@@ -8,3 +8,8 @@
 /test.py
 /test2.py
 /[preprocessing] reflacx-eye.ipynb
+/data/__pycache__
+
+
+# windsurf rules
+.windsurfrules

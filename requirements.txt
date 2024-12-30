@@ -1,0 +1,11 @@
+# pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+medclip
+numpy
+pandas
+scikit-learn
+transformers
+tqdm
+nltk
+rouge-score
+pillow
