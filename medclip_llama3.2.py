@@ -97,15 +97,138 @@ class ImageTextDataset(Dataset):
 class DiseaseClassificationDataset(Dataset):
     def __init__(self, data):
         self.data = data
+        # Find the maximum embedding size
+        max_size = 0
+        for item in data:
+            emb = item['unified_embedding']
+            if emb.dim() == 3:
+                emb = emb.squeeze(0)
+            emb_size = emb.size(-1)
+            max_size = max(max_size, emb_size)
+        self.max_size = max_size
 
     def __len__(self):
         return len(self.data)
 
+    def pad_embedding(self, embedding, target_size):
+        # Ensure embedding is 2D
+        if embedding.dim() == 3:
+            embedding = embedding.squeeze(0)
+        elif embedding.dim() == 1:
+            embedding = embedding.unsqueeze(0)
+        
+        current_size = embedding.size(1)
+        if current_size < target_size:
+            padding = torch.zeros(embedding.size(0), target_size - current_size, device=embedding.device)
+            return torch.cat([embedding, padding], dim=1)
+        return embedding[:, :target_size]
+
     def __getitem__(self, idx):
-        embedding = self.data[idx]['unified_embedding'].squeeze(0)
-        labels = self.data[idx]['disease_labels']
+        # Get the embedding
+        embedding = self.data[idx]['unified_embedding']
+        
+        # Ensure consistent dimensionality
+        if embedding.dim() == 3:
+            embedding = embedding.squeeze(0)
+        elif embedding.dim() == 1:
+            embedding = embedding.unsqueeze(0)
+        
+        # If we have multiple rows, take the mean
+        if embedding.size(0) > 1:
+            embedding = embedding.mean(dim=0, keepdim=True)
+        
+        # Pad or truncate embedding to max_size
+        embedding = self.pad_embedding(embedding, self.max_size)
+        
+        # Get clinical data and labels
         clinical_data = self.data[idx]['clinical_data'].float()
-        return embedding, clinical_data, labels
+        labels = self.data[idx]['disease_labels']
+        
+        return embedding.squeeze(0), clinical_data, labels
+
+# -------------------------------------------------------------------------
+# Step 3.5: Additional Knowledge-Based Embeddings (Optional)
+# -------------------------------------------------------------------------
+# This optional section demonstrates how you could incorporate an 
+# additional domain-specific language model (e.g., SciBERT) to generate
+# knowledge-based text embeddings and combine them with your MedCLIP 
+# embeddings. This is especially useful if you want deeper semantic
+# understanding of radiology or scientific language.
+
+from transformers import AutoModel
+
+class KnowledgeBasedEmbedder:
+    """
+    A class to handle the generation of knowledge-based text embeddings 
+    from a domain-specific model such as SciBERT.
+    """
+    def __init__(self, model_name='allenai/scibert_scivocab_uncased'):
+        try:
+            self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+            self.model = AutoModel.from_pretrained(model_name)
+            self.model.eval()
+        except Exception as e:
+            print(f"Error initializing KnowledgeBasedEmbedder with {model_name}: {e}")
+            raise e
+
+    def generate_text_embedding(self, text: str, device='cpu'):
+        """
+        Generates a text embedding from the specified domain model.
+        """
+        self.model = self.model.to(device)
+        with torch.no_grad():
+            inputs = self.tokenizer(
+                text,
+                return_tensors='pt',
+                truncation=True,
+                padding=True,
+                max_length=128
+            )
+            inputs = {k: v.to(device) for k, v in inputs.items()}
+            outputs = self.model(**inputs)
+            # Mean pooling to get a single vector
+            embedding = outputs.last_hidden_state.mean(dim=1)
+            embedding = embedding / embedding.norm(dim=-1, keepdim=True)
+        return embedding
+
+def combine_embeddings(medclip_embedding: torch.Tensor, kb_embedding: torch.Tensor):
+    """
+    Function to combine MedCLIP image+text embedding with 
+    knowledge-based text embedding from SciBERT (or similar).
+    Ensures both tensors have compatible dimensions before combining.
+    """
+    # Ensure both tensors are on the same device
+    if medclip_embedding.device != kb_embedding.device:
+        kb_embedding = kb_embedding.to(medclip_embedding.device)
+    
+    # Get the batch size from the larger tensor
+    batch_size = max(medclip_embedding.size(0), kb_embedding.size(0))
+    
+    # Reshape tensors if needed
+    if medclip_embedding.dim() == 2:
+        medclip_embedding = medclip_embedding.unsqueeze(0)
+    if kb_embedding.dim() == 2:
+        kb_embedding = kb_embedding.unsqueeze(0)
+    
+    # Expand to match batch sizes if needed
+    if medclip_embedding.size(0) == 1 and kb_embedding.size(0) > 1:
+        medclip_embedding = medclip_embedding.expand(batch_size, -1, -1)
+    elif kb_embedding.size(0) == 1 and medclip_embedding.size(0) > 1:
+        kb_embedding = kb_embedding.expand(batch_size, -1, -1)
+    
+    # Ensure the second dimension matches
+    if medclip_embedding.size(1) != kb_embedding.size(1):
+        if medclip_embedding.size(1) == 1:
+            medclip_embedding = medclip_embedding.expand(-1, kb_embedding.size(1), -1)
+        elif kb_embedding.size(1) == 1:
+            kb_embedding = kb_embedding.expand(-1, medclip_embedding.size(1), -1)
+    
+    # Concatenate along the last dimension
+    combined = torch.cat([medclip_embedding, kb_embedding], dim=-1)
+    
+    # Normalize the combined embedding
+    combined = combined / (combined.norm(dim=-1, keepdim=True) + 1e-8)
+    return combined
 
 # -------------------------------------------------------------------------
 # Step 4: Model Definitions
@@ -331,6 +454,16 @@ def main():
     )
 
     clinical_data = df[clinical_cols].values.astype(np.float32)
+    
+    # -------------------------------------------------------------------------
+    # Optional: Initialize KnowledgeBasedEmbedder for Additional Text Embeddings
+    # -------------------------------------------------------------------------
+    # If you want to incorporate domain-specific text embeddings from SciBERT
+    # (or other biomedical models), uncomment the lines below and combine
+    # them with your MedCLIP embeddings.
+
+    kb_embedder = KnowledgeBasedEmbedder(model_name='allenai/scibert_scivocab_uncased')
+
     with torch.no_grad():
         batch_idx_local = 0
         for batch in feature_dataloader:
@@ -339,29 +472,69 @@ def main():
             input_ids = input_ids.to(device)
             attention_mask = attention_mask.to(device)
 
+            # MedCLIP image features
             image_features = medclip_model.vision_model(images)
             image_features = image_features / image_features.norm(dim=-1, keepdim=True)
 
+            # MedCLIP text features
             text_features = medclip_model.text_model(input_ids=input_ids, attention_mask=attention_mask)
             text_features = text_features / text_features.norm(dim=-1, keepdim=True)
 
-            unified_embedding = (image_features + text_features) / 2
-            unified_embedding = unified_embedding / unified_embedding.norm(dim=-1, keepdim=True)
-            unified_embedding = unified_embedding.cpu()
+            # Combined MedCLIP embedding
+            medclip_embedding = (image_features + text_features) / 2
+            medclip_embedding = medclip_embedding / medclip_embedding.norm(dim=-1, keepdim=True)
 
+            # Generate an additional knowledge-based text embedding with SciBERT
+            # For demonstration, let's retrieve the plain text from the batch again
+            # and run it through kb_embedder. We'll combine it with medclip_embedding.
+            # NOTE: If you want to do this per sample, you'll need the raw text again.
+            # Here, we just mimic usage with combined_text from your dataset.
+            # This is a simplified example—customize as needed.
+
+            # We must re-read text from the dataframe rows for each sample
+            # to generate the SciBERT embedding. We'll keep it minimal:
+            kb_embeddings_list = []
             start_idx = batch_idx_local * feature_dataloader.batch_size
-            for i in range(unified_embedding.size(0)):
+
+            for i in range(images.size(0)):
+                idx = start_idx + i
+                if idx >= len(df):
+                    break
+                
+                row_data = df.iloc[idx]
+                report_text = read_text_file(row_data['report_path'])
+                reflacx_text = read_text_file(row_data['reflacx_transcript_path'])
+                eyegaze_text = read_text_file(row_data['eyegaze_transcript_path'])
+                combined_text = ' '.join([report_text, reflacx_text, eyegaze_text])
+
+                # Generate SciBERT embedding for the combined text
+                kb_embedding = kb_embedder.generate_text_embedding(combined_text, device=device)
+                kb_embeddings_list.append(kb_embedding)
+
+            # Stack the SciBERT embeddings for the batch
+            kb_embeddings_tensor = torch.stack(kb_embeddings_list).to(device)
+
+            # Combine SciBERT embedding with MedCLIP embedding
+            # Now we have a broader knowledge-based embedding
+            combined_batch_embedding = combine_embeddings(
+                medclip_embedding, 
+                kb_embeddings_tensor
+            )
+            
+            # Store embeddings, clinical data, etc.
+            for i in range(combined_batch_embedding.size(0)):
                 idx = start_idx + i
                 if idx >= len(df):
                     break
                 row_data = df.iloc[idx]
                 unified_embeddings.append({
                     'id': row_data['id'],
-                    'unified_embedding': unified_embedding[i].unsqueeze(0),
+                    'unified_embedding': combined_batch_embedding[i].unsqueeze(0),
                     'labels': row_data,
                     'fixation_path': row_data['fixation_path'],
                     'clinical_data': torch.tensor(clinical_data[idx])
                 })
+            
             batch_idx_local += 1
 
     # Add Disease Labels to Embeddings
@@ -404,7 +577,11 @@ def main():
 
     # Initialize Classification Models
     clinical_encoder = ClinicalDataEncoder(input_dim=len(clinical_cols)).to(device)
-    classifier_model = DiseaseClassifier(input_dim=512, clinical_dim=128, num_classes=len(disease_labels)).to(device)
+    # Note that our combined embedding now has medclip_embedding (dim=512) + SciBERT (dim=768),
+    # but for demonstration, we used a normalization step. If you need to adjust input_dim for
+    # the classifier, do so below. For simplicity, let's assume 512 is enough for our final combined.
+    # If you changed combine_embeddings significantly, you may need input_dim=512+768=1280, etc.
+    classifier_model = DiseaseClassifier(input_dim=combined_batch_embedding.size(-1), clinical_dim=128, num_classes=len(disease_labels)).to(device)
 
     criterion = nn.BCEWithLogitsLoss()
     optimizer_cls = optim.Adam(
@@ -556,9 +733,26 @@ FINDINGS:"""
             classifier_model.eval()
             clinical_encoder.eval()
             with torch.no_grad():
-                embedding = entry['unified_embedding'].to(device)
-                clinical_data_tensor = entry['clinical_data'].to(device)
-                clinical_embedding = clinical_encoder(clinical_data_tensor.unsqueeze(0))
+                # Get the embedding and ensure correct dimensions
+                embedding = entry['unified_embedding']
+                if embedding.dim() == 3:
+                    embedding = embedding.squeeze(0)  # Remove batch dimension if present
+                elif embedding.dim() == 1:
+                    embedding = embedding.unsqueeze(0)  # Add batch dimension if needed
+                
+                # Get clinical data and ensure correct dimensions
+                clinical_data_tensor = entry['clinical_data']
+                if clinical_data_tensor.dim() == 1:
+                    clinical_data_tensor = clinical_data_tensor.unsqueeze(0)
+                
+                # Move tensors to device
+                embedding = embedding.to(device)
+                clinical_data_tensor = clinical_data_tensor.to(device)
+                
+                # Get clinical embedding
+                clinical_embedding = clinical_encoder(clinical_data_tensor)
+                
+                # Pass through classifier
                 logits = classifier_model(embedding.unsqueeze(0), clinical_embedding)
                 probs = torch.sigmoid(logits).cpu().numpy()[0]
 
@@ -581,7 +775,7 @@ FINDINGS:"""
                 disease_prob_str += "* None\n"
 
             # Format clinical data with interpretations
-            clinical_data_np = entry['clinical_data'].cpu().numpy()
+            clinical_data_np = clinical_data_tensor.cpu().numpy()[0]  # Get first batch item
             clinical_data_dict = dict(zip(clinical_cols, clinical_data_np))
             clinical_data_str = "Clinical Measurements:\n"
             for col, val in clinical_data_dict.items():
@@ -595,6 +789,12 @@ FINDINGS:"""
                     clinical_data_str += f"* {col}: {val:.1f} (Normal)\n"
 
             prompt = prompt_template.format(disease_prob_str, clinical_data_str)
+            
+            print("\nGenerating report with the following input:")
+            print("\nDisease Probabilities:")
+            print(disease_prob_str)
+            print("\nClinical Data:")
+            print(clinical_data_str)
             
             sequences = llm_model(
                 prompt,
@@ -639,7 +839,9 @@ FINDINGS:"""
                     report += "\n\nIMPRESSION:\n1. Abnormal findings as described above, clinical correlation recommended."
                 else:
                     report += "\n\nIMPRESSION:\n1. No acute cardiopulmonary abnormalities."
-                
+            
+            print("\nGenerated Report:")
+            print("-" * 50)
             print(report)
             print("-" * 50)
             
@@ -649,9 +851,15 @@ FINDINGS:"""
             })
 
             reference_report = read_text_file(entry['labels']['report_path'])
+            if reference_report:
+                print("\nReference Report:")
+                print("-" * 50)
+                print(reference_report)
+                print("-" * 50)
             reference_reports.append(reference_report)
 
         except Exception as e:
+            print(f"Error generating report: {str(e)}")
             continue
 
     # -------------------------------------------------------------------------
