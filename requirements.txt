@@ -9,3 +9,6 @@ tqdm
 nltk
 rouge-score
 pillow
+peft
+datasets
+evaluate
