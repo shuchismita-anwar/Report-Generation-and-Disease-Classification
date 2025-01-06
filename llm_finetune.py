@@ -6,6 +6,8 @@ from importlib.metadata import version
 from typing import Dict, List, Optional, Union
 import random
 from pathlib import Path
+from collections import defaultdict
+import gc
 
 warnings.filterwarnings('ignore', category=UserWarning)
 warnings.filterwarnings('ignore', category=FutureWarning)
@@ -57,7 +59,7 @@ def normalize_clinical_value(value: Union[str, float, int], field: str) -> str:
             'o2sat': (0, 100),             # Percentage
             'sbp': (60, 240),              # mmHg (includes hypo/hypertension)
             'dbp': (20, 280),              # mmHg (includes hypo/hypertension)
-            'pain': (0, 20)                # Pain scale
+            'pain': (0, 20)                # Pain scale (max value 20)
         }
         
         if field in ranges:
@@ -76,7 +78,7 @@ def normalize_clinical_value(value: Union[str, float, int], field: str) -> str:
                 elif field == 'o2sat':
                     return f"{int(float_value)}%"
                 elif field == 'pain':
-                    return f"{int(float_value)}/10"
+                    return f"{int(float_value)}/20"  # Use /20 scale
                 elif field in ['sbp', 'dbp']:
                     return f"{int(float_value)} mmHg"
                 elif field == 'heartrate':
@@ -85,9 +87,11 @@ def normalize_clinical_value(value: Union[str, float, int], field: str) -> str:
                     return f"{float_value:.0f}"
             else:
                 # Handle out-of-range values
-                if field == 'pain' and float_value > max_val:
-                    # print(f"Note: Pain value {float_value} capped at maximum {max_val}")
-                    return f"{int(max_val)}/10"  # Cap pain at maximum
+                if field == 'pain':
+                    if float_value > max_val:
+                        return f"{int(max_val)}/20"  # Cap at 20 and use /20 scale
+                    else:
+                        return f"{int(float_value)}/20"  # Use /20 scale for all pain values
                 elif float_value < min_val:
                     print(f"Warning: Low {field} ({float_value}) below normal range (min: {min_val})")
                 else:
@@ -97,8 +101,6 @@ def normalize_clinical_value(value: Union[str, float, int], field: str) -> str:
                     return f"{float_value:.1f}°F"
                 elif field == 'o2sat':
                     return f"{int(float_value)}%"
-                elif field == 'pain':
-                    return f"{int(max_val)}/10"  # Cap pain values
                 elif field in ['sbp', 'dbp']:
                     return f"{int(float_value)} mmHg"
                 elif field == 'heartrate':
@@ -154,10 +156,6 @@ def prepare_model_for_training(model):
     """Helper function to prepare model for training"""
     model.gradient_checkpointing_enable()
     model.enable_input_require_grads()
-    
-    # Enable gradient computation for all parameters
-    for param in model.parameters():
-        param.requires_grad = True
     return model
 
 def main():
@@ -165,10 +163,20 @@ def main():
     # 1. Basic Setup
     # -------------------------------------------------
     set_seed(42)
+    
+    # Set CUDA memory allocation strategy
+    os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:512,expandable_segments:True"
+    
     device = "cuda" if torch.cuda.is_available() else "cpu"
     
     if torch.cuda.is_available():
         print(f"Using GPU: {torch.cuda.get_device_name(0)}")
+        # Clear GPU cache
+        torch.cuda.empty_cache()
+        # Set memory efficient flags
+        torch.backends.cudnn.benchmark = False
+        torch.backends.cuda.matmul.allow_tf32 = True
+        torch.backends.cudnn.allow_tf32 = True
     else:
         print("CUDA is not available. Using CPU instead.")
 
@@ -301,7 +309,7 @@ def main():
             result = tokenizer(
                 example["text"],
                 padding="max_length",
-                max_length=1024,  # Increased from 512 to 1024
+                max_length=1024,  # Increased to 1024 for longer inputs
                 truncation=True,
                 return_tensors="pt"
             )
@@ -327,27 +335,44 @@ def main():
 
             torch.cuda.empty_cache()
 
-            # Load base model
+            # More aggressive memory optimization
+            torch.backends.cudnn.benchmark = False
+            torch.backends.cuda.matmul.allow_tf32 = True
+            torch.backends.cudnn.allow_tf32 = True
+
+            # Configure 4-bit quantization for more memory savings
+            bnb_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_compute_dtype=torch.float16,
+                bnb_4bit_use_double_quant=True,
+                load_in_8bit_fp32_cpu_offload=True  # Offload fp32 weights to CPU
+            )
+
+            # Load base model with 4-bit quantization
             model = AutoModelForCausalLM.from_pretrained(
                 model_name,
+                quantization_config=bnb_config,
+                device_map="auto",
                 torch_dtype=torch.float16,
                 use_auth_token=HF_AUTH_TOKEN,
-                use_cache=False,  # Disable KV-cache for training
-                trust_remote_code=True
+                trust_remote_code=True,
+                # Memory optimizations
+                max_memory={0: "6GB"},  # Reserve 6GB for model
+                offload_folder="offload",
+                offload_state_dict=True,
             )
 
             # Prepare model for training
             model = prepare_model_for_training(model)
 
-            # LoRA configuration with expanded target modules
+            # LoRA configuration with more memory efficient settings
             lora_config = LoraConfig(
-                r=8,
-                lora_alpha=32,
+                r=4,  # Reduced from 8
+                lora_alpha=16,  # Reduced from 32
                 target_modules=[
                     "q_proj", "k_proj", "v_proj", "o_proj",
-                    "gate_proj", "up_proj", "down_proj",
-                    "lm_head"
-                ],
+                ],  # Reduced target modules
                 lora_dropout=0.05,
                 bias="none",
                 task_type="CAUSAL_LM",
@@ -358,119 +383,123 @@ def main():
             model = get_peft_model(model, lora_config)
             model.print_trainable_parameters()
 
+            # Training arguments with minimal evaluation to save memory
+            training_args = TrainingArguments(
+                output_dir="./results",
+                num_train_epochs=3,
+                per_device_train_batch_size=1,
+                per_device_eval_batch_size=1,
+                gradient_accumulation_steps=64,
+                warmup_steps=50,
+                logging_steps=10,
+                # Evaluation settings - minimal to save memory
+                evaluation_strategy="steps",
+                eval_steps=500,  # Evaluate less frequently
+                save_strategy="steps",
+                save_steps=500,
+                save_total_limit=1,
+                load_best_model_at_end=True,
+                metric_for_best_model="bleu-4",
+                greater_is_better=True,
+                # Memory optimizations
+                gradient_checkpointing=True,
+                optim="adamw_torch_fused",
+                max_grad_norm=0.3,
+                learning_rate=1e-4,
+                fp16=True,
+                # Additional memory optimizations
+                ddp_find_unused_parameters=False,
+                report_to="none",
+                group_by_length=True,
+                remove_unused_columns=True,
+                dataloader_pin_memory=False,
+                torch_compile=False,
+                # Evaluation optimizations
+                eval_accumulation_steps=4,  # Reduced from 8
+            )
+
+            # Configure generation settings
+            model.config.max_length = 256  # Reduced from 512
+            model.config.num_beams = 1     # Use greedy decoding
+            
+            # Limit evaluation dataset size
+            val_dataset = val_dataset.select(range(min(100, len(val_dataset))))
+            
+            # Define compute_metrics function with minimal memory usage
             def compute_metrics(eval_pred):
-                predictions, labels = eval_pred
-                
                 try:
-                    # Convert logits to predictions
-                    if isinstance(predictions, torch.Tensor):
-                        predictions = predictions.cpu().numpy()
-                    predictions = np.argmax(predictions, axis=-1)
+                    predictions, labels = eval_pred
                     
-                    # Decode predictions and labels
-                    tokenizer = AutoTokenizer.from_pretrained(
-                        model_name,
-                        use_auth_token=HF_AUTH_TOKEN
-                    )
+                    # Process predictions in very small batches
+                    batch_size = 8  # Reduced from 16
+                    all_bleu_scores = defaultdict(list)
+                    all_rouge_scores = defaultdict(list)
                     
-                    pred_str = tokenizer.batch_decode(predictions, skip_special_tokens=True)
-                    label_str = tokenizer.batch_decode(labels, skip_special_tokens=True)
-                    
-                    # Calculate BLEU scores with error handling
-                    smooth = SmoothingFunction().method1
-                    bleu_scores = {}
-                    for i in range(1, 5):
+                    for i in range(0, len(predictions), batch_size):
+                        batch_pred = predictions[i:i + batch_size]
+                        batch_labels = labels[i:i + batch_size]
+                        
+                        # Convert logits to predictions
+                        if isinstance(batch_pred, torch.Tensor):
+                            batch_pred = batch_pred.cpu().numpy()
+                        batch_pred = np.argmax(batch_pred, axis=-1)
+                        
+                        # Decode predictions and labels
+                        pred_str = tokenizer.batch_decode(batch_pred, skip_special_tokens=True)
+                        label_str = tokenizer.batch_decode(batch_labels, skip_special_tokens=True)
+                        
+                        # Calculate BLEU scores
+                        smooth = SmoothingFunction().method1
+                        for n in range(1, 5):
+                            try:
+                                scores = []
+                                for p, l in zip(pred_str, label_str):
+                                    if l.strip() and p.strip():
+                                        score = sentence_bleu(
+                                            [l.split()],
+                                            p.split(),
+                                            weights=[1.0/n]*n,
+                                            smoothing_function=smooth
+                                        )
+                                        scores.append(score)
+                                if scores:
+                                    all_bleu_scores[f'bleu-{n}'].extend(scores)
+                            except Exception as e:
+                                print(f"Warning: Error calculating BLEU-{n}: {str(e)}")
+                        
+                        # Calculate ROUGE scores
                         try:
-                            scores = [
-                                sentence_bleu([l.split()], p.split(), 
-                                             weights=[1.0/i]*i, 
-                                             smoothing_function=smooth)
-                                for p, l in zip(pred_str, label_str)
-                                if l.strip() and p.strip()  # Skip empty strings
-                            ]
-                            bleu_scores[f'bleu-{i}'] = np.mean(scores) if scores else 0.0
+                            scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
+                            for p, l in zip(pred_str, label_str):
+                                if l.strip() and p.strip():
+                                    scores = scorer.score(p, l)
+                                    all_rouge_scores['rouge1'].append(scores['rouge1'].fmeasure)
+                                    all_rouge_scores['rouge2'].append(scores['rouge2'].fmeasure)
+                                    all_rouge_scores['rougeL'].append(scores['rougeL'].fmeasure)
                         except Exception as e:
-                            print(f"Warning: Error calculating BLEU-{i}: {str(e)}")
-                            bleu_scores[f'bleu-{i}'] = 0.0
+                            print(f"Warning: Error calculating ROUGE scores: {str(e)}")
+                        
+                        # Clear memory
+                        torch.cuda.empty_cache()
+                        del batch_pred, batch_labels, pred_str, label_str
+                        gc.collect()
                     
-                    # Calculate ROUGE scores with error handling
-                    rouge_scores = {}
-                    try:
-                        scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
-                        rouge_scores = {
-                            'rouge1': np.mean([
-                                scorer.score(p, l)['rouge1'].fmeasure 
-                                for p, l in zip(pred_str, label_str)
-                                if l.strip() and p.strip()
-                            ]),
-                            'rouge2': np.mean([
-                                scorer.score(p, l)['rouge2'].fmeasure 
-                                for p, l in zip(pred_str, label_str)
-                                if l.strip() and p.strip()
-                            ]),
-                            'rougeL': np.mean([
-                                scorer.score(p, l)['rougeL'].fmeasure 
-                                for p, l in zip(pred_str, label_str)
-                                if l.strip() and p.strip()
-                            ])
-                        }
-                    except Exception as e:
-                        print(f"Warning: Error calculating ROUGE scores: {str(e)}")
-                        rouge_scores = {
-                            'rouge1': 0.0,
-                            'rouge2': 0.0,
-                            'rougeL': 0.0
-                        }
-                    
-                    # Calculate perplexity with error handling
-                    try:
-                        perplexity = evaluate.load("perplexity").compute(
-                            predictions=pred_str, 
-                            model_id='gpt2'
-                        )['mean_perplexity']
-                    except Exception as e:
-                        print(f"Warning: Error calculating perplexity: {str(e)}")
-                        perplexity = float('inf')
-                    
-                    metrics = {
-                        'perplexity': perplexity,
-                        **bleu_scores,
-                        **rouge_scores
-                    }
+                    # Calculate final metrics
+                    metrics = {}
+                    for k, v in all_bleu_scores.items():
+                        metrics[k] = np.mean(v) if v else 0.0
+                    for k, v in all_rouge_scores.items():
+                        metrics[k] = np.mean(v) if v else 0.0
                     
                     return metrics
                 except Exception as e:
                     print(f"Warning: Error in compute_metrics: {str(e)}")
                     return {
-                        'perplexity': float('inf'),
-                        'bleu-1': 0.0,
-                        'bleu-2': 0.0,
-                        'bleu-3': 0.0,
-                        'bleu-4': 0.0,
-                        'rouge1': 0.0,
-                        'rouge2': 0.0,
-                        'rougeL': 0.0
+                        'bleu-1': 0.0, 'bleu-2': 0.0, 'bleu-3': 0.0, 'bleu-4': 0.0,
+                        'rouge1': 0.0, 'rouge2': 0.0, 'rougeL': 0.0
                     }
-
-            # Training arguments
-            training_args = TrainingArguments(
-                output_dir="./results",
-                num_train_epochs=3,
-                per_device_train_batch_size=4,
-                gradient_accumulation_steps=4,
-                warmup_steps=100,
-                logging_steps=10,
-                save_steps=50,
-                evaluation_strategy="steps",
-                eval_steps=50,
-                learning_rate=2e-4,
-                fp16=True,
-                load_best_model_at_end=True,
-                metric_for_best_model="bleu-4",
-                greater_is_better=True,
-            )
-
-            # Initialize the Trainer
+            
+            # Initialize the Trainer with memory-optimized compute_metrics
             trainer = Trainer(
                 model=model,
                 args=training_args,
@@ -481,11 +510,16 @@ def main():
             )
 
             print("Starting training...")
-            trainer.train()
-
-            # Optional: Evaluate at the end of training
-            final_metrics = trainer.evaluate(eval_dataset=val_dataset)
-            print("Final Evaluation:", final_metrics)
+            try:
+                trainer.train()
+                
+                # Save the final model without evaluation
+                trainer.save_model("./results/final_model")
+                print("Training completed successfully!")
+                
+            except Exception as e:
+                print(f"Error during model setup or training: {str(e)}")
+                raise
 
         except Exception as e:
             print(f"Error during model setup or training: {str(e)}")
