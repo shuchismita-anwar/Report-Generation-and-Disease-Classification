@@ -8,6 +8,12 @@ import random
 from pathlib import Path
 from collections import defaultdict
 import gc
+import numpy as np
+from datasets import load_dataset
+import evaluate
+import nltk
+from nltk.translate.bleu_score import sentence_bleu
+from rouge_score import rouge_scorer
 
 warnings.filterwarnings('ignore', category=UserWarning)
 warnings.filterwarnings('ignore', category=FutureWarning)
@@ -19,18 +25,17 @@ from transformers import (
     TrainingArguments,
     Trainer,
     BitsAndBytesConfig,
+    EarlyStoppingCallback,
     default_data_collator,
     set_seed,
     logging as hf_logging,
 )
-from peft import LoraConfig, get_peft_model
-from datasets import load_dataset
+from peft import (
+    prepare_model_for_kbit_training,
+    LoraConfig,
+    get_peft_model,
+)
 import pandas as pd
-import numpy as np
-import evaluate
-from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
-from rouge_score import rouge_scorer
-import nltk
 from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
 
 hf_logging.set_verbosity_error()
@@ -111,35 +116,89 @@ def normalize_clinical_value(value: Union[str, float, int], field: str) -> str:
         return str(value)
 
 def augment_text(text: str) -> List[str]:
-    """Perform simple text augmentation for radiology reports."""
-    augmented = []
+    """Perform text augmentation for radiology reports."""
+    augmented_texts = [text]  # Original text is always included
     
-    # Medical terminology replacements
-    replacements = {
-        'opacity': ['shadow', 'density', 'haziness'],
-        'normal': ['unremarkable', 'within normal limits', 'unchanged'],
-        'abnormal': ['pathologic', 'unusual', 'irregular'],
-        'evident': ['visible', 'apparent', 'noted'],
-        'bilateral': ['both sides', 'on both sides'],
+    # 1. Synonym replacement for common medical terms
+    medical_synonyms = {
+        'normal': ['unremarkable', 'regular', 'typical'],
+        'abnormal': ['irregular', 'unusual', 'atypical'],
         'mild': ['slight', 'minimal', 'minor'],
-        'moderate': ['intermediate', 'medium'],
-        'severe': ['marked', 'significant', 'extensive']
+        'moderate': ['medium', 'intermediate'],
+        'severe': ['significant', 'marked', 'extensive'],
+        'acute': ['sudden', 'recent'],
+        'chronic': ['long-standing', 'persistent'],
     }
     
-    # Create variations using replacements
-    augmented.append(text)  # Original text
+    for word, synonyms in medical_synonyms.items():
+        if word in text.lower():
+            for synonym in synonyms:
+                augmented_text = text.lower().replace(word, synonym)
+                augmented_texts.append(augmented_text)
     
-    # Create one variation with random replacements
-    new_text = text
-    for original, alternatives in replacements.items():
-        if original.lower() in new_text.lower():
-            replacement = random.choice(alternatives)
-            new_text = new_text.replace(original, replacement)
+    # 2. Number format variations
+    def convert_numbers(match):
+        num = float(match.group())
+        # Add variations like rounding, different decimal places
+        variations = [
+            f"{num:.0f}",
+            f"{num:.1f}",
+            f"{num:.2f}"
+        ]
+        return random.choice(variations)
     
-    if new_text != text:
-        augmented.append(new_text)
+    import re
+    number_pattern = r'\d+\.?\d*'
+    augmented_text = re.sub(number_pattern, convert_numbers, text)
+    if augmented_text != text:
+        augmented_texts.append(augmented_text)
     
-    return augmented
+    # 3. Word order variation for measurements
+    measurement_pattern = r'(\d+\.?\d*)\s*(cm|mm|in)'
+    def swap_measurement_order(match):
+        number, unit = match.groups()
+        return f"{unit} {number}"
+    
+    augmented_text = re.sub(measurement_pattern, swap_measurement_order, text)
+    if augmented_text != text:
+        augmented_texts.append(augmented_text)
+    
+    # 4. Add/remove optional punctuation
+    punctuation_variations = [
+        ('. ', ' '),
+        (', ', ' '),
+        (' - ', ' '),
+        ('(', ''),
+        (')', '')
+    ]
+    
+    for punct, repl in punctuation_variations:
+        if punct in text:
+            augmented_text = text.replace(punct, repl)
+            augmented_texts.append(augmented_text)
+    
+    # 5. Medical abbreviation expansion/contraction
+    medical_abbrev = {
+        'pt': 'patient',
+        'dx': 'diagnosis',
+        'hx': 'history',
+        'w/': 'with',
+        'w/o': 'without',
+        'b/l': 'bilateral',
+    }
+    
+    for abbrev, full in medical_abbrev.items():
+        if abbrev in text.lower():
+            augmented_text = text.lower().replace(abbrev, full)
+            augmented_texts.append(augmented_text)
+        if full in text.lower():
+            augmented_text = text.lower().replace(full, abbrev)
+            augmented_texts.append(augmented_text)
+    
+    # Remove duplicates and limit the number of augmentations
+    augmented_texts = list(set(augmented_texts))
+    max_augmentations = 5
+    return augmented_texts[:max_augmentations]
 
 def check_bitsandbytes_compatibility():
     try:
@@ -157,6 +216,118 @@ def prepare_model_for_training(model):
     model.gradient_checkpointing_enable()
     model.enable_input_require_grads()
     return model
+
+class CustomTrainer(Trainer):
+    def __init__(self, tokenizer=None, original_dataset=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.tokenizer = tokenizer
+        print(f"Tokenizer initialized: {self.tokenizer is not None}")
+        self.original_dataset = original_dataset
+        print(f"Original dataset initialized: {self.original_dataset is not None}")
+        self.best_metric = float('inf')
+        self.metrics_history = []
+        self.rouge_scorer = rouge_scorer.RougeScorer(['rouge1', 'rougeL'], use_stemmer=True)
+        
+    def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
+        outputs = model(**inputs)
+        loss = outputs.loss
+        
+        # Log gradient norms if in evaluation
+        if not self.is_in_train:
+            total_norm = 0.0
+            for p in model.parameters():
+                if p.grad is not None:
+                    param_norm = p.grad.detach().data.norm(2)
+                    total_norm += param_norm.item() ** 2
+            total_norm = total_norm ** 0.5
+            print(f"Gradient norm: {total_norm}")
+        
+        return (loss, outputs) if return_outputs else loss
+        
+    def evaluate(self, *args, **kwargs):
+        metrics = super().evaluate(*args, **kwargs)
+        
+        # Check if tokenizer and dataset are available
+        if self.tokenizer is None:
+            print("Warning: Tokenizer not available for text generation evaluation")
+            return metrics
+            
+        if self.original_dataset is None:
+            print("Warning: Original dataset not available for text generation evaluation")
+            return metrics
+            
+        sample_size = min(5, len(self.original_dataset))
+        samples = random.sample(range(len(self.original_dataset)), sample_size)
+        
+        predictions = []
+        references = []
+        
+        for idx in samples:
+            # Get original text
+            full_text = self.original_dataset[idx]['text']
+            
+            # Split the text into input and target
+            try:
+                input_text = full_text.split("Write a thorough radiology interpretation:")[0].strip()
+                target_text = full_text.split("Write a thorough radiology interpretation:")[1].strip()
+            except IndexError:
+                print(f"Warning: Could not split text for sample {idx}")
+                continue
+            
+            inputs = self.tokenizer(input_text, 
+                                  return_tensors='pt', 
+                                  truncation=True, 
+                                  max_length=512)
+            inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
+            
+            with torch.no_grad():
+                outputs = self.model.generate(
+                    **inputs,
+                    max_length=256,
+                    num_return_sequences=1,
+                    temperature=0.7,
+                    do_sample=True
+                )
+            
+            pred_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+            
+            predictions.append(pred_text)
+            references.append(target_text)
+            
+            # Calculate BLEU and ROUGE scores
+            bleu1 = sentence_bleu([target_text.split()], pred_text.split(), weights=(1, 0, 0, 0))
+            bleu4 = sentence_bleu([target_text.split()], pred_text.split(), weights=(0.25, 0.25, 0.25, 0.25))
+            rouge_scores = self.rouge_scorer.score(target_text, pred_text)
+            
+            print(f"\nSample {idx}:")
+            print(f"Input: {input_text[:100]}...")
+            print(f"Prediction: {pred_text[:100]}...")
+            print(f"Reference: {target_text[:100]}...")
+            print(f"BLEU-1: {bleu1:.4f}")
+            print(f"BLEU-4: {bleu4:.4f}")
+            print(f"ROUGE-1: {rouge_scores['rouge1'].fmeasure:.4f}")
+            print(f"ROUGE-L: {rouge_scores['rougeL'].fmeasure:.4f}")
+        
+        # Save predictions and metrics
+        output_dir = Path("evaluation_outputs")
+        output_dir.mkdir(exist_ok=True)
+        
+        timestamp = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+        with open(output_dir / f"eval_samples_{timestamp}.json", "w") as f:
+            json.dump({
+                "predictions": predictions,
+                "references": references,
+                "metrics": metrics
+            }, f, indent=2)
+        
+        # Update best metric and save checkpoint if improved
+        if metrics["eval_loss"] < self.best_metric:
+            self.best_metric = metrics["eval_loss"]
+            self.save_model("best_model")
+            print(f"\nNew best model saved! Validation loss: {metrics['eval_loss']:.4f}")
+        
+        self.metrics_history.append(metrics)
+        return metrics
 
 def main():
     # -------------------------------------------------
@@ -284,18 +455,26 @@ def main():
         dataset = load_dataset('json', data_files={'train': temp_json_path})
         raw_dataset = dataset["train"]
 
-        # ---------------------
-        # Split into train & validation
-        # ---------------------
+        # Split data into train and validation sets (80-20 split)
+        total_size = len(raw_dataset)
+        val_size = int(0.2 * total_size)  # 20% for validation
+        train_size = total_size - val_size
 
-        # 0.1 for 90/10 split
-        split_dataset = raw_dataset.train_test_split(
-            test_size=0.1,
-            seed=42,
-            shuffle=True
-        )
-        train_dataset = split_dataset["train"]
-        val_dataset   = split_dataset["test"]
+        train_dataset = raw_dataset.select(range(train_size))
+        val_dataset = raw_dataset.select(range(train_size, total_size))
+
+        print(f"Training set size: {len(train_dataset)}")
+        print(f"Validation set size: {len(val_dataset)}")
+
+        # Print dataset structure for debugging
+        print("\nDataset structure:")
+        print("Train dataset features:", train_dataset.features)
+        print("Sample train example:", train_dataset[0])
+        print("\nValidation dataset features:", val_dataset.features)
+        print("Sample validation example:", val_dataset[0])
+
+        # Store original validation dataset before tokenization
+        original_val_dataset = val_dataset
 
         print("Loading tokenizer...")
         tokenizer = AutoTokenizer.from_pretrained(
@@ -383,130 +562,49 @@ def main():
             model = get_peft_model(model, lora_config)
             model.print_trainable_parameters()
 
-            # Training arguments with minimal evaluation to save memory
+            # Training arguments with early stopping and reduced steps
             training_args = TrainingArguments(
                 output_dir="./results",
-                num_train_epochs=3,
+                num_train_epochs=3,  # Reduced number of epochs
                 per_device_train_batch_size=1,
                 per_device_eval_batch_size=1,
-                gradient_accumulation_steps=64,
-                warmup_steps=50,
-                logging_steps=10,
-                # Evaluation settings - minimal to save memory
+                gradient_accumulation_steps=4,  # Reduced from 8
                 evaluation_strategy="steps",
-                eval_steps=500,  # Evaluate less frequently
-                save_strategy="steps",
-                save_steps=500,
-                save_total_limit=1,
-                load_best_model_at_end=True,
-                metric_for_best_model="bleu-4",
-                greater_is_better=True,
-                # Memory optimizations
-                gradient_checkpointing=True,
-                optim="adamw_torch_fused",
-                max_grad_norm=0.3,
-                learning_rate=1e-4,
+                eval_steps=100,  # More frequent evaluation
+                logging_steps=50,
+                learning_rate=2e-4,
+                weight_decay=0.01,
                 fp16=True,
-                # Additional memory optimizations
-                ddp_find_unused_parameters=False,
-                report_to="none",
+                bf16=False,
+                max_grad_norm=0.3,
+                max_steps=1000,  # Limit total training steps
+                warmup_ratio=0.03,
                 group_by_length=True,
-                remove_unused_columns=True,
-                dataloader_pin_memory=False,
-                torch_compile=False,
-                # Evaluation optimizations
-                eval_accumulation_steps=4,  # Reduced from 8
+                save_strategy="steps",
+                save_steps=100,
+                save_total_limit=3,  # Keep only the last 3 checkpoints
+                load_best_model_at_end=True,
+                metric_for_best_model="eval_loss",
+                greater_is_better=False,
+                report_to="none"
             )
 
-            # Configure generation settings
-            model.config.max_length = 256  # Reduced from 512
-            model.config.num_beams = 1     # Use greedy decoding
-            
-            # Limit evaluation dataset size
-            val_dataset = val_dataset.select(range(min(100, len(val_dataset))))
-            
-            # Define compute_metrics function with minimal memory usage
-            def compute_metrics(eval_pred):
-                try:
-                    predictions, labels = eval_pred
-                    
-                    # Process predictions in very small batches
-                    batch_size = 8  # Reduced from 16
-                    all_bleu_scores = defaultdict(list)
-                    all_rouge_scores = defaultdict(list)
-                    
-                    for i in range(0, len(predictions), batch_size):
-                        batch_pred = predictions[i:i + batch_size]
-                        batch_labels = labels[i:i + batch_size]
-                        
-                        # Convert logits to predictions
-                        if isinstance(batch_pred, torch.Tensor):
-                            batch_pred = batch_pred.cpu().numpy()
-                        batch_pred = np.argmax(batch_pred, axis=-1)
-                        
-                        # Decode predictions and labels
-                        pred_str = tokenizer.batch_decode(batch_pred, skip_special_tokens=True)
-                        label_str = tokenizer.batch_decode(batch_labels, skip_special_tokens=True)
-                        
-                        # Calculate BLEU scores
-                        smooth = SmoothingFunction().method1
-                        for n in range(1, 5):
-                            try:
-                                scores = []
-                                for p, l in zip(pred_str, label_str):
-                                    if l.strip() and p.strip():
-                                        score = sentence_bleu(
-                                            [l.split()],
-                                            p.split(),
-                                            weights=[1.0/n]*n,
-                                            smoothing_function=smooth
-                                        )
-                                        scores.append(score)
-                                if scores:
-                                    all_bleu_scores[f'bleu-{n}'].extend(scores)
-                            except Exception as e:
-                                print(f"Warning: Error calculating BLEU-{n}: {str(e)}")
-                        
-                        # Calculate ROUGE scores
-                        try:
-                            scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
-                            for p, l in zip(pred_str, label_str):
-                                if l.strip() and p.strip():
-                                    scores = scorer.score(p, l)
-                                    all_rouge_scores['rouge1'].append(scores['rouge1'].fmeasure)
-                                    all_rouge_scores['rouge2'].append(scores['rouge2'].fmeasure)
-                                    all_rouge_scores['rougeL'].append(scores['rougeL'].fmeasure)
-                        except Exception as e:
-                            print(f"Warning: Error calculating ROUGE scores: {str(e)}")
-                        
-                        # Clear memory
-                        torch.cuda.empty_cache()
-                        del batch_pred, batch_labels, pred_str, label_str
-                        gc.collect()
-                    
-                    # Calculate final metrics
-                    metrics = {}
-                    for k, v in all_bleu_scores.items():
-                        metrics[k] = np.mean(v) if v else 0.0
-                    for k, v in all_rouge_scores.items():
-                        metrics[k] = np.mean(v) if v else 0.0
-                    
-                    return metrics
-                except Exception as e:
-                    print(f"Warning: Error in compute_metrics: {str(e)}")
-                    return {
-                        'bleu-1': 0.0, 'bleu-2': 0.0, 'bleu-3': 0.0, 'bleu-4': 0.0,
-                        'rouge1': 0.0, 'rouge2': 0.0, 'rougeL': 0.0
-                    }
+            # Add early stopping
+            early_stopping = EarlyStoppingCallback(
+                early_stopping_patience=3,
+                early_stopping_threshold=0.01
+            )
             
             # Initialize the Trainer with memory-optimized compute_metrics
-            trainer = Trainer(
+            trainer = CustomTrainer(
+                tokenizer=tokenizer,  # Pass tokenizer first
+                original_dataset=original_val_dataset,  # Pass original dataset second
                 model=model,
                 args=training_args,
                 train_dataset=train_dataset,
                 eval_dataset=val_dataset,
                 data_collator=default_data_collator,
-                compute_metrics=compute_metrics,
+                callbacks=[early_stopping]
             )
 
             print("Starting training...")
