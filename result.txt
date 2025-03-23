@@ -1,0 +1,535 @@
+2025-03-03 02:27:02,010 - INFO - Using device: cuda
+2025-03-03 02:27:13,030 - INFO - Successfully initialized MedCLIP models.
+2025-03-03 02:27:23,956 - INFO - 
+Loading LLM model...
+2025-03-03 02:27:25,309 - INFO - We will use 90% of the memory on device 0 for storing the model, and 10% for the buffer to avoid OOM. You can set `max_memory` in to a higher value to use more memory (at your own risk).
+2025-03-03 02:27:29,201 - WARNING - Some parameters are on the meta device device because they were offloaded to the cpu.
+2025-03-03 02:27:29,202 - INFO - LLM model loaded successfully
+2025-03-03 02:27:29,204 - INFO - 
+Generating reports...
+2025-03-03 02:27:29,204 - INFO - 
+Generating report for ID P117R192765:
+2025-03-03 02:27:29,204 - INFO - --------------------------------------------------
+2025-03-03 02:27:29,211 - INFO - 
+================================================================================
+2025-03-03 02:27:29,211 - INFO - PROCESSING REPORT FOR ID P117R192765
+2025-03-03 02:27:29,211 - INFO - ================================================================================
+2025-03-03 02:27:29,217 - INFO - Creating prompt for report generation...
+2025-03-03 02:27:29,217 - INFO - About to generate text with model...
+2025-03-03 02:27:29,218 - INFO - Starting text generation...
+2025-03-03 02:44:08,263 - INFO - Text generation completed successfully.
+2025-03-03 02:44:08,277 - INFO - Decoding generated text...
+2025-03-03 02:44:08,452 - INFO - Decoding completed.
+2025-03-03 02:44:08,452 - INFO - 
+RAW GENERATED TEXT (FIRST 100 CHARS):
+2025-03-03 02:44:08,452 - INFO - Generate a medical report for chest X-ray with:                  INDICATION: Chest X-ray for evaluat
+2025-03-03 02:44:08,453 - INFO - Starting to clean text...
+2025-03-03 02:44:08,462 - INFO - Text cleaning completed successfully.
+2025-03-03 02:44:08,463 - INFO - Text cleaned successfully.
+2025-03-03 02:44:08,463 - INFO - 
+GENERATED REPORT FINDINGS:
+2025-03-03 02:44:08,464 - INFO - FINDINGS:
+No acute cardiopulmonary abnormalities identified.
+IMPRESSION:
+CONCLUSION: 
+RECOMMENDATIONS: 
+
+Introduction:
+A chest X-ray is a diagnostic imaging test that uses X-rays to produce images of the internal structures of the chest, including the lungs, heart, and surrounding tissues. The purpose of this report is to document the findings of a chest X-ray performed on [Patient Name] on [Date of Examination].
+2025-03-03 02:44:08,464 - INFO - 
+GENERATED REPORT IMPRESSION:
+2025-03-03 02:44:08,464 - INFO - CONCLUSION: 
+RECOMMENDATIONS: 
+
+Introduction:
+A chest X-ray is a diagnostic imaging test that uses X-rays to produce images of the internal structures of the chest, including the lungs, heart, and surrounding tissues. The purpose of this report is to document the findings of a chest X-ray performed on [Patient Name] on [Date of Examination].
+2025-03-03 02:44:08,474 - INFO - 
+Generated Report:
+2025-03-03 02:44:08,474 - INFO - INDICATION:
+Chest X-ray for evaluation
+
+COMPARISON:
+No prior imaging studies are available for comparison.
+
+FINDINGS:
+No acute cardiopulmonary abnormalities identified.
+
+IMPRESSION:
+CONCLUSION: 
+RECOMMENDATIONS: 
+
+Introduction:
+A chest X-ray is a diagnostic imaging test that uses X-rays to produce images of the internal structures of the chest, including the lungs, heart, and surrounding tissues. The purpose of this report is to document the findings of a chest X-ray performed on [Patient Name] on [Date of Examination].
+2025-03-03 02:44:08,474 - INFO - Report 1 of 5 generated.
+2025-03-03 02:44:08,474 - INFO - 
+Reference Report (Original Full):
+2025-03-03 02:44:08,476 - INFO - --------------------------------------------------
+2025-03-03 02:44:08,476 - INFO - FINAL REPORT
+ CHEST RADIOGRAPH PERFORMED ON ___
+ 
+ COMPARISON:  None.
+ 
+ CLINICAL HISTORY:  Wheezing and rhonchi, cough for one week, assess for
+ pneumonia.
+ 
+ FINDINGS:  PA and lateral views of the chest are obtained.  There is subtle
+ opacity in the expected region of the inferior lingula, which could represent
+ an early or resolving pneumonia.  The remainder of the lungs appears clear. 
+ No pleural effusion or pneumothorax.  Heart size appears normal.  The aorta is
+ slightly unfolded.  Bony structures are intact.
+ 
+ IMPRESSION:  Subtle opacity in the inferior lingula could represent an early
+ or resolving pneumonia.
+2025-03-03 02:44:08,484 - INFO - --------------------------------------------------
+2025-03-03 02:44:08,495 - INFO - 
+REFERENCE REPORT CONDITION ANALYSIS:
+2025-03-03 02:44:08,495 - INFO - Detected conditions in reference report:
+2025-03-03 02:44:08,495 - INFO - - Pneumonia
+2025-03-03 02:44:08,495 - INFO - 
+CONDITION COMPARISON (Reference vs Generated):
+2025-03-03 02:44:08,495 - INFO - Match rate: 0/1 conditions matched
+2025-03-03 02:44:08,496 - WARNING - DIAGNOSIS MISMATCH: Conditions in reference but missing from generated report:
+2025-03-03 02:44:08,497 - WARNING - - Pneumonia
+2025-03-03 02:44:08,497 - INFO - 
+Generating report for ID P117R346799:
+2025-03-03 02:44:08,497 - INFO - --------------------------------------------------
+2025-03-03 02:44:08,670 - INFO - 
+================================================================================
+2025-03-03 02:44:08,671 - INFO - PROCESSING REPORT FOR ID P117R346799
+2025-03-03 02:44:08,671 - INFO - ================================================================================
+2025-03-03 02:44:08,676 - INFO - Creating prompt for report generation...
+2025-03-03 02:44:08,676 - INFO - About to generate text with model...
+2025-03-03 02:44:08,685 - INFO - Starting text generation...
+2025-03-03 02:59:50,944 - INFO - Text generation completed successfully.
+2025-03-03 02:59:50,944 - INFO - Decoding generated text...
+2025-03-03 02:59:50,947 - INFO - Decoding completed.
+2025-03-03 02:59:50,947 - INFO - 
+RAW GENERATED TEXT (FIRST 100 CHARS):
+2025-03-03 02:59:50,947 - INFO - Generate a medical report for chest X-ray with:                  INDICATION: Chest X-ray for evaluat
+2025-03-03 02:59:50,948 - INFO - Starting to clean text...
+2025-03-03 02:59:50,948 - INFO - Text cleaning completed successfully.
+2025-03-03 02:59:50,948 - INFO - Text cleaned successfully.
+2025-03-03 02:59:50,949 - INFO - 
+GENERATED REPORT FINDINGS:
+2025-03-03 02:59:50,949 - INFO - FINDINGS:
+No acute cardiopulmonary abnormalities identified.
+IMPRESSION:
+CONCLUSION: 
+RECOMMENDATIONS: 
+
+Introduction:
+A chest X-ray is a diagnostic imaging test that uses X-rays to produce images of the internal structures of the chest, including the lungs, heart, and surrounding tissues. The purpose of this report is to document the findings of a chest X-ray performed on [Patient Name] on [Date of Examination].
+2025-03-03 02:59:50,950 - INFO - 
+GENERATED REPORT IMPRESSION:
+2025-03-03 02:59:50,950 - INFO - CONCLUSION: 
+RECOMMENDATIONS: 
+
+Introduction:
+A chest X-ray is a diagnostic imaging test that uses X-rays to produce images of the internal structures of the chest, including the lungs, heart, and surrounding tissues. The purpose of this report is to document the findings of a chest X-ray performed on [Patient Name] on [Date of Examination].
+2025-03-03 02:59:50,950 - INFO - 
+Generated Report:
+2025-03-03 02:59:50,950 - INFO - INDICATION:
+Chest X-ray for evaluation
+
+COMPARISON:
+No prior imaging studies are available for comparison.
+
+FINDINGS:
+No acute cardiopulmonary abnormalities identified.
+
+IMPRESSION:
+CONCLUSION: 
+RECOMMENDATIONS: 
+
+Introduction:
+A chest X-ray is a diagnostic imaging test that uses X-rays to produce images of the internal structures of the chest, including the lungs, heart, and surrounding tissues. The purpose of this report is to document the findings of a chest X-ray performed on [Patient Name] on [Date of Examination].
+2025-03-03 02:59:50,951 - INFO - Report 2 of 5 generated.
+2025-03-03 02:59:50,951 - INFO - 
+Reference Report (Original Full):
+2025-03-03 02:59:50,951 - INFO - --------------------------------------------------
+2025-03-03 02:59:50,951 - INFO - FINAL REPORT
+ CHEST RADIOGRAPH PERFORMED ON ___
+ 
+ COMPARISON:  None.
+ 
+ CLINICAL HISTORY:  Wheezing and rhonchi, cough for one week, assess for
+ pneumonia.
+ 
+ FINDINGS:  PA and lateral views of the chest are obtained.  There is subtle
+ opacity in the expected region of the inferior lingula, which could represent
+ an early or resolving pneumonia.  The remainder of the lungs appears clear. 
+ No pleural effusion or pneumothorax.  Heart size appears normal.  The aorta is
+ slightly unfolded.  Bony structures are intact.
+ 
+ IMPRESSION:  Subtle opacity in the inferior lingula could represent an early
+ or resolving pneumonia.
+2025-03-03 02:59:50,952 - INFO - --------------------------------------------------
+2025-03-03 02:59:50,952 - INFO - 
+REFERENCE REPORT CONDITION ANALYSIS:
+2025-03-03 02:59:50,952 - INFO - Detected conditions in reference report:
+2025-03-03 02:59:50,952 - INFO - - Pneumonia
+2025-03-03 02:59:50,952 - INFO - 
+CONDITION COMPARISON (Reference vs Generated):
+2025-03-03 02:59:50,953 - INFO - Match rate: 0/1 conditions matched
+2025-03-03 02:59:50,953 - WARNING - DIAGNOSIS MISMATCH: Conditions in reference but missing from generated report:
+2025-03-03 02:59:50,953 - WARNING - - Pneumonia
+2025-03-03 02:59:50,953 - INFO - 
+Generating report for ID P117R704578:
+2025-03-03 02:59:50,953 - INFO - --------------------------------------------------
+2025-03-03 02:59:50,969 - INFO - 
+================================================================================
+2025-03-03 02:59:50,969 - INFO - PROCESSING REPORT FOR ID P117R704578
+2025-03-03 02:59:50,969 - INFO - ================================================================================
+2025-03-03 02:59:50,976 - INFO - Creating prompt for report generation...
+2025-03-03 02:59:50,976 - INFO - About to generate text with model...
+2025-03-03 02:59:50,978 - INFO - Starting text generation...
+2025-03-03 03:16:34,117 - INFO - Text generation completed successfully.
+2025-03-03 03:16:34,117 - INFO - Decoding generated text...
+2025-03-03 03:16:34,120 - INFO - Decoding completed.
+2025-03-03 03:16:34,120 - INFO - 
+RAW GENERATED TEXT (FIRST 100 CHARS):
+2025-03-03 03:16:34,120 - INFO - Generate a medical report for chest X-ray with:                  INDICATION: Chest X-ray for evaluat
+2025-03-03 03:16:34,120 - INFO - Starting to clean text...
+2025-03-03 03:16:34,122 - INFO - Text cleaning completed successfully.
+2025-03-03 03:16:34,122 - INFO - Text cleaned successfully.
+2025-03-03 03:16:34,122 - INFO - 
+GENERATED REPORT FINDINGS:
+2025-03-03 03:16:34,122 - INFO - FINDINGS:
+No acute cardiopulmonary abnormalities identified.
+IMPRESSION:
+CONCLUSION: 
+RECOMMENDATIONS: 
+
+Introduction:
+A chest X-ray is a diagnostic imaging test that uses X-rays to produce images of the internal structures of the chest, including the lungs, heart, and surrounding tissues. The purpose of this report is to document the findings of a chest X-ray performed on [Patient Name] on [Date of Examination].
+2025-03-03 03:16:34,122 - INFO - 
+GENERATED REPORT IMPRESSION:
+2025-03-03 03:16:34,122 - INFO - CONCLUSION: 
+RECOMMENDATIONS: 
+
+Introduction:
+A chest X-ray is a diagnostic imaging test that uses X-rays to produce images of the internal structures of the chest, including the lungs, heart, and surrounding tissues. The purpose of this report is to document the findings of a chest X-ray performed on [Patient Name] on [Date of Examination].
+2025-03-03 03:16:34,122 - INFO - 
+Generated Report:
+2025-03-03 03:16:34,124 - INFO - INDICATION:
+Chest X-ray for evaluation
+
+COMPARISON:
+No prior imaging studies are available for comparison.
+
+FINDINGS:
+No acute cardiopulmonary abnormalities identified.
+
+IMPRESSION:
+CONCLUSION: 
+RECOMMENDATIONS: 
+
+Introduction:
+A chest X-ray is a diagnostic imaging test that uses X-rays to produce images of the internal structures of the chest, including the lungs, heart, and surrounding tissues. The purpose of this report is to document the findings of a chest X-ray performed on [Patient Name] on [Date of Examination].
+2025-03-03 03:16:34,124 - INFO - Report 3 of 5 generated.
+2025-03-03 03:16:34,124 - INFO - 
+Reference Report (Original Full):
+2025-03-03 03:16:34,124 - INFO - --------------------------------------------------
+2025-03-03 03:16:34,125 - INFO - FINAL REPORT
+ CHEST RADIOGRAPH PERFORMED ON ___
+ 
+ COMPARISON:  None.
+ 
+ CLINICAL HISTORY:  Wheezing and rhonchi, cough for one week, assess for
+ pneumonia.
+ 
+ FINDINGS:  PA and lateral views of the chest are obtained.  There is subtle
+ opacity in the expected region of the inferior lingula, which could represent
+ an early or resolving pneumonia.  The remainder of the lungs appears clear. 
+ No pleural effusion or pneumothorax.  Heart size appears normal.  The aorta is
+ slightly unfolded.  Bony structures are intact.
+ 
+ IMPRESSION:  Subtle opacity in the inferior lingula could represent an early
+ or resolving pneumonia.
+2025-03-03 03:16:34,125 - INFO - --------------------------------------------------
+2025-03-03 03:16:34,125 - INFO - 
+REFERENCE REPORT CONDITION ANALYSIS:
+2025-03-03 03:16:34,125 - INFO - Detected conditions in reference report:
+2025-03-03 03:16:34,125 - INFO - - Pneumonia
+2025-03-03 03:16:34,126 - INFO - 
+CONDITION COMPARISON (Reference vs Generated):
+2025-03-03 03:16:34,126 - INFO - Match rate: 0/1 conditions matched
+2025-03-03 03:16:34,126 - WARNING - DIAGNOSIS MISMATCH: Conditions in reference but missing from generated report:
+2025-03-03 03:16:34,126 - WARNING - - Pneumonia
+2025-03-03 03:16:34,126 - INFO - 
+Generating report for ID P117R799745:
+2025-03-03 03:16:34,127 - INFO - --------------------------------------------------
+2025-03-03 03:16:34,135 - INFO - 
+================================================================================
+2025-03-03 03:16:34,135 - INFO - PROCESSING REPORT FOR ID P117R799745
+2025-03-03 03:16:34,135 - INFO - ================================================================================
+2025-03-03 03:16:34,141 - INFO - Creating prompt for report generation...
+2025-03-03 03:16:34,141 - INFO - About to generate text with model...
+2025-03-03 03:16:34,142 - INFO - Starting text generation...
+2025-03-03 03:33:21,203 - INFO - Text generation completed successfully.
+2025-03-03 03:33:21,203 - INFO - Decoding generated text...
+2025-03-03 03:33:21,214 - INFO - Decoding completed.
+2025-03-03 03:33:21,214 - INFO - 
+RAW GENERATED TEXT (FIRST 100 CHARS):
+2025-03-03 03:33:21,214 - INFO - Generate a medical report for chest X-ray with:                  INDICATION: Chest X-ray for evaluat
+2025-03-03 03:33:21,214 - INFO - Starting to clean text...
+2025-03-03 03:33:21,215 - INFO - Text cleaning completed successfully.
+2025-03-03 03:33:21,215 - INFO - Text cleaned successfully.
+2025-03-03 03:33:21,215 - INFO - 
+GENERATED REPORT FINDINGS:
+2025-03-03 03:33:21,215 - INFO - FINDINGS:
+No acute cardiopulmonary abnormalities identified.
+IMPRESSION:
+CONCLUSION: 
+RECOMMENDATIONS: 
+
+Introduction:
+A chest X-ray is a diagnostic imaging test that uses X-rays to produce images of the internal structures of the chest, including the lungs, heart, and surrounding tissues. The purpose of this report is to document the findings of a chest X-ray performed on [Patient Name] on [Date of Examination].
+2025-03-03 03:33:21,216 - INFO - 
+GENERATED REPORT IMPRESSION:
+2025-03-03 03:33:21,216 - INFO - CONCLUSION: 
+RECOMMENDATIONS: 
+
+Introduction:
+A chest X-ray is a diagnostic imaging test that uses X-rays to produce images of the internal structures of the chest, including the lungs, heart, and surrounding tissues. The purpose of this report is to document the findings of a chest X-ray performed on [Patient Name] on [Date of Examination].
+2025-03-03 03:33:21,216 - INFO - 
+Generated Report:
+2025-03-03 03:33:21,216 - INFO - INDICATION:
+Chest X-ray for evaluation
+
+COMPARISON:
+No prior imaging studies are available for comparison.
+
+FINDINGS:
+No acute cardiopulmonary abnormalities identified.
+
+IMPRESSION:
+CONCLUSION: 
+RECOMMENDATIONS: 
+
+Introduction:
+A chest X-ray is a diagnostic imaging test that uses X-rays to produce images of the internal structures of the chest, including the lungs, heart, and surrounding tissues. The purpose of this report is to document the findings of a chest X-ray performed on [Patient Name] on [Date of Examination].
+2025-03-03 03:33:21,216 - INFO - Report 4 of 5 generated.
+2025-03-03 03:33:21,216 - INFO - 
+Reference Report (Original Full):
+2025-03-03 03:33:21,216 - INFO - --------------------------------------------------
+2025-03-03 03:33:21,216 - INFO - FINAL REPORT
+ CHEST RADIOGRAPH PERFORMED ON ___
+ 
+ COMPARISON:  None.
+ 
+ CLINICAL HISTORY:  Wheezing and rhonchi, cough for one week, assess for
+ pneumonia.
+ 
+ FINDINGS:  PA and lateral views of the chest are obtained.  There is subtle
+ opacity in the expected region of the inferior lingula, which could represent
+ an early or resolving pneumonia.  The remainder of the lungs appears clear. 
+ No pleural effusion or pneumothorax.  Heart size appears normal.  The aorta is
+ slightly unfolded.  Bony structures are intact.
+ 
+ IMPRESSION:  Subtle opacity in the inferior lingula could represent an early
+ or resolving pneumonia.
+2025-03-03 03:33:21,216 - INFO - --------------------------------------------------
+2025-03-03 03:33:21,216 - INFO - 
+REFERENCE REPORT CONDITION ANALYSIS:
+2025-03-03 03:33:21,218 - INFO - Detected conditions in reference report:
+2025-03-03 03:33:21,218 - INFO - - Pneumonia
+2025-03-03 03:33:21,218 - INFO - 
+CONDITION COMPARISON (Reference vs Generated):
+2025-03-03 03:33:21,218 - INFO - Match rate: 0/1 conditions matched
+2025-03-03 03:33:21,218 - WARNING - DIAGNOSIS MISMATCH: Conditions in reference but missing from generated report:
+2025-03-03 03:33:21,219 - WARNING - - Pneumonia
+2025-03-03 03:33:21,219 - INFO - 
+Generating report for ID P117R900274:
+2025-03-03 03:33:21,219 - INFO - --------------------------------------------------
+2025-03-03 03:33:21,230 - INFO - 
+================================================================================
+2025-03-03 03:33:21,230 - INFO - PROCESSING REPORT FOR ID P117R900274
+2025-03-03 03:33:21,230 - INFO - ================================================================================
+2025-03-03 03:33:21,238 - INFO - Creating prompt for report generation...
+2025-03-03 03:33:21,238 - INFO - About to generate text with model...
+2025-03-03 03:33:21,240 - INFO - Starting text generation...
+2025-03-03 03:47:50,638 - INFO - Text generation completed successfully.
+2025-03-03 03:47:50,647 - INFO - Decoding generated text...
+2025-03-03 03:47:50,649 - INFO - Decoding completed.
+2025-03-03 03:47:50,649 - INFO - 
+RAW GENERATED TEXT (FIRST 100 CHARS):
+2025-03-03 03:47:50,650 - INFO - Generate a medical report for chest X-ray with:                  INDICATION: Chest X-ray for evaluat
+2025-03-03 03:47:50,650 - INFO - Starting to clean text...
+2025-03-03 03:47:50,650 - INFO - Text cleaning completed successfully.
+2025-03-03 03:47:50,650 - INFO - Text cleaned successfully.
+2025-03-03 03:47:50,650 - INFO - 
+GENERATED REPORT FINDINGS:
+2025-03-03 03:47:50,651 - INFO - FINDINGS:
+No acute cardiopulmonary abnormalities identified.
+IMPRESSION:
+CONCLUSION: 
+RECOMMENDATIONS: 
+
+Introduction:
+A chest X-ray is a diagnostic imaging test that uses X-rays to produce images of the internal structures of the chest, including the lungs, heart, and surrounding tissues. The purpose of this report is to document the findings of a chest X-ray performed on [Patient Name] on [Date of Examination].
+2025-03-03 03:47:50,651 - INFO - 
+GENERATED REPORT IMPRESSION:
+2025-03-03 03:47:50,651 - INFO - CONCLUSION: 
+RECOMMENDATIONS: 
+
+Introduction:
+A chest X-ray is a diagnostic imaging test that uses X-rays to produce images of the internal structures of the chest, including the lungs, heart, and surrounding tissues. The purpose of this report is to document the findings of a chest X-ray performed on [Patient Name] on [Date of Examination].
+2025-03-03 03:47:50,651 - INFO - 
+Generated Report:
+2025-03-03 03:47:50,651 - INFO - INDICATION:
+Chest X-ray for evaluation
+
+COMPARISON:
+No prior imaging studies are available for comparison.
+
+FINDINGS:
+No acute cardiopulmonary abnormalities identified.
+
+IMPRESSION:
+CONCLUSION: 
+RECOMMENDATIONS: 
+
+Introduction:
+A chest X-ray is a diagnostic imaging test that uses X-rays to produce images of the internal structures of the chest, including the lungs, heart, and surrounding tissues. The purpose of this report is to document the findings of a chest X-ray performed on [Patient Name] on [Date of Examination].
+2025-03-03 03:47:50,652 - INFO - Report 5 of 5 generated.
+2025-03-03 03:47:50,652 - INFO - 
+Reference Report (Original Full):
+2025-03-03 03:47:50,652 - INFO - --------------------------------------------------
+2025-03-03 03:47:50,652 - INFO - FINAL REPORT
+ CHEST RADIOGRAPH PERFORMED ON ___
+ 
+ COMPARISON:  None.
+ 
+ CLINICAL HISTORY:  Wheezing and rhonchi, cough for one week, assess for
+ pneumonia.
+ 
+ FINDINGS:  PA and lateral views of the chest are obtained.  There is subtle
+ opacity in the expected region of the inferior lingula, which could represent
+ an early or resolving pneumonia.  The remainder of the lungs appears clear. 
+ No pleural effusion or pneumothorax.  Heart size appears normal.  The aorta is
+ slightly unfolded.  Bony structures are intact.
+ 
+ IMPRESSION:  Subtle opacity in the inferior lingula could represent an early
+ or resolving pneumonia.
+2025-03-03 03:47:50,652 - INFO - --------------------------------------------------
+2025-03-03 03:47:50,652 - INFO - 
+REFERENCE REPORT CONDITION ANALYSIS:
+2025-03-03 03:47:50,653 - INFO - Detected conditions in reference report:
+2025-03-03 03:47:50,653 - INFO - - Pneumonia
+2025-03-03 03:47:50,653 - INFO - 
+CONDITION COMPARISON (Reference vs Generated):
+2025-03-03 03:47:50,653 - INFO - Match rate: 0/1 conditions matched
+2025-03-03 03:47:50,653 - WARNING - DIAGNOSIS MISMATCH: Conditions in reference but missing from generated report:
+2025-03-03 03:47:50,653 - WARNING - - Pneumonia
+2025-03-03 03:47:50,653 - INFO - 
+Reached maximum number of reports (5). Stopping generation.
+2025-03-03 03:47:50,661 - INFO - Using default tokenizer.
+2025-03-03 03:47:50,663 - INFO - --------------------------------------------------------------------------------
+2025-03-03 03:47:50,663 - INFO - DETAILED REPORT COMPARISON
+2025-03-03 03:47:50,663 - INFO - --------------------------------------------------------------------------------
+2025-03-03 03:47:50,663 - INFO - 
+REPORT PAIR #1:
+2025-03-03 03:47:50,663 - INFO - REFERENCE IMPRESSION:
+2025-03-03 03:47:50,663 - INFO - Subtle opacity in the inferior lingula could represent an early
+ or resolving pneumonia.
+2025-03-03 03:47:50,664 - INFO - GENERATED IMPRESSION:
+2025-03-03 03:47:50,664 - INFO - CONCLUSION: 
+RECOMMENDATIONS: 
+
+Introduction:
+A chest X-ray is a diagnostic imaging test that uses X-rays to produce images of the internal structures of the chest, including the lungs, heart, and surrounding tissues. The purpose of this report is to document the findings of a chest X-ray performed on [Patient Name] on [Date of Examination].
+2025-03-03 03:47:50,664 - INFO - REFERENCE CONDITIONS:
+2025-03-03 03:47:50,664 - INFO - - Pneumonia
+2025-03-03 03:47:50,664 - INFO - GENERATED CONDITIONS:
+2025-03-03 03:47:50,664 - INFO - CONDITION MATCH ANALYSIS:
+2025-03-03 03:47:50,664 - INFO - - Common conditions: 0
+2025-03-03 03:47:50,665 - INFO - - Missing conditions: 1
+2025-03-03 03:47:50,665 - INFO - - Extra conditions: 0
+2025-03-03 03:47:50,665 - INFO - MISSING CONDITIONS (in reference but not in generated):
+2025-03-03 03:47:50,665 - INFO - - Pneumonia
+2025-03-03 03:47:50,665 - INFO - --------------------------------------------------
+2025-03-03 03:47:50,865 - INFO - 
+REPORT PAIR #2:
+2025-03-03 03:47:50,865 - INFO - REFERENCE IMPRESSION:
+2025-03-03 03:47:50,865 - INFO - Subtle opacity in the inferior lingula could represent an early
+ or resolving pneumonia.
+2025-03-03 03:47:50,865 - INFO - GENERATED IMPRESSION:
+2025-03-03 03:47:50,866 - INFO - CONCLUSION: 
+RECOMMENDATIONS: 
+
+Introduction:
+A chest X-ray is a diagnostic imaging test that uses X-rays to produce images of the internal structures of the chest, including the lungs, heart, and surrounding tissues. The purpose of this report is to document the findings of a chest X-ray performed on [Patient Name] on [Date of Examination].
+2025-03-03 03:47:50,866 - INFO - REFERENCE CONDITIONS:
+2025-03-03 03:47:50,866 - INFO - - Pneumonia
+2025-03-03 03:47:50,866 - INFO - GENERATED CONDITIONS:
+2025-03-03 03:47:50,866 - INFO - CONDITION MATCH ANALYSIS:
+2025-03-03 03:47:50,867 - INFO - - Common conditions: 0
+2025-03-03 03:47:50,867 - INFO - - Missing conditions: 1
+2025-03-03 03:47:50,867 - INFO - - Extra conditions: 0
+2025-03-03 03:47:50,867 - INFO - MISSING CONDITIONS (in reference but not in generated):
+2025-03-03 03:47:50,867 - INFO - - Pneumonia
+2025-03-03 03:47:50,867 - INFO - --------------------------------------------------
+2025-03-03 03:47:50,876 - INFO - 
+REPORT PAIR #3:
+2025-03-03 03:47:50,877 - INFO - REFERENCE IMPRESSION:
+2025-03-03 03:47:50,877 - INFO - Subtle opacity in the inferior lingula could represent an early
+ or resolving pneumonia.
+2025-03-03 03:47:50,877 - INFO - GENERATED IMPRESSION:
+2025-03-03 03:47:50,877 - INFO - CONCLUSION: 
+RECOMMENDATIONS: 
+
+Introduction:
+A chest X-ray is a diagnostic imaging test that uses X-rays to produce images of the internal structures of the chest, including the lungs, heart, and surrounding tissues. The purpose of this report is to document the findings of a chest X-ray performed on [Patient Name] on [Date of Examination].
+2025-03-03 03:47:50,877 - INFO - REFERENCE CONDITIONS:
+2025-03-03 03:47:50,878 - INFO - - Pneumonia
+2025-03-03 03:47:50,878 - INFO - GENERATED CONDITIONS:
+2025-03-03 03:47:50,878 - INFO - CONDITION MATCH ANALYSIS:
+2025-03-03 03:47:50,878 - INFO - - Common conditions: 0
+2025-03-03 03:47:50,878 - INFO - - Missing conditions: 1
+2025-03-03 03:47:50,878 - INFO - - Extra conditions: 0
+2025-03-03 03:47:50,879 - INFO - MISSING CONDITIONS (in reference but not in generated):
+2025-03-03 03:47:50,879 - INFO - - Pneumonia
+2025-03-03 03:47:50,879 - INFO - --------------------------------------------------
+2025-03-03 03:47:50,886 - INFO - 
+REPORT PAIR #4:
+2025-03-03 03:47:50,886 - INFO - REFERENCE IMPRESSION:
+2025-03-03 03:47:50,886 - INFO - Subtle opacity in the inferior lingula could represent an early
+ or resolving pneumonia.
+2025-03-03 03:47:50,886 - INFO - GENERATED IMPRESSION:
+2025-03-03 03:47:50,886 - INFO - CONCLUSION: 
+RECOMMENDATIONS: 
+
+Introduction:
+A chest X-ray is a diagnostic imaging test that uses X-rays to produce images of the internal structures of the chest, including the lungs, heart, and surrounding tissues. The purpose of this report is to document the findings of a chest X-ray performed on [Patient Name] on [Date of Examination].
+2025-03-03 03:47:50,887 - INFO - REFERENCE CONDITIONS:
+2025-03-03 03:47:50,888 - INFO - - Pneumonia
+2025-03-03 03:47:50,888 - INFO - GENERATED CONDITIONS:
+2025-03-03 03:47:50,888 - INFO - CONDITION MATCH ANALYSIS:
+2025-03-03 03:47:50,888 - INFO - - Common conditions: 0
+2025-03-03 03:47:50,888 - INFO - - Missing conditions: 1
+2025-03-03 03:47:50,888 - INFO - - Extra conditions: 0
+2025-03-03 03:47:50,888 - INFO - MISSING CONDITIONS (in reference but not in generated):
+2025-03-03 03:47:50,888 - INFO - - Pneumonia
+2025-03-03 03:47:50,889 - INFO - --------------------------------------------------
+2025-03-03 03:47:50,896 - INFO - 
+REPORT PAIR #5:
+2025-03-03 03:47:50,896 - INFO - REFERENCE IMPRESSION:
+2025-03-03 03:47:50,896 - INFO - Subtle opacity in the inferior lingula could represent an early
+ or resolving pneumonia.
+2025-03-03 03:47:50,896 - INFO - GENERATED IMPRESSION:
+2025-03-03 03:47:50,897 - INFO - CONCLUSION: 
+RECOMMENDATIONS: 
+
+Introduction:
+A chest X-ray is a diagnostic imaging test that uses X-rays to produce images of the internal structures of the chest, including the lungs, heart, and surrounding tissues. The purpose of this report is to document the findings of a chest X-ray performed on [Patient Name] on [Date of Examination].
+2025-03-03 03:47:50,897 - INFO - REFERENCE CONDITIONS:
+2025-03-03 03:47:50,897 - INFO - - Pneumonia
+2025-03-03 03:47:50,897 - INFO - GENERATED CONDITIONS:
+2025-03-03 03:47:50,897 - INFO - CONDITION MATCH ANALYSIS:
+2025-03-03 03:47:50,898 - INFO - - Common conditions: 0
+2025-03-03 03:47:50,898 - INFO - - Missing conditions: 1
+2025-03-03 03:47:50,898 - INFO - - Extra conditions: 0
+2025-03-03 03:47:50,898 - INFO - MISSING CONDITIONS (in reference but not in generated):
+2025-03-03 03:47:50,898 - INFO - - Pneumonia
+2025-03-03 03:47:50,898 - INFO - --------------------------------------------------
