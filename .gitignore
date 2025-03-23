@@ -14,6 +14,7 @@
 /best_xray_model.pt
 /cross_reference_model/
 /data/__pycache__/
+/utils/__pycache__
 
 # windsurf rules
 .windsurfrules
