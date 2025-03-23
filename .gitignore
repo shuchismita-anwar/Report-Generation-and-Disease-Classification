@@ -11,6 +11,9 @@
 /data/__pycache__
 /model_cache/
 /output-llama-3.2-3b-qlora/
+/best_xray_model.pt
+/cross_reference_model/
+/data/__pycache__/
 
 # windsurf rules
 .windsurfrules
