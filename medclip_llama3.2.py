@@ -3,7 +3,6 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import nltk
-import logging
 import sys
 import random
 from datetime import datetime
@@ -27,21 +26,9 @@ from medclip import MedCLIPModel, MedCLIPVisionModel, MedCLIPTextModel
 # Set TensorFlow warning fix
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
-# Configure logging to both file and console
-log_filename = 'results.txt'
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler(log_filename, mode='w'),  # Use 'w' mode to clear previous content
-        logging.StreamHandler(sys.stdout)
-    ]
-)
-logger = logging.getLogger(__name__)
-
 # Set device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-logger.info(f"Using device: {device}")
+print(f"Using device: {device}")
 
 # Initialize tokenizer globally
 clinical_bert_tokenizer = AutoTokenizer.from_pretrained('emilyalsentzer/Bio_ClinicalBERT')
@@ -79,7 +66,7 @@ def read_text_file(file_path):
                 text = f.read().strip()
             return text
         except Exception as e:
-            logger.error(f"Error reading file {file_path}: {e}")
+            print(f"Error reading file {file_path}: {e}")
             return ''
 
 def load_preprocess_image(path, device):
@@ -88,7 +75,7 @@ def load_preprocess_image(path, device):
             path = '\\\\?\\' + os.path.abspath(path)
         img = Image.open(path).convert('RGB')
     except Exception as e:
-        logger.error(f"Error processing image {path}: {e}")
+        print(f"Error processing image {path}: {e}")
         img = Image.new('RGB', (224, 224))
     img = image_transform(img)
     return img.to(device)
@@ -217,7 +204,7 @@ class KnowledgeBasedEmbedder:
             self.model = AutoModel.from_pretrained(model_name)
             self.model.eval()
         except Exception as e:
-            logger.error(f"Error initializing KnowledgeBasedEmbedder with {model_name}: {e}")
+            print(f"Error initializing KnowledgeBasedEmbedder with {model_name}: {e}")
             raise e
 
     def generate_text_embedding(self, text: str, device='cpu'):
@@ -551,11 +538,11 @@ def load_llm_model(device):
             device_map="auto"
         )
         
-        logger.info("LLM model loaded successfully")
+        print("LLM model loaded successfully")
         return model, tokenizer
         
     except Exception as e:
-        logger.error(f"Error loading LLM model: {e}")
+        print(f"Error loading LLM model: {e}")
         return None, None
 
 # -------------------------------------------------------------------------
@@ -594,7 +581,7 @@ def calculate_text_generation_metrics(generated_reports, reference_reports):
             metrics['bleu_4'].append(sentence_bleu([reference], hypothesis, weights=(0.25, 0.25, 0.25, 0.25),
                                                    smoothing_function=smooth_fn))
         except Exception as e:
-            logger.error(f"Error calculating BLEU scores: {str(e)}")
+            print(f"Error calculating BLEU scores: {str(e)}")
 
         try:
             scores = scorer.score(ref_report, gen_report)
@@ -610,7 +597,7 @@ def calculate_text_generation_metrics(generated_reports, reference_reports):
             metrics['rouge_l_r'].append(scores['rougeL'].recall)
             metrics['rouge_l_f'].append(scores['rougeL'].fmeasure)
         except Exception as e:
-            logger.error(f"Error calculating ROUGE scores: {str(e)}")
+            print(f"Error calculating ROUGE scores: {str(e)}")
     
     final_metrics = {}
     for key in metrics:
@@ -633,7 +620,7 @@ def main():
     
     # Counter for limiting report generation to 5 patients
     reports_generated = 0
-    max_reports = 5
+    max_reports = 5  # Not used when targeting specific patient
 
     # Paths
     XAMI_MIMIC_PATH = os.path.abspath(os.path.join(
@@ -645,15 +632,74 @@ def main():
 
     # Data Loading
     df = pd.read_csv('test.csv')
+    
+    # Debug information
+    print(f"\nTotal records in test.csv: {len(df)}")
+    
+    # Check if our target patient is in the dataframe
+    target_id = "P300R787588"
+    target_patient_data = None
+    
+    if target_id in df['id'].values:
+        print(f"Target patient {target_id} found in test.csv")
+        target_row = df[df['id'] == target_id].iloc[0]
+        # Save the target patient data before filtering
+        target_patient_data = target_row.copy()
+        print(f"Target patient row: {target_row[['id', 'eye_tracking_data_discarded']].to_dict()}")
+    else:
+        print(f"Target patient {target_id} NOT found in test.csv")
+    
+    # Filter out based on eye_tracking_data_discarded
     df = df[df['eye_tracking_data_discarded'] == False]
-
+    print(f"Records after filtering eye_tracking_data_discarded: {len(df)}")
+    
     critical_columns = [
         'image_path', 'bbox_path', 'fixation_path', 'report_path', 'reflacx_transcript_path',
         'eyegaze_transcript_path', 'temperature', 'heartrate', 'resprate',
         'o2sat', 'sbp', 'dbp', 'pain', 'acuity', 'chiefcomplaint', 'age'
     ]
-    df = df.dropna(subset=critical_columns)
-
+    
+    # Check which columns in critical_columns are missing for our target patient
+    if target_id in df['id'].values:
+        target_row = df[df['id'] == target_id].iloc[0]
+        missing_columns = [col for col in critical_columns if pd.isna(target_row[col])]
+        if missing_columns:
+            print(f"Target patient {target_id} is missing these critical columns: {missing_columns}")
+        else:
+            print(f"Target patient {target_id} has all required critical columns")
+    
+    # Perform regular filtering for other patients
+    regular_df = df.dropna(subset=critical_columns)
+    print(f"Records after dropping NaN in critical columns: {len(regular_df)}")
+    
+    # Special handling for our target patient
+    if target_patient_data is not None and target_id not in regular_df['id'].values:
+        print(f"Adding target patient {target_id} back to the dataset with special handling")
+        
+        # Fill missing critical values with empty strings or zeros
+        for col in critical_columns:
+            if pd.isna(target_patient_data[col]):
+                if col in ['temperature', 'heartrate', 'resprate', 'o2sat', 'sbp', 'dbp', 'pain', 'acuity', 'age']:
+                    target_patient_data[col] = 0  # Use 0 for numeric
+                else:
+                    target_patient_data[col] = ''  # Use empty string for text
+        
+        # Create a new dataframe with just our target patient
+        target_df = pd.DataFrame([target_patient_data])
+        
+        # Combine with regular filtered data
+        df = pd.concat([regular_df, target_df], ignore_index=True)
+    else:
+        df = regular_df
+    
+    print(f"Final dataset size: {len(df)}")
+    
+    # Confirm if target patient is in final dataset
+    if target_id in df['id'].values:
+        print(f"Target patient {target_id} is in the final dataset")
+    else:
+        print(f"Target patient {target_id} is NOT in the final dataset")
+    
     for path_col in [
         'image_path', 'bbox_path', 'fixation_path', 'report_path',
         'reflacx_transcript_path', 'eyegaze_transcript_path'
@@ -684,14 +730,14 @@ def main():
         vision_model = MedCLIPVisionModel()
         text_model = MedCLIPTextModel()
         medclip_model = MedCLIPModel().to(device)
-        logger.info("Successfully initialized MedCLIP models.")
+        print("Successfully initialized MedCLIP models.")
     except Exception as e:
-        logger.error(f"Error initializing MedCLIP models: {e}")
+        print(f"Error initializing MedCLIP models: {e}")
         return
 
     disease_labels = [
         'Atelectasis', 'Pneumothorax', 'Consolidation', 'Pulmonary edema',
-        'Enlarged cardiac silhouette', 'Fibrosis', 'Fracture', 'Support devices'
+        'Enlarged cardiac silhouette', 'Fibrosis', 'Fracture', 'Pneumonia'
     ]
 
     # Prepare Embeddings
@@ -907,37 +953,35 @@ def main():
     # -------------------------------------------------------------------------
     # Step 9: Load and Prepare LLM Model
     # -------------------------------------------------------------------------
-    logger.info("\nLoading LLM model...")
+    print("\nLoading LLM model...")
     try:
         model_llm, tokenizer_llm = load_llm_model(device)
         if model_llm is None or tokenizer_llm is None:
-            logger.error("Failed to load LLM model. Exiting.")
+            print("Failed to load LLM model. Exiting.")
             return
         model_llm.eval()  
     except Exception as e:
-        logger.error(f"Failed to load LLM model: {e}")
+        print(f"Failed to load LLM model: {e}")
         return
     model_llm.model.eval()
 
     # -------------------------------------------------------------------------
     # Step 10: Generate Reports with Alignment to Reference
     # -------------------------------------------------------------------------
-    logger.info("\nGenerating reports...")
+    print("\nGenerating reports...")
     reports = []
     reference_reports = []
 
-    def generate_report(entry, model_llm, tokenizer, device, classifier_model, clinical_encoder):
+    def generate_report(entry):
         try:
-            logger.info(f"\nProcessing report for ID {entry['id']}...")
-            logger.info("Extracting features and predictions...")
-            
-            # Get classifier predictions
+            classifier_model.eval()
+            clinical_encoder.eval()
             with torch.no_grad():
                 embedding = entry['unified_embedding']
                 if embedding.dim() == 3:
-                    embedding = embedding.squeeze(0)
+                    embedding = embedding.squeeze(0)  # [batch_size, channels]
                 elif embedding.dim() == 1:
-                    embedding = embedding.unsqueeze(0)
+                    embedding = embedding.unsqueeze(0)  # [1, channels]
                 
                 clinical_data_tensor = entry['clinical_data']
                 if clinical_data_tensor.dim() == 1:
@@ -955,9 +999,9 @@ def main():
                 top_indices = np.argsort(probs)[-top_k:][::-1]
                 top_probs = probs[top_indices]
                 
-                logger.info("\nTop predictions:")
+                print("\nTop predictions:")
                 for idx, prob in zip(top_indices, top_probs):
-                    logger.info(f"Class {idx}: {prob:.3f}")
+                    print(f"Class {idx}: {prob:.3f}")
 
             # Map class indices to conditions
             conditions = {
@@ -979,7 +1023,7 @@ def main():
             
             findings_str = "\n".join([f"- {f}" for f in findings]) if findings else "- No significant findings detected"
             
-            prompt = f"""You are a professional radiologist. Generate a detailed radiology report based on the following information:
+            prompt = f'''You are a professional radiologist. Generate a detailed radiology report based on the following information:
 
 Clinical Context:
 - Patient ID: {entry['id']}
@@ -1014,9 +1058,9 @@ IMPRESSION:
 - Keep interpretation focused and concise
 
 Generate a professional radiology report following these guidelines:
-"""
-            
-            logger.info("\nGenerating report with model predictions...")
+'''
+            print(prompt)
+            print("\nGenerating report with model predictions...")
             inputs = tokenizer_llm(prompt, return_tensors="pt", padding=True, truncation=True, max_length=512)
             inputs = {k: v.to(device) for k, v in inputs.items()}
             
@@ -1035,23 +1079,78 @@ Generate a professional radiology report following these guidelines:
             )
             
             report = tokenizer_llm.decode(outputs[0], skip_special_tokens=True)
-            logger.info("\nReport generated successfully")
+            print("\nReport generated successfully")
             
             return report
             
         except Exception as e:
-            logger.error(f"Error generating report: {str(e)}")
-            logger.error(traceback.format_exc())
+            print(f"Error generating report: {str(e)}")
             return None
 
+    # Find the specific patient and generate report only for that patient
+    target_patient_id = "P300R787588"
+    found_target_patient = False
+    
+    # Debug: Print all IDs in unified_embeddings to see what's available
+    # print("\nAvailable patient IDs in the dataset:")
+    # for i, entry in enumerate(unified_embeddings):
+    #     print(f"Entry {i}: ID = {entry['id']}")
+
+    for entry in unified_embeddings:
+        if entry['id'] == target_patient_id:
+            found_target_patient = True
+            print(f"\nGenerating report for target patient ID {entry['id']}:")
+            print("-" * 50)
+
+            # -------------------------------------------------------------
+            # 1) Get reference text and extract key findings/impression
+            # -------------------------------------------------------------
+            reference_report_raw = read_text_file(entry['labels']['report_path'])
+            # This ensures we parse important details for direct alignment
+            parsed_reference_content = extract_key_findings_and_impression(reference_report_raw)
+
+            try:
+                report = generate_report(entry)
+                
+                if report:
+                    # Apply the cleaning function
+                    report = clean_report(report)
+                    
+                    print("\nGenerated Report:")
+                    print(report)
+
+                    reports.append({
+                        'id': entry['id'],
+                        'report': report
+                    })
+                    
+                    # Show reference for comparison
+                    if reference_report_raw:
+                        print("\nReference Report (Original Full):")
+                        print("-" * 50)
+                        print(reference_report_raw)
+                        print("-" * 50)
+                    reference_reports.append(reference_report_raw)
+                
+            except Exception as e:
+                print(f"Error generating final report: {str(e)}")
+                continue
+            
+            break  # Only process the target patient
+    
+    if not found_target_patient:
+        print(f"Patient with ID {target_patient_id} not found in the dataset.")
+
+    # Comment out random 5 patient report generation
+    """
     for entry in unified_embeddings:
         # Check if we've generated the maximum number of reports
         if reports_generated >= max_reports:
-            logger.info("\nReached maximum number of reports (5). Stopping generation.")
+            print("\nReached maximum number of reports (5). Stopping generation.")
             break
             
-        logger.info(f"\nGenerating report for ID {entry['id']}:")
-        logger.info("-" * 50)
+        print(f"\nGenerating report for ID {entry['id']}:")
+        print("-" * 50)
 
         # -------------------------------------------------------------
         # 1) Get reference text and extract key findings/impression
@@ -1084,7 +1183,7 @@ Generate a professional radiology report following these guidelines:
                 logits, aux_outputs = classifier_model(embedding, clinical_embedding)
                 probs = torch.sigmoid(logits).cpu().numpy()[0]
         except Exception as e:
-            logger.error(f"Classifier model error: {str(e)}")
+            print(f"Classifier model error: {str(e)}")
 
         # -------------------------------------------------------------
         # 3) Build an improved prompt using reference data
@@ -1093,7 +1192,7 @@ Generate a professional radiology report following these guidelines:
         comparison_text = "No prior imaging available for comparison."
 
         # We feed the extracted reference findings/impressions to help the LLM accurately align
-        improved_prompt = f"""Generate a professional chest X-ray report following standard radiological format. Focus on objective findings and avoid speculation.
+        improved_prompt = f'''Generate a professional chest X-ray report following standard radiological format. Focus on objective findings and avoid speculation.
 
 CLINICAL INFORMATION:
 - Chief complaint: {clinical_history}
@@ -1112,143 +1211,151 @@ GUIDELINES:
 5. Focus on imaging findings only
 6. Avoid clinical speculation
 
-Begin report:"""
+Begin report:'''
 
-        # -------------------------------------------------------------
-        # 4) Final cleaning function for the LLM output
-        # -------------------------------------------------------------
-        def clean_report(text):
-            # Remove any text before the first section header
-            section_headers = ["INDICATION:", "COMPARISON:", "FINDINGS:", "IMPRESSION:"]
-            
-            # Find the first occurrence of any header
-            first_header_pos = float('inf')
-            for header in section_headers:
-                pos = text.find(header)
-                if pos != -1 and pos < first_header_pos:
-                    first_header_pos = pos
-            
-            if first_header_pos != float('inf'):
-                text = text[first_header_pos:]
-            
-            # Remove any template/instruction text
-            text = re.sub(r'\[.*?\]', '', text)  # Remove any [instructions]
-            text = re.sub(r'Guidelines:.*?report:', '', text, flags=re.DOTALL)  # Remove guidelines
-            text = re.sub(r'You are a radiologist.*?report:', '', text, flags=re.DOTALL)  # Remove prompt
-            text = re.sub(r'Begin report:.*?:', '', text, flags=re.DOTALL)  # Remove begin text
-            text = re.sub(r'Remember to:.*?findings\.?', '', text, flags=re.DOTALL)  # Remove guidelines
-            text = re.sub(r'CLINICAL INFORMATION:.*?REPORT FORMAT:', '', text, flags=re.DOTALL)  # Remove clinical info section
-            text = re.sub(r'REPORT FORMAT:.*?GUIDELINES:', '', text, flags=re.DOTALL)  # Remove format section
-            text = re.sub(r'GUIDELINES:.*?Begin report:', '', text, flags=re.DOTALL)  # Remove guidelines
-            text = re.sub(r'_+', '', text)  # Remove underscores
-            text = re.sub(r'Dr\..*?\n', '', text)  # Remove doctor references
-            text = re.sub(r'\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)', '', text)  # Remove timestamps
-            text = re.sub(r'End report:.*$', '', text, flags=re.DOTALL)  # Remove end report text
-            text = re.sub(r'End of Report.*$', '', text, flags=re.DOTALL)  # Remove end of report text
-            text = re.sub(r'Please call.*$', '', text, flags=re.DOTALL)  # Remove contact instructions
-            text = re.sub(r'Radiologist:.*$', '', text, flags=re.DOTALL)  # Remove radiologist info
-            text = re.sub(r'Radiology Resident:.*$', '', text, flags=re.DOTALL)  # Remove resident info
-            text = re.sub(r'by Dr\..*$', '', text, flags=re.DOTALL)  # Remove doctor attribution
-            text = re.sub(r'Thank you.*$', '', text, flags=re.DOTALL)  # Remove thank you notes
-            text = re.sub(r'Sincerely,.*$', '', text, flags=re.DOTALL)  # Remove signature
-            
-            # Extract content for each section
-            sections = {}
-            for i, header in enumerate(section_headers):
-                start = text.find(header)
-                if start != -1:
-                    next_header_pos = float('inf')
-                    for next_header in section_headers[i+1:]:
-                        pos = text.find(next_header, start)
-                        if pos != -1:
-                            next_header_pos = min(next_header_pos, pos)
-                    
-                    if next_header_pos == float('inf'):
-                        content = text[start + len(header):].strip()
-                    else:
-                        content = text[start + len(header):next_header_pos].strip()
-                    
-                    # Clean the content
-                    content = content.strip()
-                    if not content or content.lower() in ['none', 'none.', 'no findings', 'no specific findings.']:
-                        if header == "INDICATION:":
-                            content = clinical_history if clinical_history else "Not provided"
-                        elif header == "COMPARISON:":
-                            content = comparison_text
-                        elif header == "FINDINGS:":
-                            content = "No acute cardiopulmonary abnormalities identified."
-                        elif header == "IMPRESSION:":
-                            content = "Normal chest radiograph."
-                    sections[header] = content
-            
-            # Build the final report with sections in correct order
-            final_report = []
-            for header in section_headers:
-                if header in sections:
-                    final_report.append(f"{header}")
-                    final_report.append(sections[header])
-                else:
-                    if header == "INDICATION:":
-                        final_report.append(f"{header}")
-                        final_report.append(clinical_history if clinical_history else "Not provided")
-                    elif header == "COMPARISON:":
-                        final_report.append(f"{header}")
-                        final_report.append(comparison_text)
-                    elif header == "FINDINGS:":
-                        final_report.append(f"{header}")
-                        final_report.append("No acute cardiopulmonary abnormalities identified.")
-                    elif header == "IMPRESSION:":
-                        final_report.append(f"{header}")
-                        final_report.append("Normal chest radiograph.")
-                final_report.append("")  # Add blank line between sections
-            
-            # Clean up whitespace
-            text = "\n".join(final_report)
-            text = re.sub(r'\n\s*\n+', '\n\n', text)  # Standardize line spacing
-            text = re.sub(r'[ \t]+', ' ', text)  # Clean up horizontal whitespace
-            text = text.strip()
-            
-            return text
-
-        # -------------------------------------------------------------
-        # 5) Generate the new radiology report from the LLM
-        # -------------------------------------------------------------
+        # Generate the report
         try:
-            report = generate_report(entry, model_llm, tokenizer_llm, device, classifier_model, clinical_encoder)
-            if report is None:
-                continue
-
-            logger.info("\nGenerated Report:")
-            logger.info(report)
-
-            reports.append({
-                'id': entry['id'],
-                'report': report
-            })
+            report = generate_report_with_llm(
+                tokenizer_llm, 
+                model_llm, 
+                improved_prompt, 
+                device
+            )
             
-            # Increment the counter
-            reports_generated += 1
-            logger.info(f"Report {reports_generated} of {max_reports} generated.")
+            if report:
+                # Apply the cleaning function
+                report = clean_report(report)
+                
+                print("\nGenerated Report:")
+                print(report)
 
-            # Show reference for comparison
-            if reference_report_raw:
-                logger.info("\nReference Report (Original Full):")
-                logger.info("-" * 50)
-                logger.info(reference_report_raw)
-                logger.info("-" * 50)
-            reference_reports.append(reference_report_raw)
+                reports.append({
+                    'id': entry['id'],
+                    'report': report
+                })
+                
+                # Increment the counter
+                reports_generated += 1
+                print(f"Report {reports_generated} of {max_reports} generated.")
+
+                # Show reference for comparison
+                if reference_report_raw:
+                    print("\nReference Report (Original Full):")
+                    print("-" * 50)
+                    print(reference_report_raw)
+                    print("-" * 50)
+                reference_reports.append(reference_report_raw)
 
         except Exception as e:
-            logger.error(f"Error generating final report: {str(e)}")
+            print(f"Error generating final report: {str(e)}")
             continue
+    """
 
     # -------------------------------------------------------------------------
     # Step 11: Calculate Text Generation Metrics
     # -------------------------------------------------------------------------
-    generated_texts = [r['report'] for r in reports]
-    reference_texts = [r for r in reference_reports]
-    text_metrics = calculate_text_generation_metrics(generated_texts, reference_texts)
-    # (Optional) Could print or store metrics here.
+    if reports and reference_reports:
+        generated_texts = [r['report'] for r in reports]
+        reference_texts = [r for r in reference_reports]
+        text_metrics = calculate_text_generation_metrics(generated_texts, reference_texts)
+        # Print metrics for the single patient
+        print("\nText Generation Metrics:")
+        for metric, value in text_metrics.items():
+            print(f"{metric}: {value}")
+    
+    # Final cleaning function for the LLM output
+    def clean_report(text):
+        # Remove any text before the first section header
+        section_headers = ["INDICATION:", "COMPARISON:", "FINDINGS:", "IMPRESSION:"]
+        
+        # Find the first occurrence of any header
+        first_header_pos = float('inf')
+        for header in section_headers:
+            pos = text.find(header)
+            if pos != -1 and pos < first_header_pos:
+                first_header_pos = pos
+        
+        if first_header_pos != float('inf'):
+            text = text[first_header_pos:]
+        
+        # Remove any template/instruction text
+        text = re.sub(r'\[.*?\]', '', text)  # Remove any [instructions]
+        text = re.sub(r'Guidelines:.*?report:', '', text, flags=re.DOTALL)  # Remove guidelines
+        text = re.sub(r'You are a radiologist.*?report:', '', text, flags=re.DOTALL)  # Remove prompt
+        text = re.sub(r'Begin report:.*?:', '', text, flags=re.DOTALL)  # Remove begin text
+        text = re.sub(r'Remember to:.*?findings\.?', '', text, flags=re.DOTALL)  # Remove guidelines
+        text = re.sub(r'CLINICAL INFORMATION:.*?REPORT FORMAT:', '', text, flags=re.DOTALL)  # Remove clinical info section
+        text = re.sub(r'REPORT FORMAT:.*?GUIDELINES:', '', text, flags=re.DOTALL)  # Remove format section
+        text = re.sub(r'GUIDELINES:.*?Begin report:', '', text, flags=re.DOTALL)  # Remove guidelines
+        text = re.sub(r'_+', '', text)  # Remove underscores
+        text = re.sub(r'Dr\..*?\n', '', text)  # Remove doctor references
+        text = re.sub(r'\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)', '', text)  # Remove timestamps
+        text = re.sub(r'End report:.*$', '', text, flags=re.DOTALL)  # Remove end report text
+        text = re.sub(r'End of Report.*$', '', text, flags=re.DOTALL)  # Remove end of report text
+        text = re.sub(r'Please call.*$', '', text, flags=re.DOTALL)  # Remove contact instructions
+        text = re.sub(r'Radiologist:.*$', '', text, flags=re.DOTALL)  # Remove radiologist info
+        text = re.sub(r'Radiology Resident:.*$', '', text, flags=re.DOTALL)  # Remove resident info
+        text = re.sub(r'by Dr\..*$', '', text, flags=re.DOTALL)  # Remove doctor attribution
+        text = re.sub(r'Thank you.*$', '', text, flags=re.DOTALL)  # Remove thank you notes
+        text = re.sub(r'Sincerely,.*$', '', text, flags=re.DOTALL)  # Remove signature
+        
+        # Extract content for each section
+        sections = {}
+        for i, header in enumerate(section_headers):
+            start = text.find(header)
+            if start != -1:
+                next_header_pos = float('inf')
+                for next_header in section_headers[i+1:]:
+                    pos = text.find(next_header, start)
+                    if pos != -1:
+                        next_header_pos = min(next_header_pos, pos)
+                
+                if next_header_pos == float('inf'):
+                    content = text[start + len(header):].strip()
+                else:
+                    content = text[start + len(header):next_header_pos].strip()
+                
+                # Clean the content
+                content = content.strip()
+                if not content or content.lower() in ['none', 'none.', 'no findings', 'no specific findings.']:
+                    if header == "INDICATION:":
+                        content = clinical_history if clinical_history else "Not provided"
+                    elif header == "COMPARISON:":
+                        content = comparison_text
+                    elif header == "FINDINGS:":
+                        content = "No acute cardiopulmonary abnormalities identified."
+                    elif header == "IMPRESSION:":
+                        content = "Normal chest radiograph."
+                sections[header] = content
+        
+        # Build the final report with sections in correct order
+        final_report = []
+        for header in section_headers:
+            if header in sections:
+                final_report.append(f"{header}")
+                final_report.append(sections[header])
+            else:
+                if header == "INDICATION:":
+                    final_report.append(f"{header}")
+                    final_report.append(clinical_history if clinical_history else "Not provided")
+                elif header == "COMPARISON:":
+                    final_report.append(f"{header}")
+                    final_report.append(comparison_text)
+                elif header == "FINDINGS:":
+                    final_report.append(f"{header}")
+                    final_report.append("No acute cardiopulmonary abnormalities identified.")
+                elif header == "IMPRESSION:":
+                    final_report.append(f"{header}")
+                    final_report.append("Normal chest radiograph.")
+                final_report.append("")  # Add blank line between sections
+        
+        # Clean up whitespace
+        text = "\n".join(final_report)
+        text = re.sub(r'\n\s*\n+', '\n\n', text)  # Standardize line spacing
+        text = re.sub(r'[ \t]+', ' ', text)  # Clean up horizontal whitespace
+        text = text.strip()
+        
+        return text
 
 if __name__ == '__main__':
     main()
