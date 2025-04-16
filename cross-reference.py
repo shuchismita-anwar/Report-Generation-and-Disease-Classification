@@ -17,84 +17,34 @@ from tqdm import tqdm
 import logging
 import warnings
 import matplotlib.pyplot as plt
-import spacy
-from spacy.tokens import Span
-import re
-from negspacy.negation import Negex
 
 warnings.filterwarnings('ignore')
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Paths
-XAMI_MIMIC_PATH = os.path.abspath(os.path.join(
+def normalize_path(path):
+    """Normalize path for consistent comparison"""
+    return os.path.normpath(path).replace('\\', '/')
+
+def normalize_csv_path(path):
+    """Normalize path to match CSV format"""
+    return os.path.normpath(path).replace('/', '\\')
+
+XAMI_MIMIC_PATH = normalize_path(os.path.join(
     os.getcwd(),
     'mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0',
     'mimic-eye'
-)).replace('\\', '/')
+))
 MIMIC_EYE_PATH = XAMI_MIMIC_PATH
 
-# Conditions and Synonyms
+# Conditions
 CONDITIONS = [
     'Atelectasis', 'Cardiomegaly', 'Consolidation', 'Edema', 
     'Enlarged Cardiomediastinum', 'Fracture', 'Lung Lesion', 
     'Lung Opacity', 'No Finding', 'Pleural Effusion', 
     'Pleural Other', 'Pneumonia', 'Pneumothorax', 'Support Devices'
 ]
-
-CONDITION_SYNONYMS = {
-    'Atelectasis': ['atelectasis', 'atelectatic'],
-    'Cardiomegaly': ['cardiomegaly', 'enlarged heart', 'cardiac enlargement'],
-    'Consolidation': ['consolidation', 'consolidative', 'airspace consolidation', 'pulmonary consolidation'],
-    'Edema': ['edema', 'pulmonary edema', 'fluid overload', 'pulmonary congestion'],
-    'Enlarged Cardiomediastinum': ['widened mediastinum', 'mediastinal widening', 'cardiac silhouette enlargement'],
-    'Fracture': ['fracture', 'rib fracture'],
-    'Lung Lesion': ['lung lesion', 'pulmonary lesion', 'lung mass', 'nodule', 'pulmonary nodule'],
-    'Lung Opacity': ['lung opacity', 'opacity', 'opacities', 'pulmonary opacity', 'infiltrate', 'infiltrates', 'hazy opacity'],
-    'No Finding': ['no acute', 'normal', 'unremarkable'],
-    'Pleural Effusion': ['pleural effusion', 'effusion', 'pleural fluid', 'pleural effusions', 'large pleural effusions', 'large pleural effusion'],
-    'Pleural Other': ['pleural abnormality', 'pleural thickening'],
-    'Pneumonia': [' pneumonia', 'pneumonic', 'pneumonitis'],
-    'Pneumothorax': ['pneumothorax', 'pneumo', 'pneumothoraces'],
-    'Support Devices': ['support devices', 'catheter', 'tube', 'ventilator', 'line', 'drain', 'device']
-}
-
-# Load spaCy model and add negex component
-nlp = spacy.load("en_core_web_sm")
-nlp.add_pipe("negex", config={"ent_types": ["CONDITION"]})
-
-# Function to check for non-negated conditions
-def check_for_condition(doc, synonyms):
-    spans = []
-    for synonym in synonyms:
-        pattern = r"(?<!\w)" + re.escape(synonym) + r"(?!\w)"
-        for match in re.finditer(pattern, doc.text):
-            start_char, end_char = match.start(), match.end()
-            start_token = end_token = None
-            for token in doc:
-                if token.idx >= start_char and start_token is None:
-                    start_token = token.i
-                if token.idx + len(token.text) > end_char and end_token is None:
-                    end_token = token.i + 1
-            if start_token is not None and end_token is not None:
-                spans.append((Span(doc, start_token, end_token, label="CONDITION"), start_char, end_char))
-    
-    spans.sort(key=lambda x: (x[2] - x[1], x[1]))
-    unique_spans = []
-    used_tokens = set()
-    for span, start, end in spans:
-        span_tokens = set(range(span.start, span.end))
-        if not span_tokens & used_tokens:
-            unique_spans.append(span)
-            used_tokens.update(span_tokens)
-    
-    doc.ents = unique_spans
-    doc = nlp(doc)
-    
-    for ent in doc.ents:
-        if ent.label_ == "CONDITION" and not ent._.negex:
-            return 1
-    return 0
 
 # GPU and Memory Optimization Settings
 torch.backends.cudnn.benchmark = True  # Enable cuDNN benchmark mode
@@ -146,7 +96,7 @@ class XRayReportDataset(Dataset):
 
     def __getitem__(self, index):
         row = self.data.iloc[index]
-        image_path = row['image_path'].replace('{XAMI_MIMIC_PATH}', XAMI_MIMIC_PATH)
+        image_path = normalize_path(row['image_path'].replace('{XAMI_MIMIC_PATH}', XAMI_MIMIC_PATH))
         
         # Efficient image loading and preprocessing
         image = Image.open(image_path).convert('RGB')
@@ -331,7 +281,7 @@ def calculate_per_class_metrics(labels, preds, threshold=0.5):
 def predict(model, image_path, device):
     model.eval()
     image_processor = ViTImageProcessor.from_pretrained('google/vit-base-patch16-224')
-    image = Image.open(image_path).convert('RGB')
+    image = Image.open(normalize_path(image_path)).convert('RGB')
     inputs = image_processor(images=image, return_tensors='pt')
     pixel_values = inputs['pixel_values'].to(device)
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
@@ -353,7 +303,7 @@ def predict(model, image_path, device):
 def generate_gradcam(model, image_path, condition_index, device):
     model.eval()
     image_processor = ViTImageProcessor.from_pretrained('google/vit-base-patch16-224')
-    image = Image.open(image_path).convert('RGB')
+    image = Image.open(normalize_path(image_path)).convert('RGB')
     inputs = image_processor(images=image, return_tensors='pt')
     pixel_values = inputs['pixel_values'].to(device)
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
@@ -378,7 +328,7 @@ def generate_gradcam(model, image_path, condition_index, device):
 
 # Plot Grad-CAM Function
 def plot_gradcam(image_path, cam, title='Grad-CAM'):
-    image = Image.open(image_path).convert('RGB').resize((224, 224))
+    image = Image.open(normalize_path(image_path)).convert('RGB').resize((224, 224))
     plt.figure(figsize=(10, 5))
     plt.subplot(1, 2, 1)
     plt.imshow(image)
@@ -393,44 +343,98 @@ def plot_gradcam(image_path, cam, title='Grad-CAM'):
 
 # Main Function
 def main():
-    df = pd.read_csv('trans-data.csv')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    logger.info(f'Using device: {device}')
     
-    logger.info("Computing labels with negspacy...")
-    labels_list = []
-    for _, row in df.iterrows():
-        transcript_path = row['transcript_path']
-        try:
-            if "EyeGaze" in transcript_path:
-                with open(transcript_path, 'r', encoding='utf-8') as f:
-                    json_data = json.load(f)
-                report_text = json_data["full_text"]
-            else:
-                with open(transcript_path, 'r', encoding='utf-8') as f:
-                    report_text = f.read()
+    # Load pre-computed labels from CSV
+    labels_df = pd.read_csv('condition_labels.csv')
+    labels_df['conditions'] = labels_df['conditions'].fillna('')  # Handle any NaN values
+    
+    # Load image paths
+    df = pd.DataFrame()
+    image_paths = []
+    transcript_paths = []
+    
+    # Walk through patient directories
+    for patient_dir in os.listdir(XAMI_MIMIC_PATH):
+        if not patient_dir.startswith('patient_'):
+            continue
             
-            doc = nlp.make_doc(report_text.lower())
-            labels = []
-            for condition, synonyms in CONDITION_SYNONYMS.items():
-                if condition == 'No Finding':
-                    if any(re.search(r"(?<!\w)" + re.escape(syn) + r"(?!\w)", doc.text) for syn in synonyms):
-                        labels.append(1)
-                    else:
-                        labels.append(0)
-                else:
-                    temp_doc = nlp.make_doc(report_text.lower())
-                    if check_for_condition(temp_doc, synonyms):
-                        labels.append(1)
-                    else:
-                        labels.append(0)
-            labels_list.append(labels)
-        except Exception as e:
-            logger.error(f"Error processing {transcript_path}: {e}")
-            labels_list.append([0] * len(CONDITIONS))
+        patient_path = normalize_path(os.path.join(XAMI_MIMIC_PATH, patient_dir))
+        
+        # Look for REFLACX transcripts first
+        reflacx_path = normalize_path(os.path.join(patient_path, 'REFLACX', 'main_data'))
+        if os.path.exists(reflacx_path):
+            for study_dir in os.listdir(reflacx_path):
+                study_path = normalize_path(os.path.join(reflacx_path, study_dir))
+                transcript_path = normalize_path(os.path.join(study_path, 'transcription.txt'))
+                if os.path.exists(transcript_path):
+                    # Look for corresponding images in CXR-JPG
+                    cxr_jpg_path = normalize_path(os.path.join(patient_path, 'CXR-JPG'))
+                    if os.path.exists(cxr_jpg_path):
+                        for study_dir in os.listdir(cxr_jpg_path):
+                            if not os.path.isdir(os.path.join(cxr_jpg_path, study_dir)):
+                                continue
+                            study_path = normalize_path(os.path.join(cxr_jpg_path, study_dir))
+                            for file in os.listdir(study_path):
+                                if file.endswith(('.jpg', '.png')):
+                                    image_path = normalize_path(os.path.join(study_path, file))
+                                    image_paths.append(image_path)
+                                    csv_transcript_path = os.path.join(
+                                        'mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0',
+                                        'mimic-eye',
+                                        os.path.relpath(transcript_path, XAMI_MIMIC_PATH)
+                                    )
+                                    transcript_paths.append(normalize_csv_path(csv_transcript_path))
+        
+        # Then look for EyeGaze transcripts
+        eyegaze_path = normalize_path(os.path.join(patient_path, 'EyeGaze'))
+        if os.path.exists(eyegaze_path):
+            transcript_dir = normalize_path(os.path.join(eyegaze_path, 'audio_segmentation_transcripts'))
+            if os.path.exists(transcript_dir):
+                for transcript_file in os.listdir(transcript_dir):
+                    if transcript_file.endswith('.json'):
+                        transcript_path = normalize_path(os.path.join(transcript_dir, transcript_file))
+                        # Look for corresponding images in CXR-JPG
+                        cxr_jpg_path = normalize_path(os.path.join(patient_path, 'CXR-JPG'))
+                        if os.path.exists(cxr_jpg_path):
+                            for study_dir in os.listdir(cxr_jpg_path):
+                                if not os.path.isdir(os.path.join(cxr_jpg_path, study_dir)):
+                                    continue
+                                study_path = normalize_path(os.path.join(cxr_jpg_path, study_dir))
+                                for file in os.listdir(study_path):
+                                    if file.endswith(('.jpg', '.png')):
+                                        image_path = normalize_path(os.path.join(study_path, file))
+                                        image_paths.append(image_path)
+                                        csv_transcript_path = os.path.join(
+                                            'mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0',
+                                            'mimic-eye',
+                                            os.path.relpath(transcript_path, XAMI_MIMIC_PATH)
+                                        )
+                                        transcript_paths.append(normalize_csv_path(csv_transcript_path))
+    
+    df['image_path'] = image_paths
+    df['transcript_path'] = transcript_paths
+    
+    # Merge with labels dataframe
+    df = pd.merge(df, labels_df, on='transcript_path', how='inner')
+    
+    if len(df) == 0:
+        logger.error("No matching images and transcripts found. Cannot proceed.")
+        return
+    
+    # Convert conditions string to binary labels
+    labels_list = []
+    for conditions in df['conditions']:
+        condition_list = conditions.split('|') if conditions else []
+        labels = [1 if condition in condition_list else 0 for condition in CONDITIONS]
+        labels_list.append(labels)
     df['labels'] = labels_list
     
     # Calculate positive counts and class weights
-    positive_counts = np.sum(np.array(labels_list), axis=0)
-    logger.info(f"Positive counts per condition: {dict(zip(CONDITIONS, positive_counts))}")
+    labels_array = np.array(labels_list)
+    positive_counts = np.sum(labels_array, axis=0)
+    
     total_samples = len(df)
     pos_weights = torch.tensor([total_samples / (count + 1e-5) for count in positive_counts], dtype=torch.float32)
     
@@ -441,12 +445,10 @@ def main():
     image_processor = ViTImageProcessor.from_pretrained('google/vit-base-patch16-224')
     
     # Initialize model and move to GPU
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = XRayReportModel(num_labels=len(CONDITIONS)).to(device)
     
     # Calculate optimal batch size
     batch_size = get_optimal_batch_size(model) if torch.cuda.is_available() else 4
-    logger.info(f"Using batch size: {batch_size}")
     
     # Create datasets
     train_dataset = XRayReportDataset(train_df, tokenizer, image_processor, augment=True)
@@ -476,14 +478,12 @@ def main():
     
     train_model(model, train_loader, val_loader, test_loader, device, pos_weights)
     
-    logger.info('Generating Grad-CAM visualizations for sample test images')
+    # Generate Grad-CAM visualizations for sample test images
     for i in range(min(3, len(test_df))):
         test_sample = test_df.iloc[i]
-        image_path = test_sample['image_path'].replace('{XAMI_MIMIC_PATH}', XAMI_MIMIC_PATH)
+        image_path = normalize_path(test_sample['image_path'].replace('{XAMI_MIMIC_PATH}', XAMI_MIMIC_PATH))
         predictions, max_prob_index = predict(model, image_path, device)
         condition = CONDITIONS[max_prob_index]
-        logger.info(f"Sample {i+1}: Predictions: {predictions}")
-        logger.info(f"Visualizing for {condition} (probability: {predictions[condition]:.4f})")
         cam = generate_gradcam(model, image_path, max_prob_index, device)
         plot_gradcam(image_path, cam, title=f'Grad-CAM for {condition}')
     
