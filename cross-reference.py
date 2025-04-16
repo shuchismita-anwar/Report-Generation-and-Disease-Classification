@@ -96,6 +96,34 @@ def check_for_condition(doc, synonyms):
             return 1
     return 0
 
+# GPU and Memory Optimization Settings
+torch.backends.cudnn.benchmark = True  # Enable cuDNN benchmark mode
+torch.backends.cuda.matmul.allow_tf32 = True  # Enable TF32 on Ampere GPUs
+torch.backends.cudnn.allow_tf32 = True  # Enable TF32 on Ampere GPUs
+
+def get_optimal_batch_size(model, image_size=(224, 224), max_memory_usage=4*1024*1024*1024):  # 4GB target
+    """Calculate optimal batch size based on GPU memory."""
+    if not torch.cuda.is_available():
+        return 4  # Default batch size for CPU
+    
+    torch.cuda.empty_cache()
+    torch.cuda.reset_peak_memory_stats()
+    
+    # Test with a small batch
+    test_batch = 4
+    test_input_ids = torch.randint(0, 1000, (test_batch, 512)).cuda()
+    test_attention_mask = torch.ones((test_batch, 512)).cuda()
+    test_images = torch.randn((test_batch, 3, *image_size)).cuda()
+    
+    with torch.no_grad():
+        model(test_input_ids, test_attention_mask, test_images)
+    
+    memory_per_batch = torch.cuda.max_memory_allocated()
+    torch.cuda.empty_cache()
+    
+    optimal_batch = max(1, int(max_memory_usage / (memory_per_batch / test_batch)))
+    return min(optimal_batch, 32)  # Cap at 32 to avoid too large batches
+
 # Dataset Class
 class XRayReportDataset(Dataset):
     def __init__(self, dataframe, tokenizer, image_processor, max_len=512, augment=False):
@@ -105,51 +133,51 @@ class XRayReportDataset(Dataset):
         self.max_len = max_len
         self.augment = augment
         self.augment_transforms = transforms.Compose([
-            transforms.RandomRotation(10),
             transforms.RandomHorizontalFlip(),
             transforms.ColorJitter(brightness=0.2, contrast=0.2),
             transforms.RandomAffine(degrees=0, translate=(0.1, 0.1))
         ])
-    
+        
+        # Pre-compute labels as tensors for efficiency
+        self.labels = torch.tensor(self.data['labels'].tolist(), dtype=torch.float32)
+
     def __len__(self):
         return len(self.data)
-    
+
     def __getitem__(self, index):
-        transcript_path = self.data.iloc[index]['transcript_path']
-        # Check if the transcript comes from EyeGaze (in json format) and extract "full_text"
-        if "EyeGaze" in transcript_path:
-            with open(transcript_path, 'r', encoding='utf-8') as f:
-                json_data = json.load(f)
-            report_text = json_data["full_text"]
-        else:
-            with open(transcript_path, 'r', encoding='utf-8') as f:
-                report_text = f.read()
+        row = self.data.iloc[index]
+        image_path = row['image_path'].replace('{XAMI_MIMIC_PATH}', XAMI_MIMIC_PATH)
         
-        image_path = self.data.iloc[index]['image_path'].replace('{XAMI_MIMIC_PATH}', XAMI_MIMIC_PATH)
+        # Efficient image loading and preprocessing
         image = Image.open(image_path).convert('RGB')
-        
         if self.augment:
             image = self.augment_transforms(image)
         
-        encoding = self.tokenizer.encode_plus(
+        # Process image and move to CPU tensor
+        pixel_values = self.image_processor(image, return_tensors='pt')['pixel_values'].squeeze(0)
+        
+        # Efficient text processing
+        if "EyeGaze" in row['transcript_path']:
+            with open(row['transcript_path'], 'r', encoding='utf-8') as f:
+                report_text = json.load(f)["full_text"]
+        else:
+            with open(row['transcript_path'], 'r', encoding='utf-8') as f:
+                report_text = f.read()
+        
+        # Tokenize text
+        encoding = self.tokenizer(
             report_text,
-            add_special_tokens=True,
             max_length=self.max_len,
             padding='max_length',
             truncation=True,
             return_tensors='pt'
         )
         
-        image_features = self.image_processor(images=image, return_tensors='pt')
-        
-        labels = torch.tensor(self.data.iloc[index]['labels'], dtype=torch.float32)
-        
         return {
-            'input_ids': encoding['input_ids'].flatten(),
-            'attention_mask': encoding['attention_mask'].flatten(),
-            'pixel_values': image_features['pixel_values'].squeeze(0),
-            'labels': labels,
-            'image_path': image_path
+            'input_ids': encoding['input_ids'].squeeze(0),
+            'attention_mask': encoding['attention_mask'].squeeze(0),
+            'pixel_values': pixel_values,
+            'labels': self.labels[index]
         }
 
 # Model Class
@@ -174,99 +202,104 @@ class XRayReportModel(nn.Module):
         return logits
 
 # Training Function with Class Weights
-def train_model(model, train_loader, val_loader, test_loader, device, pos_weights, num_epochs=3, patience=3):
-    optimizer = torch.optim.AdamW(model.parameters(), lr=2e-5, weight_decay=0.01)
-    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weights.to(device))
+def train_model(model, train_loader, val_loader, test_loader, device, pos_weights, num_epochs=30, patience=5):
+    # Move pos_weights to GPU
+    pos_weights = pos_weights.to(device)
+    
+    # Initialize mixed precision training
+    scaler = torch.cuda.amp.GradScaler()
+    
+    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weights)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=2e-5)
     
     best_val_loss = float('inf')
     patience_counter = 0
+    best_model = None
     
     for epoch in range(num_epochs):
         model.train()
         train_loss = 0
-        train_preds, train_labels = [], []
+        train_preds = []
+        train_labels = []
         
-        for batch in tqdm(train_loader, desc=f'Epoch {epoch + 1} - Training'):
+        # Use tqdm for better progress tracking
+        progress_bar = tqdm(train_loader, desc=f'Epoch {epoch + 1}/{num_epochs}')
+        
+        for batch in progress_bar:
+            # Move batch to GPU efficiently
             input_ids = batch['input_ids'].to(device)
             attention_mask = batch['attention_mask'].to(device)
             pixel_values = batch['pixel_values'].to(device)
             labels = batch['labels'].to(device)
             
             optimizer.zero_grad()
-            outputs = model(input_ids, attention_mask, pixel_values)
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
+            
+            # Use automatic mixed precision
+            with torch.cuda.amp.autocast():
+                outputs = model(input_ids, attention_mask, pixel_values)
+                loss = criterion(outputs, labels)
+            
+            # Scale loss and backward pass
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
             
             train_loss += loss.item()
-            preds = torch.sigmoid(outputs).detach().cpu().numpy()
-            train_preds.extend(preds)
+            train_preds.extend(torch.sigmoid(outputs).detach().cpu().numpy())
             train_labels.extend(labels.cpu().numpy())
+            
+            # Update progress bar
+            progress_bar.set_postfix({'loss': loss.item()})
         
+        # Validation phase
         model.eval()
         val_loss = 0
-        val_preds, val_labels = [], []
+        val_preds = []
+        val_labels = []
         
         with torch.no_grad():
-            for batch in tqdm(val_loader, desc=f'Epoch {epoch + 1} - Validation'):
+            for batch in val_loader:
                 input_ids = batch['input_ids'].to(device)
                 attention_mask = batch['attention_mask'].to(device)
                 pixel_values = batch['pixel_values'].to(device)
                 labels = batch['labels'].to(device)
-                outputs = model(input_ids, attention_mask, pixel_values)
-                loss = criterion(outputs, labels)
+                
+                with torch.cuda.amp.autocast():
+                    outputs = model(input_ids, attention_mask, pixel_values)
+                    loss = criterion(outputs, labels)
+                
                 val_loss += loss.item()
-                preds = torch.sigmoid(outputs).cpu().numpy()
-                val_preds.extend(preds)
+                val_preds.extend(torch.sigmoid(outputs).cpu().numpy())
                 val_labels.extend(labels.cpu().numpy())
         
+        train_loss /= len(train_loader)
+        val_loss /= len(val_loader)
+        
+        # Calculate metrics
         train_metrics = calculate_metrics(np.array(train_labels), np.array(train_preds))
         val_metrics = calculate_metrics(np.array(val_labels), np.array(val_preds))
-        train_per_class = calculate_per_class_metrics(np.array(train_labels), np.array(train_preds))
-        val_per_class = calculate_per_class_metrics(np.array(val_labels), np.array(val_preds))
         
-        logger.info(f'Epoch {epoch + 1}:')
-        logger.info(f'Train Loss: {train_loss/len(train_loader):.4f}')
-        logger.info(f'Val Loss: {val_loss/len(val_loader):.4f}')
+        logger.info(f'Epoch {epoch + 1}/{num_epochs}:')
+        logger.info(f'Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}')
         logger.info(f'Train Metrics: {train_metrics}')
         logger.info(f'Val Metrics: {val_metrics}')
-        logger.info(f'Train Per-Class Metrics: {train_per_class}')
-        logger.info(f'Val Per-Class Metrics: {val_per_class}')
         
+        # Early stopping check
         if val_loss < best_val_loss:
             best_val_loss = val_loss
-            torch.save(model.state_dict(), 'best_xray_model.pt')
-            logger.info('Model saved!')
+            best_model = model.state_dict()
             patience_counter = 0
+            torch.save(best_model, 'best_xray_model.pt')
         else:
             patience_counter += 1
             if patience_counter >= patience:
                 logger.info(f'Early stopping triggered after {epoch + 1} epochs')
                 break
+        
+        # Clear GPU memory
+        torch.cuda.empty_cache()
     
-    model.load_state_dict(torch.load('best_xray_model.pt'))
-    model.eval()
-    test_loss = 0
-    test_preds, test_labels = [], []
-    
-    with torch.no_grad():
-        for batch in tqdm(test_loader, desc='Testing'):
-            input_ids = batch['input_ids'].to(device)
-            attention_mask = batch['attention_mask'].to(device)
-            pixel_values = batch['pixel_values'].to(device)
-            labels = batch['labels'].to(device)
-            outputs = model(input_ids, attention_mask, pixel_values)
-            loss = criterion(outputs, labels)
-            test_loss += loss.item()
-            preds = torch.sigmoid(outputs).cpu().numpy()
-            test_preds.extend(preds)
-            test_labels.extend(labels.cpu().numpy())
-    
-    test_metrics = calculate_metrics(np.array(test_labels), np.array(test_preds))
-    test_per_class = calculate_per_class_metrics(np.array(test_labels), np.array(test_preds))
-    logger.info(f'Test Loss: {test_loss/len(test_loader):.4f}')
-    logger.info(f'Test Metrics: {test_metrics}')
-    logger.info(f'Test Per-Class Metrics: {test_per_class}')
+    return best_model
 
 # Metrics Functions
 def calculate_metrics(labels, preds, threshold=0.5):
@@ -407,16 +440,39 @@ def main():
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     image_processor = ViTImageProcessor.from_pretrained('google/vit-base-patch16-224')
     
+    # Initialize model and move to GPU
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = XRayReportModel(num_labels=len(CONDITIONS)).to(device)
+    
+    # Calculate optimal batch size
+    batch_size = get_optimal_batch_size(model) if torch.cuda.is_available() else 4
+    logger.info(f"Using batch size: {batch_size}")
+    
+    # Create datasets
     train_dataset = XRayReportDataset(train_df, tokenizer, image_processor, augment=True)
     val_dataset = XRayReportDataset(val_df, tokenizer, image_processor, augment=False)
     test_dataset = XRayReportDataset(test_df, tokenizer, image_processor, augment=False)
     
-    train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=4)
-    test_loader = DataLoader(test_dataset, batch_size=4)
-    
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = XRayReportModel(num_labels=len(CONDITIONS)).to(device)
+    # Create data loaders with optimized settings
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=min(4, os.cpu_count()),
+        pin_memory=True
+    )
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=batch_size,
+        num_workers=min(4, os.cpu_count()),
+        pin_memory=True
+    )
+    test_loader = DataLoader(
+        test_dataset,
+        batch_size=batch_size,
+        num_workers=min(4, os.cpu_count()),
+        pin_memory=True
+    )
     
     train_model(model, train_loader, val_loader, test_loader, device, pos_weights)
     
