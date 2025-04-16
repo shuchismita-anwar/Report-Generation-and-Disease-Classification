@@ -2,6 +2,7 @@ import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'  # Suppress oneDNN warning
 os.environ['HF_HUB_DISABLE_SYMLINKS_WARNING'] = '1'  # Suppress symlink warning
 
+import json
 import pandas as pd
 import numpy as np
 from PIL import Image
@@ -20,7 +21,6 @@ import spacy
 from spacy.tokens import Span
 import re
 from negspacy.negation import Negex
-import json
 
 warnings.filterwarnings('ignore')
 logging.basicConfig(level=logging.INFO)
@@ -63,111 +63,38 @@ CONDITION_SYNONYMS = {
 nlp = spacy.load("en_core_web_sm")
 nlp.add_pipe("negex", config={"ent_types": ["CONDITION"]})
 
-# Function to extract text from transcript files
-def extract_transcript_text(transcript_path):
-    """Extract text from transcript files, handling both EyeGaze JSON and regular text formats"""
-    transcript_path = os.path.normpath(transcript_path)  # Normalize path
-    
-    try:
-        # Check if the file exists
-        if not os.path.exists(transcript_path):
-            # Try with absolute path
-            abs_path = os.path.abspath(transcript_path)
-            if os.path.exists(abs_path):
-                transcript_path = abs_path
-            else:
-                # Try with base directory
-                base_dir = os.getcwd()
-                rel_path = transcript_path.replace(
-                    "mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0\\mimic-eye\\", 
-                    ""
-                )
-                alt_path = os.path.join(
-                    base_dir,
-                    "mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0",
-                    "mimic-eye",
-                    rel_path
-                )
-                if os.path.exists(alt_path):
-                    transcript_path = alt_path
-                else:
-                    logger.error(f"Cannot find transcript file: {transcript_path}")
-                    # Return empty string as a last resort to avoid processing failures
-                    return ""
-            
-        # Handle EyeGaze JSON format
-        if 'EyeGaze' in transcript_path and transcript_path.endswith('transcript.json'):
-            with open(transcript_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                # Extract the full_text field
-                if 'full_text' in data:
-                    return data['full_text']
-                else:
-                    logger.error(f"No 'full_text' field found in {transcript_path}")
-                    return ""  # Return empty string to continue processing
-        # Handle regular text transcripts
-        else:
-            with open(transcript_path, 'r', encoding='utf-8') as f:
-                return f.read().strip()
-                
-    except Exception as e:
-        logger.error(f"Error processing {transcript_path}: {str(e)}")
-        return ""  # Return empty string to continue processing
-
 # Function to check for non-negated conditions
 def check_for_condition(doc, synonyms):
-    try:
-        # Safety check to ensure valid doc
-        if not doc.text or len(doc.text) == 0:
-            logger.warning("Empty document passed to check_for_condition")
-            return 0
-            
-        spans = []
-        for synonym in synonyms:
-            pattern = r"(?<!\w)" + re.escape(synonym) + r"(?!\w)"
-            for match in re.finditer(pattern, doc.text):
-                start_char, end_char = match.start(), match.end()
-                start_token = end_token = None
-                for token in doc:
-                    if token.idx >= start_char and start_token is None:
-                        start_token = token.i
-                    if token.idx + len(token.text) > end_char and end_token is None:
-                        end_token = token.i + 1
-                if start_token is not None and end_token is not None:
-                    spans.append((Span(doc, start_token, end_token, label="CONDITION"), start_char, end_char))
-        
-        # If no spans were found, return 0 early
-        if not spans:
-            return 0
-            
-        spans.sort(key=lambda x: (x[2] - x[1], x[1]))
-        unique_spans = []
-        used_tokens = set()
-        for span, start, end in spans:
-            span_tokens = set(range(span.start, span.end))
-            if not span_tokens & used_tokens:
-                unique_spans.append(span)
-                used_tokens.update(span_tokens)
-        
-        # Only proceed with negex if we found entities
-        if unique_spans:
-            doc.ents = unique_spans
-            try:
-                doc = nlp(doc)
-                
-                for ent in doc.ents:
-                    if ent.label_ == "CONDITION" and not ent._.negex:
-                        return 1
-            except Exception as e:
-                logger.error(f"Error in spaCy negex processing: {str(e)}")
-                # Fall back to basic detection without negation
-                logger.warning("Falling back to basic condition detection without negation check")
-                return 1 if unique_spans else 0
-                
-        return 0
-    except Exception as e:
-        logger.error(f"Error in check_for_condition: {str(e)}")
-        return 0
+    spans = []
+    for synonym in synonyms:
+        pattern = r"(?<!\w)" + re.escape(synonym) + r"(?!\w)"
+        for match in re.finditer(pattern, doc.text):
+            start_char, end_char = match.start(), match.end()
+            start_token = end_token = None
+            for token in doc:
+                if token.idx >= start_char and start_token is None:
+                    start_token = token.i
+                if token.idx + len(token.text) > end_char and end_token is None:
+                    end_token = token.i + 1
+            if start_token is not None and end_token is not None:
+                spans.append((Span(doc, start_token, end_token, label="CONDITION"), start_char, end_char))
+    
+    spans.sort(key=lambda x: (x[2] - x[1], x[1]))
+    unique_spans = []
+    used_tokens = set()
+    for span, start, end in spans:
+        span_tokens = set(range(span.start, span.end))
+        if not span_tokens & used_tokens:
+            unique_spans.append(span)
+            used_tokens.update(span_tokens)
+    
+    doc.ents = unique_spans
+    doc = nlp(doc)
+    
+    for ent in doc.ents:
+        if ent.label_ == "CONDITION" and not ent._.negex:
+            return 1
+    return 0
 
 # Dataset Class
 class XRayReportDataset(Dataset):
@@ -183,18 +110,20 @@ class XRayReportDataset(Dataset):
             transforms.ColorJitter(brightness=0.2, contrast=0.2),
             transforms.RandomAffine(degrees=0, translate=(0.1, 0.1))
         ])
-
+    
     def __len__(self):
         return len(self.data)
-
+    
     def __getitem__(self, index):
-        # Get the transcript text using the transcript_path
         transcript_path = self.data.iloc[index]['transcript_path']
-        report_text = extract_transcript_text(transcript_path)
-        
-        # If we get an empty string, log a warning but continue processing
-        if not report_text:
-            logger.warning(f"Empty transcript text for {transcript_path}, model may not perform well")
+        # Check if the transcript comes from EyeGaze (in json format) and extract "full_text"
+        if "EyeGaze" in transcript_path:
+            with open(transcript_path, 'r', encoding='utf-8') as f:
+                json_data = json.load(f)
+            report_text = json_data["full_text"]
+        else:
+            with open(transcript_path, 'r', encoding='utf-8') as f:
+                report_text = f.read()
         
         image_path = self.data.iloc[index]['image_path'].replace('{XAMI_MIMIC_PATH}', XAMI_MIMIC_PATH)
         image = Image.open(image_path).convert('RGB')
@@ -232,7 +161,7 @@ class XRayReportModel(nn.Module):
         self.dropout = nn.Dropout(0.3)
         self.classifier = nn.Linear(768 + 768, num_labels)
         self.last_hidden_state = None
-
+    
     def forward(self, input_ids, attention_mask, pixel_values):
         vit_outputs = self.vit(pixel_values=pixel_values)
         self.last_hidden_state = vit_outputs.last_hidden_state
@@ -265,17 +194,15 @@ def train_model(model, train_loader, val_loader, test_loader, device, pos_weight
             
             optimizer.zero_grad()
             outputs = model(input_ids, attention_mask, pixel_values)
-            
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
             
             train_loss += loss.item()
-            preds = torch.sigmoid(outputs).cpu().numpy()
+            preds = torch.sigmoid(outputs).detach().cpu().numpy()
             train_preds.extend(preds)
             train_labels.extend(labels.cpu().numpy())
         
-        # Validation
         model.eval()
         val_loss = 0
         val_preds, val_labels = [], []
@@ -286,7 +213,6 @@ def train_model(model, train_loader, val_loader, test_loader, device, pos_weight
                 attention_mask = batch['attention_mask'].to(device)
                 pixel_values = batch['pixel_values'].to(device)
                 labels = batch['labels'].to(device)
-                
                 outputs = model(input_ids, attention_mask, pixel_values)
                 loss = criterion(outputs, labels)
                 val_loss += loss.item()
@@ -296,29 +222,29 @@ def train_model(model, train_loader, val_loader, test_loader, device, pos_weight
         
         train_metrics = calculate_metrics(np.array(train_labels), np.array(train_preds))
         val_metrics = calculate_metrics(np.array(val_labels), np.array(val_preds))
+        train_per_class = calculate_per_class_metrics(np.array(train_labels), np.array(train_preds))
+        val_per_class = calculate_per_class_metrics(np.array(val_labels), np.array(val_preds))
         
-        logger.info(f'Epoch {epoch + 1}/{num_epochs}')
+        logger.info(f'Epoch {epoch + 1}:')
         logger.info(f'Train Loss: {train_loss/len(train_loader):.4f}')
         logger.info(f'Val Loss: {val_loss/len(val_loader):.4f}')
         logger.info(f'Train Metrics: {train_metrics}')
         logger.info(f'Val Metrics: {val_metrics}')
+        logger.info(f'Train Per-Class Metrics: {train_per_class}')
+        logger.info(f'Val Per-Class Metrics: {val_per_class}')
         
-        # Early stopping
-        if val_loss/len(val_loader) < best_val_loss:
-            best_val_loss = val_loss/len(val_loader)
-            patience_counter = 0
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
             torch.save(model.state_dict(), 'best_xray_model.pt')
-            logger.info('Saving model checkpoint')
+            logger.info('Model saved!')
+            patience_counter = 0
         else:
             patience_counter += 1
             if patience_counter >= patience:
-                logger.info(f'Early stopping after {epoch + 1} epochs')
+                logger.info(f'Early stopping triggered after {epoch + 1} epochs')
                 break
     
-    # Load best model for testing
     model.load_state_dict(torch.load('best_xray_model.pt'))
-    
-    # Testing
     model.eval()
     test_loss = 0
     test_preds, test_labels = [], []
@@ -329,7 +255,6 @@ def train_model(model, train_loader, val_loader, test_loader, device, pos_weight
             attention_mask = batch['attention_mask'].to(device)
             pixel_values = batch['pixel_values'].to(device)
             labels = batch['labels'].to(device)
-            
             outputs = model(input_ids, attention_mask, pixel_values)
             loss = criterion(outputs, labels)
             test_loss += loss.item()
@@ -440,34 +365,33 @@ def main():
     logger.info("Computing labels with negspacy...")
     labels_list = []
     for _, row in df.iterrows():
+        transcript_path = row['transcript_path']
         try:
-            # Use only transcript_path, no fallback to report_path
-            transcript_path = row['transcript_path']
-            report_text = extract_transcript_text(transcript_path)
-            
-            # Only continue if we have valid text
-            if report_text:
-                doc = nlp.make_doc(report_text.lower())
-                labels = []
-                for condition, synonyms in CONDITION_SYNONYMS.items():
-                    if condition == 'No Finding':
-                        if any(re.search(r"(?<!\w)" + re.escape(syn) + r"(?!\w)", doc.text) for syn in synonyms):
-                            labels.append(1)
-                        else:
-                            labels.append(0)
-                    else:
-                        temp_doc = nlp.make_doc(report_text.lower())
-                        if check_for_condition(temp_doc, synonyms):
-                            labels.append(1)
-                        else:
-                            labels.append(0)
-                labels_list.append(labels)
+            if "EyeGaze" in transcript_path:
+                with open(transcript_path, 'r', encoding='utf-8') as f:
+                    json_data = json.load(f)
+                report_text = json_data["full_text"]
             else:
-                # If no valid text, add zero labels
-                logger.warning(f"No valid transcript text for ID {row['id']}, using zero labels")
-                labels_list.append([0] * len(CONDITIONS))
+                with open(transcript_path, 'r', encoding='utf-8') as f:
+                    report_text = f.read()
+            
+            doc = nlp.make_doc(report_text.lower())
+            labels = []
+            for condition, synonyms in CONDITION_SYNONYMS.items():
+                if condition == 'No Finding':
+                    if any(re.search(r"(?<!\w)" + re.escape(syn) + r"(?!\w)", doc.text) for syn in synonyms):
+                        labels.append(1)
+                    else:
+                        labels.append(0)
+                else:
+                    temp_doc = nlp.make_doc(report_text.lower())
+                    if check_for_condition(temp_doc, synonyms):
+                        labels.append(1)
+                    else:
+                        labels.append(0)
+            labels_list.append(labels)
         except Exception as e:
-            logger.error(f"Error processing {row['id']}: {str(e)}")
+            logger.error(f"Error processing {transcript_path}: {e}")
             labels_list.append([0] * len(CONDITIONS))
     df['labels'] = labels_list
     

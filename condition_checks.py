@@ -1,254 +1,145 @@
-import os
 import pandas as pd
 import re
-import nltk
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-from collections import Counter, defaultdict
-import logging
-import sys
+import spacy
+from spacy.tokens import Span, Token
+from spacy.language import Language
+from tqdm import tqdm
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('condition_analysis.txt', mode='w'),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
+# Load spaCy model
+nlp = spacy.load("en_core_web_sm")
 
-logger = logging.getLogger(__name__)
+# Register the custom extensions
+if not Token.has_extension("is_negated"):
+    Token.set_extension("is_negated", default=False)
+if not Span.has_extension("is_negated"):
+    Span.set_extension("is_negated", getter=lambda span: any(t._.get("is_negated") for t in span))
 
-# Download required NLTK resources
-try:
-    nltk.download('punkt', quiet=True)
-    nltk.download('stopwords', quiet=True)
-except Exception as e:
-    logger.error(f"Error downloading NLTK resources: {e}")
+# Custom negation component
+@Language.component("custom_negex")
+def custom_negex(doc):
+    # Define negation words
+    negation_words = {"no", "not", "none", "negative", "deny", "denies", "without", "absence", "absent"}
+    
+    # Check for negation patterns
+    for token in doc:
+        if token.text.lower() in negation_words:
+            # Mark the next 5 tokens as negated
+            for i in range(1, 6):
+                if token.i + i < len(doc):
+                    doc[token.i + i]._.is_negated = True
+    
+    return doc
 
-# The predefined conditions
-PREDEFINED_CONDITIONS = {
-    0: "No acute cardiopulmonary abnormality",
-    1: "Cardiomegaly",
-    2: "Pulmonary edema",
-    3: "Pneumonia",
-    4: "Pleural effusion",
-    5: "Atelectasis",
-    6: "Pneumothorax",
-    7: "Consolidation"
+nlp.add_pipe("custom_negex", last=True)
+
+CONDITION_SYNONYMS = {
+    'Atelectasis': ['atelectasis', 'atelectatic'],
+    'Cardiomegaly': ['cardiomegaly', 'enlarged heart', 'cardiac enlargement'],
+    'Consolidation': ['consolidation', 'consolidative', 'airspace consolidation', 'pulmonary consolidation'],
+    'Edema': ['edema', 'pulmonary edema', 'fluid overload', 'pulmonary congestion'],
+    'Enlarged Cardiomediastinum': ['widened mediastinum', 'mediastinal widening', 'cardiac silhouette enlargement'],
+    'Fracture': ['fracture', 'rib fracture'],
+    'Lung Lesion': ['lung lesion', 'pulmonary lesion', 'lung mass', 'nodule', 'pulmonary nodule'],
+    'Lung Opacity': ['lung opacity', 'opacity', 'opacities', 'pulmonary opacity', 'infiltrate', 'infiltrates', 'hazy opacity'],
+    'No Finding': ['no acute', 'normal', 'unremarkable'],
+    'Pleural Effusion': ['pleural effusion', 'effusion', 'pleural fluid', 'pleural effusions', 'large pleural effusions', 'large pleural effusion'],
+    'Pleural Other': ['pleural abnormality', 'pleural thickening'],
+    'Pneumonia': [' pneumonia', 'pneumonic', 'pneumonitis'],
+    'Pneumothorax': ['pneumothorax', 'pneumo', 'pneumothoraces'],
+    'Support Devices': ['support devices', 'catheter', 'tube', 'ventilator', 'line', 'drain', 'device']
 }
 
-# Common medical terms to help identify conditions
-MEDICAL_KEYWORDS = [
-    'acute', 'chronic', 'opacity', 'mass', 'nodule', 'fracture', 'effusion', 
-    'pneumonia', 'cardiomegaly', 'edema', 'atelectasis', 'pneumothorax', 
-    'consolidation', 'abnormality', 'disease', 'fibrosis', 'emphysema', 
-    'congestion', 'infection', 'infiltrate', 'lesion', 'fluid', 'thickening',
-    'enlarged', 'distention', 'hyperinflation', 'hypertension', 'failure',
-    'tuberculosis', 'tumor', 'cancer', 'malignancy', 'bronchitis', 'copd',
-    'asthma', 'embolism', 'aneurysm', 'sarcoidosis', 'silicosis'
-]
+# Initialize counts
+condition_counts = {condition: 0 for condition in CONDITION_SYNONYMS.keys()}
 
-# Section headers typically found in radiology reports
-SECTION_HEADERS = ["INDICATION:", "COMPARISON:", "FINDINGS:", "IMPRESSION:"]
+# Load data
+df = pd.read_csv('trans-data.csv')
 
-def read_text_file(file_path):
-    """Read and return the contents of a text file."""
-    if pd.isna(file_path) or file_path == '':
-        return ''
-    else:
-        try:
-            if len(file_path) >= 260 and os.name == 'nt' and not file_path.startswith('\\\\?\\'):
-                file_path = '\\\\?\\' + os.path.abspath(file_path)
-            with open(file_path, 'r', encoding='utf-8') as f:
-                text = f.read().strip()
-            return text
-        except Exception as e:
-            logger.error(f"Error reading file {file_path}: {e}")
-            return ''
+# --- Core Logic ---
+def check_for_condition(doc, synonyms):
+    """Check if any synonym in the doc is non-negated."""
+    spans = []
+    for synonym in synonyms:
+        pattern = r"(?<!\w)" + re.escape(synonym) + r"(?!\w)"
+        for match in re.finditer(pattern, doc.text):
+            start_char, end_char = match.start(), match.end()
+            start_token = end_token = None
+            for token in doc:
+                if token.idx >= start_char and start_token is None:
+                    start_token = token.i
+                if token.idx + len(token.text) > end_char and end_token is None:
+                    end_token = token.i + 1
+            if start_token is not None and end_token is not None:
+                spans.append((Span(doc, start_token, end_token, label="CONDITION"), start_char, end_char))
 
-def extract_findings_and_impression(text):
-    """Extract the FINDINGS and IMPRESSION sections from a radiology report."""
-    findings = ""
-    impression = ""
-    
-    # Split the text into sections based on headers
-    current_section = ""
-    sections = {}
-    lines = text.split('\n')
-    
-    for line in lines:
-        for header in SECTION_HEADERS:
-            if header in line or line.strip().upper() == header.strip(':'):
-                current_section = header
-                if current_section not in sections:
-                    sections[current_section] = []
-                break
-        else:  # This is an 'else' clause for the for loop, not an if-else
-            if current_section:
-                sections[current_section].append(line)
-    
-    # Convert lists to strings
-    for header, lines in sections.items():
-        sections[header] = '\n'.join(lines).strip()
-    
-    # Extract findings and impression
-    findings = sections.get("FINDINGS:", "")
-    impression = sections.get("IMPRESSION:", "")
-    
-    return findings, impression
+    # Sort spans by length (shorter first) and deduplicate by position
+    spans.sort(key=lambda x: (x[2] - x[1], x[1]))  # Sort by length, then start position
+    unique_spans = []
+    used_tokens = set()
+    for span, start, end in spans:
+        span_tokens = set(range(span.start, span.end))
+        if not span_tokens & used_tokens:  # No overlap with previously used tokens
+            unique_spans.append(span)
+            used_tokens.update(span_tokens)
 
-def extract_potential_conditions(text):
-    """Extract potential medical conditions mentioned in the text."""
-    if not text:
-        return []
-    
-    # Preprocess text
-    text = text.lower()
-    
-    # Remove common non-condition phrases
-    text = re.sub(r'\b(no|without|absence of|negative for)\s+\w+', '', text)
-    
-    # Find all n-grams that contain medical keywords
-    tokens = word_tokenize(text)
-    stop_words = set(stopwords.words('english'))
-    filtered_tokens = [w for w in tokens if w.lower() not in stop_words and len(w) > 2]
-    
-    # Check for medical keywords
-    potential_conditions = []
-    for i, token in enumerate(filtered_tokens):
-        if token in MEDICAL_KEYWORDS or any(keyword in token for keyword in MEDICAL_KEYWORDS):
-            # Try to capture the condition phrase (up to 3 words before and after)
-            start = max(0, i - 3)
-            end = min(len(filtered_tokens), i + 4)
-            phrase = ' '.join(filtered_tokens[start:end])
-            potential_conditions.append(phrase)
-    
-    # Also check for direct mentions of our predefined conditions
-    for condition in PREDEFINED_CONDITIONS.values():
-        condition_lower = condition.lower()
-        if condition_lower in text and condition_lower != "no acute cardiopulmonary abnormality":
-            if condition_lower not in [c.lower() for c in potential_conditions]:
-                potential_conditions.append(condition_lower)
-    
-    return potential_conditions
+    # Set entities and process with pipeline
+    doc.ents = unique_spans
+    doc = nlp(doc)
 
-def analyze_reports():
-    """Analyze all reports to check for additional conditions."""
-    logger.info("Starting condition analysis...")
-    
-    # Paths
-    XAMI_MIMIC_PATH = os.path.abspath(os.path.join(
-        os.getcwd(),
-        'mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0',
-        'mimic-eye'
-    )).replace('\\', '/')
-    
-    # Load the dataset
+    # Check for non-negated entities
+    for ent in doc.ents:
+        if ent.label_ == "CONDITION" and not ent._.is_negated:
+            return 1  # Found a non-negated mention
+    return 0
+
+# Process each report
+print("Processing reports...")
+results = []
+for _, row in tqdm(df.iterrows(), total=len(df), desc="Processing reports"):
+    transcript_path = row['transcript_path']
     try:
-        df = pd.read_csv('test.csv')
-        logger.info(f"Loaded {len(df)} records from test.csv")
-    except Exception as e:
-        logger.error(f"Error loading test.csv: {e}")
-        return
-    
-    # Prepare report paths
-    df['report_path'] = df['report_path'].str.replace(
-        '{XAMI_MIMIC_PATH}', XAMI_MIMIC_PATH
-    ).str.replace('\\', '/')
-    df['report_path'] = df['report_path'].apply(lambda x: os.path.abspath(x) if pd.notna(x) else x)
-    
-    # Replace mimic-eye path if needed
-    df['report_path'] = df['report_path'].str.replace(
-        'mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0/mimic-eye',
-        XAMI_MIMIC_PATH,
-        regex=False
-    )
-    
-    # Collect all conditions from reports
-    all_conditions = []
-    condition_frequencies = Counter()
-    reports_analyzed = 0
-    conditions_by_report = {}
-    
-    for idx, row in df.iterrows():
-        if pd.isna(row['report_path']):
-            continue
-        
-        report_text = read_text_file(row['report_path'])
-        if not report_text:
-            continue
-        
-        findings, impression = extract_findings_and_impression(report_text)
-        
-        # Combine findings and impression for condition extraction
-        combined_text = f"{findings}\n{impression}"
-        potential_conditions = extract_potential_conditions(combined_text)
-        
-        # Store conditions by report ID
-        report_id = row.get('id', f"report_{idx}")
-        conditions_by_report[report_id] = potential_conditions
-        
-        # Update statistics
-        all_conditions.extend(potential_conditions)
-        condition_frequencies.update(potential_conditions)
-        reports_analyzed += 1
-        
-        # Log progress every 50 reports
-        if reports_analyzed % 50 == 0:
-            logger.info(f"Analyzed {reports_analyzed} reports...")
-    
-    # Compare with predefined conditions
-    predefined_set = set([c.lower() for c in PREDEFINED_CONDITIONS.values()])
-    all_conditions_set = set(all_conditions)
-    
-    # Identify potentially missing conditions (those not in predefined list)
-    missing_conditions = all_conditions_set - predefined_set
-    
-    # Calculate condition frequencies
-    logger.info(f"\nAnalyzed {reports_analyzed} reports in total.")
-    logger.info("\n===== Condition Analysis Results =====")
-    
-    # Log statistics about predefined conditions
-    logger.info("\nPredefined conditions frequency:")
-    for condition_id, condition in PREDEFINED_CONDITIONS.items():
-        condition_lower = condition.lower()
-        count = sum(1 for c in all_conditions if condition_lower in c)
-        percentage = (count / reports_analyzed) * 100 if reports_analyzed > 0 else 0
-        logger.info(f"- {condition}: {count} occurrences ({percentage:.2f}%)")
-    
-    # Log top potential missing conditions
-    logger.info("\nTop 20 potential additional conditions found:")
-    for condition, count in condition_frequencies.most_common(50):
-        if not any(pred_cond.lower() in condition for pred_cond in predefined_set):
-            percentage = (count / reports_analyzed) * 100 if reports_analyzed > 0 else 0
-            logger.info(f"- {condition}: {count} occurrences ({percentage:.2f}%)")
-    
-    # Generate detailed report for each unique condition
-    unique_conditions = defaultdict(int)
-    for conditions in conditions_by_report.values():
-        for condition in conditions:
-            unique_conditions[condition] += 1
-    
-    logger.info(f"\nTotal unique conditions found: {len(unique_conditions)}")
-    
-    # Report findings
-    logger.info("\n===== Recommendation =====")
-    if missing_conditions:
-        significant_missing = [c for c, count in unique_conditions.items() 
-                              if c in missing_conditions and 
-                              count > reports_analyzed * 0.05]  # More than 5% occurrence
-        if significant_missing:
-            logger.info("Consider adding these conditions to your model:")
-            for condition in significant_missing[:10]:  # Top 10
-                count = unique_conditions[condition]
-                percentage = (count / reports_analyzed) * 100
-                logger.info(f"- {condition}: {count} occurrences ({percentage:.2f}%)")
-        else:
-            logger.info("The current condition list appears to cover the most common conditions in the dataset.")
-    else:
-        logger.info("The current condition list covers all identified conditions in the dataset.")
+        with open(transcript_path, 'r', encoding='utf-8') as f:
+            report_text = f.read()
 
-if __name__ == "__main__":
-    analyze_reports()
+        # Create a doc without processing the pipeline yet
+        doc = nlp.make_doc(report_text.lower())  # Lowercase for consistency
+        
+        # Initialize conditions for this report
+        report_conditions = []
+
+        # Process "No Finding" separately
+        if any(re.search(r"(?<!\w)" + re.escape(syn) + r"(?!\w)", doc.text) for syn in CONDITION_SYNONYMS['No Finding']):
+            report_conditions.append('No Finding')
+            condition_counts['No Finding'] += 1
+
+        # Process other conditions
+        for condition, synonyms in CONDITION_SYNONYMS.items():
+            if condition != 'No Finding':
+                # Create a fresh doc for each condition to avoid entity conflicts
+                temp_doc = nlp.make_doc(report_text.lower())
+                if check_for_condition(temp_doc, synonyms):
+                    report_conditions.append(condition)
+                    condition_counts[condition] += 1
+        
+        # Add to results
+        results.append({
+            'transcript_path': transcript_path,
+            'conditions': '|'.join(report_conditions) if report_conditions else 'None'
+        })
+
+    except Exception as e:
+        print(f"Error processing {transcript_path}: {e}")
+        results.append({
+            'transcript_path': transcript_path,
+            'conditions': 'Error'
+        })
+
+# Save results to CSV
+results_df = pd.DataFrame(results)
+results_df.to_csv('condition_labels.csv', index=False)
+print("\nResults saved to condition_labels.csv")
+
+# Print condition counts
+print("\nCondition counts:")
+for condition, count in condition_counts.items():
+    print(f"{condition}: {count} positive samples")
