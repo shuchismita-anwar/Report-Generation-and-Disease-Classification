@@ -166,6 +166,9 @@ def train_model(model, train_loader, val_loader, test_loader, device, pos_weight
     patience_counter = 0
     best_model = None
     
+    # Store all results for final saving
+    all_results = []
+    
     for epoch in range(num_epochs):
         model.train()
         train_loss = 0
@@ -225,14 +228,37 @@ def train_model(model, train_loader, val_loader, test_loader, device, pos_weight
         train_loss /= len(train_loader)
         val_loss /= len(val_loader)
         
-        # Calculate metrics
+        # Calculate overall metrics
         train_metrics = calculate_metrics(np.array(train_labels), np.array(train_preds))
         val_metrics = calculate_metrics(np.array(val_labels), np.array(val_preds))
+        
+        # Calculate per-class metrics
+        train_per_class = calculate_per_class_metrics(np.array(train_labels), np.array(train_preds))
+        val_per_class = calculate_per_class_metrics(np.array(val_labels), np.array(val_preds))
+        
+        # Store epoch results
+        epoch_results = {
+            'epoch': epoch + 1,
+            'train_loss': train_loss,
+            'val_loss': val_loss,
+            'train_metrics': train_metrics,
+            'val_metrics': val_metrics,
+            'train_per_class': train_per_class,
+            'val_per_class': val_per_class
+        }
+        all_results.append(epoch_results)
         
         logger.info(f'Epoch {epoch + 1}/{num_epochs}:')
         logger.info(f'Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}')
         logger.info(f'Train Metrics: {train_metrics}')
         logger.info(f'Val Metrics: {val_metrics}')
+        logger.info('\nPer-Class Metrics:')
+        logger.info('Train:')
+        for condition, metrics in train_per_class.items():
+            logger.info(f'{condition}: {metrics}')
+        logger.info('\nValidation:')
+        for condition, metrics in val_per_class.items():
+            logger.info(f'{condition}: {metrics}')
         
         # Early stopping check
         if val_loss < best_val_loss:
@@ -248,6 +274,24 @@ def train_model(model, train_loader, val_loader, test_loader, device, pos_weight
         
         # Clear GPU memory
         torch.cuda.empty_cache()
+    
+    # Save final results to file
+    with open('d:/Studies/Projects/Mimic/results.txt', 'w') as f:
+        f.write('Training Results Summary\n')
+        f.write('=======================\n\n')
+        for result in all_results:
+            f.write(f"Epoch {result['epoch']}\n")
+            f.write(f"Train Loss: {result['train_loss']:.4f}, Val Loss: {result['val_loss']:.4f}\n")
+            f.write(f"Train Metrics: {result['train_metrics']}\n")
+            f.write(f"Val Metrics: {result['val_metrics']}\n")
+            f.write('\nPer-Class Metrics:\n')
+            f.write('Train:\n')
+            for condition, metrics in result['train_per_class'].items():
+                f.write(f'{condition}: {metrics}\n')
+            f.write('\nValidation:\n')
+            for condition, metrics in result['val_per_class'].items():
+                f.write(f'{condition}: {metrics}\n')
+            f.write('\n' + '='*50 + '\n\n')
     
     return best_model
 
