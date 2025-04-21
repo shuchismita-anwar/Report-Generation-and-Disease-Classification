@@ -152,7 +152,7 @@ class XRayReportModel(nn.Module):
         return logits
 
 # Training Function with Class Weights
-def train_model(model, train_loader, val_loader, test_loader, device, pos_weights, num_epochs=30, patience=5):
+def train_model(model, train_loader, val_loader, test_loader, device, pos_weights, num_epochs=50, patience=5):
     # Move pos_weights to GPU
     pos_weights = pos_weights.to(device)
     
@@ -276,7 +276,7 @@ def train_model(model, train_loader, val_loader, test_loader, device, pos_weight
         torch.cuda.empty_cache()
     
     # Save final results to file
-    with open('d:/Studies/Projects/Mimic/results.txt', 'w') as f:
+    with open('results.txt', 'w') as f:
         f.write('Training Results Summary\n')
         f.write('=======================\n\n')
         for result in all_results:
