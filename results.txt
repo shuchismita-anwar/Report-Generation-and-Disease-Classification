@@ -2,252 +2,87 @@ Training Results Summary
 =======================
 
 Epoch 1
- Train Loss: 1.2365, Val Loss: 1.2084
- Train Metrics: {'accuracy': 0.0035657686212361333, 'precision': 0.2658662178758605, 'recall': 0.8690993339125398, 'f1': 0.39446585882380697, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.0, 'precision': 0.29476975890203383, 'recall': 0.9060022650056625, 'f1': 0.4253373092766743, 'roc_auc': nan}
+ Train Loss: 1.2508, Val Loss: 1.1678
+ Train Metrics: {'accuracy': 0.4943579327465583, 'precision': 0.2988674443938011, 'recall': 0.7026406429391504, 'f1': 0.363376150621688, 'roc_auc': nan}
+ Val   Metrics: {'accuracy': 0.6159029649595688, 'precision': 0.3268004213672904, 'recall': 0.8708133971291866, 'f1': 0.4493278719586421, 'roc_auc': nan}
 
 Epoch 2
- Train Loss: 1.1901, Val Loss: 1.1895
- Train Metrics: {'accuracy': 0.05824088748019018, 'precision': 0.2976763900547584, 'recall': 0.9061685490877498, 'f1': 0.44040118372537373, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.0, 'precision': 0.29318879096460093, 'recall': 0.9195922989807475, 'f1': 0.4364722718383651, 'roc_auc': nan}
+ Train Loss: 1.2630, Val Loss: 1.1573
+ Train Metrics: {'accuracy': 0.5727826675693974, 'precision': 0.3189145713090982, 'recall': 0.8553386911595867, 'f1': 0.4388584959284825, 'roc_auc': nan}
+ Val   Metrics: {'accuracy': 0.6127583108715184, 'precision': 0.35627647806764573, 'recall': 0.8373205741626795, 'f1': 0.4772023238038509, 'roc_auc': nan}
 
 Epoch 3
- Train Loss: 1.1514, Val Loss: 1.1469
- Train Metrics: {'accuracy': 0.05784469096671949, 'precision': 0.3081819371577242, 'recall': 0.9270199826238054, 'f1': 0.4551149685979119, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.0, 'precision': 0.30909468002599144, 'recall': 0.9241223103057757, 'f1': 0.4587300659496411, 'roc_auc': nan}
+ Train Loss: 1.2215, Val Loss: 1.1478
+ Train Metrics: {'accuracy': 0.5769577973369443, 'precision': 0.3530795604608565, 'recall': 0.851894374282434, 'f1': 0.4608468307058158, 'roc_auc': nan}
+ Val   Metrics: {'accuracy': 0.6437556154537286, 'precision': 0.3719906047919781, 'recall': 0.8373205741626795, 'f1': 0.491931686006993, 'roc_auc': nan}
 
 Epoch 4
- Train Loss: 1.1191, Val Loss: 1.1212
- Train Metrics: {'accuracy': 0.042789223454833596, 'precision': 0.3294529246769436, 'recall': 0.9432377642629598, 'f1': 0.4824951763458684, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.09177215189873418, 'precision': 0.34766864058043917, 'recall': 0.9218573046432617, 'f1': 0.4969665535634473, 'roc_auc': nan}
+ Train Loss: 1.2066, Val Loss: 1.1450
+ Train Metrics: {'accuracy': 0.627172195892575, 'precision': 0.35187512396633375, 'recall': 0.8461538461538461, 'f1': 0.47004238018675865, 'roc_auc': nan}
+ Val   Metrics: {'accuracy': 0.6666666666666666, 'precision': 0.3702744275349945, 'recall': 0.8325358851674641, 'f1': 0.49052231380080974, 'roc_auc': nan}
 
 Epoch 5
- Train Loss: 1.0965, Val Loss: 1.1003
- Train Metrics: {'accuracy': 0.0832012678288431, 'precision': 0.3520357257597054, 'recall': 0.9481610194034173, 'f1': 0.5083557820416046, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.01740506329113924, 'precision': 0.33759327246429593, 'recall': 0.9535673839184597, 'f1': 0.4957039349291825, 'roc_auc': nan}
+ Train Loss: 1.2015, Val Loss: 1.1474
+ Train Metrics: {'accuracy': 0.6459038591740014, 'precision': 0.36379136076877294, 'recall': 0.8404133180252583, 'f1': 0.48214742178179804, 'roc_auc': nan}
+ Val   Metrics: {'accuracy': 0.6401617250673854, 'precision': 0.36722971292375756, 'recall': 0.8325358851674641, 'f1': 0.4919020890307241, 'roc_auc': nan}
 
 Epoch 6
- Train Loss: 1.0770, Val Loss: 1.0854
- Train Metrics: {'accuracy': 0.13549920760697307, 'precision': 0.3705277909428025, 'recall': 0.9539530842745438, 'f1': 0.5281401911740778, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.09335443037974683, 'precision': 0.39381199198788713, 'recall': 0.9343148357870895, 'f1': 0.5466615124993598, 'roc_auc': nan}
+ Train Loss: 1.1962, Val Loss: 1.1428
+ Train Metrics: {'accuracy': 0.6403746332656285, 'precision': 0.36997615156740365, 'recall': 0.8553386911595867, 'f1': 0.48611223482335, 'roc_auc': nan}
+ Val   Metrics: {'accuracy': 0.6522911051212938, 'precision': 0.3912421902210165, 'recall': 0.8277511961722488, 'f1': 0.5031004207454186, 'roc_auc': nan}
 
 Epoch 7
- Train Loss: 1.0589, Val Loss: 1.0662
- Train Metrics: {'accuracy': 0.25356576862123614, 'precision': 0.39184502086424206, 'recall': 0.9507674485954243, 'f1': 0.5517483632236512, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.185126582278481, 'precision': 0.395194064135029, 'recall': 0.9546998867497168, 'f1': 0.5509227219223146, 'roc_auc': nan}
+ Train Loss: 1.1860, Val Loss: 1.1423
+ Train Metrics: {'accuracy': 0.6631685849695328, 'precision': 0.37124348063622536, 'recall': 0.8553386911595867, 'f1': 0.4927497120095192, 'roc_auc': nan}
+ Val   Metrics: {'accuracy': 0.6019766397124887, 'precision': 0.3782461158814102, 'recall': 0.8325358851674641, 'f1': 0.4878898350874586, 'roc_auc': nan}
 
 Epoch 8
- Train Loss: 1.0469, Val Loss: 1.0544
- Train Metrics: {'accuracy': 0.28526148969889065, 'precision': 0.4022166106434555, 'recall': 0.9568491167101072, 'f1': 0.5613994646116562, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.24525316455696203, 'precision': 0.395796634928923, 'recall': 0.9558323895809739, 'f1': 0.5561347912690403, 'roc_auc': nan}
+ Train Loss: 1.1780, Val Loss: 1.1400
+ Train Metrics: {'accuracy': 0.6767095463777928, 'precision': 0.3766292463344305, 'recall': 0.8610792192881745, 'f1': 0.49967021768220277, 'roc_auc': nan}
+ Val   Metrics: {'accuracy': 0.710691823899371, 'precision': 0.39138422598072453, 'recall': 0.7703349282296651, 'f1': 0.5051743247998042, 'roc_auc': nan}
 
 Epoch 9
- Train Loss: 1.0292, Val Loss: 1.0417
- Train Metrics: {'accuracy': 0.3205229793977813, 'precision': 0.4070079246589827, 'recall': 0.9565595134665508, 'f1': 0.5673526959229082, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.20094936708860758, 'precision': 0.39248946537203433, 'recall': 0.9614949037372593, 'f1': 0.5505450776066865, 'roc_auc': nan}
+ Train Loss: 1.1705, Val Loss: 1.1411
+ Train Metrics: {'accuracy': 0.6927330173775671, 'precision': 0.38135522267519784, 'recall': 0.8656716417910447, 'f1': 0.5070486610522033, 'roc_auc': nan}
+ Val   Metrics: {'accuracy': 0.6913746630727763, 'precision': 0.3760781111963855, 'recall': 0.8133971291866029, 'f1': 0.49117763762281524, 'roc_auc': nan}
 
 Epoch 10
- Train Loss: 1.0170, Val Loss: 1.0362
- Train Metrics: {'accuracy': 0.32210776545166403, 'precision': 0.41842182919180726, 'recall': 0.964668404286128, 'f1': 0.5804213293853602, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.3212025316455696, 'precision': 0.45493587655675033, 'recall': 0.9354473386183465, 'f1': 0.603916029262603, 'roc_auc': nan}
+ Train Loss: 1.1620, Val Loss: 1.1393
+ Train Metrics: {'accuracy': 0.6846084405326112, 'precision': 0.3819385013451776, 'recall': 0.8794489092996556, 'f1': 0.5071305067452636, 'roc_auc': nan}
+ Val   Metrics: {'accuracy': 0.7174303683737646, 'precision': 0.37780472764319634, 'recall': 0.7655502392344498, 'f1': 0.49427789830280544, 'roc_auc': nan}
 
 Epoch 11
- Train Loss: 1.0136, Val Loss: 1.0314
- Train Metrics: {'accuracy': 0.31774960380348655, 'precision': 0.40594303522477454, 'recall': 0.9577179264407761, 'f1': 0.5664491536672706, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.3528481012658228, 'precision': 0.3973260685631376, 'recall': 0.927519818799547, 'f1': 0.5519240591955527, 'roc_auc': nan}
+ Train Loss: 1.1535, Val Loss: 1.1401
+ Train Metrics: {'accuracy': 0.6963439404197698, 'precision': 0.3829320200116495, 'recall': 0.8679678530424799, 'f1': 0.5086844660961101, 'roc_auc': nan}
+ Val   Metrics: {'accuracy': 0.7322551662174304, 'precision': 0.38134540399505407, 'recall': 0.7751196172248804, 'f1': 0.5013893748417455, 'roc_auc': nan}
 
 Epoch 12
- Train Loss: 1.0262, Val Loss: 1.0608
- Train Metrics: {'accuracy': 0.2991283676703645, 'precision': 0.3914557308131395, 'recall': 0.9391833188531712, 'f1': 0.5474776408617272, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.28639240506329117, 'precision': 0.4269259715678362, 'recall': 0.869762174405436, 'f1': 0.55660986731991, 'roc_auc': nan}
+ Train Loss: 1.1445, Val Loss: 1.1393
+ Train Metrics: {'accuracy': 0.7234258632362898, 'precision': 0.3951159308348052, 'recall': 0.8633754305396096, 'f1': 0.5210573581133453, 'roc_auc': nan}
+ Val   Metrics: {'accuracy': 0.7412398921832885, 'precision': 0.3687169202434784, 'recall': 0.7559808612440191, 'f1': 0.4867185452989715, 'roc_auc': nan}
 
 Epoch 13
- Train Loss: 1.0006, Val Loss: 1.0092
- Train Metrics: {'accuracy': 0.31378763866877973, 'precision': 0.4130796859385142, 'recall': 0.94874022589053, 'f1': 0.5707980386534675, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.37341772151898733, 'precision': 0.41663970588452137, 'recall': 0.9218573046432617, 'f1': 0.5696295499617726, 'roc_auc': nan}
+ Train Loss: 1.1308, Val Loss: 1.1395
+ Train Metrics: {'accuracy': 0.7327916948770029, 'precision': 0.4014859383967326, 'recall': 0.894374282433984, 'f1': 0.5340225780208174, 'roc_auc': nan}
+ Val   Metrics: {'accuracy': 0.7327044025157232, 'precision': 0.37660881136495195, 'recall': 0.7559808612440191, 'f1': 0.49306068535261843, 'roc_auc': nan}
 
 Epoch 14
- Train Loss: 0.9751, Val Loss: 0.9940
- Train Metrics: {'accuracy': 0.37282091917591126, 'precision': 0.42444843894900525, 'recall': 0.9600347523892268, 'f1': 0.584214405901517, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.36075949367088606, 'precision': 0.4349092598799215, 'recall': 0.9365798414496036, 'f1': 0.5892459129279544, 'roc_auc': nan}
+ Train Loss: 1.1286, Val Loss: 1.1347
+ Train Metrics: {'accuracy': 0.735387045813586, 'precision': 0.40219234807372023, 'recall': 0.8897818599311137, 'f1': 0.5350408386616713, 'roc_auc': nan}
+ Val   Metrics: {'accuracy': 0.7327044025157232, 'precision': 0.3780911724712983, 'recall': 0.7655502392344498, 'f1': 0.4955857031265101, 'roc_auc': nan}
 
 Epoch 15
- Train Loss: 0.9646, Val Loss: 0.9832
- Train Metrics: {'accuracy': 0.3906497622820919, 'precision': 0.43474267748459844, 'recall': 0.963799594555459, 'f1': 0.5953325129882743, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.36075949367088606, 'precision': 0.4347528543687716, 'recall': 0.9388448471121178, 'f1': 0.5897379035199088, 'roc_auc': nan}
+ Train Loss: 1.1244, Val Loss: 1.1363
+ Train Metrics: {'accuracy': 0.7315504400812458, 'precision': 0.40417921602633783, 'recall': 0.8978185993111366, 'f1': 0.5372442192163063, 'roc_auc': nan}
+ Val   Metrics: {'accuracy': 0.7407906558849955, 'precision': 0.375804795713526, 'recall': 0.7464114832535885, 'f1': 0.4903114562520049, 'roc_auc': nan}
 
 Epoch 16
- Train Loss: 0.9511, Val Loss: 0.9727
- Train Metrics: {'accuracy': 0.40689381933438984, 'precision': 0.43990912244021957, 'recall': 0.96293078482479, 'f1': 0.5992871973338768, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.3829113924050633, 'precision': 0.42920970190554475, 'recall': 0.9354473386183465, 'f1': 0.5846916337549743, 'roc_auc': nan}
+ Train Loss: 1.1192, Val Loss: 1.1437
+ Train Metrics: {'accuracy': 0.7446400361092305, 'precision': 0.4086209126406894, 'recall': 0.9024110218140069, 'f1': 0.5432910119293702, 'roc_auc': nan}
+ Val   Metrics: {'accuracy': 0.7578616352201258, 'precision': 0.36230360018758256, 'recall': 0.6985645933014354, 'f1': 0.4709463804663532, 'roc_auc': nan}
 
 Epoch 17
- Train Loss: 0.9441, Val Loss: 0.9629
- Train Metrics: {'accuracy': 0.4195721077654517, 'precision': 0.44466657973802526, 'recall': 0.9635099913119027, 'f1': 0.6036614757493056, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.37816455696202533, 'precision': 0.42680213773826287, 'recall': 0.9365798414496036, 'f1': 0.5834691942410071, 'roc_auc': nan}
-
-Epoch 18
- Train Loss: 0.9331, Val Loss: 0.9547
- Train Metrics: {'accuracy': 0.410459587955626, 'precision': 0.44643998612686975, 'recall': 0.9649580075296843, 'f1': 0.6052366183788712, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.379746835443038, 'precision': 0.4297656424083941, 'recall': 0.9377123442808607, 'f1': 0.5850926119293373, 'roc_auc': nan}
-
-Epoch 19
- Train Loss: 0.9284, Val Loss: 0.9454
- Train Metrics: {'accuracy': 0.4195721077654517, 'precision': 0.44873888886436586, 'recall': 0.9632203880683463, 'f1': 0.6064318037918889, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.379746835443038, 'precision': 0.4252982570632156, 'recall': 0.9309173272933182, 'f1': 0.5812505973669625, 'roc_auc': nan}
-
-Epoch 20
- Train Loss: 0.9161, Val Loss: 0.9372
- Train Metrics: {'accuracy': 0.419175911251981, 'precision': 0.44690675122619633, 'recall': 0.963799594555459, 'f1': 0.604804967810143, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.3686708860759494, 'precision': 0.42094992777519624, 'recall': 0.9365798414496036, 'f1': 0.5778205021387124, 'roc_auc': nan}
-
-Epoch 21
- Train Loss: 0.9067, Val Loss: 0.9288
- Train Metrics: {'accuracy': 0.4274960380348653, 'precision': 0.4518391036639925, 'recall': 0.964668404286128, 'f1': 0.609599115653426, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.3813291139240506, 'precision': 0.42886450556244143, 'recall': 0.9399773499433749, 'f1': 0.5859128683578215, 'roc_auc': nan}
-
-Epoch 22
- Train Loss: 0.8951, Val Loss: 0.9190
- Train Metrics: {'accuracy': 0.4267036450079239, 'precision': 0.45440274097238115, 'recall': 0.9649580075296843, 'f1': 0.6116591212452395, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.375, 'precision': 0.42722012864751213, 'recall': 0.9433748584371461, 'f1': 0.5845691563111644, 'roc_auc': nan}
-
-Epoch 23
- Train Loss: 0.8861, Val Loss: 0.9107
- Train Metrics: {'accuracy': 0.420364500792393, 'precision': 0.4539293797935952, 'recall': 0.9678540399652477, 'f1': 0.6114230041462091, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.37341772151898733, 'precision': 0.43341439122206493, 'recall': 0.9377123442808607, 'f1': 0.58998523469736, 'roc_auc': nan}
-
-Epoch 24
- Train Loss: 0.8770, Val Loss: 0.9033
- Train Metrics: {'accuracy': 0.4298732171156894, 'precision': 0.4633706461004673, 'recall': 0.965537214016797, 'f1': 0.6193592183905877, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.37341772151898733, 'precision': 0.4377527465634962, 'recall': 0.9399773499433749, 'f1': 0.5942327741665826, 'roc_auc': nan}
-
-Epoch 25
- Train Loss: 0.8678, Val Loss: 0.8952
- Train Metrics: {'accuracy': 0.4306656101426308, 'precision': 0.4663280441554023, 'recall': 0.9643788010425717, 'f1': 0.6217334874823671, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.37658227848101267, 'precision': 0.4554076876541471, 'recall': 0.9399773499433749, 'f1': 0.6077541328176733, 'roc_auc': nan}
-
-Epoch 26
- Train Loss: 0.8605, Val Loss: 0.8882
- Train Metrics: {'accuracy': 0.4346275752773376, 'precision': 0.46855412114311734, 'recall': 0.966406023747466, 'f1': 0.6241130789673237, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.3813291139240506, 'precision': 0.4454514502592371, 'recall': 0.9388448471121178, 'f1': 0.600298422653441, 'roc_auc': nan}
-
-Epoch 27
- Train Loss: 0.8552, Val Loss: 0.8798
- Train Metrics: {'accuracy': 0.4354199683042789, 'precision': 0.4722853315845282, 'recall': 0.963799594555459, 'f1': 0.6261720554849182, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.39556962025316456, 'precision': 0.4669325349815908, 'recall': 0.9399773499433749, 'f1': 0.6191538345911548, 'roc_auc': nan}
-
-Epoch 28
- Train Loss: 0.8438, Val Loss: 0.8713
- Train Metrics: {'accuracy': 0.4354199683042789, 'precision': 0.47593632292763977, 'recall': 0.9635099913119027, 'f1': 0.6294006458062078, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.41139240506329117, 'precision': 0.4699273554636215, 'recall': 0.9399773499433749, 'f1': 0.6183148260412599, 'roc_auc': nan}
-
-Epoch 29
- Train Loss: 0.8362, Val Loss: 0.8648
- Train Metrics: {'accuracy': 0.4417591125198098, 'precision': 0.48053348498800896, 'recall': 0.9635099913119027, 'f1': 0.6328821238813727, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.37658227848101267, 'precision': 0.4673879643293828, 'recall': 0.9388448471121178, 'f1': 0.6163251468300688, 'roc_auc': nan}
-
-Epoch 30
- Train Loss: 0.8294, Val Loss: 0.8582
- Train Metrics: {'accuracy': 0.45047543581616484, 'precision': 0.48941729722954186, 'recall': 0.9626411815812337, 'f1': 0.6400141938365196, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.3639240506329114, 'precision': 0.47027229696386463, 'recall': 0.942242355605889, 'f1': 0.6197842074618785, 'roc_auc': nan}
-
-Epoch 31
- Train Loss: 0.8268, Val Loss: 0.8609
- Train Metrics: {'accuracy': 0.4354199683042789, 'precision': 0.48613304048427003, 'recall': 0.9574283231972198, 'f1': 0.6351353441443318, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.37816455696202533, 'precision': 0.5030862735442845, 'recall': 0.927519818799547, 'f1': 0.6461957910192959, 'roc_auc': nan}
-
-Epoch 32
- Train Loss: 0.8450, Val Loss: 0.8913
- Train Metrics: {'accuracy': 0.41561014263074486, 'precision': 0.4740064077279232, 'recall': 0.9371560961482769, 'f1': 0.6189159226714213, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.3623417721518987, 'precision': 0.43176529538156533, 'recall': 0.8980747451868629, 'f1': 0.565919216875577, 'roc_auc': nan}
-
-Epoch 33
- Train Loss: 0.8643, Val Loss: 0.8668
- Train Metrics: {'accuracy': 0.375594294770206, 'precision': 0.45490029597744214, 'recall': 0.9215175209962352, 'f1': 0.5958401510982095, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.375, 'precision': 0.4405341664441713, 'recall': 0.9161947904869762, 'f1': 0.5844490975144772, 'roc_auc': nan}
-
-Epoch 34
- Train Loss: 0.8148, Val Loss: 0.8566
- Train Metrics: {'accuracy': 0.4401743264659271, 'precision': 0.48543149715063794, 'recall': 0.952215464813206, 'f1': 0.6333674615171052, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.370253164556962, 'precision': 0.4602725153606453, 'recall': 0.9184597961494904, 'f1': 0.6086428756054819, 'roc_auc': nan}
-
-Epoch 35
- Train Loss: 0.8011, Val Loss: 0.8303
- Train Metrics: {'accuracy': 0.4532488114104596, 'precision': 0.49320679561763836, 'recall': 0.9574283231972198, 'f1': 0.6416849170057779, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.3829113924050633, 'precision': 0.4693857711643981, 'recall': 0.9354473386183465, 'f1': 0.6186036301924461, 'roc_auc': nan}
-
-Epoch 36
- Train Loss: 0.7880, Val Loss: 0.8212
- Train Metrics: {'accuracy': 0.4520602218700475, 'precision': 0.5037222820972894, 'recall': 0.9626411815812337, 'f1': 0.6512512652563873, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.41139240506329117, 'precision': 0.4850968733372236, 'recall': 0.9354473386183465, 'f1': 0.6309398952471583, 'roc_auc': nan}
-
-Epoch 37
- Train Loss: 0.7815, Val Loss: 0.8154
- Train Metrics: {'accuracy': 0.4679080824088748, 'precision': 0.513894505255887, 'recall': 0.96293078482479, 'f1': 0.6584901843812473, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.40822784810126583, 'precision': 0.48492369361713084, 'recall': 0.9377123442808607, 'f1': 0.6326479960913178, 'roc_auc': nan}
-
-Epoch 38
- Train Loss: 0.7757, Val Loss: 0.8078
- Train Metrics: {'accuracy': 0.4631537242472266, 'precision': 0.5168553480320529, 'recall': 0.9632203880683463, 'f1': 0.6610503112577372, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.4224683544303797, 'precision': 0.5037691797461122, 'recall': 0.9365798414496036, 'f1': 0.6487829340598832, 'roc_auc': nan}
-
-Epoch 39
- Train Loss: 0.7647, Val Loss: 0.8007
- Train Metrics: {'accuracy': 0.4663232963549921, 'precision': 0.521248539982475, 'recall': 0.9632203880683463, 'f1': 0.6649260049668653, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.41139240506329117, 'precision': 0.49934572081198597, 'recall': 0.9377123442808607, 'f1': 0.6441258033217185, 'roc_auc': nan}
-
-Epoch 40
- Train Loss: 0.7608, Val Loss: 0.7960
- Train Metrics: {'accuracy': 0.46671949286846276, 'precision': 0.5275705266880999, 'recall': 0.9640891977990154, 'f1': 0.6693369376864869, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.43354430379746833, 'precision': 0.5065813391271258, 'recall': 0.9365798414496036, 'f1': 0.6503741974213345, 'roc_auc': nan}
-
-Epoch 41
- Train Loss: 0.7507, Val Loss: 0.7893
- Train Metrics: {'accuracy': 0.47781299524564186, 'precision': 0.5308921607927344, 'recall': 0.963799594555459, 'f1': 0.6728375965629738, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.4161392405063291, 'precision': 0.5099624218567002, 'recall': 0.942242355605889, 'f1': 0.6517364665471147, 'roc_auc': nan}
-
-Epoch 42
- Train Loss: 0.7464, Val Loss: 0.7848
- Train Metrics: {'accuracy': 0.4714738510301109, 'precision': 0.5345954589296537, 'recall': 0.9643788010425717, 'f1': 0.6754897031422635, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.4177215189873418, 'precision': 0.5118440273565563, 'recall': 0.9320498301245753, 'f1': 0.6515123474920667, 'roc_auc': nan}
-
-Epoch 43
- Train Loss: 0.7459, Val Loss: 0.7847
- Train Metrics: {'accuracy': 0.4702852614896989, 'precision': 0.5284725970097918, 'recall': 0.9597451491456704, 'f1': 0.6699633633971753, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.41930379746835444, 'precision': 0.508095382971697, 'recall': 0.928652321630804, 'f1': 0.6473032663519244, 'roc_auc': nan}
-
-Epoch 44
- Train Loss: 0.7383, Val Loss: 0.7782
- Train Metrics: {'accuracy': 0.4694928684627575, 'precision': 0.52765989031435, 'recall': 0.9611931653634521, 'f1': 0.6689079837553955, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.4272151898734177, 'precision': 0.5124205565233533, 'recall': 0.927519818799547, 'f1': 0.6535212446441829, 'roc_auc': nan}
-
-Epoch 45
- Train Loss: 0.7300, Val Loss: 0.7721
- Train Metrics: {'accuracy': 0.4742472266244057, 'precision': 0.5296634312961713, 'recall': 0.9603243556327831, 'f1': 0.6713980567235084, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.4240506329113924, 'precision': 0.49949596335190094, 'recall': 0.9320498301245753, 'f1': 0.6424633457689346, 'roc_auc': nan}
-
-Epoch 46
- Train Loss: 0.7241, Val Loss: 0.7640
- Train Metrics: {'accuracy': 0.48019017432646594, 'precision': 0.5352944850848865, 'recall': 0.9617723718505647, 'f1': 0.6766145170804713, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.4572784810126582, 'precision': 0.525318912276356, 'recall': 0.928652321630804, 'f1': 0.6644885262625702, 'roc_auc': nan}
-
-Epoch 47
- Train Loss: 0.7135, Val Loss: 0.7514
- Train Metrics: {'accuracy': 0.48534072900158476, 'precision': 0.5443410158019775, 'recall': 0.9652476107732406, 'f1': 0.6849361380209663, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.44145569620253167, 'precision': 0.5232899068931011, 'recall': 0.9354473386183465, 'f1': 0.6625482303528626, 'roc_auc': nan}
-
-Epoch 48
- Train Loss: 0.7059, Val Loss: 0.7476
- Train Metrics: {'accuracy': 0.49049128367670364, 'precision': 0.5506773362633798, 'recall': 0.96293078482479, 'f1': 0.6886854105970022, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.41930379746835444, 'precision': 0.5202357901676824, 'recall': 0.928652321630804, 'f1': 0.6579301680728173, 'roc_auc': nan}
-
-Epoch 49
- Train Loss: 0.7007, Val Loss: 0.7409
- Train Metrics: {'accuracy': 0.4849445324881141, 'precision': 0.5526748010091899, 'recall': 0.9649580075296843, 'f1': 0.6907805436508495, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.4525316455696203, 'precision': 0.5339661231263371, 'recall': 0.9309173272933182, 'f1': 0.6709230283941345, 'roc_auc': nan}
-
-Epoch 50
- Train Loss: 0.6939, Val Loss: 0.7405
- Train Metrics: {'accuracy': 0.4960380348652932, 'precision': 0.5580460076500788, 'recall': 0.9635099913119027, 'f1': 0.6948776874569806, 'roc_auc': nan}
- Val   Metrics: {'accuracy': 0.4620253164556962, 'precision': 0.5396474620618473, 'recall': 0.928652321630804, 'f1': 0.6753298176986862, 'roc_auc': nan}
+ Train Loss: 1.1172, Val Loss: 1.1362
+ Train Metrics: {'accuracy': 0.7465583389754006, 'precision': 0.4081624642081836, 'recall': 0.9012629161882894, 'f1': 0.5438962750082227, 'roc_auc': nan}
+ Val   Metrics: {'accuracy': 0.7295597484276729, 'precision': 0.37003617296583435, 'recall': 0.7464114832535885, 'f1': 0.4825305972026145, 'roc_auc': nan}
 
