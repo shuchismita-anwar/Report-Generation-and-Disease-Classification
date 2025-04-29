@@ -1,16 +1,7 @@
 import os
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'  # Suppress oneDNN warning
-os.environ['HF_HUB_DISABLE_SYMLINKS_WARNING'] = '1'  # Suppress symlink warning
-
-# Filter all warnings
 import warnings
-warnings.filterwarnings('ignore')
-warnings.simplefilter('ignore')
 import logging
-logging.getLogger('transformers').setLevel(logging.ERROR)
-logging.getLogger('timm').setLevel(logging.ERROR)
-
-import json
+import sys
 import pandas as pd
 import numpy as np
 from PIL import Image
@@ -19,93 +10,127 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from transformers import AutoModel, AutoTokenizer
-# from health_multimodal.image.transforms import create_chest_xray_transform_for_inference
 from health_multimodal.image.data.transforms import create_chest_xray_transform_for_inference
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
+# Suppress all warnings and future warnings
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+os.environ['HF_HUB_DISABLE_SYMLINKS_WARNING'] = '1'
+import warnings
 warnings.filterwarnings('ignore')
-logging.basicConfig(level=logging.INFO)
+warnings.simplefilter('ignore')
+
+# Suppress specific timm FutureWarnings
+import builtins
+import types
+import contextlib
+
+# Patch warnings.warn to suppress specific messages
+_original_warn = warnings.warn
+def custom_warn(message, *args, **kwargs):
+    if isinstance(message, str) and (
+        'Importing from timm.models.layers is deprecated' in message
+        or 'CXRBertModel has no image projection' in message
+    ):
+        return  # suppress
+    return _original_warn(message, *args, **kwargs)
+warnings.warn = custom_warn
+
+# Suppress logging from libraries
+logging.getLogger('transformers').setLevel(logging.ERROR)
+logging.getLogger('timm').setLevel(logging.ERROR)
+logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
-# Paths
+# Patch stdout/stderr for unwanted prints (optional)
+class SuppressPrint:
+    def __enter__(self):
+        self._stdout = sys.stdout
+        self._stderr = sys.stderr
+        sys.stdout = open(os.devnull, 'w')
+        sys.stderr = open(os.devnull, 'w')
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout.close()
+        sys.stderr.close()
+        sys.stdout = self._stdout
+        sys.stderr = self._stderr
+
+# Path normalization utility
+
 def normalize_path(path):
-    """Normalize path for consistent comparison"""
-    return os.path.normpath(path).replace('\\', '/')
+    """Normalize path for consistent comparison and file access."""
+    return os.path.normpath(path)
 
-def normalize_csv_path(path):
-    """Normalize path to match CSV format"""
-    return os.path.normpath(path).replace('/', '\\')
+# Load dataset from trans-data.csv
+CSV_PATH = 'trans-data.csv'
+df = pd.read_csv(CSV_PATH)
 
-XAMI_MIMIC_PATH = normalize_path(os.path.join(
-    os.getcwd(),
-    'mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0',
-    'mimic-eye'
-))
+# Only keep the columns we care about
+columns_to_keep = ['image_path', 'transcript_path', 'conditions']
+df = df[columns_to_keep]
 
-# Conditions
-CONDITIONS = [
+# Ensure all paths are normalized and absolute
+for col in ['image_path', 'transcript_path']:
+    df[col] = df[col].apply(lambda p: normalize_path(p) if os.path.isabs(p) else normalize_path(os.path.join(os.getcwd(), p)))
+
+# Utility to convert pipe-separated string labels to multi-hot vector
+CONDITION_LIST = [
     'Atelectasis', 'Cardiomegaly', 'Consolidation', 'Edema',
     'Enlarged Cardiomediastinum', 'Fracture', 'Lung Lesion',
     'Lung Opacity', 'No Finding', 'Pleural Effusion',
     'Pleural Other', 'Pneumonia', 'Pneumothorax', 'Support Devices'
 ]
+def conditions_to_multihot(conditions_str):
+    if pd.isna(conditions_str) or not isinstance(conditions_str, str):
+        return [0]*len(CONDITION_LIST)
+    present = set([c.strip() for c in conditions_str.split('|') if c.strip()])
+    return [1 if c in present else 0 for c in CONDITION_LIST]
 
-# GPU optimizations
-torch.backends.cudnn.benchmark = True
-torch.backends.cuda.matmul.allow_tf32 = True
-torch.backends.cudnn.allow_tf32 = True
+# Apply multi-hot encoding to the 'conditions' column
+df['labels'] = df['conditions'].apply(conditions_to_multihot)
 
-def get_optimal_batch_size(model, image_size=(224, 224)):
-    """Simple default batch size for BioViL-T"""
-    return 4
+# Example: splitting for training/testing (customize as needed)
+train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)
 
-class XRayReportDataset(Dataset):
+# Example usage for a DataLoader (customize as needed)
+class MedicalDataset(Dataset):
     def __init__(self, dataframe, tokenizer, image_transform, max_len=77, augment=False):
-        self.data = dataframe
+        self.data = dataframe.reset_index(drop=True)
         self.tokenizer = tokenizer
-        self.transform = image_transform
+        self.image_transform = image_transform
         self.max_len = max_len
         self.augment = augment
-        self.augment_transforms = transforms.Compose([
-            transforms.RandomHorizontalFlip(),
-            transforms.ColorJitter(brightness=0.2, contrast=0.2),
-            transforms.RandomAffine(degrees=0, translate=(0.1, 0.1))
-        ])
         self.labels = torch.tensor(self.data['labels'].tolist(), dtype=torch.float32)
-
     def __len__(self):
         return len(self.data)
-
-    def __getitem__(self, index):
-        row = self.data.iloc[index]
-        img_path = normalize_path(row['image_path'].replace('{XAMI_MIMIC_PATH}', XAMI_MIMIC_PATH))
-        image = Image.open(img_path).convert('L')  # Convert to grayscale
-        logger.debug(f"[DEBUG] Image mode: {image.mode}, size: {image.size}, path: {img_path}")
+    def __getitem__(self, idx):
+        row = self.data.iloc[idx]
+        img_path = row['image_path']
+        image = Image.open(img_path).convert('L')
         if self.augment:
-            image = self.augment_transforms(image)
-        image_tensor = self.transform(image)
-        logger.debug(f"[DEBUG] Image tensor shape after transform: {image_tensor.shape}")
-
-        # load transcript
+            image = transforms.RandomApply([
+                transforms.ColorJitter(brightness=0.2, contrast=0.2),
+                transforms.RandomAffine(degrees=0, translate=(0.1, 0.1))
+            ], p=0.5)(image)
+        image_tensor = self.image_transform(image)
         tp = row['transcript_path']
         with open(tp, 'r', encoding='utf-8') as f:
-            report_text = json.load(f).get("full_text", None) if tp.lower().endswith('.json') else f.read()
-
+            report_text = f.read()
         text_enc = self.tokenizer(
             report_text,
+            return_tensors='pt',
             padding='max_length',
             truncation=True,
-            max_length=self.max_len,
-            return_tensors='pt'
+            max_length=self.max_len
         )
         return {
             'input_ids': text_enc.input_ids.squeeze(0),
             'attention_mask': text_enc.attention_mask.squeeze(0),
             'pixel_values': image_tensor,
-            'labels': self.labels[index]
+            'labels': self.labels[idx]
         }
 
 class XRayReportModel(nn.Module):
@@ -252,7 +277,7 @@ def calculate_metrics(labels, preds, threshold=0.5):
 
 def predict(model, image_path, tokenizer, image_transform, device):
     model.eval()
-    image = Image.open(normalize_path(image_path)).convert('L')  # Convert to grayscale
+    image = Image.open(image_path).convert('L')  # Convert to grayscale
     img_tensor = image_transform(image).unsqueeze(0).to(device)
     text = "inference"
     text_enc = tokenizer(text, return_tensors='pt', padding=True, truncation=True, max_length=77).to(device)
@@ -265,44 +290,12 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     logger.info(f'Using device: {device}')
 
-    # load labels & build df
-    labels_df = pd.read_csv('condition_labels.csv')
-    labels_df['conditions'] = labels_df['conditions'].fillna('')
-    records = []
-    for patient_dir in os.listdir(XAMI_MIMIC_PATH):
-        patient_path = os.path.join(XAMI_MIMIC_PATH, patient_dir)
-        if os.path.isdir(patient_path) and patient_dir.startswith('patient_'):
-            for root, _, files in os.walk(patient_path):
-                imgs = [f for f in files if f.lower().endswith(('.jpg','.jpeg','.png'))]
-                txts = [f for f in files if f.lower().endswith(('.txt','.json'))]
-                if imgs and txts:
-                    image_path = os.path.join(root, imgs[0])
-                    transcript_path = os.path.join(root, txts[0])
-                    records.append({
-                        'image_path': image_path,
-                        'transcript_path': os.path.relpath(transcript_path, os.getcwd()).replace('/', '\\')
-                    })
-    logger.info(f"[DEBUG] Number of valid (image, transcript) pairs: {len(records)}")
-    df = pd.DataFrame(records)
-    logger.info(f"[DEBUG] Length of df after fix: {len(df)}")
-    df = pd.merge(df, labels_df, on='transcript_path', how='inner')
-    if df.empty:
-        logger.warning("[WARNING] DataFrame is empty after merging with labels_df.")
-        return
-
-    # labels array
-    labels_list = []
-    for conds in df['conditions']:
-        cl = conds.split('|') if conds else []
-        labels_list.append([1 if c in cl else 0 for c in CONDITIONS])
-    df['labels'] = labels_list
-
-    pos_counts = np.sum(np.array(labels_list), axis=0)
-    total = len(df)
-    pos_weights = torch.tensor([total/(c+1e-5) for c in pos_counts], dtype=torch.float32)
-
-    train_val, test_df = train_test_split(df, test_size=0.2, random_state=42)
-    train_df, val_df  = train_test_split(train_val, test_size=0.2, random_state=42)
+    CONDITIONS = [
+        'Atelectasis', 'Cardiomegaly', 'Consolidation', 'Edema',
+        'Enlarged Cardiomediastinum', 'Fracture', 'Lung Lesion',
+        'Lung Opacity', 'No Finding', 'Pleural Effusion',
+        'Pleural Other', 'Pneumonia', 'Pneumothorax', 'Support Devices'
+    ]
 
     model_name = "microsoft/BiomedVLP-BioViL-T"
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
@@ -312,23 +305,26 @@ def main():
     image_transform = create_chest_xray_transform_for_inference(resize, center_crop_size)
 
     model = XRayReportModel(num_labels=len(CONDITIONS)).to(device)
-    batch_size = get_optimal_batch_size(model) if torch.cuda.is_available() else 4
+    batch_size = 4
 
-    train_ds = XRayReportDataset(train_df, tokenizer, image_transform, augment=True)
-    val_ds   = XRayReportDataset(val_df,   tokenizer, image_transform, augment=False)
-    test_ds  = XRayReportDataset(test_df,  tokenizer, image_transform, augment=False)
+    train_dataset = MedicalDataset(train_df, tokenizer, image_transform, augment=True)
+    val_dataset   = MedicalDataset(test_df,   tokenizer, image_transform, augment=False)
 
-    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True,
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True,
                               num_workers=min(4, os.cpu_count()), pin_memory=True)
-    val_loader   = DataLoader(val_ds,   batch_size=batch_size,
+    val_loader   = DataLoader(val_dataset,   batch_size=batch_size,
                               num_workers=min(4, os.cpu_count()), pin_memory=True)
+
+    pos_counts = np.sum(np.array(train_df['labels'].tolist()), axis=0)
+    total = len(train_df)
+    pos_weights = torch.tensor([total/(c+1e-5) for c in pos_counts], dtype=torch.float32)
 
     train_model(model, train_loader, val_loader, device, pos_weights)
 
     # simple inference on first 3 test samples
     for i in range(min(3, len(test_df))):
         row = test_df.iloc[i]
-        imgp = normalize_path(row['image_path'].replace('{XAMI_MIMIC_PATH}', XAMI_MIMIC_PATH))
+        imgp = row['image_path']
         preds, idx = predict(model, imgp, tokenizer, image_transform, device)
         logger.info(f"Sample {i}: Predicted {CONDITIONS[idx]} with scores {preds}")
 

@@ -3,25 +3,31 @@ import pandas as pd
 import re
 import glob
 from data.paths import MIMIC_EYE_PATH
-from utils import print as print_f
 from tqdm import tqdm
 import time
 
 # Set the path to MIMIC-EYE dataset
 mimic_eye_path = MIMIC_EYE_PATH
 
+print(f"[INFO] mimic_eye_path: {mimic_eye_path}")
+print(f"[INFO] Listing patient directories in: {mimic_eye_path}")
+
 # Find all patient directories
 patient_pattern = re.compile(r'^patient_(\d{8})$')
 patient_dirs = []
 
 start_time = time.time()
-with tqdm(total=len(os.listdir(mimic_eye_path)), desc='Finding patient directories') as pbar:
-    for item in os.listdir(mimic_eye_path):
+patient_items = os.listdir(mimic_eye_path)
+print(f"[INFO] Found {len(patient_items)} items in mimic_eye_path")
+with tqdm(total=len(patient_items), desc='Finding patient directories') as pbar:
+    for idx, item in enumerate(patient_items):
         item_path = os.path.join(mimic_eye_path, item)
         match = patient_pattern.match(item)
         if os.path.isdir(item_path) and match:
             patient_dirs.append((item_path, match.group(1)))
+            print(f"[DEBUG] Found patient dir: {item_path} (id={match.group(1)}) at index {idx}")
         pbar.update(1)
+print(f"[INFO] Total patient directories found: {len(patient_dirs)}")
 
 # Initialize lists to store paths
 image_paths = []
@@ -130,6 +136,27 @@ crosstrain_df = pd.DataFrame({
 # Drop rows with no transcript_path
 crosstrain_df = crosstrain_df.dropna(subset=['transcript_path'])
 
-# Save to CSV
+# ---- Add conditions column from condition_labels.csv ----
+try:
+    # Load condition_labels.csv
+    cond_df = pd.read_csv('condition_labels.csv')
+    # Ensure both id columns are string type for merge
+    crosstrain_df['id'] = crosstrain_df['id'].astype(str)
+    cond_df['id'] = cond_df['id'].astype(str)
+    if 'id' in cond_df.columns and 'conditions' in cond_df.columns:
+        # Merge on 'id' to add 'conditions' column to crosstrain_df
+        crosstrain_df = pd.merge(
+            crosstrain_df,
+            cond_df[['id', 'conditions']],
+            on='id',
+            how='left'
+        )
+    else:
+        print("Warning: condition_labels.csv does not have required columns ['id', 'conditions'].")
+except Exception as e:
+    print(f"Error loading or merging condition_labels.csv: {e}")
+# ---- End conditions column addition ----
+
+# Save to CSV (with conditions column)
 output_path = os.path.join("./", "trans-data.csv")
 crosstrain_df.to_csv(output_path, index=False)
