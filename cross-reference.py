@@ -1,7 +1,36 @@
-import os
 import warnings
+import builtins
+import types
+import contextlib
+import os
 import logging
 import sys
+
+# Suppress all warnings and future warnings
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+os.environ['HF_HUB_DISABLE_SYMLINKS_WARNING'] = '1'
+warnings.filterwarnings('ignore')
+warnings.simplefilter('ignore')
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
+# Patch warnings.warn to suppress specific messages
+_original_warn = warnings.warn
+def custom_warn(message, *args, **kwargs):
+    if isinstance(message, str) and (
+        'Importing from timm.models.layers is deprecated' in message
+        or 'CXRBertModel has no image projection' in message or
+        'Importing from {__name__} is deprecated' in message
+    ):
+        return  # suppress
+    return _original_warn(message, *args, **kwargs)
+warnings.warn = custom_warn
+
+# Suppress logging from libraries
+logging.getLogger('transformers').setLevel(logging.ERROR)
+logging.getLogger('timm').setLevel(logging.ERROR)
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
+
 import pandas as pd
 import numpy as np
 from PIL import Image
@@ -15,48 +44,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-
-# Suppress all warnings and future warnings
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
-os.environ['HF_HUB_DISABLE_SYMLINKS_WARNING'] = '1'
-import warnings
-warnings.filterwarnings('ignore')
-warnings.simplefilter('ignore')
-
-# Suppress specific timm FutureWarnings
-import builtins
-import types
-import contextlib
-
-# Patch warnings.warn to suppress specific messages
-_original_warn = warnings.warn
-def custom_warn(message, *args, **kwargs):
-    if isinstance(message, str) and (
-        'Importing from timm.models.layers is deprecated' in message
-        or 'CXRBertModel has no image projection' in message
-    ):
-        return  # suppress
-    return _original_warn(message, *args, **kwargs)
-warnings.warn = custom_warn
-
-# Suppress logging from libraries
-logging.getLogger('transformers').setLevel(logging.ERROR)
-logging.getLogger('timm').setLevel(logging.ERROR)
-logging.basicConfig(level=logging.ERROR)
-logger = logging.getLogger(__name__)
-
-# Patch stdout/stderr for unwanted prints (optional)
-class SuppressPrint:
-    def __enter__(self):
-        self._stdout = sys.stdout
-        self._stderr = sys.stderr
-        sys.stdout = open(os.devnull, 'w')
-        sys.stderr = open(os.devnull, 'w')
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        sys.stdout.close()
-        sys.stderr.close()
-        sys.stdout = self._stdout
-        sys.stderr = self._stderr
 
 # Path normalization utility
 
