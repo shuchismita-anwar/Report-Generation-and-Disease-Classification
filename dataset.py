@@ -25,9 +25,23 @@ with tqdm(total=len(patient_items), desc='Finding patient directories') as pbar:
         match = patient_pattern.match(item)
         if os.path.isdir(item_path) and match:
             patient_dirs.append((item_path, match.group(1)))
-            print(f"[DEBUG] Found patient dir: {item_path} (id={match.group(1)}) at index {idx}")
+            # print(f"[DEBUG] Found patient dir: {item_path} (id={match.group(1)}) at index {idx}")
         pbar.update(1)
 print(f"[INFO] Total patient directories found: {len(patient_dirs)}")
+
+# Check for patients with more than 2 dicom_id in cxr_meta.csv
+for patient_dir, patient_id in patient_dirs:
+    cxr_jpg_folder = os.path.join(patient_dir, 'CXR-JPG')
+    cxr_meta_path = os.path.join(cxr_jpg_folder, 'cxr_meta.csv')
+    if os.path.exists(cxr_meta_path):
+        try:
+            meta_df = pd.read_csv(cxr_meta_path)
+            if 'dicom_id' in meta_df.columns:
+                unique_dicom_ids = meta_df['dicom_id'].dropna().unique()
+                if len(unique_dicom_ids) > 2:
+                    print(f"[CHECK] Patient {patient_id} has {len(unique_dicom_ids)} dicom_id values in cxr_meta.csv")
+        except Exception as e:
+            print(f"[CHECK WARNING] Could not process {cxr_meta_path}: {e}")
 
 # Initialize lists to store paths
 image_paths = []
@@ -124,6 +138,45 @@ with tqdm(total=len(patient_dirs), desc='Processing patient directories') as pba
                                 patient_ids.append(patient_id)
                                 transcript_paths.append(None)
         pbar.update(1)
+
+# --- Filter image_paths by dicom_id in cxr_meta.csv and matching jpg file ---
+filtered_image_paths = []
+filtered_report_paths = []
+filtered_patient_ids = []
+filtered_transcript_paths = []
+
+for img_path, rpt_path, pid, tr_path in zip(image_paths, report_paths, patient_ids, transcript_paths):
+    # Extract patient id and study id from the image path
+    # Example: .../patient_10015701/CXR-JPG/s53321493/5f1ac54d-47dfae00-930fa704-514131fa-ee0c138e.jpg
+    try:
+        parts = img_path.replace("\\", "/").split("/")
+        patient_folder_idx = next(i for i, p in enumerate(parts) if p.startswith("patient_"))
+        patient_folder = parts[patient_folder_idx]
+        study_folder = parts[patient_folder_idx + 2]  # CXR-JPG/sXXXXX
+        jpg_file = parts[-1]
+        dicom_id = os.path.splitext(jpg_file)[0]
+        # Compose path to cxr_meta.csv
+        cxr_meta_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(img_path))), "CXR-JPG", "cxr_meta.csv")
+        if not os.path.exists(cxr_meta_path):
+            continue
+        meta_df = pd.read_csv(cxr_meta_path)
+        if 'dicom_id' not in meta_df.columns:
+            continue
+        dicom_ids = set(meta_df['dicom_id'].astype(str))
+        # Check if dicom_id is in meta and file exists
+        if dicom_id in dicom_ids and os.path.exists(img_path):
+            filtered_image_paths.append(img_path)
+            filtered_report_paths.append(rpt_path)
+            filtered_patient_ids.append(pid)
+            filtered_transcript_paths.append(tr_path)
+    except Exception as e:
+        print(f"[FILTER WARNING] Could not process {img_path}: {e}")
+
+image_paths = filtered_image_paths
+report_paths = filtered_report_paths
+patient_ids = filtered_patient_ids
+transcript_paths = filtered_transcript_paths
+# --- End filter ---
 
 # Create dataframe
 crosstrain_df = pd.DataFrame({
