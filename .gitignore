@@ -17,6 +17,7 @@
 /utils/__pycache__
 /cross-reference-clip.py
 /model
+/output
 
 # windsurf rules
 .windsurfrules
