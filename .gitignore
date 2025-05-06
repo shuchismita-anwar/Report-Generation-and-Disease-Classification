@@ -18,6 +18,11 @@
 /cross-reference-clip.py
 /model
 /output
+/output_image_bbox
+/output_image_bbox_fixation
+/output_image_only
+/output_image_only_trainer
+/output_full
 
 # windsurf rules
 .windsurfrules

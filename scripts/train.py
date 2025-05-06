@@ -31,10 +31,9 @@ def log_tensor_stats(name, tensor):
 # 1) Fixed label list
 ############################
 CONDITIONS = [
-    'Atelectasis', 'Cardiomegaly', 'Consolidation', 'Edema',
-    'Enlarged Cardiomediastinum', 'Fracture', 'Lung Lesion',
+    'Atelectasis', 'Cardiomegaly', 'Edema',
     'Lung Opacity', 'No Finding', 'Pleural Effusion',
-    'Pleural Other', 'Pneumonia', 'Pneumothorax', 'Support Devices'
+    'Pneumonia', 'Support Devices'
 ]
 cond2idx = {c: i for i, c in enumerate(CONDITIONS)}
 
