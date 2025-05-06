@@ -23,6 +23,7 @@
 /output_image_only
 /output_image_only_trainer
 /output_full
+/best.pt
 
 # windsurf rules
 .windsurfrules
