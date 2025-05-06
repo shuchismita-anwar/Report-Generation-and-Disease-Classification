@@ -21,6 +21,7 @@ from sklearn.metrics import (
     precision_score,
 )
 from sklearn.model_selection import train_test_split
+from tabulate import tabulate
 
 import math
 # import logging
@@ -356,8 +357,12 @@ def main():
     ])
     
     # Print the table
-    from tabulate import tabulate
-    print(tabulate(rows, headers=headers, tablefmt="grid"))
+    table_str = tabulate(rows, headers=headers, tablefmt="grid")
+    print(table_str)
+    
+    # Save the table to a text file in OUTPUT_DIR
+    with open(os.path.join(OUTPUT_DIR, "train_image_bbox_metrics_table.txt"), "w") as f:
+        f.write(table_str)
     
     # Save metrics
     with open(os.path.join(OUTPUT_DIR, "metrics_img_bbox.json"), "w") as f:

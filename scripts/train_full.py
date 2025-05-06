@@ -614,8 +614,13 @@ def main():
         f"{test_metrics['eval_auc']:.3f}"
     ])
     
-    logger.info("\n" + tabulate(rows, headers=headers, tablefmt="grid"))
-
+    table_str = tabulate(rows, headers=headers, tablefmt="grid")
+    logger.info("\n" + table_str)
+    
+    # Save the table to a text file in OUTPUT_DIR
+    with open(os.path.join(OUTPUT_DIR, "train_full_metrics_table.txt"), "w") as f:
+        f.write(table_str)
+    
     # logger.info(f"Test metrics: {test_metrics}")
     with open(os.path.join(OUTPUT_DIR, "metrics_full.json"), "w") as f:
         json.dump(test_metrics, f, indent=4)

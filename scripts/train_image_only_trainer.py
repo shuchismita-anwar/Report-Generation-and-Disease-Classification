@@ -276,7 +276,12 @@ def main():
         f"{test_metrics['eval_auc']:.3f}"
     ])
     
-    print("\n" + tabulate(rows, headers=headers, tablefmt="grid"))
+    table_str = tabulate(rows, headers=headers, tablefmt="grid")
+    print("\n" + table_str)
+    
+    # Save the table to a text file in OUTPUT_DIR
+    with open(os.path.join(OUTPUT_DIR, "train_image_only_metrics_table.txt"), "w") as f:
+        f.write(table_str)
 
     with open(os.path.join(OUTPUT_DIR, "metrics_image_only.json"), "w") as f:
         json.dump({
