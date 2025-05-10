@@ -8,6 +8,10 @@ def analyze_conditions():
     print("Reading dataset...")
     df = pd.read_csv('final_dataset_fixed.csv')
     
+    # Count how many patients have more than 1 condition
+    patients_with_multiple_conditions = (df['condition'].apply(lambda x: len(x.split('|')) > 1)).sum()
+    print(f"Number of patients with more than 1 condition: {patients_with_multiple_conditions}")
+
     # Initialize a dictionary to count conditions
     condition_counts = {}
     condition_split_counts = {}

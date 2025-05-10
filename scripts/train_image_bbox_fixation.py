@@ -58,6 +58,7 @@ GRAD_ACCUM   = 4
 LR           = 1e-4
 WD           = 1e-4
 EPOCHS       = 20
+EARLY_STOPPING_PATIENCE = 3  # Early stopping patience
 GRAD_CLIP    = 1.0
 WARMUP_STEPS = 100
 
@@ -349,7 +350,7 @@ class ImageBboxFixationModel(nn.Module):
             output["loss"] = loss
         return output
 
-from transformers import Trainer, TrainingArguments
+from transformers import Trainer, TrainingArguments, EarlyStoppingCallback
 
 def compute_metrics(eval_pred):
     import numpy as np
@@ -397,12 +398,16 @@ def main():
         remove_unused_columns=False,
         report_to="none"
     )
+    # Add early stopping callback with patience of 3
+    callbacks = [EarlyStoppingCallback(early_stopping_patience=EARLY_STOPPING_PATIENCE)]
+    
     trainer = Trainer(
         model=model,
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=val_dataset,
         compute_metrics=compute_metrics,
+        callbacks=callbacks
     )
     trainer.train()
     print("=== Test ===")

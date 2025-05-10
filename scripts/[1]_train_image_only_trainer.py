@@ -17,7 +17,7 @@ from PIL import Image
 from transformers import (
     Trainer, TrainingArguments, 
     EvalPrediction, DefaultDataCollator,
-    set_seed
+    set_seed, EarlyStoppingCallback
 )
 
 from sklearn.metrics import (
@@ -26,7 +26,6 @@ from sklearn.metrics import (
     recall_score,
     precision_score,
 )
-from sklearn.model_selection import train_test_split
 from tabulate import tabulate
 
 ############################
@@ -42,16 +41,20 @@ cond2idx = {c: i for i, c in enumerate(CONDITIONS)}
 #####################
 # === CONSTANTS === #
 #####################
-DATA_CSV     = "final_dataset_fixed.csv"
+# Correct paths to the dataset files
+TRAIN_CSV    = "dataset_splits/train.csv"
+VAL_CSV      = "dataset_splits/val.csv" 
+TEST_CSV     = "dataset_splits/test.csv"
 IMG_DIR      = os.path.join("output", "img_png")
 OUTPUT_DIR   = "output_image_only_trainer"
-
+EXP_NAME    = "image_vit_base_patch16_224"
 BATCH_SIZE   = 32
-EPOCHS       = 20
+EPOCHS       = 100
 LR           = 1e-4
 WD           = 1e-4
 GRAD_ACCUM   = 4
 WARMUP_STEPS = 100
+EARLY_STOPPING_PATIENCE = 3
 
 SEED         = 42
 set_seed(SEED)
@@ -62,12 +65,13 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 # === DATASET DEF ===   #
 #########################
 class CXRDataset(Dataset):
-    def __init__(self, df: pd.DataFrame, split: str):
-        self.df = df[df["split"] == split].reset_index(drop=True)
+    def __init__(self, df: pd.DataFrame, is_train=False):
+        self.df = df.reset_index(drop=True)
+        self.is_train = is_train
         self.img_tf = transforms.Compose([
             transforms.Resize((224, 224)),
-            transforms.RandomHorizontalFlip(0.5) if split=="train" else nn.Identity(),
-            transforms.RandomRotation(3) if split=="train" else nn.Identity(),
+            transforms.RandomHorizontalFlip(0.5) if is_train else nn.Identity(),
+            transforms.RandomRotation(3) if is_train else nn.Identity(),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.5]*3, std=[0.5]*3),
         ])
@@ -90,10 +94,8 @@ class CXRDataset(Dataset):
         }
 
 ###############################
-# === LOAD & SPLIT DATA ===   #
+# === LOAD DATA ===   #
 ###############################
-df = pd.read_csv(DATA_CSV)
-
 def make_cond_vec(cs: str):
     if pd.isna(cs) or cs == "":
         return [0] * len(CONDITIONS)
@@ -114,32 +116,29 @@ def make_cond_vec(cs: str):
             vec[cond2idx[c]] = 1
     return vec
 
-df["cond_vec"] = df["condition"].apply(make_cond_vec)
+# Load pre-split datasets
+# print("Loading pre-split datasets...")
+# print(f"Train CSV path: {TRAIN_CSV}")
+# print(f"Val CSV path: {VAL_CSV}")
+# print(f"Test CSV path: {TEST_CSV}")
 
-if "split" not in df.columns:
-    # Stratified split by patient_folder using at least one label as stratification
-    # Use the first positive label in cond_vec for stratification
-    df["stratify_label"] = df["cond_vec"].apply(lambda x: np.argmax(x) if np.sum(x) > 0 else -1)
-    # Group by patient_folder and assign the most common label to each patient
-    patient_labels = df.groupby("patient_folder")["stratify_label"].agg(lambda x: x[x!=-1].mode()[0] if any(x!=-1) else -1)
-    patients = patient_labels.index.tolist()
-    labels = patient_labels.values
-    # First split train vs temp (val+test)
-    train_patients, temp_patients, train_labels, temp_labels = train_test_split(
-        patients, labels, test_size=0.3, random_state=SEED, stratify=labels
-    )
-    # Then split temp into val and test
-    val_patients, test_patients, val_labels, test_labels = train_test_split(
-        temp_patients, temp_labels, test_size=0.5, random_state=SEED, stratify=temp_labels
-    )
-    df.loc[df["patient_folder"].isin(train_patients), "split"] = "train"
-    df.loc[df["patient_folder"].isin(val_patients), "split"] = "val"
-    df.loc[df["patient_folder"].isin(test_patients), "split"] = "test"
-    df.drop(columns=["stratify_label"], inplace=True)
+train_df = pd.read_csv(TRAIN_CSV)
+val_df = pd.read_csv(VAL_CSV)
+test_df = pd.read_csv(TEST_CSV)
 
-train_dataset = CXRDataset(df, "train")
-val_dataset = CXRDataset(df, "val")
-test_dataset = CXRDataset(df, "test")
+# print(f"Train samples: {len(train_df)}")
+# print(f"Validation samples: {len(val_df)}")
+# print(f"Test samples: {len(test_df)}")
+
+# Create condition vectors for each dataset
+train_df["cond_vec"] = train_df["condition"].apply(make_cond_vec)
+val_df["cond_vec"] = val_df["condition"].apply(make_cond_vec)
+test_df["cond_vec"] = test_df["condition"].apply(make_cond_vec)
+
+# Create dataset objects
+train_dataset = CXRDataset(train_df, is_train=True)
+val_dataset = CXRDataset(val_df, is_train=False)
+test_dataset = CXRDataset(test_df, is_train=False)
 
 #########################
 # === MODEL DEF ===     #
@@ -202,27 +201,31 @@ def main():
         learning_rate=LR,
         weight_decay=WD,
         logging_dir=os.path.join(OUTPUT_DIR, "logs"),
-        logging_steps=10,
         evaluation_strategy="epoch",
-        # eval_steps=50,
         save_strategy="epoch",
+        save_total_limit=2,
         load_best_model_at_end=True,
         metric_for_best_model="f1",
         greater_is_better=True,
-        # fp16=True,
         dataloader_num_workers=4,
         remove_unused_columns=False,
         report_to="none"
     )
+    
+    # Add early stopping callback with patience of 3
+    callbacks = [EarlyStoppingCallback(early_stopping_patience=EARLY_STOPPING_PATIENCE)]
+    
     trainer = Trainer(
         model=model,
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=val_dataset,
         compute_metrics=compute_metrics,
-        data_collator=DefaultDataCollator()
+        data_collator=DefaultDataCollator(),
+        callbacks=callbacks
     )
     trainer.train()
+    trainer.save_model(os.path.join(OUTPUT_DIR, f"model_{EXP_NAME}"))
     test_metrics = trainer.evaluate(test_dataset)
 
     # Get predictions for test set for detailed per-condition metrics

@@ -20,18 +20,9 @@ from sklearn.metrics import (
     recall_score,
     precision_score,
 )
-from sklearn.model_selection import train_test_split
 from tabulate import tabulate
 
 import math
-# import logging
-
-# # Set up logging
-# logging.basicConfig(
-#     level=logging.INFO,
-#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-# )
-# logger = logging.getLogger('train_image_bbox')
 
 ############################
 # 1) Fixed label list
@@ -46,17 +37,19 @@ cond2idx = {c: i for i, c in enumerate(CONDITIONS)}
 #####################
 # === CONSTANTS === #
 #####################
-DATA_CSV     = "final_dataset_fixed.csv"
+TRAIN_CSV    = "dataset_splits/train.csv"
+VAL_CSV      = "dataset_splits/val.csv"
+TEST_CSV     = "dataset_splits/test.csv"
 IMG_DIR      = os.path.join("output", "img_png")
 BBOX_DIR     = os.path.join("output", "bbox_mask")
 OUTPUT_DIR   = "output_image_bbox"
+EXP_NAME     = "image_bbox_vit_base_patch16_224"
 
-BATCH_SIZE   = 32 # Adjusted based on potential memory increase
+BATCH_SIZE   = 32
 GRAD_ACCUM   = 4
 LR           = 1e-4
 WD           = 1e-4
-EPOCHS       = 20
-GRAD_CLIP    = 1.0
+EPOCHS       = 100
 WARMUP_STEPS = 100
 
 DEVICE       = "cuda" if torch.cuda.is_available() else "cpu"
@@ -70,17 +63,15 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 # === DATASET DEF ===   #
 #########################
 class CXRDataset(Dataset):
-    def __init__(self, df: pd.DataFrame, split: str):
-        # logger.info(f"Initializing {split} dataset with {len(df[df['split'] == split])} samples")
-        self.df = df[df["split"] == split].reset_index(drop=True)
+    def __init__(self, df: pd.DataFrame, is_train=False):
+        self.df = df.reset_index(drop=True)
         # Filter out rows without bbox
         self.df = self.df[self.df["bbox_path"].notna()].reset_index(drop=True)
-        # logger.info(f"After filtering for bbox: {len(self.df)} samples")
-
+        
         self.img_tf = transforms.Compose([
             transforms.Resize((224, 224)),
-            transforms.RandomHorizontalFlip(0.5) if split=="train" else nn.Identity(),
-            transforms.RandomRotation(3) if split=="train" else nn.Identity(),
+            transforms.RandomHorizontalFlip(0.5) if is_train else nn.Identity(),
+            transforms.RandomRotation(3) if is_train else nn.Identity(),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.5]*3, std=[0.5]*3),
         ])
@@ -101,7 +92,6 @@ class CXRDataset(Dataset):
             img = Image.open(img_path).convert("RGB")
             img = self.img_tf(img)
         except Exception as e:
-            # logger.error(f"Error loading image {row['image_path']}: {e}")
             img = torch.zeros(3, 224, 224)
         
         # --- Bbox Mask ---
@@ -110,7 +100,6 @@ class CXRDataset(Dataset):
             mask = Image.open(mask_path).convert("L") # Grayscale
             mask = self.mask_tf(mask)
         except Exception as e:
-            # logger.error(f"Error loading mask {row['bbox_path']}: {e}")
             mask = torch.zeros(1, 224, 224)
         
         # --- Condition Vector ---
@@ -119,10 +108,8 @@ class CXRDataset(Dataset):
         return {"img": img, "bbox": mask, "labels": y}
 
 ###############################
-# === LOAD & SPLIT DATA ===   #
+# === LOAD DATA ===         #
 ###############################
-df = pd.read_csv(DATA_CSV)
-
 def make_cond_vec(cs: str):
     if pd.isna(cs) or cs == "":
         return [0] * len(CONDITIONS)
@@ -143,68 +130,37 @@ def make_cond_vec(cs: str):
             vec[cond2idx[c]] = 1
     return vec
 
-df["cond_vec"] = df["condition"].apply(make_cond_vec)
+# Load pre-split datasets
+# print("Loading pre-split datasets...")
+train_df = pd.read_csv(TRAIN_CSV)
+val_df = pd.read_csv(VAL_CSV)
+test_df = pd.read_csv(TEST_CSV)
 
-if "split" not in df.columns:
-    # logger.info("Creating train/val/test split")
-    # Stratified split by patient_folder using at least one label as stratification
-    # Use the first positive label in cond_vec for stratification
-    df["stratify_label"] = df["cond_vec"].apply(lambda x: np.argmax(x) if np.sum(x) > 0 else -1)
-    # Group by patient_folder and assign the most common label to each patient
-    patient_labels = df.groupby("patient_folder")["stratify_label"].agg(lambda x: x[x!=-1].mode()[0] if any(x!=-1) else -1)
-    patients = patient_labels.index.tolist()
-    labels = patient_labels.values
+# print(f"Train samples: {len(train_df)}")
+# print(f"Validation samples: {len(val_df)}")
+# print(f"Test samples: {len(test_df)}")
 
-    # Ensure labels are not all -1 before stratifying
-    valid_indices = [i for i, l in enumerate(labels) if l != -1]
-    if not valid_indices:
-        # logger.warning("No valid labels found for stratification. Falling back to random split.")
-        patients = df["patient_folder"].unique().tolist()
-        np.random.shuffle(patients)
-        n = len(patients)
-        cut1, cut2 = int(0.7*n), int(0.85*n)
-        train_patients = patients[:cut1]
-        val_patients = patients[cut1:cut2]
-        test_patients = patients[cut2:]
-    else:
-        patients_to_split = [patients[i] for i in valid_indices]
-        labels_to_split = [labels[i] for i in valid_indices]
-        # First split train vs temp (val+test)
-        train_patients, temp_patients, _, _ = train_test_split(
-            patients_to_split, labels_to_split, test_size=0.3, random_state=SEED, stratify=labels_to_split
-        )
-        # Then split temp into val and test
-        val_patients, test_patients, _, _ = train_test_split(
-            temp_patients, labels_to_split[len(train_patients):], # Use corresponding subset of labels for second split stratification
-            test_size=0.5, random_state=SEED, stratify=labels_to_split[len(train_patients):]
-        )
-        # Add back patients with no labels (-1), distributing them randomly
-        no_label_patients = [p for p, l in zip(patients, labels) if l == -1]
-        np.random.shuffle(no_label_patients)
-        n_no_label = len(no_label_patients)
-        cut1_no_label = int(0.7 * n_no_label)
-        cut2_no_label = int(0.85 * n_no_label)
-        train_patients.extend(no_label_patients[:cut1_no_label])
-        val_patients.extend(no_label_patients[cut1_no_label:cut2_no_label])
-        test_patients.extend(no_label_patients[cut2_no_label:])
-
-    df.loc[df["patient_folder"].isin(train_patients), "split"] = "train"
-    df.loc[df["patient_folder"].isin(val_patients), "split"] = "val"
-    df.loc[df["patient_folder"].isin(test_patients), "split"] = "test"
-    if "stratify_label" in df.columns: df.drop(columns=["stratify_label"], inplace=True)
+# Create condition vectors for each dataset
+train_df["cond_vec"] = train_df["condition"].apply(make_cond_vec)
+val_df["cond_vec"] = val_df["condition"].apply(make_cond_vec)
+test_df["cond_vec"] = test_df["condition"].apply(make_cond_vec)
 
 # Create Datasets and DataLoaders
-train_dataset = CXRDataset(df, "train")
+train_dataset = CXRDataset(train_df, is_train=True)
 train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, 
                          num_workers=4, pin_memory=True, prefetch_factor=2)
 
-val_dataset = CXRDataset(df, "val")
+val_dataset = CXRDataset(val_df, is_train=False)
 val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE*2, shuffle=False, # Increase batch size for validation
                        num_workers=4, pin_memory=True, prefetch_factor=2)
 
-test_dataset = CXRDataset(df, "test")
+test_dataset = CXRDataset(test_df, is_train=False)
 test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE*2, shuffle=False,
                         num_workers=4, pin_memory=True, prefetch_factor=2)
+
+# print(f"Train dataset size after filtering: {len(train_dataset)}")
+# print(f"Val dataset size after filtering: {len(val_dataset)}")
+# print(f"Test dataset size after filtering: {len(test_dataset)}")
 
 #########################
 # === MODEL DEF ===     #
@@ -212,7 +168,6 @@ test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE*2, shuffle=False,
 class ImageBboxModel(nn.Module):
     def __init__(self, num_conditions:int):
         super().__init__()
-        # logger.info(f"Initializing model with {num_conditions} conditions")
         # Load pre-trained ViT model
         self.vit = timm.create_model("vit_base_patch16_224", pretrained=True)
         self.vit.head = nn.Identity()
@@ -275,8 +230,6 @@ def compute_metrics(eval_pred):
 # === Main ===  #
 #################
 def main():
-    # logger.info("Starting training process (Transformers Trainer)")
-    # logger.info(f"Using device: {DEVICE}")
     model = ImageBboxModel(len(CONDITIONS))
     training_args = TrainingArguments(
         output_dir=OUTPUT_DIR,
@@ -288,18 +241,17 @@ def main():
         learning_rate=LR,
         weight_decay=WD,
         logging_dir=os.path.join(OUTPUT_DIR, "logs"),
-        logging_steps=10,
         evaluation_strategy="epoch",
-        # eval_steps=50,
         save_strategy="epoch",
+        save_total_limit=2,
         load_best_model_at_end=True,
         metric_for_best_model="f1",
         greater_is_better=True,
-        # fp16=True,
         dataloader_num_workers=4,
         remove_unused_columns=False,
         report_to="none"
     )
+    
     trainer = Trainer(
         model=model,
         args=training_args,
@@ -308,7 +260,8 @@ def main():
         compute_metrics=compute_metrics,
     )
     trainer.train()
-    # logger.info("=== Final Test Evaluation ===")
+    trainer.save_model(os.path.join(OUTPUT_DIR, f"model_{EXP_NAME}"))
+    print("=== Final Test Evaluation ===")
     test_metrics = trainer.evaluate(test_dataset)
     
     # Get predictions for test set
@@ -349,11 +302,11 @@ def main():
     # Add macro average
     rows.append([
         "Macro Avg",
-        f"{test_metrics['eval_precision']:.3f}",
-        f"{test_metrics['eval_recall']:.3f}",
-        f"{test_metrics['eval_f1']:.3f}",
+        f"{test_metrics['test_precision']:.3f}",
+        f"{test_metrics['test_recall']:.3f}",
+        f"{test_metrics['test_f1']:.3f}",
         f"{len(test_dataset)}",
-        f"{test_metrics['eval_auc']:.3f}"
+        f"{test_metrics['test_auc']:.3f}"
     ])
     
     # Print the table
@@ -368,7 +321,7 @@ def main():
     with open(os.path.join(OUTPUT_DIR, "metrics_img_bbox.json"), "w") as f:
         json.dump(test_metrics, f, indent=4)
     print("\nMetrics saved to:", os.path.join(OUTPUT_DIR, "metrics_img_bbox.json"))
-    # logger.info("Training complete")
+    print("Training complete")
 
 if __name__=="__main__":
     main()
