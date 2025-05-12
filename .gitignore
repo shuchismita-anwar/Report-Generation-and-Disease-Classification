@@ -23,6 +23,9 @@
 /output_image_only
 /output_image_only_trainer
 /output_full
+/output_image_only_chexpert_finetuned
+/output_full_with_report
+/output_image_only_finetuned
 /best.pt
 
 # windsurf rules
