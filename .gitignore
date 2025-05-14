@@ -27,6 +27,10 @@
 /output_full_with_report
 /output_image_only_finetuned
 /best.pt
+/output_image_only_chexpert_finetuned_12
+/output_image_only_chexpert_finetuned_raddino
+/output_image_only_chexpert_finetuned_raddino_from_hf
+/output_full_with_report_exp_raddino
 
 # windsurf rules
 .windsurfrules

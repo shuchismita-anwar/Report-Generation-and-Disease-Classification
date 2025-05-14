@@ -322,7 +322,7 @@ class MultiModalModel(nn.Module):
         super().__init__()
         # logger.info(f"Initializing model with {num_conditions} conditions")
         self.contrastive_temperature = contrastive_temperature
-
+        
         # Image encoder (Vision Transformer)
         self.vit = timm.create_model("vit_base_patch16_224.augreg2_in21k_ft_in1k", pretrained=True, num_classes=0) # num_classes=0 for feature extraction
         self.img_proj = nn.Linear(768, 768) # Project to common dimension
