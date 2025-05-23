@@ -52,19 +52,19 @@ IMG_DIR      = os.path.join("output", "img_png") # Keep for reference, but datas
 HF_DATASET_NAME = "danjacobellis/chexpert"
 
 # Path to the *multi-modal* model checkpoint containing the pre-trained image encoder
-MULTI_MODAL_MODEL_PATH = r"output_full_with_report_exp_raddino\model_full_rad_dino_no_report\model.safetensors"
+MULTI_MODAL_MODEL_PATH = r"output_multimodal_vit_features_image_bbox_fixseq_transcript\model_multimodal_vit_features_image_bbox_fixseq_transcript\model.safetensors"
 
 # Output directory for the CheXpert fine-tuned image-only model
-OUTPUT_DIR   = "output_image_only_chexpert_finetuned_raddino"
-EXP_NAME     = "image_only_classifier_chexpert_finetuned_raddino"
+OUTPUT_DIR   = "output_multimodal_vit_finetune_chexpert"
+EXP_NAME     = "multimodal_vit_finetune_chexpert"
 
 OUTPUT_METRICS_FILE = os.path.join(OUTPUT_DIR, "finetuned_image_only_metrics.txt")
 
-BATCH_SIZE   = 16
+BATCH_SIZE   = 64
 GRAD_ACCUM   = 4
-LR           = 5e-5
+LR           = 5e-4
 WD           = 1e-4
-EPOCHS       = 20 # Number of epochs for fine-tuning the head
+EPOCHS       = 20
 EARLY_STOPPING_PATIENCE = 5
 WARMUP_STEPS = 100
 
@@ -74,15 +74,15 @@ torch.manual_seed(SEED)
 np.random.seed(SEED)
 
 # Ensure consistency with the trained ViT
-VIT_MODEL_NAME = "vit_base_patch16_224.augreg2_in21k_ft_in1k"
+VIT_MODEL_NAME = "google/vit-base-patch16-224-in21k"
 IMG_PROJ_DIM = 768 # Dimension of the image projection layer output
 
 # === NEW: Specify the ViT model to use for THIS fine-tuning run ===
 # FINETUNE_VIT_MODEL_NAME = "vit_base_patch16_224.augreg2_in21k_ft_in1k" # Default to original, change this to try others
 # Example: FINETUNE_VIT_MODEL_NAME = "vit_large_patch16_224.augreg_in21k_ft_in1k"
 # Example: FINETUNE_VIT_MODEL_NAME = "swin_base_patch4_window7_224.ms_in22k_ft_in1k"
-# FINETUNE_VIT_MODEL_NAME = "google/vit-base-patch16-224-in21k" # Using a HF model name
-FINETUNE_VIT_MODEL_NAME = "microsoft/rad-dino"
+FINETUNE_VIT_MODEL_NAME = "google/vit-base-patch16-224-in21k" # Using a HF model name
+# FINETUNE_VIT_MODEL_NAME = "microsoft/rad-dino"
 
 STRATIFY_COLUMN_NAME = "Consolidation" # Column to use for stratification
 
@@ -96,10 +96,18 @@ class CXRImageDataset(Dataset):
         # Filtering and cond_vec creation is now expected to be done in a preprocessing step before this class is instantiated.
 
         # Use non-random transforms for evaluation (same as original test transform)
+        # self.img_tf = transforms.Compose([
+        #     transforms.Resize((224, 224)),
+            
+        #     transforms.ToTensor(),
+        #     transforms.Normalize(mean=[0.5]*3, std=[0.5]*3), # Ensure this matches ViT pretraining if applicable
+        # ])
         self.img_tf = transforms.Compose([
             transforms.Resize((224, 224)),
+            transforms.RandomHorizontalFlip(0.5) if split_name=="train" else nn.Identity(),
+            transforms.RandomRotation(3) if split_name=="train" else nn.Identity(),
             transforms.ToTensor(),
-            transforms.Normalize(mean=[0.5]*3, std=[0.5]*3), # Ensure this matches ViT pretraining if applicable
+            transforms.Normalize(mean=[0.5]*3, std=[0.5]*3),
         ])
 
     def __len__(self):
@@ -182,13 +190,19 @@ class ImageOnlyClassifier(nn.Module):
         self.classifier = nn.Linear(IMG_PROJ_DIM, num_conditions * 4)
 
     def freeze_encoder(self):
-        logger.info(f"Freezing image encoder (ViT: {self.vit.__class__.__name__} and projection layer) weights.")
-        for param in self.vit.parameters():
-            param.requires_grad = True   # Freeze the encoder
+        # Scenario B: Fine-tune the ViT, freeze only the projection layer
+        logger.info(f"Fine-tuning ViT ({self.vit.__class__.__name__}). Freezing only the projection layer (img_proj). Training classifier head.")
+        # Keep self.vit parameters trainable (requires_grad = True by default)
+        # Freeze only self.img_proj
         for param in self.img_proj.parameters():
-            param.requires_grad = False  # Not Freeze the projection layer
+            param.requires_grad = False
+        # Ensure classifier head remains trainable (it should be by default)
+        for param in self.classifier.parameters():
+            param.requires_grad = True
 
     def unfreeze_encoder(self):
+        # This method might not be strictly needed if freeze_encoder handles the desired state,
+        # but we can update it for consistency or if switching strategies.
         logger.info("Unfreezing image encoder (ViT and projection layer) weights.")
         for param in self.vit.parameters():
             param.requires_grad = True
@@ -264,26 +278,26 @@ def compute_metrics(eval_pred: EvalPrediction):
         preds_filtered = preds_reshaped[valid_indices]
         if len(labels_filtered) == 0:
              logger.error("No valid labels found after filtering in compute_metrics.")
-             return {"accuracy": 0.0, "f1_weighted": 0.0, "recall_weighted": 0.0, "precision_weighted": 0.0}
+             return {"accuracy": 0.0, "f1_micro": 0.0, "recall_micro": 0.0, "precision_micro": 0.0}
     else:
         labels_filtered = labels_reshaped
         preds_filtered = preds_reshaped
 
-    # Calculate overall multi-class metrics using WEIGHTED averaging
+    # Calculate overall multi-class metrics using MICRO averaging
     try:
         accuracy = accuracy_score(labels_filtered, preds_filtered)
-        f1_weighted = f1_score(labels_filtered, preds_filtered, average="weighted", zero_division=0)
-        recall_weighted = recall_score(labels_filtered, preds_filtered, average="weighted", zero_division=0)
-        precision_weighted = precision_score(labels_filtered, preds_filtered, average="weighted", zero_division=0)
+        f1_micro = f1_score(labels_filtered, preds_filtered, average="weighted", zero_division=0)
+        recall_micro = recall_score(labels_filtered, preds_filtered, average="weighted", zero_division=0)
+        precision_micro = precision_score(labels_filtered, preds_filtered, average="weighted", zero_division=0)
     except Exception as e:
         logger.error(f"Error calculating multi-class metrics: {e}")
-        accuracy, f1_weighted, recall_weighted, precision_weighted = 0.0, 0.0, 0.0, 0.0
+        accuracy, f1_micro, recall_micro, precision_micro = 0.0, 0.0, 0.0, 0.0
 
     return {
         "accuracy": accuracy,
-        "f1_weighted": f1_weighted,
-        "recall_weighted": recall_weighted,
-        "precision_weighted": precision_weighted
+        "f1_micro": f1_micro,
+        "recall_micro": recall_micro,
+        "precision_micro": precision_micro
     }
 
 ###############################################
@@ -303,19 +317,26 @@ def log_condition_label_distribution(dataset: Any, dataset_name: str, conditions
     # This might be slow for large datasets, especially train. Consider sampling if needed.
     # Access the 'cond_vec' which holds the list of 8 labels (0-3) for each sample.
     try:
-        for i in tqdm(range(total_samples), desc=f"Calculating {dataset_name} distribution"):
-            cond_vector = dataset[i]['cond_vec']
-            if len(cond_vector) == len(conditions):
-                for cond_idx, label in enumerate(cond_vector):
-                    condition_name = conditions[cond_idx]
-                    if label in label_counts[condition_name]:
-                        label_counts[condition_name][label] += 1
-                    else:
-                        # This case should ideally not happen if map_labels clamps values correctly
-                        logger.warning(f"Unexpected label value '{label}' found for condition '{condition_name}' in {dataset_name} set sample {i}.")
-            else:
-                 logger.warning(f"Length mismatch between cond_vec ({len(cond_vector)}) and CONDITIONS ({len(conditions)}) in {dataset_name} set sample {i}.")
-
+        # for i in tqdm(range(total_samples), desc=f"Calculating {dataset_name} distribution"):
+        #     cond_vector = dataset[i]['cond_vec']
+        #     if len(cond_vector) == len(conditions):
+        #         for cond_idx, label in enumerate(cond_vector):
+        #             condition_name = conditions[cond_idx]
+        #             if label in label_counts[condition_name]:
+        #                 label_counts[condition_name][label] += 1
+        #             else:
+        #                 # This case should ideally not happen if map_labels clamps values correctly
+        #                 logger.warning(f"Unexpected label value '{label}' found for condition '{condition_name}' in {dataset_name} set sample {i}.")
+        #     else:
+        #          logger.warning(f"Length mismatch between cond_vec ({len(cond_vector)}) and CONDITIONS ({len(conditions)}) in {dataset_name} set sample {i}.")
+        pass
+        # Log the results
+        logger.info(f"Label distribution for {dataset_name} set:")
+        for condition_name in conditions:
+            counts = label_counts[condition_name]
+            total = sum(counts.values())
+            logger.info(f"Condition: {condition_name}")
+        
     except KeyError:
         logger.error(f"'cond_vec' column not found in {dataset_name} dataset. Cannot calculate distribution. Was map_labels applied correctly?")
         return
@@ -543,12 +564,12 @@ def main():
         learning_rate=LR,
         weight_decay=WD,
         logging_dir=os.path.join(current_output_dir, "logs"), # Use updated path
-        logging_steps=50, # Log more frequently during fine-tuning
+        logging_steps=50,
         evaluation_strategy="epoch",
         save_strategy="epoch",
         save_total_limit=2,
         load_best_model_at_end=True,
-        metric_for_best_model="f1_weighted",
+        metric_for_best_model="f1_micro",
         greater_is_better=True,
         dataloader_num_workers=4,
         save_safetensors=True,
@@ -557,6 +578,17 @@ def main():
     )
 
     callbacks = [EarlyStoppingCallback(early_stopping_patience=EARLY_STOPPING_PATIENCE)]
+
+    # Check for existing checkpoints to resume from
+    resume_from_checkpoint = None
+    if os.path.exists(current_output_dir):
+        checkpoint_dirs = [d for d in os.listdir(current_output_dir) if d.startswith("checkpoint-")]
+        if checkpoint_dirs:
+            # Sort by checkpoint number
+            checkpoint_dirs.sort(key=lambda x: int(x.split("-")[1]))
+            latest_checkpoint = checkpoint_dirs[-1]
+            resume_from_checkpoint = os.path.join(current_output_dir, latest_checkpoint)
+            logger.info(f"Found existing checkpoint: {resume_from_checkpoint}. Will resume training from this point.")
 
     trainer = Trainer(
         model=model,
@@ -569,7 +601,8 @@ def main():
 
     # === Train ===
     logger.info("Starting fine-tuning of the classifier head...")
-    trainer.train()
+    # Pass resume_from_checkpoint to the train method instead of in the constructor
+    trainer.train(resume_from_checkpoint=resume_from_checkpoint)
 
     # === Final Evaluation ===
     logger.info("Fine-tuning complete. Evaluating on Test Set...")
@@ -586,8 +619,8 @@ def main():
     # Log the metrics dictionary returned by compute_metrics during trainer.evaluate
     for key, value in test_metrics.items():
         if key.startswith("test_"): # Hugging Face prepends "test_"
-             # Adjust key display for weighted-averaged metrics
-             display_key = key[5:].replace('_', ' ').replace('weighted', '(weighted)').capitalize()
+             # Adjust key display for micro-averaged metrics
+             display_key = key[5:].replace('_', ' ').replace('micro', '(micro)').capitalize()
              logger.info(f"{display_key}: {value:.4f}")
     logger.info("-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-")
 
@@ -599,7 +632,7 @@ def main():
             f.write("-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-\n")
             for key, value in test_metrics.items():
                 if key.startswith("test_"):
-                    display_key = key[5:].replace('_', ' ').replace('weighted', '(weighted)').capitalize()
+                    display_key = key[5:].replace('_', ' ').replace('micro', '(micro)').capitalize()
                     f.write(f"{display_key}: {value:.4f}\n")
         logger.info(f"Metrics report saved to {current_output_metrics_file}")
     except Exception as e:

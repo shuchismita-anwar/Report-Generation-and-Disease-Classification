@@ -31,6 +31,9 @@
 /output_image_only_chexpert_finetuned_raddino
 /output_image_only_chexpert_finetuned_raddino_from_hf
 /output_full_with_report_exp_raddino
+/output_image_only_trainer_chexpert
+/output_multimodal_vit_features_image_bbox_fixseq_transcript
+/output_multimodal_vit_finetune_chexpert
 
 # windsurf rules
 .windsurfrules

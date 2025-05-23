@@ -60,11 +60,11 @@ EXP_NAME     = "image_only_classifier_chexpert_finetuned_raddino_from_hf" # <-- 
 
 OUTPUT_METRICS_FILE = os.path.join(OUTPUT_DIR, "finetuned_image_only_metrics.txt")
 
-BATCH_SIZE   = 16
+BATCH_SIZE   = 64
 GRAD_ACCUM   = 4
 LR           = 2e-5 # <-- UPDATED LR for full fine-tuning
 WD           = 1e-4
-EPOCHS       = 20 # Number of epochs for fine-tuning
+EPOCHS       = 1 # Number of epochs for fine-tuning
 EARLY_STOPPING_PATIENCE = 5
 WARMUP_STEPS = 100
 
@@ -81,8 +81,9 @@ IMG_PROJ_DIM = 768 # Dimension of the image projection layer output
 # FINETUNE_VIT_MODEL_NAME = "vit_base_patch16_224.augreg2_in21k_ft_in1k" # Default to original, change this to try others
 # Example: FINETUNE_VIT_MODEL_NAME = "vit_large_patch16_224.augreg_in21k_ft_in1k"
 # Example: FINETUNE_VIT_MODEL_NAME = "swin_base_patch4_window7_224.ms_in22k_ft_in1k"
-# FINETUNE_VIT_MODEL_NAME = "google/vit-base-patch16-224-in21k" # Using a HF model name
-FINETUNE_VIT_MODEL_NAME = "microsoft/rad-dino"
+FINETUNE_VIT_MODEL_NAME = "google/vit-base-patch16-224-in21k" # Using a HF model name
+# FINETUNE_VIT_MODEL_NAME = 'google/vit-base-patch16-224'
+# FINETUNE_VIT_MODEL_NAME = "microsoft/rad-dino"
 
 STRATIFY_COLUMN_NAME = "Consolidation" # Column to use for stratification
 
@@ -274,19 +275,19 @@ def log_condition_label_distribution(dataset: Any, dataset_name: str, conditions
     # This might be slow for large datasets, especially train. Consider sampling if needed.
     # Access the 'cond_vec' which holds the list of 8 labels (0-3) for each sample.
     try:
-        for i in tqdm(range(total_samples), desc=f"Calculating {dataset_name} distribution"):
-            cond_vector = dataset[i]['cond_vec']
-            if len(cond_vector) == len(conditions):
-                for cond_idx, label in enumerate(cond_vector):
-                    condition_name = conditions[cond_idx]
-                    if label in label_counts[condition_name]:
-                        label_counts[condition_name][label] += 1
-                    else:
-                        # This case should ideally not happen if map_labels clamps values correctly
-                        logger.warning(f"Unexpected label value '{label}' found for condition '{condition_name}' in {dataset_name} set sample {i}.")
-            else:
-                 logger.warning(f"Length mismatch between cond_vec ({len(cond_vector)}) and CONDITIONS ({len(conditions)}) in {dataset_name} set sample {i}.")
-
+        # for i in tqdm(range(total_samples), desc=f"Calculating {dataset_name} distribution"):
+        #     cond_vector = dataset[i]['cond_vec']
+        #     if len(cond_vector) == len(conditions):
+        #         for cond_idx, label in enumerate(cond_vector):
+        #             condition_name = conditions[cond_idx]
+        #             if label in label_counts[condition_name]:
+        #                 label_counts[condition_name][label] += 1
+        #             else:
+        #                 # This case should ideally not happen if map_labels clamps values correctly
+        #                 logger.warning(f"Unexpected label value '{label}' found for condition '{condition_name}' in {dataset_name} set sample {i}.")
+        #     else:
+        #          logger.warning(f"Length mismatch between cond_vec ({len(cond_vector)}) and CONDITIONS ({len(conditions)}) in {dataset_name} set sample {i}.")
+        pass
     except KeyError:
         logger.error(f"'cond_vec' column not found in {dataset_name} dataset. Cannot calculate distribution. Was map_labels applied correctly?")
         return
@@ -563,6 +564,57 @@ def main():
         logger.info(f"Overall test metrics saved to {metrics_json_path}")
     except Exception as e:
         logger.error(f"Failed to save metrics JSON: {e}")
+    
+    # === NEW: Visualize predictions for a few test samples ===
+    logger.info("\n=== Visualizing predictions for sample test images ===")
+    
+    # Get predictions for test set
+    test_predictions = trainer.predict(test_dataset)
+    logits = test_predictions.predictions
+    true_labels = test_predictions.label_ids
+    
+    # Number of samples to visualize
+    num_samples_to_show = min(5, len(test_dataset))
+    
+    # For each sample, show the predictions
+    for i in range(num_samples_to_show):
+        # Get the logits for this sample (shape: [num_conditions * 4])
+        sample_logits = logits[i]
+        
+        # Reshape to [num_conditions, 4]
+        sample_logits_reshaped = sample_logits.reshape(len(CONDITIONS), 4)
+        
+        # Get the predicted class (0-3) for each condition
+        sample_preds = np.argmax(sample_logits_reshaped, axis=1)
+        
+        # Get the true labels for this sample
+        sample_true_labels = true_labels[i]
+        
+        # Create a binary vector for conditions with prediction > 0
+        # (0 = not mentioned, >0 = some level of presence)
+        binary_pred_vector = [1 if pred > 0 else 0 for pred in sample_preds]
+        
+        # Display prediction info
+        logger.info(f"\nSample {i+1}:")
+        logger.info(f"Binary prediction vector (1 if condition present): {binary_pred_vector}")
+        
+        # Display per-condition predictions with condition names
+        logger.info("Detailed predictions (CheXpert classes 0-3):")
+        for cond_idx, condition in enumerate(CONDITIONS):
+            pred_class = sample_preds[cond_idx]
+            true_class = sample_true_labels[cond_idx]
+            class_meaning = {
+                0: "Not Mentioned",
+                1: "Negative",
+                2: "Uncertain",
+                3: "Positive"
+            }
+            pred_status = class_meaning.get(pred_class, "Unknown")
+            true_status = class_meaning.get(true_class, "Unknown")
+            
+            logger.info(f"  {condition}: Predicted={pred_class} ({pred_status}), True={true_class} ({true_status})")
+    
+    logger.info("=== End of prediction visualization ===")
 
     logger.info("Image-only FULL fine-tuning and evaluation complete.") # <-- Updated log
 

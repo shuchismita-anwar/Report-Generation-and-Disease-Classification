@@ -54,19 +54,21 @@ VAL_CSV      = "dataset_splits/val.csv"
 TEST_CSV     = "dataset_splits/test.csv"
 
 FIXSTATS_NPZ = "fixstats.npz"
+
 IMG_DIR      = os.path.join("output", "img_png")
 BBOX_DIR     = os.path.join("output", "bbox_mask")
 FIXSEQ_DIR   = os.path.join("output", "fix_seq")
-OUTPUT_DIR   = "output_full_with_report_exp_raddino"
 
-EXP_NAME     = "full_rad_dino_no_report"
+OUTPUT_DIR   = "output_multimodal_vit_features_image_bbox_fixseq_transcript"
 
-BATCH_SIZE   = 32 # Adjusted based on potential memory increase
+EXP_NAME     = "multimodal_vit_features_image_bbox_fixseq_transcript"
+
+BATCH_SIZE   = 32
 GRAD_ACCUM   = 4
-LR           = 1e-4
+LR           = 1e-5
 WD           = 1e-4
 EPOCHS       = 20
-EARLY_STOPPING_PATIENCE = 5  # Early stopping patience
+EARLY_STOPPING_PATIENCE = 5
 WARMUP_STEPS = 100
 
 DEVICE       = "cuda" if torch.cuda.is_available() else "cpu"
@@ -301,7 +303,8 @@ class MultiModalModel(nn.Module):
         self.contrastive_temperature = contrastive_temperature
 
         # --- Image encoder (Hugging Face microsoft/rad-dino) ---
-        hf_img_model_name = "microsoft/rad-dino"
+        # hf_img_model_name = "microsoft/rad-dino"
+        hf_img_model_name = "google/vit-base-patch16-224-in21k"
         logger.info(f"Loading image encoder from Hugging Face Hub: {hf_img_model_name}")
         try:
             # Load the model directly from Hugging Face Hub
