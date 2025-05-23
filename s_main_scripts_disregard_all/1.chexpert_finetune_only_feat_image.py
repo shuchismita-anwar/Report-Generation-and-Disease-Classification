@@ -60,10 +60,10 @@ HF_DATASET_NAME = "danjacobellis/chexpert"
 IMG_DIR = os.path.join("output", "img_png")
 
 # Output directory for the image-only model
-OUTPUT_DIR = "output_image_only_trainer_chexpert"
-EXP_NAME = "image_only_trainer_chexpert"
+OUTPUT_DIR = "output_1.chexpert_finetune_only_feat_image"
+EXP_NAME = "1.chexpert_finetune_only_feat_image"
 
-OUTPUT_METRICS_FILE = os.path.join(OUTPUT_DIR, "trainer_image_only_metrics.txt")
+OUTPUT_METRICS_FILE = os.path.join(OUTPUT_DIR, "1.chexpert_finetune_only_feat_image_trainer_image_only_metrics.txt")
 
 BATCH_SIZE = 32
 EPOCHS = 100

@@ -55,10 +55,10 @@ HF_DATASET_NAME = "danjacobellis/chexpert"
 MULTI_MODAL_MODEL_PATH = r"output_multimodal_vit_features_image_bbox_fixseq_transcript\model_multimodal_vit_features_image_bbox_fixseq_transcript\model.safetensors"
 
 # Output directory for the CheXpert fine-tuned image-only model
-OUTPUT_DIR   = "output_multimodal_vit_finetune_chexpert"
-EXP_NAME     = "multimodal_vit_finetune_chexpert"
+OUTPUT_DIR   = "output_2.multimodal_of_mimiceye_feat_image_chexpert_finetune_only_feat_image"
+EXP_NAME     = "2.multimodal_of_mimiceye_feat_image_chexpert_finetune_only_feat_image"
 
-OUTPUT_METRICS_FILE = os.path.join(OUTPUT_DIR, "finetuned_image_only_metrics.txt")
+OUTPUT_METRICS_FILE = os.path.join(OUTPUT_DIR, "2.multimodal_of_mimiceye_feat_image_chexpert_finetune_only_feat_image_finetuned_image_only_metrics.txt")
 
 BATCH_SIZE   = 64
 GRAD_ACCUM   = 4
@@ -137,9 +137,13 @@ class CXRImageDataset(Dataset):
             logger.error(f"Error processing labels for item {idx}: {e}")
             labels = torch.zeros(len(CONDITIONS), dtype=torch.long) # Use long
 
+        # --- Unique Identifier ---
+        unique_id = f"sample_{idx}"
+
         return {
             "img": img,
-            "labels": labels
+            "labels": labels,
+            "unique_id": unique_id
         }
 
 ###############################
@@ -160,7 +164,7 @@ def make_cond_vec(cs: str):
     return vec
 
 #########################
-# === MODEL DEF ===     # (Simplified Image-Only Classifier)
+# === MODEL DEF ===     # (Image-Only Classifier)
 #########################
 class ImageOnlyClassifier(nn.Module):
     def __init__(self, num_conditions: int, vit_model_name: str):
@@ -600,7 +604,7 @@ def main():
     )
 
     # === Train ===
-    logger.info("Starting fine-tuning of the classifier head...")
+    logger.info("Starting fine-tuning of the classifier head (image-only)...")
     # Pass resume_from_checkpoint to the train method instead of in the constructor
     trainer.train(resume_from_checkpoint=resume_from_checkpoint)
 
@@ -610,9 +614,48 @@ def main():
     logger.info(f"Test metrics: {test_metrics}")
 
     # === Get predictions using the best model loaded by Trainer ===
-    # test_predictions = trainer.predict(test_dataset) # No longer need to redo predict here, test_metrics has it
-    # logits = test_predictions.predictions # Get logits array
-    # labels = test_predictions.label_ids
+    logger.info("Getting predictions for CSV generation...")
+    test_predictions = trainer.predict(test_dataset)
+    logits = test_predictions.predictions # Get logits array
+    labels = test_predictions.label_ids # Get true labels
+
+    # === Create CSV with predictions and real labels ===
+    logger.info("Creating CSV with real and predicted labels...")
+    
+    # Convert logits to predicted classes
+    if isinstance(logits, dict):
+        logits = logits['logits']
+    if isinstance(logits, torch.Tensor):
+        logits = logits.cpu().numpy()
+    if isinstance(labels, torch.Tensor):
+        labels = labels.cpu().numpy()
+    
+    # Reshape logits from [B, num_conditions * 4] to [B, num_conditions, 4] and get predictions
+    batch_size = logits.shape[0]
+    num_conditions = len(CONDITIONS)
+    logits_reshaped = logits.reshape(batch_size, num_conditions, 4)
+    predicted_labels = np.argmax(logits_reshaped, axis=2)  # [B, num_conditions]
+    
+    # Create DataFrame
+    csv_data = []
+    for i in range(batch_size):
+        row = {"unique_id": f"sample_{i}"}
+        
+        # Add real labels
+        for j, condition in enumerate(CONDITIONS):
+            row[f"real_{condition}"] = labels[i][j]
+        
+        # Add predicted labels  
+        for j, condition in enumerate(CONDITIONS):
+            row[f"pred_{condition}"] = predicted_labels[i][j]
+            
+        csv_data.append(row)
+    
+    # Save to CSV
+    csv_df = pd.DataFrame(csv_data)
+    csv_path = os.path.join(current_output_dir, "test_predictions_and_labels.csv")
+    csv_df.to_csv(csv_path, index=False)
+    logger.info(f"Saved predictions and labels CSV to: {csv_path}")
 
     logger.info("\nFine-tuned Image-Only Test Set Metrics (4-Class Multi-Label):")
     logger.info("-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-")
@@ -647,7 +690,7 @@ def main():
     except Exception as e:
         logger.error(f"Failed to save metrics JSON: {e}")
 
-    logger.info("Image-only binary fine-tuning and evaluation complete.")
+    logger.info("Image-only fine-tuning and evaluation complete.")
 
 if __name__ == "__main__":
-    main()
+    main() 
