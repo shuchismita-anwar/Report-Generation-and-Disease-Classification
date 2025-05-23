@@ -36,7 +36,8 @@
 /output_multimodal_vit_features_image_bbox_fixseq_transcript
 /output_multimodal_vit_finetune_chexpert
 /output_1.chexpert_finetune_only_feat_image
-
+/output_2.multimodal_of_mimiceye_feat_image_chexpert_finetune_only_feat_image
+/output_3.multimodal_of_mimiceye_feat_image_bbox_chexpert_finetune_only_feat_image
 # windsurf rules
 .windsurfrules
 instructions.txt

@@ -130,9 +130,13 @@ class CXRDataset(Dataset):
             logger.error(f"Error processing labels for item {idx}: {e}")
             labels = torch.zeros(len(CONDITIONS), dtype=torch.float32)
 
+        # --- Unique Identifier ---
+        unique_id = f"sample_{idx}"
+
         return {
             "pixel_values": img,
-            "labels": labels
+            "labels": labels,
+            "unique_id": unique_id
         }
 
 ###############################
@@ -490,7 +494,7 @@ def main():
     logger.info(f"Test metrics: {test_metrics}")
 
     # Get predictions for test set for detailed per-condition metrics
-    logger.info("Calculating per-condition test metrics...")
+    logger.info("Getting predictions for CSV generation...")
     test_predictions = trainer.predict(test_dataset)
     # In ImageOnlyModel, predictions from trainer.predict() are the logits directly
     logits = test_predictions.predictions 
@@ -502,7 +506,40 @@ def main():
     if isinstance(labels, torch.Tensor):
         labels = labels.cpu().numpy()
 
+    # === Create CSV with predictions and real labels ===
+    logger.info("Creating CSV with real and predicted labels...")
+    
+    # Convert logits to binary predictions (for binary classification)
     probs = 1 / (1 + np.exp(-logits))  # Sigmoid
+    predicted_labels = (probs > 0.5).astype(int)  # Binary predictions (0 or 1)
+    
+    # Create DataFrame
+    csv_data = []
+    batch_size = logits.shape[0]
+    for i in range(batch_size):
+        row = {"unique_id": f"sample_{i}"}
+        
+        # Add real labels (binary: 0 or 1)
+        for j, condition in enumerate(CONDITIONS):
+            row[f"real_{condition}"] = int(labels[i][j])
+        
+        # Add predicted labels (binary: 0 or 1)
+        for j, condition in enumerate(CONDITIONS):
+            row[f"pred_{condition}"] = int(predicted_labels[i][j])
+            
+        # Add prediction probabilities
+        for j, condition in enumerate(CONDITIONS):
+            row[f"prob_{condition}"] = float(probs[i][j])
+            
+        csv_data.append(row)
+    
+    # Save to CSV
+    csv_df = pd.DataFrame(csv_data)
+    csv_path = os.path.join(OUTPUT_DIR, "test_predictions_and_labels.csv")
+    csv_df.to_csv(csv_path, index=False)
+    logger.info(f"Saved predictions and labels CSV to: {csv_path}")
+
+    logger.info("Calculating per-condition test metrics...")
     y_pred = (probs > 0.5).astype(int)
     
     # Calculate metrics for each condition

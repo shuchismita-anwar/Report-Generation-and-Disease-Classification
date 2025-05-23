@@ -60,13 +60,13 @@ EXP_NAME     = "5.multimodal_of_mimiceye_feat_image_bbox_fix_transcript_chexpert
 
 OUTPUT_METRICS_FILE = os.path.join(OUTPUT_DIR, "5.multimodal_of_mimiceye_feat_image_bbox_fix_transcript_chexpert_finetune_only_feat_image_finetuned_image_only_metrics.txt")
 
-BATCH_SIZE   = 64
+BATCH_SIZE   = 32
 GRAD_ACCUM   = 4
-LR           = 5e-4
+LR           = 1e-4
 WD           = 1e-4
-EPOCHS       = 20
-EARLY_STOPPING_PATIENCE = 5
-WARMUP_STEPS = 100
+EPOCHS       = 100
+EARLY_STOPPING_PATIENCE = 3
+WARMUP_STEPS = 20
 
 DEVICE       = "cuda" if torch.cuda.is_available() else "cpu"
 SEED         = 42
@@ -607,6 +607,11 @@ def main():
     logger.info("Starting fine-tuning of the classifier head...")
     # Pass resume_from_checkpoint to the train method instead of in the constructor
     trainer.train(resume_from_checkpoint=resume_from_checkpoint)
+
+    # Save the best model
+    model_save_path = os.path.join(current_output_dir, f"model_{current_exp_name}")
+    trainer.save_model(model_save_path)
+    logger.info(f"Best model saved to {model_save_path}")
 
     # === Final Evaluation ===
     logger.info("Fine-tuning complete. Evaluating on Test Set...")
