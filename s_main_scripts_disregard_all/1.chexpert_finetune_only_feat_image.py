@@ -43,11 +43,16 @@ logger = logging.getLogger('train_image_only_chexpert')
 ############################
 # 1) Fixed label list
 ############################
-CONDITIONS = [
-    'Atelectasis', 'Cardiomegaly', 'Edema',
-    'Lung Opacity', 'No Finding', 'Pleural Effusion',
-    'Pneumonia', 'Support Devices'
-]
+# CONDITIONS = [
+#     'Atelectasis', 'Cardiomegaly', 'Edema',
+#     'Lung Opacity', 'No Finding', 'Pleural Effusion',
+#     'Pneumonia', 'Support Devices'
+# ]
+
+CONDITIONS = ['Atelectasis','Cardiomegaly','Consolidation','Edema','Enlarged Cardiomediastinum',
+                              'Fracture','Lung Lesion','Lung Opacity','No Finding', 'Pleural Effusion','Pleural Other',
+                              'Pneumonia','Pneumothorax','Support Devices']
+
 cond2idx = {c: i for i, c in enumerate(CONDITIONS)}
 
 #####################
@@ -65,13 +70,22 @@ EXP_NAME = "1.chexpert_finetune_only_feat_image"
 
 OUTPUT_METRICS_FILE = os.path.join(OUTPUT_DIR, "1.chexpert_finetune_only_feat_image_trainer_image_only_metrics.txt")
 
-BATCH_SIZE = 32
-EPOCHS = 100
-LR = 1e-4
-WD = 1e-4
-GRAD_ACCUM = 4
-WARMUP_STEPS = 20
-EARLY_STOPPING_PATIENCE = 3
+# BATCH_SIZE = 32
+# EPOCHS = 100
+# LR = 1e-4
+# WD = 1e-4
+# GRAD_ACCUM = 4
+# WARMUP_STEPS = 20
+# EARLY_STOPPING_PATIENCE = 3
+
+
+BATCH_SIZE   = 64
+GRAD_ACCUM   = 4
+LR           = 5e-5
+WD           = 1e-4
+EPOCHS       = 20
+EARLY_STOPPING_PATIENCE = 5
+WARMUP_STEPS = 100
 
 # Use HF ViT model
 VIT_MODEL_NAME = "google/vit-base-patch16-224-in21k"

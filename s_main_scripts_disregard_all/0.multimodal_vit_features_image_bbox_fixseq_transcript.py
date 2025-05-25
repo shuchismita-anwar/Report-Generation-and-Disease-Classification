@@ -44,6 +44,11 @@ CONDITIONS = [
     'Lung Opacity', 'No Finding', 'Pleural Effusion',
     'Pneumonia', 'Support Devices'
 ]
+
+# CONDITIONS = ['Atelectasis','Cardiomegaly','Consolidation','Edema','Enlarged Cardiomediastinum',
+#                               'Fracture','Lung Lesion','Lung Opacity','No Finding', 'Pleural Effusion','Pleural Other',
+#                               'Pneumonia','Pneumothorax','Support Devices']
+
 cond2idx = {c: i for i, c in enumerate(CONDITIONS)}
 
 #####################
@@ -67,8 +72,8 @@ BATCH_SIZE   = 32
 GRAD_ACCUM   = 4
 LR           = 1e-5
 WD           = 1e-4
-EPOCHS       = 20
-EARLY_STOPPING_PATIENCE = 5
+EPOCHS       = 30
+EARLY_STOPPING_PATIENCE = 10
 WARMUP_STEPS = 100
 
 DEVICE       = "cuda" if torch.cuda.is_available() else "cpu"
@@ -565,6 +570,27 @@ def main():
     # logger.info("Starting training process (Transformers Trainer)")
     logger.info(f"Using device: {DEVICE}")
     model = MultiModalModel(len(CONDITIONS))
+    # training_args = TrainingArguments(
+    #     output_dir=OUTPUT_DIR,
+    #     num_train_epochs=EPOCHS,
+    #     per_device_train_batch_size=BATCH_SIZE,
+    #     per_device_eval_batch_size=BATCH_SIZE,
+    #     gradient_accumulation_steps=GRAD_ACCUM,
+    #     warmup_steps=WARMUP_STEPS,
+    #     learning_rate=LR,
+    #     weight_decay=WD,
+    #     logging_dir=os.path.join(OUTPUT_DIR, "logs"),
+    #     evaluation_strategy="epoch",
+    #     save_strategy="epoch",
+    #     save_total_limit=2,
+    #     load_best_model_at_end=True,
+    #     metric_for_best_model="f1",
+    #     greater_is_better=True,
+    #     dataloader_num_workers=4,
+    #     remove_unused_columns=False,
+    #     report_to="none"
+    # )
+
     training_args = TrainingArguments(
         output_dir=OUTPUT_DIR,
         num_train_epochs=EPOCHS,
@@ -579,12 +605,15 @@ def main():
         save_strategy="epoch",
         save_total_limit=2,
         load_best_model_at_end=True,
-        metric_for_best_model="f1",
-        greater_is_better=True,
+
+        metric_for_best_model="loss",
+        greater_is_better=False,
+        
         dataloader_num_workers=4,
         remove_unused_columns=False,
         report_to="none"
     )
+
     # Add early stopping callback with patience of 3
     callbacks = [EarlyStoppingCallback(early_stopping_patience=EARLY_STOPPING_PATIENCE)]
     

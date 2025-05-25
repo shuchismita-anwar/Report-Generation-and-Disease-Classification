@@ -37,11 +37,16 @@ logger = logging.getLogger('finetune_chexpert_image_bbox_fix') # Updated logger 
 ############################
 # 1) Fixed label list
 ############################
-CONDITIONS = [
-    'Atelectasis', 'Cardiomegaly', 'Edema',
-    'Lung Opacity', 'No Finding', 'Pleural Effusion',
-    'Pneumonia', 'Support Devices'
-]
+# CONDITIONS = [
+#     'Atelectasis', 'Cardiomegaly', 'Edema',
+#     'Lung Opacity', 'No Finding', 'Pleural Effusion',
+#     'Pneumonia', 'Support Devices'
+# ]
+
+CONDITIONS = ['Atelectasis','Cardiomegaly','Consolidation','Edema','Enlarged Cardiomediastinum',
+                              'Fracture','Lung Lesion','Lung Opacity','No Finding', 'Pleural Effusion','Pleural Other',
+                              'Pneumonia','Pneumothorax','Support Devices']
+
 cond2idx = {c: i for i, c in enumerate(CONDITIONS)}
 
 #####################
@@ -52,7 +57,9 @@ IMG_DIR      = os.path.join("output", "img_png") # Keep for reference, but datas
 HF_DATASET_NAME = "danjacobellis/chexpert"
 
 # Path to the *multi-modal* model checkpoint containing the pre-trained image encoder (image+bbox+fixation, no transcript)
-MULTI_MODAL_MODEL_PATH = r"output_multimodal_vit_features_image_bbox_fixseq_transcript\model_multimodal_vit_features_image_bbox_fixseq_transcript\model.safetensors"
+# MULTI_MODAL_MODEL_PATH = r"output_multimodal_vit_features_image_bbox_fixseq_transcript\model_multimodal_vit_features_image_bbox_fixseq_transcript\model.safetensors"
+
+MULTI_MODAL_MODEL_PATH = r"output_multimodal_vit_features_image_bbox_fixseq\model_multimodal_vit_features_image_bbox_fixseq\model.safetensors"
 
 # Output directory for the CheXpert fine-tuned image-only model
 OUTPUT_DIR   = "output_4.multimodal_of_mimiceye_feat_image_bbox_fix_chexpert_finetune_only_feat_image"
@@ -60,13 +67,21 @@ EXP_NAME     = "4.multimodal_of_mimiceye_feat_image_bbox_fix_chexpert_finetune_o
 
 OUTPUT_METRICS_FILE = os.path.join(OUTPUT_DIR, "4.multimodal_of_mimiceye_feat_image_bbox_fix_chexpert_finetune_only_feat_image_finetuned_image_only_metrics.txt")
 
-BATCH_SIZE   = 32
+# BATCH_SIZE   = 32
+# GRAD_ACCUM   = 4
+# LR           = 1e-4
+# WD           = 1e-4
+# EPOCHS       = 100
+# EARLY_STOPPING_PATIENCE = 3
+# WARMUP_STEPS = 20
+
+BATCH_SIZE   = 64
 GRAD_ACCUM   = 4
-LR           = 1e-4
+LR           = 5e-5
 WD           = 1e-4
-EPOCHS       = 100
-EARLY_STOPPING_PATIENCE = 3
-WARMUP_STEPS = 20
+EPOCHS       = 20
+EARLY_STOPPING_PATIENCE = 5
+WARMUP_STEPS = 100
 
 DEVICE       = "cuda" if torch.cuda.is_available() else "cpu"
 SEED         = 42
