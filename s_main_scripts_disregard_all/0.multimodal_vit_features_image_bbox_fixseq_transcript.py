@@ -364,8 +364,11 @@ class MultiModalModel(nn.Module):
             nn.ReLU()
         )
         
-        # Classifier head
+        # Classifier head (fused)
         self.classifier = nn.Linear(768, num_conditions)
+        
+        # Auxiliary image-only classification head
+        self.img_only_classifier = nn.Linear(self.img_proj.out_features, num_conditions)
         
         # Loss function for multi-label classification
         self.loss_fn = nn.BCEWithLogitsLoss()
@@ -400,9 +403,6 @@ class MultiModalModel(nn.Module):
 
     def forward(self, img, bbox, fix_seq, fix_mask, input_ids, attention_mask, labels=None, contrastive_weight=1.0):
         # --- Image encoding ---
-        # Get image features from the Hugging Face model output
-        # Option 1: Use pooler_output if available and suitable
-        # Option 2: Use last_hidden_state and take the CLS token (index 0)
         img_outputs = self.vit(pixel_values=img)
         if hasattr(img_outputs, 'pooler_output') and img_outputs.pooler_output is not None:
             img_feat = img_outputs.pooler_output # [B, hidden_size]
@@ -410,6 +410,9 @@ class MultiModalModel(nn.Module):
             img_feat = img_outputs.last_hidden_state[:, 0, :] # [B, hidden_size] (CLS token)
 
         img_proj = self.img_proj(img_feat)  # [B, 768]
+        
+        # Auxiliary image-only head
+        logits_img_only = self.img_only_classifier(img_proj)  # [B, num_conditions]
         
         # --- Text encoding ---
         txt_outputs = self.txt_enc(
@@ -425,85 +428,63 @@ class MultiModalModel(nn.Module):
         
         # --- Fixation sequence encoding ---
         batch_size, seq_len = fix_seq.size(0), fix_seq.size(1)
-        
-        # Apply embedding to each fixation point
         fix_emb = self.fix_emb(fix_seq)  # [B, L, 64]
-        
-        # Pack for efficient GRU processing
         fix_lens = fix_mask.sum(dim=1).cpu()
-        
         if torch.all(fix_lens == 0):
-            # Handle the case where all sequences are empty
             fix_feat_gru = torch.zeros(batch_size, 1024, device=fix_emb.device)
         else:
-            # Process with GRU
             packed_seq = nn.utils.rnn.pack_padded_sequence(
                 fix_emb, 
                 fix_lens.clamp(min=1), # Ensure at least length 1
                 batch_first=True, 
                 enforce_sorted=False
             )
-            
-            # Run through GRU
             _, h_n = self.fix_gru(packed_seq)
-            # h_n shape: [2, B, 256] (2 for bidirectional)
-            
-            # Concatenate directions
-            fix_feat_gru = h_n.transpose(0, 1).reshape(batch_size, -1)  # [B, 512]
-        
+            fix_feat_gru = h_n.transpose(0, 1).reshape(batch_size, -1)  # [B, 1024]
         fix_proj = self.fix_proj(fix_feat_gru)  # [B, 768]
         
         # --- Fuse all modalities ---
         combined = torch.cat([img_proj, txt_proj, fix_proj, bbox_proj], dim=1)
         fused = self.fusion(combined)
+        logits = self.classifier(fused)
         
-        # --- Classification ---
-        logits_output = self.classifier(fused)
-        
-        # Create attention map between image and fixations (not used for classification)
-        attn_map_output = torch.zeros_like(bbox)  # Placeholder
-        
+        # --- Losses ---
         loss = None
-        loss_cls = torch.tensor(0.0, device=img.device) # Default to 0 if no labels
+        loss_cls_fused = torch.tensor(0.0, device=img.device) # Default to 0 if no labels
+        loss_img_only = torch.tensor(0.0, device=img.device)
         loss_contrastive = torch.tensor(0.0, device=img.device)
 
         if labels is not None:
-            # 1. Classification Loss
-            loss_cls = self.loss_fn(logits_output, labels)
-
-            # 2. Contrastive Losses (only if batch size > 1)
+            # 1. Fused Classification Loss
+            loss_cls_fused = F.binary_cross_entropy_with_logits(logits, labels.float())
+            # 2. Auxiliary Image-Only Loss
+            loss_img_only = F.binary_cross_entropy_with_logits(logits_img_only, labels.float())
+            # 3. Contrastive Losses (only if batch size > 1)
             if img_proj.shape[0] > 1:
                 loss_img_txt = self.info_nce_loss(img_proj, txt_proj)
                 loss_img_fix = self.info_nce_loss(img_proj, fix_proj)
                 loss_img_bbox = self.info_nce_loss(img_proj, bbox_proj)
-                # Combine contrastive losses (average or sum)
                 loss_contrastive = (loss_img_txt + loss_img_fix + loss_img_bbox) / 3.0
             else:
-                 # Log warning if batch size is 1 during training/eval with labels
-                 # logger.warning("Batch size is 1, skipping contrastive loss calculation.")
-                 loss_contrastive = torch.tensor(0.0, device=img.device)
+                loss_contrastive = torch.tensor(0.0, device=img.device)
+            # 4. Combine Losses
+            lambda_img = 0.5
+            loss = loss_cls_fused + lambda_img * loss_img_only + contrastive_weight * loss_contrastive
 
-            # 3. Combine Losses
-            loss = loss_cls + contrastive_weight * loss_contrastive
-
-        # Hugging Face Trainer expects a dict or a ModelOutput object.
         output = {
-            "logits": logits_output,
-            # The following are custom outputs, Trainer might ignore them unless specified for metrics or other callbacks
+            "logits": logits,
+            "logits_img_only": logits_img_only,
             "zi": img_proj,  # image projection for contrastive loss
             "zt": txt_proj,  # text projection for contrastive loss
             "zg": fix_proj,  # fixation projection for contrastive loss
             "zb": bbox_proj,  # bbox projection for contrastive loss
-            "attn_map": attn_map_output,  # attention map for visualization
-            "loss_cls": loss_cls.detach() if loss is not None else None,  # Log separate losses
-            "loss_con": loss_contrastive.detach() if loss is not None else None  # Log separate losses
+            "attn_map": torch.zeros_like(bbox),  # attention map for visualization
+            "loss_cls_fused": loss_cls_fused.detach() if loss is not None else None,
+            "loss_img_only": loss_img_only.detach() if loss is not None else None,
+            "loss_con": loss_contrastive.detach() if loss is not None else None
         }
         if loss is not None:
             output["loss"] = loss
-
-        # If labels are provided, the Trainer will compute the loss outside.
-        # Or, we can compute loss here if preferred.
-        # For simplicity with Trainer, usually just return logits and let Trainer handle loss if labels are present.
         return output
 
 def compute_metrics(eval_pred: EvalPrediction):
