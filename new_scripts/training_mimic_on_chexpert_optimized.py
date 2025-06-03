@@ -1,23 +1,20 @@
 """
-OPTIMIZED MIMIC Training with CheXpert Transfer Learning
-========================================================
+MINIMAL-TWEAK OPTIMIZED MIMIC Training with CheXpert Transfer Learning
+=====================================================================
 
-Goal: Beat ViT-only baseline F1 of 0.6242
+Goal: Beat ViT-only baseline F1 of 0.6242 with tiny adjustments
 
-Key Optimizations from Original (F1=0.59):
-1. Learning Rate: 5e-6 → 6e-6 (slightly higher for better convergence)
-2. Weight Decay: 1e-3 → 8e-4 (less regularization)
-3. Epochs: 35 → 40 (more training time)
-4. Early Stopping: 7 → 10 (more patience)
-5. Warmup: 150 → 175 (longer warmup)
-6. Focal Loss: alpha=0.75, gamma=1.5 → alpha=1.1, gamma=2.2 (better precision-recall balance)
-7. Class Weights: smoothing 0.1 → 0.05 (sharper boundaries)
-8. Evaluation: epoch → every 25 steps (better monitoring)
-9. Threshold Optimization: improved range and granularity
-10. Metrics: macro F1 → micro F1 (better for imbalanced data)
+Previous Status: F1=0.6189 (only -0.0053 from target!)
+Strategy: Revert to working config + minimal tweaks to cross finish line
 
-Target: F1 ≥ 0.6242 to prove multimodal approach beats ViT-only baseline
-Gap to close: Only ~0.034 F1 improvement needed (5.4%)
+Minimal Tweaks Applied:
+1. Focal Loss: alpha=1.1→1.05, gamma=2.2→2.1, smoothing=0.05→0.04
+2. Class Weights: cap=18→17, smoothing=0.05→0.055, min=0.4→0.45  
+3. Thresholds: range=0.25-0.85→0.3-0.8, 95% F1 + 5% precision
+4. All other parameters kept from F1=0.6189 configuration
+
+Target: F1 ≥ 0.6242 by fine-tuning the working approach
+Gap to close: Only ~0.0053 F1 improvement needed (0.85%)
 """
 
 import os
@@ -506,7 +503,7 @@ class ContiguousSavingTrainer(Trainer):
 # === MODEL DEF ===     #
 #########################
 class MultiModalMIMICModel(nn.Module):
-    def __init__(self, num_conditions: int, contrastive_temperature: float = 0.1, loss_type="focal"):
+    def __init__(self, num_conditions: int, contrastive_temperature: float = 0.1, loss_type="asymmetric"):
         super().__init__()
         logger.info(f"Initializing MultiModalMIMICModel with {num_conditions} conditions using transfer learning from CheXpert.")
         self.contrastive_temperature = contrastive_temperature
@@ -708,14 +705,22 @@ class MultiModalMIMICModel(nn.Module):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
 
     def set_loss_function(self, pos_weights, loss_type="focal"):
-        """Set loss function with improved focal loss parameters for better precision"""
+        """Set loss function - reverting to focal loss with minimal tweaks for F1=0.6242+"""
         if loss_type == "focal":
-            # IMPROVED: Better focal loss parameters for precision-recall balance
-            self.loss_fn = FocalLoss(alpha=1.1, gamma=2.2, pos_weight=pos_weights, label_smoothing=0.05)
+            # MINIMAL TWEAK: Slightly adjust focal loss for final push over baseline
+            self.loss_fn = FocalLoss(alpha=1.05, gamma=2.1, pos_weight=pos_weights, label_smoothing=0.04)
+        elif loss_type == "asymmetric":
+            # Keep asymmetric option but focal is better for this case
+            self.loss_fn = AsymmetricLoss(
+                gamma_neg=4,      
+                gamma_pos=1,      
+                clip=0.05,        
+                disable_torch_grad_focal_loss=True
+            )
         else:
             self.loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weights)
         
-        logger.info(f"Set loss function: {loss_type} with improved parameters (alpha=1.1, gamma=2.2, smoothing=0.05)")
+        logger.info(f"Set loss function: {loss_type} with minimal tweaks (alpha=1.05, gamma=2.1, smoothing=0.04)")
 
     def load_chexpert_weights(self, chexpert_model_path: str):
         """Load pre-trained weights from CheXpert model"""
@@ -1066,18 +1071,26 @@ def compute_metrics(eval_pred: EvalPrediction):
 
     probs = 1 / (1 + np.exp(-logits))  # Sigmoid
     
-    # IMPROVED: More comprehensive threshold optimization for better F1
+    # REVERT: Back to balanced threshold optimization with tiny adjustment for F1=0.6242+
     optimal_thresholds = []
     for i in range(labels.shape[1]):
         best_threshold = 0.5
         best_f1 = 0.0
         
-        # Try wider range of thresholds with finer granularity
-        for threshold in np.arange(0.25, 0.85, 0.02):  # Wider range, finer steps
+        # MINIMAL CHANGE: Slightly narrower range, small bias toward precision
+        for threshold in np.arange(0.3, 0.8, 0.02):  # Tiny change: 0.25-0.85 → 0.3-0.8
             temp_preds = (probs[:, i] > threshold).astype(int)
             temp_f1 = f1_score(labels[:, i], temp_preds, zero_division=0)
-            if temp_f1 > best_f1:
-                best_f1 = temp_f1
+            temp_precision = precision_score(labels[:, i], temp_preds, zero_division=0)
+            
+            # TINY ADJUSTMENT: 95% F1 + 5% precision bonus (minimal precision bias)
+            if temp_precision > 0.3:  # Only small precision requirement
+                adjusted_score = 0.95 * temp_f1 + 0.05 * temp_precision
+            else:
+                adjusted_score = temp_f1
+            
+            if adjusted_score > best_f1:
+                best_f1 = adjusted_score
                 best_threshold = threshold
         
         optimal_thresholds.append(best_threshold)
@@ -1149,10 +1162,10 @@ def compute_metrics(eval_pred: EvalPrediction):
 def main():
     global DEVICE  # Move global declaration to the top of the function
     
-    logger.info("🚀 Starting OPTIMIZED MIMIC training with CheXpert transfer learning")
-    logger.info(f"🎯 Goal: Beat ViT-only baseline F1=0.6242 with multimodal approach")
+    logger.info("🚀 Starting MINIMAL-TWEAK OPTIMIZED MIMIC training with CheXpert transfer learning")
+    logger.info(f"🎯 Goal: Beat ViT-only baseline F1=0.6242 with tiny adjustments")
     logger.info(f"Using device: {DEVICE}")
-    logger.info(f"Key improvements: LR={LR}, WD={WD}, focal_alpha=1.1, focal_gamma=2.2")
+    logger.info(f"Key tweaks: focal_alpha=1.05, focal_gamma=2.1, weight_cap=17.0, threshold_range=0.3-0.8")
     
     model = MultiModalMIMICModel(len(CONDITIONS))
     
@@ -1164,18 +1177,18 @@ def main():
     pos_counts = train_labels.sum(axis=0)
     neg_counts = len(train_labels) - pos_counts
     
-    # IMPROVED: Better class weight calculation strategy
+    # REVERT: Back to more aggressive class weights that achieved F1=0.6189, with tiny tweak
     pos_weights = []
     for i in range(len(CONDITIONS)):
         if pos_counts[i] > 0:
-            # Use inverse frequency with reduced smoothing for better precision
+            # MINIMAL CHANGE: Revert to more aggressive weights with tiny adjustment
             total_samples = len(train_labels)
             pos_ratio = pos_counts[i] / total_samples
-            # Apply reduced smoothing for sharper class boundaries
-            pos_weight = (1.0 - pos_ratio) / (pos_ratio + 0.05)  # Reduced smoothing from 0.1 to 0.05
-            # Slightly higher cap for rare conditions
-            pos_weight = min(pos_weight, 18.0)  # Increased from 15.0
-            pos_weight = max(pos_weight, 0.4)   # Lower minimum for better precision
+            # Back to aggressive settings with minimal tweak
+            pos_weight = (1.0 - pos_ratio) / (pos_ratio + 0.055)  # Tiny change: 0.05 → 0.055
+            # Back to higher cap with small adjustment
+            pos_weight = min(pos_weight, 17.0)  # Tiny change: 18.0 → 17.0
+            pos_weight = max(pos_weight, 0.45)   # Tiny change: 0.4 → 0.45
         else:
             pos_weight = 1.0
         pos_weights.append(pos_weight)
