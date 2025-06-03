@@ -1,20 +1,22 @@
 """
-MINIMAL-TWEAK OPTIMIZED MIMIC Training with CheXpert Transfer Learning
-=====================================================================
+MODERATE PRECISION-RECALL BALANCED MIMIC Training with CheXpert Transfer Learning
+================================================================================
 
-Goal: Beat ViT-only baseline F1 of 0.6242 with tiny adjustments
+Goal: Beat ViT-only baseline F1 of 0.6242 with balanced precision-recall approach
 
-Previous Status: F1=0.6189 (only -0.0053 from target!)
-Strategy: Revert to working config + minimal tweaks to cross finish line
+Previous Status: F1=0.6213 (only -0.0029 from target!)
+Analysis: Overcorrected with aggressive precision focus - gained precision but lost too much recall
+Strategy: MODERATE balance to gain +0.04 recall while maintaining precision gains
 
-Minimal Tweaks Applied:
-1. Focal Loss: alpha=1.1→1.05, gamma=2.2→2.1, smoothing=0.05→0.04
-2. Class Weights: cap=18→17, smoothing=0.05→0.055, min=0.4→0.45  
-3. Thresholds: range=0.25-0.85→0.3-0.8, 95% F1 + 5% precision
-4. All other parameters kept from F1=0.6189 configuration
+Moderate Balance Changes:
+1. Focal Loss: alpha=1.15→1.10, gamma=2.3→2.15 (less aggressive)
+2. Class Weights: cap=15.0→16.0, smoothing=0.08→0.07 (moderate)
+3. Thresholds: range=0.4-0.8→0.38-0.78, 80% F1 + 20% precision → 85% F1 + 15% precision
+4. Target: Find sweet spot - maintain precision ~0.57+ while gaining recall to ~0.71+
 
-Target: F1 ≥ 0.6242 by fine-tuning the working approach
-Gap to close: Only ~0.0053 F1 improvement needed (0.85%)
+Current: Precision=0.574, Recall=0.677 → F1=0.6213
+Target: Precision=0.58+, Recall=0.71+ → F1=0.6242+
+Gap: Only -0.0029 F1 (oscillating around target - need fine balance!)
 """
 
 import os
@@ -707,8 +709,8 @@ class MultiModalMIMICModel(nn.Module):
     def set_loss_function(self, pos_weights, loss_type="focal"):
         """Set loss function - reverting to focal loss with minimal tweaks for F1=0.6242+"""
         if loss_type == "focal":
-            # MINIMAL TWEAK: Slightly adjust focal loss for final push over baseline
-            self.loss_fn = FocalLoss(alpha=1.05, gamma=2.1, pos_weight=pos_weights, label_smoothing=0.04)
+            # MODERATE BALANCE: Less aggressive focal loss for better precision-recall balance
+            self.loss_fn = FocalLoss(alpha=1.10, gamma=2.15, pos_weight=pos_weights, label_smoothing=0.08)
         elif loss_type == "asymmetric":
             # Keep asymmetric option but focal is better for this case
             self.loss_fn = AsymmetricLoss(
@@ -720,7 +722,7 @@ class MultiModalMIMICModel(nn.Module):
         else:
             self.loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weights)
         
-        logger.info(f"Set loss function: {loss_type} with minimal tweaks (alpha=1.05, gamma=2.1, smoothing=0.04)")
+        logger.info(f"Set loss function: {loss_type} with minimal tweaks (alpha=1.10, gamma=2.15, smoothing=0.08)")
 
     def load_chexpert_weights(self, chexpert_model_path: str):
         """Load pre-trained weights from CheXpert model"""
@@ -1071,21 +1073,21 @@ def compute_metrics(eval_pred: EvalPrediction):
 
     probs = 1 / (1 + np.exp(-logits))  # Sigmoid
     
-    # REVERT: Back to balanced threshold optimization with tiny adjustment for F1=0.6242+
+    # MODERATE BALANCE: Wider threshold range + reduced precision bias for better recall
     optimal_thresholds = []
     for i in range(labels.shape[1]):
         best_threshold = 0.5
         best_f1 = 0.0
         
-        # MINIMAL CHANGE: Slightly narrower range, small bias toward precision
-        for threshold in np.arange(0.3, 0.8, 0.02):  # Tiny change: 0.25-0.85 → 0.3-0.8
+        # MODERATE CHANGE: Slightly wider threshold range for better recall
+        for threshold in np.arange(0.38, 0.78, 0.02):  # Moderate change: 0.4-0.8 → 0.38-0.78
             temp_preds = (probs[:, i] > threshold).astype(int)
             temp_f1 = f1_score(labels[:, i], temp_preds, zero_division=0)
             temp_precision = precision_score(labels[:, i], temp_preds, zero_division=0)
             
-            # TINY ADJUSTMENT: 95% F1 + 5% precision bonus (minimal precision bias)
+            # MODERATE PRECISION BIAS: 85% F1 + 15% precision (less precision-focused)
             if temp_precision > 0.3:  # Only small precision requirement
-                adjusted_score = 0.95 * temp_f1 + 0.05 * temp_precision
+                adjusted_score = 0.85 * temp_f1 + 0.15 * temp_precision
             else:
                 adjusted_score = temp_f1
             
@@ -1162,10 +1164,11 @@ def compute_metrics(eval_pred: EvalPrediction):
 def main():
     global DEVICE  # Move global declaration to the top of the function
     
-    logger.info("🚀 Starting MINIMAL-TWEAK OPTIMIZED MIMIC training with CheXpert transfer learning")
-    logger.info(f"🎯 Goal: Beat ViT-only baseline F1=0.6242 with tiny adjustments")
+    logger.info("🚀 Starting MODERATE PRECISION-RECALL BALANCED MIMIC training with CheXpert transfer learning")
+    logger.info(f"🎯 Goal: Beat ViT-only baseline F1 of 0.6242 with balanced precision-recall approach")
     logger.info(f"Using device: {DEVICE}")
-    logger.info(f"Key tweaks: focal_alpha=1.05, focal_gamma=2.1, weight_cap=17.0, threshold_range=0.3-0.8")
+    logger.info(f"Strategy: MODERATE balance to gain +0.04 recall while maintaining precision gains")
+    logger.info(f"Key changes: focal_alpha=1.10, focal_gamma=2.15, weight_cap=16.0, threshold_range=0.38-0.78, precision_bias=15%")
     
     model = MultiModalMIMICModel(len(CONDITIONS))
     
@@ -1177,18 +1180,18 @@ def main():
     pos_counts = train_labels.sum(axis=0)
     neg_counts = len(train_labels) - pos_counts
     
-    # REVERT: Back to more aggressive class weights that achieved F1=0.6189, with tiny tweak
+    # MODERATE PRECISION: More conservative class weights to reduce false positives
     pos_weights = []
     for i in range(len(CONDITIONS)):
         if pos_counts[i] > 0:
-            # MINIMAL CHANGE: Revert to more aggressive weights with tiny adjustment
+            # More conservative weighting for better precision
             total_samples = len(train_labels)
             pos_ratio = pos_counts[i] / total_samples
-            # Back to aggressive settings with minimal tweak
-            pos_weight = (1.0 - pos_ratio) / (pos_ratio + 0.055)  # Tiny change: 0.05 → 0.055
-            # Back to higher cap with small adjustment
-            pos_weight = min(pos_weight, 17.0)  # Tiny change: 18.0 → 17.0
-            pos_weight = max(pos_weight, 0.45)   # Tiny change: 0.4 → 0.45
+            # More conservative weighting for better precision
+            pos_weight = (1.0 - pos_ratio) / (pos_ratio + 0.07)  # Higher smoothing: 0.06 → 0.07
+            # Lower cap to prevent over-aggressive weighting
+            pos_weight = min(pos_weight, 16.0)  # Reduced cap: 16.5 → 16.0
+            pos_weight = max(pos_weight, 0.6)   # Higher minimum: 0.5 → 0.6
         else:
             pos_weight = 1.0
         pos_weights.append(pos_weight)
@@ -1458,7 +1461,7 @@ def monitor_memory():
     if torch.cuda.is_available():
         memory_allocated = torch.cuda.memory_allocated() / (1024**3)
         memory_reserved = torch.cuda.memory_reserved() / (1024**3)
-        print(f"CUDA Memory - Allocated: {memory_allocated:.1f}GB, Reserved: {memory_reserved:.1f}GB")
+        # print(f"CUDA Memory - Allocated: {memory_allocated:.1f}GB, Reserved: {memory_reserved:.1f}GB")
         
         # If memory usage is high, force cleanup
         if memory_allocated > 10.0:  # More than 10GB allocated
