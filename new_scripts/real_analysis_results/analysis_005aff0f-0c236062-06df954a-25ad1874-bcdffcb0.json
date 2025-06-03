@@ -1,0 +1,385 @@
+{
+  "success": true,
+  "image_path": "..\\data_dump\\output\\img_png\\005aff0f-0c236062-06df954a-25ad1874-bcdffcb0.png",
+  "template_used": "standard",
+  "processing_steps": {
+    "image_processing": {
+      "success": true,
+      "shape": [
+        1,
+        3,
+        224,
+        224
+      ],
+      "device": "cuda:0",
+      "processing_time": 0.010182380676269531
+    },
+    "model_inference": {
+      "success": true,
+      "num_conditions": 8,
+      "processing_time": 0.026051759719848633
+    },
+    "keyword_extraction": {
+      "success": true,
+      "total_keywords": 27,
+      "conditions_with_keywords": 6,
+      "processing_time": 0.0
+    },
+    "attention_analysis": {
+      "success": true,
+      "significant_regions": 5,
+      "spatial_keywords": 19,
+      "target_condition": "No Finding",
+      "processing_time": 0.08838224411010742
+    },
+    "report_generation": {
+      "success": true,
+      "used_fallback": false,
+      "report_length": 2297,
+      "sections_found": 4,
+      "processing_time": 10.981061935424805
+    }
+  },
+  "performance_metrics": {
+    "total_processing_time": 11.10567831993103,
+    "steps_completed": 5,
+    "total_steps": 5,
+    "errors_encountered": 0,
+    "memory_efficient": false,
+    "device_used": "cuda"
+  },
+  "error_log": [],
+  "model_predictions": {
+    "Atelectasis": {
+      "probability": 0.24391761422157288,
+      "predicted": false,
+      "logit": -1.1313197612762451
+    },
+    "Cardiomegaly": {
+      "probability": 0.259583443403244,
+      "predicted": false,
+      "logit": -1.048134684562683
+    },
+    "Edema": {
+      "probability": 0.1593065708875656,
+      "predicted": false,
+      "logit": -1.6633965969085693
+    },
+    "Lung Opacity": {
+      "probability": 0.29325252771377563,
+      "predicted": false,
+      "logit": -0.8796393275260925
+    },
+    "No Finding": {
+      "probability": 0.7467645406723022,
+      "predicted": true,
+      "logit": 1.081430196762085
+    },
+    "Pleural Effusion": {
+      "probability": 0.13086938858032227,
+      "predicted": false,
+      "logit": -1.8932936191558838
+    },
+    "Pneumonia": {
+      "probability": 0.2863723337650299,
+      "predicted": false,
+      "logit": -0.9130685329437256
+    },
+    "Support Devices": {
+      "probability": 0.25817009806632996,
+      "predicted": false,
+      "logit": -1.0555012226104736
+    }
+  },
+  "prediction_keywords": {
+    "Atelectasis": [
+      "slight collapse",
+      "lower lobe",
+      "minor atelectasis",
+      "minimal atelectasis"
+    ],
+    "Cardiomegaly": [
+      "left ventricular",
+      "mild cardiomegaly",
+      "borderline cardiomegaly",
+      "slight enlargement"
+    ],
+    "Lung Opacity": [
+      "right lung",
+      "patchy opacity",
+      "minimal infiltrate",
+      "subtle opacity"
+    ],
+    "No Finding": [
+      "normal",
+      "clear",
+      "unremarkable",
+      "no acute findings",
+      "clear lung fields",
+      "normal cardiac silhouette",
+      "no infiltrates",
+      "no consolidation"
+    ],
+    "Pneumonia": [
+      "right lung",
+      "minimal infection",
+      "mild pneumonia",
+      "early pneumonia"
+    ],
+    "Support Devices": [
+      "single device",
+      "endotracheal tube",
+      "properly positioned"
+    ]
+  },
+  "keyword_summary": {
+    "primary_findings": [
+      "normal",
+      "no acute findings",
+      "clear",
+      "unremarkable"
+    ],
+    "anatomical_locations": [
+      "left ventricular",
+      "lower lobe",
+      "right lung",
+      "endotracheal tube"
+    ],
+    "severity_indicators": [
+      "early pneumonia",
+      "minimal atelectasis",
+      "slight enlargement",
+      "subtle opacity",
+      "patchy opacity",
+      "mild cardiomegaly",
+      "single device",
+      "mild pneumonia",
+      "minor atelectasis",
+      "borderline cardiomegaly",
+      "slight collapse",
+      "minimal infiltrate",
+      "minimal infection",
+      "properly positioned"
+    ],
+    "descriptive_terms": [
+      "normal cardiac silhouette",
+      "no infiltrates",
+      "clear lung fields",
+      "no consolidation"
+    ],
+    "total_keywords": 27,
+    "conditions_detected": [
+      "Atelectasis",
+      "Cardiomegaly",
+      "Lung Opacity",
+      "No Finding",
+      "Pneumonia",
+      "Support Devices"
+    ]
+  },
+  "attention_analysis": {
+    "regions": {
+      "upper_left": {
+        "name": "left upper lung field",
+        "max_attention": 0.45284783840179443,
+        "mean_attention": 0.1002824679017067,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "left upper lobe",
+          "left apical region",
+          "left clavicular area"
+        ]
+      },
+      "upper_right": {
+        "name": "right upper lung field",
+        "max_attention": 0.7394761443138123,
+        "mean_attention": 0.134632870554924,
+        "attention_coverage": 0.002307383627608347,
+        "is_significant": true,
+        "keywords": [
+          "right upper lobe",
+          "right apical region",
+          "right clavicular area"
+        ]
+      },
+      "middle_left": {
+        "name": "left middle lung field",
+        "max_attention": 0.5069544911384583,
+        "mean_attention": 0.15628065168857574,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "left middle lobe",
+          "left perihilar region",
+          "left cardiac border"
+        ]
+      },
+      "middle_right": {
+        "name": "right middle lung field",
+        "max_attention": 0.8662133812904358,
+        "mean_attention": 0.2416417896747589,
+        "attention_coverage": 0.024653518123667378,
+        "is_significant": true,
+        "keywords": [
+          "right middle lobe",
+          "right perihilar region",
+          "right cardiac border"
+        ]
+      },
+      "lower_left": {
+        "name": "left lower lung field",
+        "max_attention": 1.0,
+        "mean_attention": 0.12223415076732635,
+        "attention_coverage": 0.006959033613445379,
+        "is_significant": true,
+        "keywords": [
+          "left lower lobe",
+          "left costophrenic angle",
+          "left diaphragmatic region"
+        ]
+      },
+      "lower_right": {
+        "name": "right lower lung field",
+        "max_attention": 0.41320377588272095,
+        "mean_attention": 0.09225167334079742,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "right lower lobe",
+          "right costophrenic angle",
+          "right diaphragmatic region"
+        ]
+      },
+      "central_cardiac": {
+        "name": "cardiac silhouette",
+        "max_attention": 0.7433716058731079,
+        "mean_attention": 0.20938773453235626,
+        "attention_coverage": 0.006019261637239166,
+        "is_significant": true,
+        "keywords": [
+          "heart border",
+          "mediastinum",
+          "cardiac shadow",
+          "central region"
+        ]
+      },
+      "hilum_left": {
+        "name": "left hilum",
+        "max_attention": 0.5069544911384583,
+        "mean_attention": 0.1850605010986328,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "left hilar region",
+          "left pulmonary vessels",
+          "left bronchial tree"
+        ]
+      },
+      "hilum_right": {
+        "name": "right hilum",
+        "max_attention": 0.8662133812904358,
+        "mean_attention": 0.3177019953727722,
+        "attention_coverage": 0.04633548674537759,
+        "is_significant": true,
+        "keywords": [
+          "right hilar region",
+          "right pulmonary vessels",
+          "right bronchial tree"
+        ]
+      }
+    },
+    "top_regions": [
+      "lower_left",
+      "middle_right",
+      "hilum_right"
+    ],
+    "significant_regions": [
+      "upper_right",
+      "middle_right",
+      "lower_left",
+      "central_cardiac",
+      "hilum_right"
+    ],
+    "overall_attention_intensity": 0.13873505592346191,
+    "max_attention_location": {
+      "y": 199,
+      "x": 72
+    },
+    "visualization_saved": "test_data\\attention_visualizations\\attention_005aff0f-0c236062-06df954a-25ad1874-bcdffcb0.png"
+  },
+  "spatial_keywords": [
+    "right upper lobe",
+    "right apical region",
+    "increased attention in right upper lung field",
+    "right middle lobe",
+    "right perihilar region",
+    "right cardiac border",
+    "focal attention in right middle lung field",
+    "left lower lobe",
+    "left costophrenic angle",
+    "left diaphragmatic region",
+    "focal attention in left lower lung field",
+    "heart border",
+    "mediastinum",
+    "increased attention in cardiac silhouette",
+    "right hilar region",
+    "right pulmonary vessels",
+    "right bronchial tree",
+    "focal attention in right hilum",
+    "diffuse attention pattern"
+  ],
+  "llm_response": {
+    "success": true,
+    "report": "## CHEST RADIOGRAPH REPORT\n\n**Patient:** [Insert Patient Name/ID Here - *Required for complete report*]\n**Date of Examination:** [Insert Date Here - *Required for complete report*]\n**Examination:** Chest Radiograph (PA and Lateral \u2013 *Assume standard views unless specified otherwise*)\n\n---\n\n**FINDINGS:**\n\nThe chest radiograph demonstrates generally clear lung fields. However, subtle increased attention is noted within the right upper and middle lung fields as identified by spatial analysis. Specifically, there is focal increased opacity in the right apical region and perihilar area of the right middle lobe.  Attention intensity is highest within the left lower lung field; however, no discrete consolidation, effusion, or pneumothorax is apparent on initial review. The cardiac silhouette is normal in size and contour. Mediastinal contours are unremarkable. No acute bony abnormalities are identified.\n\n**IMPRESSION:**\n\nThe chest radiograph shows subtle findings warranting further evaluation. While the overall probability of \u201cNo Finding\u201d is high (74.7%), the localized increased attention within the right upper and middle lung fields, specifically the right apical region and perihilar area of the right middle lobe, raises suspicion for a possible early inflammatory process or subtle consolidation. The increased attention in the left lower lung field does not correlate with any obvious pathology on this initial review. \n\n**RECOMMENDATIONS:**\n\nCorrelation with clinical history and physical examination is recommended.  Consider follow-up chest radiography in [6-8 weeks/as clinically indicated] to assess for stability or progression of the subtle right upper lobe findings. If clinical suspicion remains high, further investigation with a CT chest without contrast may be warranted to better characterize these areas and exclude underlying pathology such as early pneumonia, granulomatous disease, or malignancy.\n\n\n\n**Radiologist:** [Insert Radiologist Name/Signature Here - *Required for complete report*]\n**Date of Report:** [Insert Date Here - *Required for complete report*]\n\n---\n\n**Disclaimer:** This report is based on the provided analysis data and assumes standard radiographic technique. A complete clinical correlation is essential for accurate diagnosis and management.\n\n\n\n",
+    "raw_response": {
+      "id": "chatcmpl-tndwaj0r48f5jcgorplauy",
+      "object": "chat.completion",
+      "created": 1748986944,
+      "model": "gemma-3-27b-it-qat",
+      "choices": [
+        {
+          "index": 0,
+          "logprobs": null,
+          "finish_reason": "stop",
+          "message": {
+            "role": "assistant",
+            "content": "## CHEST RADIOGRAPH REPORT\n\n**Patient:** [Insert Patient Name/ID Here - *Required for complete report*]\n**Date of Examination:** [Insert Date Here - *Required for complete report*]\n**Examination:** Chest Radiograph (PA and Lateral \u2013 *Assume standard views unless specified otherwise*)\n\n---\n\n**FINDINGS:**\n\nThe chest radiograph demonstrates generally clear lung fields. However, subtle increased attention is noted within the right upper and middle lung fields as identified by spatial analysis. Specifically, there is focal increased opacity in the right apical region and perihilar area of the right middle lobe.  Attention intensity is highest within the left lower lung field; however, no discrete consolidation, effusion, or pneumothorax is apparent on initial review. The cardiac silhouette is normal in size and contour. Mediastinal contours are unremarkable. No acute bony abnormalities are identified.\n\n**IMPRESSION:**\n\nThe chest radiograph shows subtle findings warranting further evaluation. While the overall probability of \u201cNo Finding\u201d is high (74.7%), the localized increased attention within the right upper and middle lung fields, specifically the right apical region and perihilar area of the right middle lobe, raises suspicion for a possible early inflammatory process or subtle consolidation. The increased attention in the left lower lung field does not correlate with any obvious pathology on this initial review. \n\n**RECOMMENDATIONS:**\n\nCorrelation with clinical history and physical examination is recommended.  Consider follow-up chest radiography in [6-8 weeks/as clinically indicated] to assess for stability or progression of the subtle right upper lobe findings. If clinical suspicion remains high, further investigation with a CT chest without contrast may be warranted to better characterize these areas and exclude underlying pathology such as early pneumonia, granulomatous disease, or malignancy.\n\n\n\n**Radiologist:** [Insert Radiologist Name/Signature Here - *Required for complete report*]\n**Date of Report:** [Insert Date Here - *Required for complete report*]\n\n---\n\n**Disclaimer:** This report is based on the provided analysis data and assumes standard radiographic technique. A complete clinical correlation is essential for accurate diagnosis and management.\n\n\n\n"
+          }
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 355,
+        "completion_tokens": 438,
+        "total_tokens": 793
+      },
+      "stats": {},
+      "system_fingerprint": "gemma-3-27b-it-qat"
+    },
+    "used_fallback": false,
+    "attempt": 1
+  },
+  "medical_report": {
+    "report_text": "## CHEST RADIOGRAPH REPORT\n\n**Patient:** [Insert Patient Name/ID Here - *Required for complete report*]\n**Date of Examination:** [Insert Date Here - *Required for complete report*]\n**Examination:** Chest Radiograph (PA and Lateral \u2013 *Assume standard views unless specified otherwise*)\n\n---\n\n**FINDINGS:**\n\nThe chest radiograph demonstrates generally clear lung fields. However, subtle increased attention is noted within the right upper and middle lung fields as identified by spatial analysis. Specifically, there is focal increased opacity in the right apical region and perihilar area of the right middle lobe.  Attention intensity is highest within the left lower lung field; however, no discrete consolidation, effusion, or pneumothorax is apparent on initial review. The cardiac silhouette is normal in size and contour. Mediastinal contours are unremarkable. No acute bony abnormalities are identified.\n\n**IMPRESSION:**\n\nThe chest radiograph shows subtle findings warranting further evaluation. While the overall probability of \u201cNo Finding\u201d is high (74.7%), the localized increased attention within the right upper and middle lung fields, specifically the right apical region and perihilar area of the right middle lobe, raises suspicion for a possible early inflammatory process or subtle consolidation. The increased attention in the left lower lung field does not correlate with any obvious pathology on this initial review. \n\n**RECOMMENDATIONS:**\n\nCorrelation with clinical history and physical examination is recommended.  Consider follow-up chest radiography in [6-8 weeks/as clinically indicated] to assess for stability or progression of the subtle right upper lobe findings. If clinical suspicion remains high, further investigation with a CT chest without contrast may be warranted to better characterize these areas and exclude underlying pathology such as early pneumonia, granulomatous disease, or malignancy.\n\n\n\n**Radiologist:** [Insert Radiologist Name/Signature Here - *Required for complete report*]\n**Date of Report:** [Insert Date Here - *Required for complete report*]\n\n---\n\n**Disclaimer:** This report is based on the provided analysis data and assumes standard radiographic technique. A complete clinical correlation is essential for accurate diagnosis and management.",
+    "sections": {
+      "report": "## CHEST RADIOGRAPH REPORT\n**Patient:** [Insert Patient Name/ID Here - *Required for complete report*]\n**Date of Examination:** [Insert Date Here - *Required for complete report*]\n**Examination:** Chest Radiograph (PA and Lateral \u2013 *Assume standard views unless specified otherwise*)\n---",
+      "**findings**": "The chest radiograph demonstrates generally clear lung fields. However, subtle increased attention is noted within the right upper and middle lung fields as identified by spatial analysis. Specifically, there is focal increased opacity in the right apical region and perihilar area of the right middle lobe.  Attention intensity is highest within the left lower lung field; however, no discrete consolidation, effusion, or pneumothorax is apparent on initial review. The cardiac silhouette is normal in size and contour. Mediastinal contours are unremarkable. No acute bony abnormalities are identified.",
+      "**impression**": "The chest radiograph shows subtle findings warranting further evaluation. While the overall probability of \u201cNo Finding\u201d is high (74.7%), the localized increased attention within the right upper and middle lung fields, specifically the right apical region and perihilar area of the right middle lobe, raises suspicion for a possible early inflammatory process or subtle consolidation. The increased attention in the left lower lung field does not correlate with any obvious pathology on this initial review.",
+      "**recommendations**": "Correlation with clinical history and physical examination is recommended.  Consider follow-up chest radiography in [6-8 weeks/as clinically indicated] to assess for stability or progression of the subtle right upper lobe findings. If clinical suspicion remains high, further investigation with a CT chest without contrast may be warranted to better characterize these areas and exclude underlying pathology such as early pneumonia, granulomatous disease, or malignancy.\n**Radiologist:** [Insert Radiologist Name/Signature Here - *Required for complete report*]\n**Date of Report:** [Insert Date Here - *Required for complete report*]\n---\n**Disclaimer:** This report is based on the provided analysis data and assumes standard radiographic technique. A complete clinical correlation is essential for accurate diagnosis and management."
+    },
+    "metadata": {
+      "generated_at": "2025-06-03T21:42:35",
+      "generator": "Medical Report Generator v1.0",
+      "model_used": "gemma-3-27b-it-qat",
+      "word_count": 316,
+      "character_count": 2297,
+      "image_path": "..\\data_dump\\output\\img_png\\005aff0f-0c236062-06df954a-25ad1874-bcdffcb0.png",
+      "template_used": "standard",
+      "llm_success": true,
+      "used_fallback": false,
+      "total_keywords": 27,
+      "attention_regions": 5,
+      "patient_info_included": false
+    }
+  }
+}

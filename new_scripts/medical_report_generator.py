@@ -1,0 +1,2929 @@
+import os
+import sys
+import gc
+import psutil
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from transformers import AutoTokenizer, AutoModel
+import safetensors
+import logging
+from typing import Optional, Union, Dict, List, Tuple
+from torchvision import transforms
+from PIL import Image, ImageDraw, ImageFont
+import numpy as np
+from pathlib import Path
+import json
+import cv2
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+from scipy.ndimage import gaussian_filter
+import requests
+import time
+import base64
+from io import BytesIO
+import textwrap
+from datetime import datetime
+import random
+
+# Constants from training script
+CONDITIONS = [
+    'Atelectasis', 'Cardiomegaly', 'Edema',
+    'Lung Opacity', 'No Finding', 'Pleural Effusion',
+    'Pneumonia', 'Support Devices'
+]
+
+VIT_MODEL_NAME = "google/vit-base-patch16-224-in21k"
+TEXT_MODEL_NAME = "emilyalsentzer/Bio_ClinicalBERT"
+
+# Real chest X-ray image directory
+CHEST_XRAY_DIR = os.path.join("..", "data_dump", "output", "img_png")
+
+# Add medical terminology mapping for keyword extraction
+CONDITION_KEYWORDS = {
+    'Atelectasis': {
+        'primary': ['atelectasis', 'collapse', 'collapsed lung', 'lung collapse'],
+        'anatomical': ['lower lobe', 'upper lobe', 'middle lobe', 'bibasilar', 'subsegmental', 'segmental'],
+        'severity': {
+            'mild': ['minimal atelectasis', 'slight collapse', 'minor atelectasis'],
+            'moderate': ['atelectasis', 'partial collapse', 'moderate atelectasis'],
+            'severe': ['complete atelectasis', 'total collapse', 'massive atelectasis']
+        },
+        'descriptors': ['linear', 'plate-like', 'bandlike', 'discoid', 'compressive', 'obstructive']
+    },
+    'Cardiomegaly': {
+        'primary': ['cardiomegaly', 'enlarged heart', 'cardiac enlargement', 'heart enlargement'],
+        'anatomical': ['left ventricular', 'right ventricular', 'biventricular', 'left atrial', 'right atrial'],
+        'severity': {
+            'mild': ['mild cardiomegaly', 'borderline cardiomegaly', 'slight enlargement'],
+            'moderate': ['cardiomegaly', 'moderate enlargement', 'cardiac enlargement'],
+            'severe': ['severe cardiomegaly', 'marked enlargement', 'massive cardiomegaly']
+        },
+        'descriptors': ['globular', 'boot-shaped', 'water bottle', 'enlarged cardiac silhouette']
+    },
+    'Edema': {
+        'primary': ['pulmonary edema', 'lung edema', 'fluid overload', 'congestion'],
+        'anatomical': ['bilateral', 'perihilar', 'peripheral', 'alveolar', 'interstitial', 'peribronchial'],
+        'severity': {
+            'mild': ['mild edema', 'minimal fluid', 'early edema'],
+            'moderate': ['pulmonary edema', 'moderate congestion', 'fluid overload'],
+            'severe': ['severe edema', 'acute pulmonary edema', 'flash edema']
+        },
+        'descriptors': ['butterfly pattern', 'bat wing', 'ground glass', 'reticular', 'nodular']
+    },
+    'Lung Opacity': {
+        'primary': ['opacity', 'infiltrate', 'consolidation', 'shadowing'],
+        'anatomical': ['right lung', 'left lung', 'bilateral', 'upper lobe', 'lower lobe', 'lingula'],
+        'severity': {
+            'mild': ['patchy opacity', 'minimal infiltrate', 'subtle opacity'],
+            'moderate': ['opacity', 'consolidation', 'infiltrate'],
+            'severe': ['dense opacity', 'complete consolidation', 'white out']
+        },
+        'descriptors': ['airspace', 'ground glass', 'reticular', 'nodular', 'confluent', 'patchy']
+    },
+    'No Finding': {
+        'primary': ['normal', 'clear', 'unremarkable', 'no acute findings'],
+        'anatomical': ['lungs', 'heart', 'mediastinum', 'pleura', 'bones'],
+        'severity': {
+            'mild': ['normal', 'clear lungs', 'unremarkable'],
+            'moderate': ['normal', 'clear lungs', 'unremarkable'],
+            'severe': ['normal', 'clear lungs', 'unremarkable']
+        },
+        'descriptors': ['clear lung fields', 'normal cardiac silhouette', 'no infiltrates', 'no consolidation']
+    },
+    'Pleural Effusion': {
+        'primary': ['pleural effusion', 'fluid', 'effusion', 'pleural fluid'],
+        'anatomical': ['right pleural', 'left pleural', 'bilateral', 'costophrenic angle', 'meniscus'],
+        'severity': {
+            'mild': ['small effusion', 'minimal fluid', 'trace effusion'],
+            'moderate': ['pleural effusion', 'moderate effusion', 'fluid collection'],
+            'severe': ['large effusion', 'massive effusion', 'complete opacification']
+        },
+        'descriptors': ['blunted costophrenic angle', 'meniscus sign', 'layering', 'loculated']
+    },
+    'Pneumonia': {
+        'primary': ['pneumonia', 'pneumonitis', 'infection', 'inflammatory changes'],
+        'anatomical': ['right lung', 'left lung', 'bilateral', 'multilobar', 'lobar', 'bronchopneumonia'],
+        'severity': {
+            'mild': ['mild pneumonia', 'early pneumonia', 'minimal infection'],
+            'moderate': ['pneumonia', 'consolidation', 'infectious process'],
+            'severe': ['severe pneumonia', 'extensive pneumonia', 'necrotizing pneumonia']
+        },
+        'descriptors': ['airspace disease', 'consolidative', 'patchy', 'confluent', 'cavitary']
+    },
+    'Support Devices': {
+        'primary': ['medical device', 'support device', 'hardware', 'prosthesis'],
+        'anatomical': ['endotracheal tube', 'central line', 'pacemaker', 'chest tube', 'nasogastric tube'],
+        'severity': {
+            'mild': ['single device', 'properly positioned'],
+            'moderate': ['multiple devices', 'medical hardware'],
+            'severe': ['extensive hardware', 'multiple support devices']
+        },
+        'descriptors': ['properly positioned', 'appropriate placement', 'unchanged position', 'stable position']
+    }
+}
+
+# Anatomical region mapping for spatial attention analysis
+ANATOMICAL_REGIONS = {
+    'upper_left': {
+        'name': 'left upper lung field',
+        'keywords': ['left upper lobe', 'left apical region', 'left clavicular area'],
+        'bounds': (0, 0, 0.5, 0.4)  # (x_min, y_min, x_max, y_max) as fractions
+    },
+    'upper_right': {
+        'name': 'right upper lung field', 
+        'keywords': ['right upper lobe', 'right apical region', 'right clavicular area'],
+        'bounds': (0.5, 0, 1.0, 0.4)
+    },
+    'middle_left': {
+        'name': 'left middle lung field',
+        'keywords': ['left middle lobe', 'left perihilar region', 'left cardiac border'],
+        'bounds': (0, 0.4, 0.5, 0.7)
+    },
+    'middle_right': {
+        'name': 'right middle lung field',
+        'keywords': ['right middle lobe', 'right perihilar region', 'right cardiac border'],
+        'bounds': (0.5, 0.4, 1.0, 0.7)
+    },
+    'lower_left': {
+        'name': 'left lower lung field',
+        'keywords': ['left lower lobe', 'left costophrenic angle', 'left diaphragmatic region'],
+        'bounds': (0, 0.7, 0.5, 1.0)
+    },
+    'lower_right': {
+        'name': 'right lower lung field',
+        'keywords': ['right lower lobe', 'right costophrenic angle', 'right diaphragmatic region'],
+        'bounds': (0.5, 0.7, 1.0, 1.0)
+    },
+    'central_cardiac': {
+        'name': 'cardiac silhouette',
+        'keywords': ['heart border', 'mediastinum', 'cardiac shadow', 'central region'],
+        'bounds': (0.3, 0.3, 0.7, 0.8)
+    },
+    'hilum_left': {
+        'name': 'left hilum',
+        'keywords': ['left hilar region', 'left pulmonary vessels', 'left bronchial tree'],
+        'bounds': (0.15, 0.35, 0.45, 0.65)
+    },
+    'hilum_right': {
+        'name': 'right hilum', 
+        'keywords': ['right hilar region', 'right pulmonary vessels', 'right bronchial tree'],
+        'bounds': (0.55, 0.35, 0.85, 0.65)
+    }
+}
+
+# LLM Integration Configuration
+LLM_CONFIG = {
+    'base_url': 'http://127.0.0.1:1234',
+    'chat_endpoint': '/v1/chat/completions',
+    'model_name': 'gemma-3-27b-it-qat',
+    'max_tokens': 1024,
+    'temperature': 0.3,  # Conservative for medical reports
+    'timeout': 60,  # 60 seconds timeout
+    'max_retries': 3,
+    'retry_delay': 2  # seconds
+}
+
+# Medical Report Templates
+REPORT_TEMPLATES = {
+    'standard': {
+        'sections': ['findings', 'impression', 'recommendations'],
+        'style': 'formal medical report',
+        'length': 'concise but comprehensive'
+    },
+    'detailed': {
+        'sections': ['clinical_history', 'technique', 'findings', 'impression', 'recommendations'],
+        'style': 'detailed radiological report',
+        'length': 'comprehensive with technical details'
+    },
+    'concise': {
+        'sections': ['findings', 'impression'],
+        'style': 'brief clinical summary',
+        'length': 'concise and direct'
+    }
+}
+
+def check_system_memory():
+    memory = psutil.virtual_memory()
+    available_gb = memory.available / (1024**3)
+    return available_gb < 4.0
+
+def detect_device():
+    if torch.cuda.is_available():
+        try:
+            test_tensor = torch.zeros(1).cuda()
+            del test_tensor
+            torch.cuda.empty_cache()
+            return "cuda"
+        except Exception:
+            return "cpu"
+    else:
+        return "cpu"
+
+class MultiModalMIMICModel(nn.Module):
+    def __init__(self, num_conditions: int, contrastive_temperature: float = 0.1, loss_type="asymmetric"):
+        super().__init__()
+        self.contrastive_temperature = contrastive_temperature
+        self.loss_type = loss_type
+        self._keys_to_ignore_on_save = None
+
+        low_memory = check_system_memory()
+        
+        # Image encoder (ViT)
+        self.vit = AutoModel.from_pretrained(VIT_MODEL_NAME)
+        img_feature_dim = self.vit.config.hidden_size
+
+        if low_memory:
+            hidden_dim = 512
+            self.img_proj = nn.Sequential(
+                nn.Linear(img_feature_dim, 512),
+                nn.LayerNorm(512),
+                nn.GELU(),
+                nn.Dropout(0.1),
+                nn.Linear(512, 512)
+            )
+        else:
+            hidden_dim = 768
+            self.img_proj = nn.Sequential(
+                nn.Linear(img_feature_dim, 768),
+                nn.LayerNorm(768),
+                nn.GELU(),
+                nn.Dropout(0.15),
+                nn.Linear(768, 768),
+                nn.LayerNorm(768),
+                nn.Dropout(0.1)
+            )
+
+        # BBox encoder
+        if low_memory:
+            self.bbox_encoder = nn.Sequential(
+                nn.Conv2d(1, 16, kernel_size=3, stride=2, padding=1),
+                nn.BatchNorm2d(16),
+                nn.ReLU(),
+                nn.Conv2d(16, 32, kernel_size=3, stride=2, padding=1),
+                nn.BatchNorm2d(32),
+                nn.ReLU(),
+                nn.AdaptiveAvgPool2d((2, 2))
+            )
+            self.bbox_proj = nn.Sequential(
+                nn.Linear(128, 512),
+                nn.LayerNorm(512),
+                nn.GELU(),
+                nn.Dropout(0.1)
+            )
+        else:
+            self.bbox_encoder = nn.Sequential(
+                nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(32),
+                nn.ReLU(),
+                nn.MaxPool2d(2, 2),
+                nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(64),
+                nn.ReLU(),
+                nn.MaxPool2d(2, 2),
+                nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(128),
+                nn.ReLU(),
+                nn.AdaptiveAvgPool2d((2, 2))
+            )
+            self.bbox_proj = nn.Sequential(
+                nn.Linear(512, 768),
+                nn.LayerNorm(768),
+                nn.GELU(),
+                nn.Dropout(0.15),
+                nn.Linear(768, 768),
+                nn.LayerNorm(768),
+                nn.Dropout(0.1)
+            )
+
+        # Fixation encoder
+        if low_memory:
+            self.fix_emb = nn.Linear(4, 64)
+            self.fix_gru = nn.GRU(64, 128, num_layers=1, batch_first=True, bidirectional=True, dropout=0.1)
+            self.fix_proj = nn.Sequential(
+                nn.Linear(256, 512),
+                nn.LayerNorm(512),
+                nn.GELU(),
+                nn.Dropout(0.1)
+            )
+        else:
+            self.fix_emb = nn.Linear(4, 128)
+            self.fix_gru = nn.GRU(128, 384, num_layers=2, batch_first=True, bidirectional=True, dropout=0.15)
+            self.fix_proj = nn.Sequential(
+                nn.Linear(1536, 768),
+                nn.LayerNorm(768),
+                nn.GELU(),
+                nn.Dropout(0.15),
+                nn.Linear(768, 768),
+                nn.LayerNorm(768),
+                nn.Dropout(0.1)
+            )
+
+        # Text encoder
+        self.tokenizer = AutoTokenizer.from_pretrained(TEXT_MODEL_NAME)
+        self.text_encoder = AutoModel.from_pretrained(TEXT_MODEL_NAME)
+        text_feature_dim = self.text_encoder.config.hidden_size
+        
+        if low_memory:
+            self.text_proj = nn.Sequential(
+                nn.Linear(text_feature_dim, 512),
+                nn.LayerNorm(512),
+                nn.GELU(),
+                nn.Dropout(0.1)
+            )
+        else:
+            self.text_proj = nn.Sequential(
+                nn.Linear(text_feature_dim, 768),
+                nn.LayerNorm(768),
+                nn.GELU(),
+                nn.Dropout(0.15),
+                nn.Linear(768, 768),
+                nn.LayerNorm(768),
+                nn.Dropout(0.1)
+            )
+
+        # Fusion and classification
+        if low_memory:
+            self.fusion = nn.Sequential(
+                nn.Linear(hidden_dim * 4, hidden_dim * 2),
+                nn.LayerNorm(hidden_dim * 2),
+                nn.GELU(),
+                nn.Dropout(0.15),
+                nn.Linear(hidden_dim * 2, hidden_dim)
+            )
+            self.global_classifier = nn.Sequential(
+                nn.Linear(hidden_dim, 256),
+                nn.LayerNorm(256),
+                nn.GELU(),
+                nn.Dropout(0.3),
+                nn.Linear(256, num_conditions)
+            )
+            self.condition_specific_heads = None
+            self.fusion_attention = None
+        else:
+            self.fusion_attention = nn.MultiheadAttention(768, 8, dropout=0.1, batch_first=True)
+            self.fusion_norm = nn.LayerNorm(768)
+            self.fusion = nn.Sequential(
+                nn.Linear(768 * 4, 1536),
+                nn.LayerNorm(1536),
+                nn.GELU(),
+                nn.Dropout(0.2),
+                nn.Linear(1536, 768),
+                nn.LayerNorm(768),
+                nn.GELU(),
+                nn.Dropout(0.15)
+            )
+            self.condition_specific_heads = nn.ModuleList([
+                nn.Sequential(
+                    nn.Linear(768, 256),
+                    nn.LayerNorm(256),
+                    nn.GELU(),
+                    nn.Dropout(0.3),
+                    nn.Linear(256, 1)
+                ) for _ in range(num_conditions)
+            ])
+            self.global_classifier = nn.Sequential(
+                nn.Linear(768, 512),
+                nn.LayerNorm(512),
+                nn.GELU(),
+                nn.Dropout(0.3),
+                nn.Linear(512, num_conditions)
+            )
+
+        self._initialize_weights()
+        self.loss_fn = None
+
+    def _initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.trunc_normal_(m.weight, std=0.02)
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+
+    def forward(self, img, bbox, fix_seq, fix_mask, transcript, labels=None, contrastive_weight=0.1):
+        # Basic forward pass implementation for inference
+        batch_size = img.size(0)
+        
+        # Image encoding
+        img_outputs = self.vit(pixel_values=img)
+        if hasattr(img_outputs, 'pooler_output') and img_outputs.pooler_output is not None:
+            img_feat = img_outputs.pooler_output
+        else:
+            img_feat = img_outputs.last_hidden_state[:, 0, :]
+        img_proj = self.img_proj(img_feat)
+        
+        # BBox encoding
+        bbox_feat = self.bbox_encoder(bbox).flatten(1)
+        bbox_proj = self.bbox_proj(bbox_feat)
+        
+        # Fixation encoding
+        fix_lens = fix_mask.sum(dim=1).cpu()
+        if torch.all(fix_lens == 0):
+            fix_feat_gru = torch.zeros(batch_size, 256 if check_system_memory() else 1536, device=fix_seq.device)
+        else:
+            fix_emb = self.fix_emb(fix_seq)
+            packed_seq = nn.utils.rnn.pack_padded_sequence(
+                fix_emb, fix_lens.clamp(min=1), batch_first=True, enforce_sorted=False
+            )
+            _, h_n = self.fix_gru(packed_seq)
+            fix_feat_gru = h_n.transpose(0, 1).reshape(batch_size, -1)
+        fix_proj = self.fix_proj(fix_feat_gru)
+        
+        # Text encoding
+        if isinstance(transcript, list):
+            try:
+                max_length = 256 if check_system_memory() else 512
+                transcript_tokens = self.tokenizer(
+                    transcript, return_tensors="pt", padding=True, 
+                    truncation=True, max_length=max_length
+                ).to(img.device)
+                text_outputs = self.text_encoder(**transcript_tokens)
+                text_feat = text_outputs.last_hidden_state[:, 0, :]
+                text_proj = self.text_proj(text_feat)
+            except Exception:
+                hidden_dim = 512 if check_system_memory() else 768
+                text_proj = torch.zeros(batch_size, hidden_dim, device=img.device)
+        else:
+            hidden_dim = 512 if check_system_memory() else 768
+            text_proj = torch.zeros(batch_size, hidden_dim, device=img.device)
+        
+        # Fusion
+        combined = torch.cat([img_proj, bbox_proj, fix_proj, text_proj], dim=1)
+        fused = self.fusion(combined)
+        
+        if not check_system_memory() and self.fusion_attention is not None:
+            stacked_features = torch.stack([img_proj, bbox_proj, fix_proj, text_proj], dim=1)
+            attended_features, _ = self.fusion_attention(stacked_features, stacked_features, stacked_features)
+            attended_combined = attended_features.mean(dim=1)
+            final_fused = self.fusion_norm(fused + attended_combined)
+        else:
+            final_fused = fused
+        
+        # Classification
+        global_logits = self.global_classifier(final_fused)
+        
+        if not check_system_memory() and self.condition_specific_heads is not None:
+            condition_logits = []
+            for head in self.condition_specific_heads:
+                cond_logit = head(final_fused)
+                condition_logits.append(cond_logit)
+            condition_logits = torch.cat(condition_logits, dim=1)
+            logits_output = 0.7 * global_logits + 0.3 * condition_logits
+        else:
+            logits_output = global_logits
+        
+        return {
+            "logits": logits_output,
+            "zi": img_proj,
+            "zg": fix_proj,
+            "zb": bbox_proj,
+            "zt": text_proj,
+            "attn_map": torch.zeros_like(bbox)
+        }
+
+class MedicalReportGenerator:
+    def __init__(self, model_path: str = None, log_level: int = logging.INFO):
+        self.device = detect_device()
+        self.low_memory = check_system_memory()
+        self.model = None
+        self.model_path = model_path or os.path.join(
+            "output", "training_mimic_on_chexpert_optimized", 
+            "model_training_mimic_on_chexpert_optimized", "model.safetensors"
+        )
+        
+        # Enhanced logging setup
+        self._setup_logging(log_level)
+        
+        # Initialize preprocessing transforms
+        self._setup_preprocessing()
+        
+        # Initialize keyword extraction system (Phase 2)
+        self.condition_keywords = CONDITION_KEYWORDS
+        self.confidence_thresholds = {
+            'high': 0.7,    # Strong indication of condition
+            'medium': 0.4,  # Moderate indication
+            'low': 0.2      # Weak indication
+        }
+        
+        # Initialize attention visualization system (Phase 3)
+        self.anatomical_regions = ANATOMICAL_REGIONS
+        self.attention_threshold = 0.6  # Minimum attention intensity to consider
+        self.grad_cam_enabled = True
+        self.attention_cache = {}  # Cache attention maps for efficiency
+        
+        # Initialize LLM integration system (Phase 4)
+        self.llm_config = LLM_CONFIG
+        self.report_templates = REPORT_TEMPLATES
+        self.llm_available = False
+        self.llm_connection_tested = False
+        
+        # Initialize with real data paths
+        self.chest_xray_dir = CHEST_XRAY_DIR
+        
+        self.logger.info(f"Initialized MedicalReportGenerator")
+        self.logger.info(f"Device: {self.device}")
+        self.logger.info(f"Low memory mode: {self.low_memory}")
+        self.logger.info(f"Real chest X-ray directory: {self.chest_xray_dir}")
+        self.logger.info(f"Keyword extraction system loaded with {len(self.condition_keywords)} conditions")
+        self.logger.info(f"Attention visualization system loaded with {len(self.anatomical_regions)} anatomical regions")
+        self.logger.info(f"LLM integration configured for {self.llm_config['model_name']} at {self.llm_config['base_url']}")
+
+    def _setup_logging(self, log_level: int):
+        """Enhanced logging configuration"""
+        # Create formatter
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
+        
+        # Setup logger
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+        self.logger.setLevel(log_level)
+        
+        # Avoid duplicate handlers
+        if not self.logger.handlers:
+            # Console handler
+            console_handler = logging.StreamHandler()
+            console_handler.setLevel(log_level)
+            console_handler.setFormatter(formatter)
+            self.logger.addHandler(console_handler)
+            
+            # File handler for detailed logs
+            os.makedirs("logs", exist_ok=True)
+            file_handler = logging.FileHandler("logs/medical_report_generator.log")
+            file_handler.setLevel(logging.DEBUG)
+            file_handler.setFormatter(formatter)
+            self.logger.addHandler(file_handler)
+
+    def _setup_preprocessing(self):
+        # Match training transforms exactly
+        self.img_transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.5]*3, std=[0.5]*3),
+        ])
+        
+        self.bbox_transform = transforms.Compose([
+            transforms.Resize((224, 224), interpolation=transforms.InterpolationMode.NEAREST),
+            transforms.ToTensor(),
+        ])
+
+    def get_available_chest_xrays(self) -> List[str]:
+        """
+        Get list of available chest X-ray images from the real dataset.
+        
+        Returns:
+            List of available image file paths
+        """
+        try:
+            if not os.path.exists(self.chest_xray_dir):
+                self.logger.error(f"Chest X-ray directory not found: {self.chest_xray_dir}")
+                return []
+            
+            # Get all PNG files
+            image_files = []
+            for filename in os.listdir(self.chest_xray_dir):
+                if filename.lower().endswith('.png'):
+                    image_path = os.path.join(self.chest_xray_dir, filename)
+                    image_files.append(image_path)
+            
+            self.logger.info(f"Found {len(image_files)} chest X-ray images in {self.chest_xray_dir}")
+            return sorted(image_files)
+            
+        except Exception as e:
+            self.logger.error(f"Error getting available chest X-rays: {e}")
+            return []
+
+    def get_random_chest_xray(self) -> str:
+        """
+        Get a random chest X-ray from the available images.
+        
+        Returns:
+            Path to a random chest X-ray image
+        """
+        try:
+            available_images = self.get_available_chest_xrays()
+            if not available_images:
+                raise ValueError("No chest X-ray images available")
+            
+            selected_image = random.choice(available_images)
+            self.logger.info(f"Selected random chest X-ray: {os.path.basename(selected_image)}")
+            return selected_image
+            
+        except Exception as e:
+            self.logger.error(f"Error getting random chest X-ray: {e}")
+            raise
+
+    def preprocess_image(self, image_path: Union[str, Path]) -> torch.Tensor:
+        try:
+            image_path = Path(image_path)
+            
+            # Validate file exists
+            if not image_path.exists():
+                raise FileNotFoundError(f"Image file not found: {image_path}")
+            
+            # Validate file extension
+            valid_extensions = {'.png', '.jpg', '.jpeg', '.dcm', '.dicom'}
+            if image_path.suffix.lower() not in valid_extensions:
+                raise ValueError(f"Unsupported image format: {image_path.suffix}")
+            
+            # Load and preprocess image
+            if image_path.suffix.lower() in {'.dcm', '.dicom'}:
+                # Handle DICOM files (simplified - may need pydicom for full support)
+                try:
+                    import pydicom
+                    ds = pydicom.dcmread(image_path)
+                    img_array = ds.pixel_array
+                    # Convert to PIL Image
+                    img_array = ((img_array - img_array.min()) / 
+                               (img_array.max() - img_array.min()) * 255).astype(np.uint8)
+                    img = Image.fromarray(img_array).convert('RGB')
+                except ImportError:
+                    self.logger.warning("pydicom not available, treating DICOM as regular image")
+                    img = Image.open(image_path).convert('RGB')
+            else:
+                # Handle standard image formats
+                img = Image.open(image_path).convert('RGB')
+            
+            # Apply transforms
+            img_tensor = self.img_transform(img)
+            
+            # Add batch dimension and move to device
+            img_tensor = img_tensor.unsqueeze(0).to(self.device)
+            
+            self.logger.info(f"Preprocessed image: {image_path} -> {img_tensor.shape}")
+            return img_tensor
+            
+        except Exception as e:
+            self.logger.error(f"Error preprocessing image {image_path}: {e}")
+            # Return default tensor on error
+            return torch.zeros(1, 3, 224, 224).to(self.device)
+
+    def preprocess_bbox_mask(self, bbox_path: Union[str, Path]) -> torch.Tensor:
+        try:
+            bbox_path = Path(bbox_path)
+            
+            if not bbox_path.exists():
+                raise FileNotFoundError(f"BBox mask file not found: {bbox_path}")
+            
+            # Load bbox mask
+            bbox = Image.open(bbox_path).convert('L')
+            
+            # Apply transforms
+            bbox_tensor = self.bbox_transform(bbox)
+            
+            # Add batch dimension and move to device
+            bbox_tensor = bbox_tensor.unsqueeze(0).to(self.device)
+            
+            return bbox_tensor
+            
+        except Exception as e:
+            self.logger.error(f"Error preprocessing bbox mask {bbox_path}: {e}")
+            # Return default tensor on error
+            return torch.zeros(1, 1, 224, 224).to(self.device)
+
+    def preprocess_fixation_sequence(self, fixation_path: Union[str, Path]) -> tuple:
+        try:
+            fixation_path = Path(fixation_path)
+            
+            if not fixation_path.exists():
+                raise FileNotFoundError(f"Fixation file not found: {fixation_path}")
+            
+            # Load fixation data
+            arr = np.load(fixation_path)
+            seq = arr["seq"].astype(np.float32)  # (L,4)
+            mask = arr["mask"].astype(bool)      # (L,)
+            
+            # Safely handle any remaining NaNs
+            seq = np.nan_to_num(seq, nan=0.0, posinf=0.0, neginf=0.0)
+            
+            # Convert to tensors and apply safety clipping
+            seq = torch.from_numpy(seq).float()
+            seq = seq.clamp(-10.0, 10.0)
+            mask = torch.from_numpy(mask)
+            
+            # Add batch dimension and move to device
+            seq = seq.unsqueeze(0).to(self.device)
+            mask = mask.unsqueeze(0).to(self.device)
+            
+            # Close numpy file to free memory
+            arr.close() if hasattr(arr, 'close') else None
+            
+            return seq, mask
+            
+        except Exception as e:
+            self.logger.error(f"Error preprocessing fixation sequence {fixation_path}: {e}")
+            # Return default tensors on error
+            seq = torch.zeros(1, 128, 4).to(self.device)
+            mask = torch.zeros(1, 128, dtype=torch.bool).to(self.device)
+            return seq, mask
+
+    def load_classification_model(self) -> bool:
+        try:
+            self.logger.info(f"Loading model from {self.model_path}")
+            
+            if not os.path.exists(self.model_path):
+                raise FileNotFoundError(f"Model file not found: {self.model_path}")
+            
+            # Initialize model
+            self.model = MultiModalMIMICModel(len(CONDITIONS))
+            
+            # Load weights
+            state_dict = safetensors.torch.load_file(self.model_path, device="cpu")
+            self.model.load_state_dict(state_dict, strict=False)
+            
+            # Move to device and set to eval mode
+            self.model = self.model.to(self.device)
+            self.model.eval()
+            
+            self.logger.info("Model loaded successfully")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Error loading model: {e}")
+            return False
+
+    def run_model_inference(self, image_path: str) -> Dict:
+        """
+        Run model inference on a chest X-ray image.
+        
+        Args:
+            image_path: Path to the chest X-ray image
+            
+        Returns:
+            Dictionary with model predictions and results
+        """
+        try:
+            self.logger.info(f"Running model inference on: {os.path.basename(image_path)}")
+            
+            # Ensure model is loaded
+            if self.model is None:
+                if not self.load_classification_model():
+                    raise RuntimeError("Failed to load model")
+            
+            # Preprocess image
+            img_tensor = self.preprocess_image(image_path)
+            
+            # Create dummy multimodal inputs (simplified for real usage)
+            dummy_bbox = torch.zeros(1, 1, 224, 224).to(self.device)
+            dummy_fix_seq = torch.randn(1, 20, 4).to(self.device)
+            dummy_fix_mask = torch.ones(1, 20, dtype=torch.bool).to(self.device)
+            dummy_transcript = ["Medical chest X-ray analysis"]
+            
+            # Model inference
+            with torch.no_grad():
+                outputs = self.model(
+                    img=img_tensor,
+                    bbox=dummy_bbox,
+                    fix_seq=dummy_fix_seq,
+                    fix_mask=dummy_fix_mask,
+                    transcript=dummy_transcript
+                )
+            
+            # Process predictions
+            logits = outputs["logits"]
+            probabilities = torch.sigmoid(logits)
+            predictions = (probabilities > 0.5).float()
+            
+            # Create results
+            results = {
+                "success": True,
+                "image_path": str(image_path),
+                "condition_predictions": {}
+            }
+            
+            # Map predictions to condition names
+            for i, condition in enumerate(CONDITIONS):
+                results["condition_predictions"][condition] = {
+                    "probability": float(probabilities[0, i].item()),
+                    "predicted": bool(predictions[0, i].item()),
+                    "logit": float(logits[0, i].item())
+                }
+            
+            self.logger.info(f"Model inference completed successfully")
+            return results
+            
+        except Exception as e:
+            self.logger.error(f"Model inference failed: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "image_path": str(image_path)
+            }
+
+    def test_model_inference(self) -> bool:
+        if self.model is None:
+            self.logger.error("Model not loaded. Call load_classification_model() first.")
+            return False
+        
+        try:
+            # Create dummy inputs
+            batch_size = 1
+            dummy_img = torch.randn(batch_size, 3, 224, 224).to(self.device)
+            dummy_bbox = torch.randn(batch_size, 1, 224, 224).to(self.device)
+            dummy_fix_seq = torch.randn(batch_size, 10, 4).to(self.device)
+            dummy_fix_mask = torch.ones(batch_size, 10, dtype=torch.bool).to(self.device)
+            dummy_transcript = ["test transcript"]
+            
+            # Test inference
+            with torch.no_grad():
+                outputs = self.model(
+                    img=dummy_img,
+                    bbox=dummy_bbox,
+                    fix_seq=dummy_fix_seq,
+                    fix_mask=dummy_fix_mask,
+                    transcript=dummy_transcript
+                )
+            
+            # Verify output shape
+            logits = outputs["logits"]
+            if logits.shape == (batch_size, len(CONDITIONS)):
+                self.logger.info("Model inference test passed")
+                return True
+            else:
+                self.logger.error(f"Unexpected output shape: {logits.shape}")
+                return False
+                
+        except Exception as e:
+            self.logger.error(f"Model inference test failed: {e}")
+            return False
+
+    def test_image_preprocessing(self, test_image_path: str = None) -> bool:
+        try:
+            # Create a dummy test image if none provided
+            if test_image_path is None:
+                # Create a simple test image
+                test_img = Image.new('RGB', (512, 512), color='gray')
+                test_image_path = "temp_test_image.png"
+                test_img.save(test_image_path)
+                cleanup_test_image = True
+            else:
+                cleanup_test_image = False
+            
+            # Test image preprocessing
+            img_tensor = self.preprocess_image(test_image_path)
+            
+            # Verify tensor properties
+            if (img_tensor.shape == (1, 3, 224, 224) and 
+                img_tensor.device.type == self.device and
+                img_tensor.dtype == torch.float32):
+                self.logger.info("Image preprocessing test passed")
+                success = True
+            else:
+                self.logger.error(f"Image preprocessing failed: shape={img_tensor.shape}, device={img_tensor.device}, dtype={img_tensor.dtype}")
+                success = False
+            
+            # Cleanup test image if we created it
+            if cleanup_test_image and os.path.exists(test_image_path):
+                os.remove(test_image_path)
+            
+            return success
+            
+        except Exception as e:
+            self.logger.error(f"Image preprocessing test failed: {e}")
+            return False
+
+    def create_test_image_collection(self) -> bool:
+        """Create a collection of test images for development and testing"""
+        try:
+            os.makedirs(self.test_data_dir, exist_ok=True)
+            
+            # Create various test images
+            test_images = [
+                ("normal_chest.png", "RGB", (512, 512), "lightgray"),
+                ("pneumonia_sim.png", "RGB", (512, 512), "darkgray"),
+                ("small_image.png", "RGB", (128, 128), "blue"),
+                ("large_image.png", "RGB", (1024, 1024), "green"),
+            ]
+            
+            created_images = []
+            for filename, mode, size, color in test_images:
+                filepath = os.path.join(self.test_data_dir, filename)
+                if not os.path.exists(filepath):
+                    img = Image.new(mode, size, color)
+                    img.save(filepath)
+                    created_images.append(filename)
+                    self.logger.debug(f"Created test image: {filename}")
+            
+            # Create test metadata file
+            metadata = {
+                "test_images": [
+                    {"filename": "normal_chest.png", "description": "Simulated normal chest X-ray", "expected_conditions": []},
+                    {"filename": "pneumonia_sim.png", "description": "Simulated pneumonia case", "expected_conditions": ["Pneumonia"]},
+                    {"filename": "small_image.png", "description": "Small resolution test image", "expected_conditions": []},
+                    {"filename": "large_image.png", "description": "Large resolution test image", "expected_conditions": []},
+                ],
+                "created_at": str(np.datetime64('now')),
+                "purpose": "Development and testing of medical report generator"
+            }
+            
+            metadata_path = os.path.join(self.test_data_dir, "metadata.json")
+            with open(metadata_path, 'w') as f:
+                json.dump(metadata, f, indent=2)
+            
+            self.logger.info(f"Test image collection ready: {len(test_images)} images in {self.test_data_dir}")
+            if created_images:
+                self.logger.info(f"Created new images: {created_images}")
+            
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Error creating test image collection: {e}")
+            return False
+
+    def debug_model_outputs(self, outputs: Dict, input_info: Dict = None) -> Dict:
+        """Debug utility to analyze model outputs"""
+        debug_info = {
+            "output_keys": list(outputs.keys()),
+            "shapes": {},
+            "dtypes": {},
+            "devices": {},
+            "statistics": {}
+        }
+        
+        # Analyze each output tensor
+        for key, value in outputs.items():
+            if isinstance(value, torch.Tensor):
+                debug_info["shapes"][key] = list(value.shape)
+                debug_info["dtypes"][key] = str(value.dtype)
+                debug_info["devices"][key] = str(value.device)
+                
+                # Calculate statistics
+                if value.numel() > 0:
+                    debug_info["statistics"][key] = {
+                        "mean": float(value.mean().item()),
+                        "std": float(value.std().item()),
+                        "min": float(value.min().item()),
+                        "max": float(value.max().item()),
+                        "zero_fraction": float((value == 0).float().mean().item())
+                    }
+        
+        # Log debug information
+        self.logger.debug("=== Model Output Debug Info ===")
+        for key in debug_info["output_keys"]:
+            if key in debug_info["shapes"]:
+                self.logger.debug(f"{key}: shape={debug_info['shapes'][key]}, "
+                                f"dtype={debug_info['dtypes'][key]}, "
+                                f"device={debug_info['devices'][key]}")
+                if key in debug_info["statistics"]:
+                    stats = debug_info["statistics"][key]
+                    self.logger.debug(f"  Stats: mean={stats['mean']:.4f}, std={stats['std']:.4f}, "
+                                    f"range=[{stats['min']:.4f}, {stats['max']:.4f}], "
+                                    f"zero%={stats['zero_fraction']*100:.1f}%")
+        
+        # Add input information if provided
+        if input_info:
+            debug_info["input_info"] = input_info
+            self.logger.debug(f"Input info: {input_info}")
+        
+        return debug_info
+
+    def test_end_to_end_inference(self, image_path: str = None) -> Dict:
+        """Comprehensive end-to-end inference test"""
+        try:
+            self.logger.info("Starting end-to-end inference test...")
+            
+            # Use test image if none provided
+            if image_path is None:
+                if not os.path.exists(self.test_data_dir):
+                    self.create_test_image_collection()
+                image_path = os.path.join(self.test_data_dir, "normal_chest.png")
+            
+            # Ensure model is loaded
+            if self.model is None:
+                self.logger.info("Loading model for inference test...")
+                if not self.load_classification_model():
+                    raise RuntimeError("Failed to load model")
+            
+            # Step 1: Preprocess image
+            self.logger.info("Step 1: Preprocessing image...")
+            img_tensor = self.preprocess_image(image_path)
+            
+            # Step 2: Create dummy multimodal inputs
+            self.logger.info("Step 2: Preparing multimodal inputs...")
+            dummy_bbox = torch.zeros(1, 1, 224, 224).to(self.device)
+            dummy_fix_seq = torch.randn(1, 20, 4).to(self.device)  # Random fixation sequence
+            dummy_fix_mask = torch.ones(1, 20, dtype=torch.bool).to(self.device)
+            dummy_transcript = ["Patient presents with chest discomfort and cough."]
+            
+            input_info = {
+                "image_path": str(image_path),
+                "image_shape": list(img_tensor.shape),
+                "bbox_shape": list(dummy_bbox.shape),
+                "fix_seq_shape": list(dummy_fix_seq.shape),
+                "transcript_length": len(dummy_transcript[0])
+            }
+            
+            # Step 3: Model inference
+            self.logger.info("Step 3: Running model inference...")
+            with torch.no_grad():
+                outputs = self.model(
+                    img=img_tensor,
+                    bbox=dummy_bbox,
+                    fix_seq=dummy_fix_seq,
+                    fix_mask=dummy_fix_mask,
+                    transcript=dummy_transcript
+                )
+            
+            # Step 4: Process predictions
+            self.logger.info("Step 4: Processing predictions...")
+            logits = outputs["logits"]
+            probabilities = torch.sigmoid(logits)
+            predictions = (probabilities > 0.5).float()
+            
+            # Step 5: Create results
+            results = {
+                "success": True,
+                "input_info": input_info,
+                "raw_logits": logits.cpu().numpy().tolist(),
+                "probabilities": probabilities.cpu().numpy().tolist(),
+                "binary_predictions": predictions.cpu().numpy().tolist(),
+                "condition_predictions": {}
+            }
+            
+            # Map predictions to condition names
+            for i, condition in enumerate(CONDITIONS):
+                results["condition_predictions"][condition] = {
+                    "probability": float(probabilities[0, i].item()),
+                    "predicted": bool(predictions[0, i].item()),
+                    "logit": float(logits[0, i].item())
+                }
+            
+            # Step 6: Debug analysis
+            debug_info = self.debug_model_outputs(outputs, input_info)
+            results["debug_info"] = debug_info
+            
+            # Step 7: Validation checks
+            validation_results = self._validate_inference_results(results)
+            results["validation"] = validation_results
+            
+            if validation_results["all_passed"]:
+                self.logger.info("End-to-end inference test PASSED")
+            else:
+                self.logger.warning(f"⚠️ End-to-end inference test had issues: {validation_results['failed_checks']}")
+            
+            return results
+            
+        except Exception as e:
+            self.logger.error(f"End-to-end inference test failed: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "input_info": input_info if 'input_info' in locals() else None
+            }
+
+    def _validate_inference_results(self, results: Dict) -> Dict:
+        """Validate inference results for correctness"""
+        validation = {
+            "checks": {},
+            "failed_checks": [],
+            "all_passed": True
+        }
+        
+        try:
+            # Check 1: Probabilities in valid range
+            probs = np.array(results["probabilities"][0])
+            prob_valid = np.all((probs >= 0) & (probs <= 1))
+            validation["checks"]["probabilities_valid_range"] = prob_valid
+            if not prob_valid:
+                validation["failed_checks"].append("probabilities_valid_range")
+                validation["all_passed"] = False
+            
+            # Check 2: Correct number of conditions
+            num_conditions = len(results["condition_predictions"])
+            conditions_correct = num_conditions == len(CONDITIONS)
+            validation["checks"]["correct_num_conditions"] = conditions_correct
+            if not conditions_correct:
+                validation["failed_checks"].append("correct_num_conditions")
+                validation["all_passed"] = False
+            
+            # Check 3: All condition names present
+            expected_conditions = set(CONDITIONS)
+            actual_conditions = set(results["condition_predictions"].keys())
+            conditions_match = expected_conditions == actual_conditions
+            validation["checks"]["condition_names_match"] = conditions_match
+            if not conditions_match:
+                validation["failed_checks"].append("condition_names_match")
+                validation["all_passed"] = False
+            
+            # Check 4: Reasonable probability distribution (not all zeros or ones)
+            prob_diversity = 0.01 < probs.std() < 0.5
+            validation["checks"]["probability_diversity"] = prob_diversity
+            if not prob_diversity:
+                validation["failed_checks"].append("probability_diversity")
+                validation["all_passed"] = False
+            
+        except Exception as e:
+            validation["validation_error"] = str(e)
+            validation["all_passed"] = False
+        
+        return validation
+
+    # ========================
+    # Phase 2: Keyword Extraction System
+    # ========================
+    
+    def extract_keywords_from_predictions(self, condition_predictions: Dict) -> Dict:
+        """
+        Extract medical keywords based on model predictions and confidence levels.
+        
+        Args:
+            condition_predictions: Dictionary with condition names as keys and 
+                                 prediction dictionaries as values containing
+                                 'probability' and 'predicted' fields
+        
+        Returns:
+            Dictionary with condition names as keys and lists of extracted keywords
+        """
+        try:
+            extracted_keywords = {}
+            
+            self.logger.debug("Extracting keywords from predictions...")
+            
+            for condition, pred_info in condition_predictions.items():
+                if condition not in self.condition_keywords:
+                    self.logger.warning(f"No keyword mapping found for condition: {condition}")
+                    continue
+                
+                probability = pred_info.get('probability', 0.0)
+                predicted = pred_info.get('predicted', False)
+                
+                # Skip if confidence is too low
+                if probability < self.confidence_thresholds['low']:
+                    continue
+                
+                # Get keywords for this condition
+                condition_kw = self.condition_keywords[condition]
+                keywords = []
+                
+                # Always include primary keywords for detected conditions
+                if predicted or probability >= self.confidence_thresholds['medium']:
+                    keywords.extend(condition_kw['primary'])
+                
+                # Add severity-based keywords
+                severity_level = self._determine_severity_level(probability)
+                if severity_level in condition_kw['severity']:
+                    keywords.extend(condition_kw['severity'][severity_level])
+                
+                # Add anatomical keywords based on confidence
+                if probability >= self.confidence_thresholds['medium']:
+                    # For higher confidence, include more anatomical details
+                    keywords.extend(condition_kw['anatomical'][:3])  # Top 3 anatomical terms
+                elif probability >= self.confidence_thresholds['low']:
+                    # For lower confidence, include fewer details
+                    keywords.extend(condition_kw['anatomical'][:1])  # Top 1 anatomical term
+                
+                # Add descriptive keywords for high confidence predictions
+                if probability >= self.confidence_thresholds['high']:
+                    keywords.extend(condition_kw['descriptors'][:2])  # Top 2 descriptors
+                
+                # Remove duplicates and store
+                if keywords:
+                    extracted_keywords[condition] = list(set(keywords))
+                    self.logger.debug(f"{condition} (p={probability:.3f}): {len(keywords)} keywords extracted")
+            
+            # Special handling for "No Finding" - only if it has highest probability
+            if self._should_include_no_finding(condition_predictions):
+                if 'No Finding' in condition_predictions:
+                    no_finding_kw = self.condition_keywords['No Finding']
+                    extracted_keywords['No Finding'] = no_finding_kw['primary'] + no_finding_kw['descriptors']
+            
+            self.logger.info(f"Keyword extraction completed: {len(extracted_keywords)} conditions with keywords")
+            return extracted_keywords
+            
+        except Exception as e:
+            self.logger.error(f"Error extracting keywords from predictions: {e}")
+            return {}
+    
+    def _determine_severity_level(self, probability: float) -> str:
+        """Determine severity level based on prediction probability"""
+        if probability >= 0.8:
+            return 'severe'
+        elif probability >= 0.6:
+            return 'moderate'
+        else:
+            return 'mild'
+    
+    def _should_include_no_finding(self, condition_predictions: Dict) -> bool:
+        """
+        Determine if 'No Finding' should be included based on overall predictions.
+        Include 'No Finding' only if it has the highest probability and 
+        no other significant pathology is detected.
+        """
+        try:
+            no_finding_prob = condition_predictions.get('No Finding', {}).get('probability', 0.0)
+            
+            # Check if No Finding has highest probability
+            max_prob = max(pred.get('probability', 0.0) for pred in condition_predictions.values())
+            
+            if no_finding_prob != max_prob:
+                return False
+            
+            # Check if any pathology has high confidence
+            pathology_conditions = [c for c in condition_predictions.keys() if c != 'No Finding']
+            high_conf_pathology = any(
+                condition_predictions[c].get('probability', 0.0) >= self.confidence_thresholds['high']
+                for c in pathology_conditions
+            )
+            
+            return not high_conf_pathology
+            
+        except Exception as e:
+            self.logger.error(f"Error determining No Finding inclusion: {e}")
+            return False
+    
+    def get_keyword_summary(self, extracted_keywords: Dict) -> Dict:
+        """
+        Create a summary of extracted keywords organized by category.
+        
+        Args:
+            extracted_keywords: Output from extract_keywords_from_predictions
+            
+        Returns:
+            Dictionary with categorized keyword summary
+        """
+        try:
+            summary = {
+                'primary_findings': [],
+                'anatomical_locations': [],
+                'severity_indicators': [],
+                'descriptive_terms': [],
+                'total_keywords': 0,
+                'conditions_detected': list(extracted_keywords.keys())
+            }
+            
+            for condition, keywords in extracted_keywords.items():
+                if condition not in self.condition_keywords:
+                    continue
+                
+                condition_kw = self.condition_keywords[condition]
+                
+                # Categorize keywords
+                for keyword in keywords:
+                    if keyword in condition_kw['primary']:
+                        summary['primary_findings'].append(keyword)
+                    elif keyword in condition_kw['anatomical']:
+                        summary['anatomical_locations'].append(keyword)
+                    elif any(keyword in sev_list for sev_list in condition_kw['severity'].values()):
+                        summary['severity_indicators'].append(keyword)
+                    elif keyword in condition_kw['descriptors']:
+                        summary['descriptive_terms'].append(keyword)
+                
+                summary['total_keywords'] += len(keywords)
+            
+            # Remove duplicates
+            for category in ['primary_findings', 'anatomical_locations', 'severity_indicators', 'descriptive_terms']:
+                summary[category] = list(set(summary[category]))
+            
+            self.logger.debug(f"Keyword summary: {summary['total_keywords']} total keywords across {len(summary['conditions_detected'])} conditions")
+            return summary
+            
+        except Exception as e:
+            self.logger.error(f"Error creating keyword summary: {e}")
+            return {
+                'primary_findings': [],
+                'anatomical_locations': [],
+                'severity_indicators': [],
+                'descriptive_terms': [],
+                'total_keywords': 0,
+                'conditions_detected': []
+            }
+    
+    def test_keyword_extraction_system(self) -> bool:
+        """Test the keyword extraction system with various scenarios"""
+        try:
+            self.logger.info("Testing keyword extraction system...")
+            
+            # Test Case 1: High confidence pneumonia
+            test_predictions_1 = {
+                'Pneumonia': {'probability': 0.85, 'predicted': True},
+                'No Finding': {'probability': 0.15, 'predicted': False}
+            }
+            keywords_1 = self.extract_keywords_from_predictions(test_predictions_1)
+            
+            if 'Pneumonia' not in keywords_1 or len(keywords_1['Pneumonia']) == 0:
+                self.logger.error("Test 1 failed: No keywords for high confidence pneumonia")
+                return False
+            
+            # Test Case 2: Multiple conditions
+            test_predictions_2 = {
+                'Cardiomegaly': {'probability': 0.6, 'predicted': True},
+                'Pleural Effusion': {'probability': 0.4, 'predicted': False},
+                'No Finding': {'probability': 0.1, 'predicted': False}
+            }
+            keywords_2 = self.extract_keywords_from_predictions(test_predictions_2)
+            
+            if len(keywords_2) != 2:  # Should have keywords for both conditions above threshold
+                self.logger.error(f"Test 2 failed: Expected 2 conditions with keywords, got {len(keywords_2)}")
+                return False
+            
+            # Test Case 3: Normal case (No Finding dominant)
+            test_predictions_3 = {
+                'No Finding': {'probability': 0.9, 'predicted': True},
+                'Pneumonia': {'probability': 0.1, 'predicted': False}
+            }
+            keywords_3 = self.extract_keywords_from_predictions(test_predictions_3)
+            
+            if 'No Finding' not in keywords_3:
+                self.logger.error("Test 3 failed: No Finding should be included for normal case")
+                return False
+            
+            # Test keyword summary
+            summary = self.get_keyword_summary(keywords_1)
+            if not isinstance(summary, dict) or 'total_keywords' not in summary:
+                self.logger.error("Keyword summary test failed")
+                return False
+            
+            self.logger.info("Keyword extraction system tests passed")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Keyword extraction system test failed: {e}")
+            return False
+
+    # ========================
+    # Phase 3: Attention Visualization System
+    # ========================
+    
+    def generate_grad_cam_attention(self, image_tensor: torch.Tensor, 
+                                   target_condition: str = None) -> torch.Tensor:
+        """
+        Generate Grad-CAM attention map for Vision Transformer.
+        
+        Args:
+            image_tensor: Preprocessed image tensor (1, 3, 224, 224)
+            target_condition: Specific condition to generate attention for (optional)
+        
+        Returns:
+            Attention heatmap tensor (224, 224)
+        """
+        try:
+            if self.model is None:
+                raise ValueError("Model not loaded. Call load_classification_model() first.")
+            
+            # Set model to training mode for gradients but temporarily
+            original_training_mode = self.model.training
+            self.model.train()  # Need training mode for RNN gradients
+            
+            image_tensor = image_tensor.to(self.device)
+            image_tensor.requires_grad_(True)
+            
+            # Create dummy multimodal inputs
+            dummy_bbox = torch.zeros(1, 1, 224, 224).to(self.device)
+            dummy_fix_seq = torch.randn(1, 10, 4).to(self.device)
+            dummy_fix_mask = torch.ones(1, 10, dtype=torch.bool).to(self.device)
+            dummy_transcript = [""]
+            
+            # Forward pass
+            outputs = self.model(
+                img=image_tensor,
+                bbox=dummy_bbox,
+                fix_seq=dummy_fix_seq,
+                fix_mask=dummy_fix_mask,
+                transcript=dummy_transcript
+            )
+            
+            logits = outputs["logits"]
+            
+            # Determine target class for gradient
+            if target_condition and target_condition in CONDITIONS:
+                target_idx = CONDITIONS.index(target_condition)
+                target_score = logits[0, target_idx]
+            else:
+                # Use highest probability class
+                target_score = logits.max()
+            
+            # Backward pass
+            self.model.zero_grad()
+            target_score.backward(retain_graph=True)
+            
+            # Get gradients from the image
+            gradients = image_tensor.grad
+            
+            # Create attention map from gradients
+            # Average across color channels and take absolute value
+            attention_map = torch.mean(torch.abs(gradients.squeeze(0)), dim=0)
+            
+            # Normalize to [0, 1]
+            attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min() + 1e-8)
+            
+            # Restore original training mode
+            self.model.train(original_training_mode)
+            
+            self.logger.debug(f"Generated Grad-CAM attention map: {attention_map.shape}")
+            return attention_map.detach().cpu()
+            
+        except Exception as e:
+            self.logger.error(f"Error generating Grad-CAM attention: {e}")
+            # Restore original training mode
+            if 'original_training_mode' in locals():
+                self.model.train(original_training_mode)
+            # Return zero attention map on error
+            return torch.zeros(224, 224)
+    
+    def generate_enhanced_attention(self, image_tensor: torch.Tensor, 
+                                   target_condition: str = None) -> torch.Tensor:
+        """
+        Generate enhanced attention map using multiple techniques.
+        
+        Args:
+            image_tensor: Preprocessed image tensor
+            target_condition: Specific condition for attention generation
+            
+        Returns:
+            Enhanced attention heatmap
+        """
+        try:
+            # Generate basic Grad-CAM
+            grad_cam_attention = self.generate_grad_cam_attention(image_tensor, target_condition)
+            
+            # Apply Gaussian smoothing for better visualization
+            attention_np = grad_cam_attention.detach().cpu().numpy()
+            smoothed_attention = gaussian_filter(attention_np, sigma=1.5)
+            
+            # Enhance contrast
+            smoothed_attention = np.power(smoothed_attention, 0.7)
+            
+            # Normalize again
+            smoothed_attention = (smoothed_attention - smoothed_attention.min()) / (
+                smoothed_attention.max() - smoothed_attention.min() + 1e-8)
+            
+            return torch.from_numpy(smoothed_attention)
+            
+        except Exception as e:
+            self.logger.error(f"Error generating enhanced attention: {e}")
+            return torch.zeros(224, 224)
+    
+    def analyze_attention_regions(self, attention_map: torch.Tensor, 
+                                 threshold: float = None) -> Dict:
+        """
+        Analyze attention map to identify key anatomical regions.
+        
+        Args:
+            attention_map: Attention heatmap (224, 224)
+            threshold: Minimum attention intensity to consider
+            
+        Returns:
+            Dictionary with attention analysis results
+        """
+        try:
+            if threshold is None:
+                threshold = self.attention_threshold
+            
+            attention_np = attention_map.detach().cpu().numpy()
+            height, width = attention_np.shape
+            
+            # Analyze each anatomical region
+            region_analysis = {}
+            
+            for region_id, region_info in self.anatomical_regions.items():
+                x_min, y_min, x_max, y_max = region_info['bounds']
+                
+                # Convert to pixel coordinates
+                pixel_x_min = int(x_min * width)
+                pixel_y_min = int(y_min * height)
+                pixel_x_max = int(x_max * width)
+                pixel_y_max = int(y_max * height)
+                
+                # Extract region from attention map
+                region_attention = attention_np[pixel_y_min:pixel_y_max, pixel_x_min:pixel_x_max]
+                
+                if region_attention.size > 0:
+                    # Calculate statistics for this region
+                    max_attention = float(region_attention.max())
+                    mean_attention = float(region_attention.mean())
+                    attention_area = float((region_attention > threshold).mean())
+                    
+                    region_analysis[region_id] = {
+                        'name': region_info['name'],
+                        'max_attention': max_attention,
+                        'mean_attention': mean_attention,
+                        'attention_coverage': attention_area,
+                        'is_significant': max_attention > threshold,
+                        'keywords': region_info['keywords']
+                    }
+            
+            # Find top regions by attention
+            sorted_regions = sorted(
+                [(rid, data) for rid, data in region_analysis.items()],
+                key=lambda x: x[1]['max_attention'],
+                reverse=True
+            )
+            
+            analysis_result = {
+                'regions': region_analysis,
+                'top_regions': [rid for rid, _ in sorted_regions[:3]],
+                'significant_regions': [rid for rid, data in region_analysis.items() 
+                                      if data['is_significant']],
+                'overall_attention_intensity': float(attention_np.mean()),
+                'max_attention_location': {
+                    'y': int(np.unravel_index(attention_np.argmax(), attention_np.shape)[0]),
+                    'x': int(np.unravel_index(attention_np.argmax(), attention_np.shape)[1])
+                }
+            }
+            
+            self.logger.debug(f"Attention analysis: {len(analysis_result['significant_regions'])} significant regions")
+            return analysis_result
+            
+        except Exception as e:
+            self.logger.error(f"Error analyzing attention regions: {e}")
+            return {
+                'regions': {},
+                'top_regions': [],
+                'significant_regions': [],
+                'overall_attention_intensity': 0.0,
+                'max_attention_location': {'y': 0, 'x': 0}
+            }
+    
+    def extract_spatial_keywords(self, attention_analysis: Dict) -> List[str]:
+        """
+        Extract spatial keywords based on attention analysis.
+        
+        Args:
+            attention_analysis: Output from analyze_attention_regions
+            
+        Returns:
+            List of spatial keywords describing attention focus
+        """
+        try:
+            spatial_keywords = []
+            
+            # Add keywords from significant regions
+            for region_id in attention_analysis.get('significant_regions', []):
+                region_data = attention_analysis['regions'].get(region_id, {})
+                
+                # Add region-specific keywords based on attention intensity
+                max_attention = region_data.get('max_attention', 0)
+                region_keywords = region_data.get('keywords', [])
+                
+                if max_attention > 0.8:
+                    # High attention - add all keywords
+                    spatial_keywords.extend(region_keywords)
+                    spatial_keywords.append(f"focal attention in {region_data.get('name', 'unknown region')}")
+                elif max_attention > 0.6:
+                    # Moderate attention - add primary keywords
+                    spatial_keywords.extend(region_keywords[:2])
+                    spatial_keywords.append(f"increased attention in {region_data.get('name', 'unknown region')}")
+                else:
+                    # Lower attention - add one keyword
+                    if region_keywords:
+                        spatial_keywords.append(region_keywords[0])
+            
+            # Add descriptive terms based on attention pattern
+            overall_intensity = attention_analysis.get('overall_attention_intensity', 0)
+            num_significant = len(attention_analysis.get('significant_regions', []))
+            
+            if num_significant > 3:
+                spatial_keywords.append("diffuse attention pattern")
+            elif num_significant == 1:
+                spatial_keywords.append("focal attention pattern")
+            elif num_significant > 1:
+                spatial_keywords.append("multifocal attention pattern")
+            
+            if overall_intensity > 0.7:
+                spatial_keywords.append("high model confidence")
+            elif overall_intensity > 0.4:
+                spatial_keywords.append("moderate model confidence")
+            
+            # Remove duplicates while preserving order
+            unique_keywords = []
+            seen = set()
+            for keyword in spatial_keywords:
+                if keyword not in seen:
+                    unique_keywords.append(keyword)
+                    seen.add(keyword)
+            
+            self.logger.debug(f"Extracted {len(unique_keywords)} spatial keywords")
+            return unique_keywords
+            
+        except Exception as e:
+            self.logger.error(f"Error extracting spatial keywords: {e}")
+            return []
+    
+    def visualize_attention_map(self, image_tensor: torch.Tensor, 
+                               attention_map: torch.Tensor,
+                               save_path: str = None) -> np.ndarray:
+        """
+        Create a visualization of the attention map overlaid on the original image.
+        
+        Args:
+            image_tensor: Original image tensor (1, 3, 224, 224)
+            attention_map: Attention heatmap (224, 224)
+            save_path: Optional path to save the visualization
+            
+        Returns:
+            Visualization as numpy array
+        """
+        try:
+            # Convert image tensor to numpy (denormalize from [-1, 1] to [0, 1])
+            img_np = image_tensor.detach().squeeze(0).cpu().numpy()
+            img_np = (img_np + 1.0) / 2.0  # Denormalize from [-1, 1] to [0, 1]
+            img_np = np.transpose(img_np, (1, 2, 0))  # CHW to HWC
+            
+            # Convert to grayscale for better overlay
+            img_gray = np.mean(img_np, axis=2)
+            
+            # Prepare attention map
+            attention_np = attention_map.detach().cpu().numpy()
+            
+            # Create colormap for attention
+            colormap = cm.get_cmap('jet')
+            attention_colored = colormap(attention_np)[:, :, :3]  # Remove alpha channel
+            
+            # Blend image and attention
+            alpha = 0.4  # Transparency of attention overlay
+            blended = img_gray[:, :, np.newaxis] * (1 - alpha) + attention_colored * alpha
+            blended = np.clip(blended, 0, 1)
+            
+            # Add region boundaries for reference
+            vis_with_regions = self._add_region_boundaries(blended)
+            
+            # Save if path provided
+            if save_path:
+                os.makedirs(os.path.dirname(save_path), exist_ok=True)
+                plt.figure(figsize=(10, 10))
+                plt.imshow(vis_with_regions)
+                plt.title("Attention Map Visualization")
+                plt.axis('off')
+                plt.colorbar(plt.cm.ScalarMappable(cmap='jet'), shrink=0.8)
+                plt.savefig(save_path, dpi=150, bbox_inches='tight')
+                plt.close()
+                self.logger.debug(f"Attention visualization saved to {save_path}")
+            
+            return (vis_with_regions * 255).astype(np.uint8)
+            
+        except Exception as e:
+            self.logger.error(f"Error creating attention visualization: {e}")
+            # Return blank image on error
+            return np.zeros((224, 224, 3), dtype=np.uint8)
+    
+    def _add_region_boundaries(self, image: np.ndarray) -> np.ndarray:
+        """Add anatomical region boundaries to visualization"""
+        try:
+            height, width = image.shape[:2]
+            vis_image = image.copy()
+            
+            # Draw region boundaries
+            for region_info in self.anatomical_regions.values():
+                x_min, y_min, x_max, y_max = region_info['bounds']
+                
+                # Convert to pixel coordinates
+                pixel_x_min = int(x_min * width)
+                pixel_y_min = int(y_min * height)
+                pixel_x_max = int(x_max * width)
+                pixel_y_max = int(y_max * height)
+                
+                # Draw thin boundary lines
+                vis_image[pixel_y_min:pixel_y_min+1, pixel_x_min:pixel_x_max] = [0.8, 0.8, 0.8]  # Top
+                vis_image[pixel_y_max-1:pixel_y_max, pixel_x_min:pixel_x_max] = [0.8, 0.8, 0.8]  # Bottom
+                vis_image[pixel_y_min:pixel_y_max, pixel_x_min:pixel_x_min+1] = [0.8, 0.8, 0.8]  # Left
+                vis_image[pixel_y_min:pixel_y_max, pixel_x_max-1:pixel_x_max] = [0.8, 0.8, 0.8]  # Right
+            
+            return vis_image
+            
+        except Exception as e:
+            self.logger.error(f"Error adding region boundaries: {e}")
+            return image
+    
+    def test_attention_visualization_system(self) -> bool:
+        """Test the attention visualization system with various scenarios"""
+        try:
+            self.logger.info("Testing attention visualization system...")
+            
+            if self.model is None:
+                self.logger.error("Model not loaded for attention testing")
+                return False
+            
+            # Test 1: Generate attention map
+            test_image_path = "test_data/pneumonia_sim.png"
+            img_tensor = self.preprocess_image(test_image_path)
+            
+            attention_map = self.generate_enhanced_attention(img_tensor, target_condition="Pneumonia")
+            if attention_map.shape != (224, 224):
+                self.logger.error("Test 1 failed: Incorrect attention map shape")
+                return False
+            
+            # Test 2: Analyze attention regions
+            attention_analysis = self.analyze_attention_regions(attention_map)
+            if not isinstance(attention_analysis, dict) or 'regions' not in attention_analysis:
+                self.logger.error("Test 2 failed: Attention analysis format incorrect")
+                return False
+            
+            # Test 3: Extract spatial keywords
+            spatial_keywords = self.extract_spatial_keywords(attention_analysis)
+            if not isinstance(spatial_keywords, list):
+                self.logger.error("Test 3 failed: Spatial keywords not a list")
+                return False
+            
+            # Test 4: Create visualization
+            visualization = self.visualize_attention_map(img_tensor, attention_map)
+            if visualization.shape != (224, 224, 3):
+                self.logger.error("Test 4 failed: Visualization shape incorrect")
+                return False
+            
+            self.logger.info("Attention visualization system tests passed")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Attention visualization system test failed: {e}")
+            return False
+
+    # ========================
+    # Phase 4: LLM Integration System
+    # ========================
+    
+    def test_llm_connection(self) -> bool:
+        """
+        Test connection to the LLM server.
+        
+        Returns:
+            True if connection successful, False otherwise
+        """
+        try:
+            self.logger.info("Testing LLM connection...")
+            
+            # Simple test request
+            test_payload = {
+                "model": self.llm_config['model_name'],
+                "messages": [
+                    {"role": "user", "content": "Hello, are you working?"}
+                ],
+                "max_tokens": 50,
+                "temperature": 0.1
+            }
+            
+            url = f"{self.llm_config['base_url']}{self.llm_config['chat_endpoint']}"
+            
+            response = requests.post(
+                url,
+                json=test_payload,
+                timeout=self.llm_config['timeout']
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                if 'choices' in result and len(result['choices']) > 0:
+                    self.llm_available = True
+                    self.llm_connection_tested = True
+                    self.logger.info("LLM connection test successful")
+                    return True
+            
+            self.logger.error(f"LLM connection test failed: {response.status_code} - {response.text}")
+            return False
+            
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"LLM connection error: {e}")
+            self.llm_available = False
+            return False
+        except Exception as e:
+            self.logger.error(f"Unexpected error testing LLM connection: {e}")
+            return False
+    
+    def encode_image_for_llm(self, image_tensor: torch.Tensor) -> str:
+        """
+        Encode image tensor as base64 string for LLM transmission.
+        
+        Args:
+            image_tensor: Image tensor (1, 3, 224, 224)
+            
+        Returns:
+            Base64 encoded image string
+        """
+        try:
+            # Convert tensor to PIL Image
+            img_np = image_tensor.detach().squeeze(0).cpu().numpy()
+            img_np = (img_np + 1.0) / 2.0  # Denormalize from [-1, 1] to [0, 1]
+            img_np = np.transpose(img_np, (1, 2, 0))  # CHW to HWC
+            img_np = (img_np * 255).astype(np.uint8)
+            
+            img_pil = Image.fromarray(img_np)
+            
+            # Convert to base64
+            buffer = BytesIO()
+            img_pil.save(buffer, format='PNG')
+            img_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            
+            return img_base64
+            
+        except Exception as e:
+            self.logger.error(f"Error encoding image for LLM: {e}")
+            return ""
+    
+    def create_medical_report_prompt(self, 
+                                   condition_predictions: Dict, 
+                                   prediction_keywords: Dict,
+                                   spatial_keywords: List[str],
+                                   attention_analysis: Dict,
+                                   template: str = 'standard',
+                                   patient_info: Dict = None) -> str:
+        """
+        Create a comprehensive prompt for medical report generation.
+        
+        Args:
+            condition_predictions: Model predictions for conditions
+            prediction_keywords: Keywords extracted from predictions
+            spatial_keywords: Keywords from attention analysis
+            attention_analysis: Detailed attention analysis results
+            template: Report template to use ('standard', 'detailed', 'concise')
+            patient_info: Optional patient information
+            
+        Returns:
+            Formatted prompt string for LLM
+        """
+        try:
+            template_config = self.report_templates.get(template, self.report_templates['standard'])
+            
+            # Build prompt sections
+            prompt_sections = []
+            
+            # System instruction
+            system_instruction = f"""You are an expert radiologist generating a professional {template_config['style']}. 
+Generate a {template_config['length']} medical report based on the provided chest X-ray analysis data.
+
+IMPORTANT GUIDELINES:
+- Use professional medical terminology
+- Be accurate and evidence-based
+- Include relevant anatomical details
+- Maintain appropriate clinical tone
+- Focus on significant findings
+- Provide actionable recommendations when appropriate
+"""
+            
+            # Context section
+            context_section = "\n=== CHEST X-RAY ANALYSIS DATA ===\n"
+            
+            # Add condition predictions
+            context_section += "\n📊 CONDITION PREDICTIONS:\n"
+            significant_predictions = []
+            for condition, pred_info in condition_predictions.items():
+                prob = pred_info.get('probability', 0)
+                predicted = pred_info.get('predicted', False)
+                if prob > 0.3 or predicted:
+                    confidence = "High" if prob > 0.7 else "Moderate" if prob > 0.5 else "Low"
+                    context_section += f"- {condition}: {prob:.3f} probability ({confidence} confidence)\n"
+                    significant_predictions.append(condition)
+            
+            # Add prediction-based keywords
+            context_section += "\n🔑 CLINICAL KEYWORDS (by condition):\n"
+            for condition, keywords in prediction_keywords.items():
+                if keywords and condition in significant_predictions:
+                    context_section += f"- {condition}: {', '.join(keywords[:5])}\n"
+            
+            # Add spatial attention analysis
+            context_section += "\n🗺️ SPATIAL ATTENTION ANALYSIS:\n"
+            if attention_analysis:
+                intensity = attention_analysis.get('overall_attention_intensity', 0)
+                significant_regions = attention_analysis.get('significant_regions', [])
+                
+                context_section += f"- Overall attention intensity: {intensity:.3f}\n"
+                context_section += f"- Significant regions detected: {len(significant_regions)}\n"
+                
+                if significant_regions:
+                    context_section += "- Key focus areas:\n"
+                    for region_id in significant_regions[:3]:
+                        region_data = attention_analysis['regions'].get(region_id, {})
+                        region_name = region_data.get('name', 'Unknown region')
+                        max_attention = region_data.get('max_attention', 0)
+                        context_section += f"  • {region_name}: {max_attention:.3f} attention intensity\n"
+            
+            # Add spatial keywords
+            if spatial_keywords:
+                context_section += f"\n📍 SPATIAL KEYWORDS:\n"
+                context_section += f"- Anatomical focus: {', '.join(spatial_keywords[:8])}\n"
+            
+            # Add patient information if provided
+            if patient_info:
+                context_section += "\n👤 PATIENT INFORMATION:\n"
+                for key, value in patient_info.items():
+                    context_section += f"- {key.replace('_', ' ').title()}: {value}\n"
+            
+            # Task instruction
+            task_instruction = f"""
+=== TASK ===
+Based on the above analysis data, generate a professional chest X-ray report with the following sections:
+{', '.join(template_config['sections']).upper()}
+
+The report should be {template_config['length']} and written in a {template_config['style']} format.
+Focus on the significant findings and provide clear, actionable medical insights.
+
+REPORT:
+"""
+            
+            # Combine all sections
+            full_prompt = system_instruction + context_section + task_instruction
+            
+            self.logger.debug(f"Created medical report prompt ({len(full_prompt)} characters)")
+            return full_prompt
+            
+        except Exception as e:
+            self.logger.error(f"Error creating medical report prompt: {e}")
+            return "Error creating prompt. Please provide chest X-ray analysis for medical report generation."
+    
+    def call_llm_for_report(self, prompt: str, include_image: bool = False, 
+                           image_tensor: torch.Tensor = None) -> Dict:
+        """
+        Call the LLM to generate a medical report.
+        
+        Args:
+            prompt: Formatted prompt for report generation
+            include_image: Whether to include the image in the request
+            image_tensor: Image tensor if including image
+            
+        Returns:
+            Dictionary with response information
+        """
+        try:
+            if not self.llm_connection_tested:
+                if not self.test_llm_connection():
+                    return {
+                        'success': False,
+                        'error': 'LLM connection not available',
+                        'report': self._generate_fallback_report(),
+                        'used_fallback': True
+                    }
+            
+            # Prepare message content
+            message_content = prompt
+            
+            # Add image if requested and available
+            if include_image and image_tensor is not None:
+                try:
+                    image_b64 = self.encode_image_for_llm(image_tensor)
+                    if image_b64:
+                        message_content += f"\n\n[IMAGE DATA: base64_encoded_xray_image]\n{image_b64[:100]}..."
+                except Exception as e:
+                    self.logger.warning(f"Failed to include image in LLM request: {e}")
+            
+            # Prepare request payload
+            payload = {
+                "model": self.llm_config['model_name'],
+                "messages": [
+                    {"role": "user", "content": message_content}
+                ],
+                "max_tokens": self.llm_config['max_tokens'],
+                "temperature": self.llm_config['temperature']
+            }
+            
+            url = f"{self.llm_config['base_url']}{self.llm_config['chat_endpoint']}"
+            
+            # Make request with retries
+            for attempt in range(self.llm_config['max_retries']):
+                try:
+                    self.logger.debug(f"LLM request attempt {attempt + 1}/{self.llm_config['max_retries']}")
+                    
+                    response = requests.post(
+                        url,
+                        json=payload,
+                        timeout=self.llm_config['timeout']
+                    )
+                    
+                    if response.status_code == 200:
+                        result = response.json()
+                        
+                        if 'choices' in result and len(result['choices']) > 0:
+                            report_text = result['choices'][0]['message']['content']
+                            
+                            return {
+                                'success': True,
+                                'report': report_text,
+                                'raw_response': result,
+                                'used_fallback': False,
+                                'attempt': attempt + 1
+                            }
+                    
+                    self.logger.warning(f"LLM request failed (attempt {attempt + 1}): {response.status_code}")
+                    
+                except requests.exceptions.RequestException as e:
+                    self.logger.warning(f"LLM request error (attempt {attempt + 1}): {e}")
+                
+                # Wait before retry
+                if attempt < self.llm_config['max_retries'] - 1:
+                    time.sleep(self.llm_config['retry_delay'])
+            
+            # All attempts failed
+            self.logger.error("All LLM request attempts failed")
+            return {
+                'success': False,
+                'error': 'All LLM request attempts failed',
+                'report': self._generate_fallback_report(),
+                'used_fallback': True
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error calling LLM for report: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'report': self._generate_fallback_report(),
+                'used_fallback': True
+            }
+    
+    def _generate_fallback_report(self) -> str:
+        """
+        Generate a fallback report when LLM is not available.
+        
+        Returns:
+            Basic medical report template
+        """
+        return """CHEST X-RAY REPORT
+
+FINDINGS:
+Chest X-ray analysis has been completed using automated multimodal AI analysis.
+Detailed findings are available in the system logs.
+
+IMPRESSION:
+Automated analysis completed. Please refer to the detailed predictions and 
+keywords for specific findings. Clinical correlation recommended.
+
+RECOMMENDATIONS:
+1. Review automated analysis results with attending radiologist
+2. Clinical correlation with patient symptoms and history
+3. Follow-up imaging as clinically indicated
+
+NOTE: This report was generated using fallback mode due to LLM unavailability.
+Please ensure proper clinical review of all automated findings.
+
+[Report generated by Medical Report Generator - Fallback Mode]
+"""
+    
+    def format_medical_report(self, raw_report: str, metadata: Dict = None) -> Dict:
+        """
+        Format and validate the medical report output.
+        
+        Args:
+            raw_report: Raw report text from LLM
+            metadata: Additional metadata to include
+            
+        Returns:
+            Formatted report dictionary
+        """
+        try:
+            # Basic formatting and cleanup
+            formatted_text = raw_report.strip()
+            
+            # Split into sections (basic parsing)
+            sections = {}
+            current_section = "report"
+            current_content = []
+            
+            lines = formatted_text.split('\n')
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
+                    
+                # Check if line is a section header
+                line_upper = line.upper()
+                if any(header in line_upper for header in ['FINDINGS:', 'IMPRESSION:', 'RECOMMENDATIONS:', 'CLINICAL HISTORY:', 'TECHNIQUE:']):
+                    # Save previous section
+                    if current_content:
+                        sections[current_section] = '\n'.join(current_content).strip()
+                    
+                    # Start new section
+                    current_section = line_upper.replace(':', '').lower()
+                    current_content = []
+                else:
+                    current_content.append(line)
+            
+            # Save last section
+            if current_content:
+                sections[current_section] = '\n'.join(current_content).strip()
+            
+            # Create formatted report
+            formatted_report = {
+                'report_text': formatted_text,
+                'sections': sections,
+                'metadata': {
+                    'generated_at': str(np.datetime64('now')),
+                    'generator': 'Medical Report Generator v1.0',
+                    'model_used': self.llm_config['model_name'],
+                    'word_count': len(formatted_text.split()),
+                    'character_count': len(formatted_text)
+                }
+            }
+            
+            # Add additional metadata if provided
+            if metadata:
+                formatted_report['metadata'].update(metadata)
+            
+            self.logger.debug(f"Formatted medical report: {len(sections)} sections, {formatted_report['metadata']['word_count']} words")
+            return formatted_report
+            
+        except Exception as e:
+            self.logger.error(f"Error formatting medical report: {e}")
+            return {
+                'report_text': raw_report,
+                'sections': {'report': raw_report},
+                'metadata': {
+                    'generated_at': str(np.datetime64('now')),
+                    'generator': 'Medical Report Generator v1.0',
+                    'error': str(e)
+                }
+            }
+    
+    def generate_complete_medical_report(self, 
+                                       image_path: str,
+                                       template: str = 'standard',
+                                       include_image: bool = False,
+                                       patient_info: Dict = None) -> Dict:
+        """
+        Generate a complete medical report from image analysis.
+        
+        Args:
+            image_path: Path to the chest X-ray image
+            template: Report template to use
+            include_image: Whether to include image in LLM request
+            patient_info: Optional patient information
+            
+        Returns:
+            Complete report analysis dictionary
+        """
+        try:
+            self.logger.info(f"Generating complete medical report for: {image_path}")
+            
+            # Step 1: Load and preprocess image
+            img_tensor = self.preprocess_image(image_path)
+            
+            # Step 2: Run model inference
+            inference_results = self.test_end_to_end_inference(image_path)
+            if not inference_results["success"]:
+                raise RuntimeError("Model inference failed")
+            
+            # Step 3: Extract prediction keywords
+            prediction_keywords = self.extract_keywords_from_predictions(inference_results["condition_predictions"])
+            
+            # Step 4: Generate attention analysis
+            # Use the top predicted condition for attention
+            top_condition = max(
+                inference_results["condition_predictions"].items(),
+                key=lambda x: x[1]['probability']
+            )[0]
+            
+            attention_map = self.generate_enhanced_attention(img_tensor, target_condition=top_condition)
+            attention_analysis = self.analyze_attention_regions(attention_map)
+            spatial_keywords = self.extract_spatial_keywords(attention_analysis)
+            
+            # Step 5: Create LLM prompt
+            prompt = self.create_medical_report_prompt(
+                condition_predictions=inference_results["condition_predictions"],
+                prediction_keywords=prediction_keywords,
+                spatial_keywords=spatial_keywords,
+                attention_analysis=attention_analysis,
+                template=template,
+                patient_info=patient_info
+            )
+            
+            # Step 6: Generate report via LLM
+            llm_response = self.call_llm_for_report(
+                prompt=prompt,
+                include_image=include_image,
+                image_tensor=img_tensor if include_image else None
+            )
+            
+            # Step 7: Format final report
+            formatted_report = self.format_medical_report(
+                raw_report=llm_response['report'],
+                metadata={
+                    'image_path': str(image_path),
+                    'template_used': template,
+                    'llm_success': llm_response['success'],
+                    'used_fallback': llm_response.get('used_fallback', False),
+                    'top_predicted_condition': top_condition,
+                    'total_keywords': len(prediction_keywords) + len(spatial_keywords),
+                    'attention_regions': len(attention_analysis.get('significant_regions', []))
+                }
+            )
+            
+            # Step 8: Compile complete analysis
+            complete_analysis = {
+                'success': True,
+                'image_path': str(image_path),
+                'model_predictions': inference_results["condition_predictions"],
+                'prediction_keywords': prediction_keywords,
+                'spatial_keywords': spatial_keywords,
+                'attention_analysis': attention_analysis,
+                'llm_response': llm_response,
+                'medical_report': formatted_report,
+                'processing_metadata': {
+                    'phases_completed': ['inference', 'keywords', 'attention', 'llm_generation'],
+                    'template_used': template,
+                    'total_processing_time': None  # Could add timing if needed
+                }
+            }
+            
+            self.logger.info("Complete medical report generation successful")
+            return complete_analysis
+            
+        except Exception as e:
+            self.logger.error(f"Error generating complete medical report: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'image_path': str(image_path) if 'image_path' in locals() else None,
+                'medical_report': {
+                    'report_text': self._generate_fallback_report(),
+                    'metadata': {'error': str(e)}
+                }
+            }
+    
+    def test_llm_integration_system(self) -> bool:
+        """Test the complete LLM integration system"""
+        try:
+            self.logger.info("Testing LLM integration system...")
+            
+            # Test 1: LLM Connection
+            if not self.test_llm_connection():
+                self.logger.warning("LLM connection test failed - testing with fallback mode")
+            
+            # Test 2: Prompt Creation
+            dummy_predictions = {
+                'Pneumonia': {'probability': 0.8, 'predicted': True},
+                'No Finding': {'probability': 0.2, 'predicted': False}
+            }
+            dummy_keywords = {'Pneumonia': ['pneumonia', 'consolidation']}
+            dummy_spatial = ['right lower lobe', 'focal attention']
+            dummy_attention = {
+                'overall_attention_intensity': 0.7,
+                'significant_regions': ['lower_right'],
+                'regions': {
+                    'lower_right': {'name': 'right lower lung field', 'max_attention': 0.9}
+                }
+            }
+            
+            prompt = self.create_medical_report_prompt(
+                dummy_predictions, dummy_keywords, dummy_spatial, dummy_attention
+            )
+            
+            if len(prompt) < 100:
+                self.logger.error("Test 2 failed: Prompt too short")
+                return False
+            
+            # Test 3: Report Generation (with fallback)
+            llm_response = self.call_llm_for_report(prompt)
+            if not isinstance(llm_response, dict) or 'report' not in llm_response:
+                self.logger.error("Test 3 failed: Invalid LLM response format")
+                return False
+            
+            # Test 4: Report Formatting
+            formatted = self.format_medical_report(llm_response['report'])
+            if not isinstance(formatted, dict) or 'report_text' not in formatted:
+                self.logger.error("Test 4 failed: Report formatting failed")
+                return False
+            
+            self.logger.info("LLM integration system tests passed")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"LLM integration system test failed: {e}")
+            return False
+
+    # ========================
+    # Phase 5: Complete System Integration
+    # ========================
+    
+    def generate_comprehensive_analysis(self, 
+                                       image_path: str,
+                                       template: str = 'standard',
+                                       include_image_in_llm: bool = False,
+                                       patient_info: Dict = None,
+                                       save_visualizations: bool = False,
+                                       progress_callback: callable = None) -> Dict:
+        """
+        Complete end-to-end medical analysis pipeline with progress tracking.
+        
+        Args:
+            image_path: Path to the chest X-ray image
+            template: Report template ('standard', 'detailed', 'concise')
+            include_image_in_llm: Whether to send image to LLM
+            patient_info: Optional patient information
+            save_visualizations: Whether to save attention visualizations
+            progress_callback: Optional callback for progress updates
+            
+        Returns:
+            Comprehensive analysis dictionary with all components
+        """
+        def update_progress(step: str, progress: float, message: str = ""):
+            if progress_callback:
+                progress_callback(step, progress, message)
+            self.logger.info(f"[{progress:.0f}%] {step}: {message}")
+        
+        try:
+            update_progress("Initialization", 0, "Starting comprehensive analysis")
+            
+            # Initialize result structure
+            analysis_result = {
+                'success': False,
+                'image_path': str(image_path),
+                'template_used': template,
+                'processing_steps': {},
+                'performance_metrics': {},
+                'error_log': []
+            }
+            
+            start_time = time.time()
+            
+            # Step 1: Image Processing (10%)
+            update_progress("Image Processing", 10, "Loading and preprocessing image")
+            step_start = time.time()
+            
+            try:
+                img_tensor = self.preprocess_image(image_path)
+                analysis_result['processing_steps']['image_processing'] = {
+                    'success': True,
+                    'shape': list(img_tensor.shape),
+                    'device': str(img_tensor.device),
+                    'processing_time': time.time() - step_start
+                }
+                update_progress("Image Processing", 15, "Image preprocessing completed")
+            except Exception as e:
+                error_msg = f"Image processing failed: {str(e)}"
+                analysis_result['error_log'].append(error_msg)
+                self.logger.error(error_msg)
+                return analysis_result
+            
+            # Step 2: Model Inference (25%)
+            update_progress("Model Inference", 25, "Running multimodal model inference")
+            step_start = time.time()
+            
+            try:
+                inference_results = self.run_model_inference(image_path)
+                if not inference_results["success"]:
+                    raise RuntimeError("Model inference failed")
+                
+                analysis_result['model_predictions'] = inference_results["condition_predictions"]
+                analysis_result['processing_steps']['model_inference'] = {
+                    'success': True,
+                    'num_conditions': len(inference_results["condition_predictions"]),
+                    'processing_time': time.time() - step_start
+                }
+                update_progress("Model Inference", 35, "Model inference completed")
+            except Exception as e:
+                error_msg = f"Model inference failed: {str(e)}"
+                analysis_result['error_log'].append(error_msg)
+                self.logger.error(error_msg)
+                return analysis_result
+            
+            # Step 3: Keyword Extraction (45%)
+            update_progress("Keyword Extraction", 45, "Extracting medical keywords")
+            step_start = time.time()
+            
+            try:
+                prediction_keywords = self.extract_keywords_from_predictions(
+                    analysis_result['model_predictions']
+                )
+                keyword_summary = self.get_keyword_summary(prediction_keywords)
+                
+                analysis_result['prediction_keywords'] = prediction_keywords
+                analysis_result['keyword_summary'] = keyword_summary
+                analysis_result['processing_steps']['keyword_extraction'] = {
+                    'success': True,
+                    'total_keywords': keyword_summary['total_keywords'],
+                    'conditions_with_keywords': len(prediction_keywords),
+                    'processing_time': time.time() - step_start
+                }
+                update_progress("Keyword Extraction", 55, f"Extracted {keyword_summary['total_keywords']} keywords")
+            except Exception as e:
+                error_msg = f"Keyword extraction failed: {str(e)}"
+                analysis_result['error_log'].append(error_msg)
+                self.logger.error(error_msg)
+                # Continue with empty keywords
+                analysis_result['prediction_keywords'] = {}
+                analysis_result['keyword_summary'] = {'total_keywords': 0}
+            
+            # Step 4: Attention Analysis (65%)
+            update_progress("Attention Analysis", 65, "Generating attention visualization")
+            step_start = time.time()
+            
+            try:
+                # Determine target condition for attention
+                top_condition = max(
+                    analysis_result['model_predictions'].items(),
+                    key=lambda x: x[1]['probability']
+                )[0]
+                
+                attention_map = self.generate_enhanced_attention(img_tensor, target_condition=top_condition)
+                attention_analysis = self.analyze_attention_regions(attention_map)
+                spatial_keywords = self.extract_spatial_keywords(attention_analysis)
+                
+                # Save visualization if requested
+                if save_visualizations:
+                    vis_dir = os.path.join("test_data", "attention_visualizations")
+                    os.makedirs(vis_dir, exist_ok=True)
+                    vis_path = os.path.join(vis_dir, f"attention_{Path(image_path).stem}.png")
+                    self.visualize_attention_map(img_tensor, attention_map, save_path=vis_path)
+                    attention_analysis['visualization_saved'] = vis_path
+                
+                analysis_result['attention_analysis'] = attention_analysis
+                analysis_result['spatial_keywords'] = spatial_keywords
+                analysis_result['processing_steps']['attention_analysis'] = {
+                    'success': True,
+                    'significant_regions': len(attention_analysis['significant_regions']),
+                    'spatial_keywords': len(spatial_keywords),
+                    'target_condition': top_condition,
+                    'processing_time': time.time() - step_start
+                }
+                update_progress("Attention Analysis", 75, f"Analyzed {len(attention_analysis['significant_regions'])} regions")
+            except Exception as e:
+                error_msg = f"Attention analysis failed: {str(e)}"
+                analysis_result['error_log'].append(error_msg)
+                self.logger.error(error_msg)
+                # Continue with empty attention
+                analysis_result['attention_analysis'] = {'significant_regions': []}
+                analysis_result['spatial_keywords'] = []
+            
+            # Step 5: LLM Report Generation (85%)
+            update_progress("Report Generation", 85, "Generating medical report")
+            step_start = time.time()
+            
+            try:
+                # Create comprehensive prompt
+                prompt = self.create_medical_report_prompt(
+                    condition_predictions=analysis_result['model_predictions'],
+                    prediction_keywords=analysis_result['prediction_keywords'],
+                    spatial_keywords=analysis_result['spatial_keywords'],
+                    attention_analysis=analysis_result['attention_analysis'],
+                    template=template,
+                    patient_info=patient_info
+                )
+                
+                # Generate report
+                llm_response = self.call_llm_for_report(
+                    prompt=prompt,
+                    include_image=include_image_in_llm,
+                    image_tensor=img_tensor if include_image_in_llm else None
+                )
+                
+                # Format final report
+                formatted_report = self.format_medical_report(
+                    raw_report=llm_response['report'],
+                    metadata={
+                        'image_path': str(image_path),
+                        'template_used': template,
+                        'llm_success': llm_response['success'],
+                        'used_fallback': llm_response.get('used_fallback', False),
+                        'total_keywords': analysis_result['keyword_summary']['total_keywords'],
+                        'attention_regions': len(analysis_result['attention_analysis']['significant_regions']),
+                        'patient_info_included': patient_info is not None
+                    }
+                )
+                
+                analysis_result['llm_response'] = llm_response
+                analysis_result['medical_report'] = formatted_report
+                analysis_result['processing_steps']['report_generation'] = {
+                    'success': llm_response['success'],
+                    'used_fallback': llm_response.get('used_fallback', False),
+                    'report_length': len(formatted_report['report_text']),
+                    'sections_found': len(formatted_report['sections']),
+                    'processing_time': time.time() - step_start
+                }
+                update_progress("Report Generation", 95, "Medical report generated")
+            except Exception as e:
+                error_msg = f"Report generation failed: {str(e)}"
+                analysis_result['error_log'].append(error_msg)
+                self.logger.error(error_msg)
+                # Generate fallback report
+                fallback_report = self._generate_fallback_report()
+                analysis_result['medical_report'] = self.format_medical_report(fallback_report)
+                analysis_result['processing_steps']['report_generation'] = {
+                    'success': False,
+                    'used_fallback': True,
+                    'error': str(e)
+                }
+            
+            # Step 6: Finalization (100%)
+            total_time = time.time() - start_time
+            
+            # Calculate performance metrics
+            analysis_result['performance_metrics'] = {
+                'total_processing_time': total_time,
+                'steps_completed': len([s for s in analysis_result['processing_steps'].values() if s.get('success', False)]),
+                'total_steps': 5,
+                'errors_encountered': len(analysis_result['error_log']),
+                'memory_efficient': self.low_memory,
+                'device_used': str(self.device)
+            }
+            
+            # Final validation
+            analysis_result['success'] = self._validate_comprehensive_analysis(analysis_result)
+            
+            update_progress("Complete", 100, f"Analysis completed in {total_time:.1f}s")
+            
+            # Log summary
+            self._log_analysis_summary(analysis_result)
+            
+            return analysis_result
+            
+        except Exception as e:
+            self.logger.error(f"Comprehensive analysis failed: {e}")
+            analysis_result['error_log'].append(f"System error: {str(e)}")
+            analysis_result['success'] = False
+            return analysis_result
+    
+    def _validate_comprehensive_analysis(self, analysis_result: Dict) -> bool:
+        """Validate that comprehensive analysis completed successfully"""
+        try:
+            # Check essential components
+            required_keys = ['model_predictions', 'medical_report', 'processing_steps']
+            for key in required_keys:
+                if key not in analysis_result:
+                    self.logger.error(f"Missing required component: {key}")
+                    return False
+            
+            # Check that medical report has content
+            if len(analysis_result['medical_report']['report_text']) < 50:
+                self.logger.error("Medical report too short")
+                return False
+            
+            # Check that at least inference succeeded
+            inference_success = analysis_result['processing_steps'].get('model_inference', {}).get('success', False)
+            if not inference_success:
+                self.logger.error("Model inference did not succeed")
+                return False
+            
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Validation error: {e}")
+            return False
+    
+    def _log_analysis_summary(self, analysis_result: Dict):
+        """Log a comprehensive summary of the analysis"""
+        try:
+            self.logger.info("=== COMPREHENSIVE ANALYSIS SUMMARY ===")
+            self.logger.info(f"Image: {analysis_result['image_path']}")
+            self.logger.info(f"Success: {analysis_result['success']}")
+            self.logger.info(f"Template: {analysis_result['template_used']}")
+            
+            # Performance metrics
+            metrics = analysis_result['performance_metrics']
+            self.logger.info(f"Total time: {metrics['total_processing_time']:.2f}s")
+            self.logger.info(f"Steps completed: {metrics['steps_completed']}/{metrics['total_steps']}")
+            self.logger.info(f"Errors: {metrics['errors_encountered']}")
+            
+            # Content summary
+            if 'model_predictions' in analysis_result:
+                top_predictions = sorted(
+                    analysis_result['model_predictions'].items(),
+                    key=lambda x: x[1]['probability'], reverse=True
+                )[:3]
+                self.logger.info("Top predictions:")
+                for condition, pred in top_predictions:
+                    self.logger.info(f"  {condition}: {pred['probability']:.3f}")
+            
+            if 'keyword_summary' in analysis_result:
+                keywords = analysis_result['keyword_summary']['total_keywords']
+                self.logger.info(f"Keywords extracted: {keywords}")
+            
+            if 'attention_analysis' in analysis_result:
+                regions = len(analysis_result['attention_analysis']['significant_regions'])
+                self.logger.info(f"Attention regions: {regions}")
+            
+            if 'medical_report' in analysis_result:
+                report_len = len(analysis_result['medical_report']['report_text'])
+                sections = len(analysis_result['medical_report']['sections'])
+                self.logger.info(f"Report: {report_len} chars, {sections} sections")
+            
+            self.logger.info("=" * 40)
+            
+        except Exception as e:
+            self.logger.error(f"Error logging summary: {e}")
+    
+    def batch_analyze_images(self, 
+                           image_paths: List[str],
+                           template: str = 'standard',
+                           max_concurrent: int = 2,
+                           save_results: bool = True,
+                           output_dir: str = "batch_analysis_results") -> Dict:
+        """
+        Analyze multiple images in batch with performance optimization.
+        
+        Args:
+            image_paths: List of image paths to analyze
+            template: Report template to use
+            max_concurrent: Maximum concurrent analyses (for memory management)
+            save_results: Whether to save individual results
+            output_dir: Directory to save results
+            
+        Returns:
+            Batch analysis results
+        """
+        try:
+            self.logger.info(f"Starting batch analysis of {len(image_paths)} images")
+            
+            if save_results:
+                os.makedirs(output_dir, exist_ok=True)
+            
+            batch_results = {
+                'total_images': len(image_paths),
+                'successful_analyses': 0,
+                'failed_analyses': 0,
+                'results': {},
+                'performance_summary': {},
+                'error_summary': []
+            }
+            
+            start_time = time.time()
+            
+            # Process images in chunks for memory efficiency
+            chunk_size = max_concurrent
+            for i in range(0, len(image_paths), chunk_size):
+                chunk_paths = image_paths[i:i+chunk_size]
+                
+                self.logger.info(f"Processing chunk {i//chunk_size + 1}/{(len(image_paths)-1)//chunk_size + 1}")
+                
+                for image_path in chunk_paths:
+                    try:
+                        # Individual analysis
+                        analysis = self.generate_comprehensive_analysis(
+                            image_path=image_path,
+                            template=template,
+                            save_visualizations=save_results
+                        )
+                        
+                        if analysis['success']:
+                            batch_results['successful_analyses'] += 1
+                        else:
+                            batch_results['failed_analyses'] += 1
+                            batch_results['error_summary'].extend(analysis.get('error_log', []))
+                        
+                        batch_results['results'][image_path] = analysis
+                        
+                        # Save individual result if requested
+                        if save_results:
+                            result_file = os.path.join(
+                                output_dir, 
+                                f"analysis_{Path(image_path).stem}.json"
+                            )
+                            with open(result_file, 'w') as f:
+                                json.dump(analysis, f, indent=2, default=str)
+                        
+                    except Exception as e:
+                        self.logger.error(f"Failed to analyze {image_path}: {e}")
+                        batch_results['failed_analyses'] += 1
+                        batch_results['error_summary'].append(f"{image_path}: {str(e)}")
+                
+                # Memory cleanup between chunks
+                if self.device == "cuda":
+                    torch.cuda.empty_cache()
+                gc.collect()
+            
+            # Calculate performance summary
+            total_time = time.time() - start_time
+            batch_results['performance_summary'] = {
+                'total_time': total_time,
+                'average_time_per_image': total_time / len(image_paths),
+                'success_rate': batch_results['successful_analyses'] / len(image_paths) * 100,
+                'device_used': str(self.device),
+                'memory_mode': 'low' if self.low_memory else 'high'
+            }
+            
+            # Save batch summary
+            if save_results:
+                summary_file = os.path.join(output_dir, "batch_summary.json")
+                with open(summary_file, 'w') as f:
+                    json.dump(batch_results, f, indent=2, default=str)
+            
+            self.logger.info(f"Batch analysis completed: {batch_results['successful_analyses']}/{len(image_paths)} successful")
+            return batch_results
+            
+        except Exception as e:
+            self.logger.error(f"Batch analysis failed: {e}")
+            return {
+                'total_images': len(image_paths),
+                'successful_analyses': 0,
+                'failed_analyses': len(image_paths),
+                'error': str(e)
+            }
+    
+    def optimize_performance(self, enable_caching: bool = True, 
+                           cleanup_frequency: int = 5) -> Dict:
+        """
+        Optimize system performance with caching and memory management.
+        
+        Args:
+            enable_caching: Whether to enable attention map caching
+            cleanup_frequency: How often to perform memory cleanup
+            
+        Returns:
+            Performance optimization settings
+        """
+        try:
+            optimization_settings = {
+                'caching_enabled': enable_caching,
+                'cleanup_frequency': cleanup_frequency,
+                'memory_optimizations': [],
+                'performance_mode': 'optimized'
+            }
+            
+            # Enable attention caching
+            if enable_caching:
+                if not hasattr(self, 'attention_cache'):
+                    self.attention_cache = {}
+                optimization_settings['memory_optimizations'].append('attention_caching')
+            
+            # Set cleanup frequency
+            self.cleanup_frequency = cleanup_frequency
+            optimization_settings['memory_optimizations'].append('periodic_cleanup')
+            
+            # Enable gradient checkpointing for memory efficiency
+            if hasattr(self.model, 'gradient_checkpointing_enable'):
+                self.model.gradient_checkpointing_enable()
+                optimization_settings['memory_optimizations'].append('gradient_checkpointing')
+            
+            # Set optimal batch sizes based on system memory
+            if self.low_memory:
+                optimization_settings['recommended_batch_size'] = 1
+                optimization_settings['max_concurrent_analyses'] = 1
+            else:
+                optimization_settings['recommended_batch_size'] = 4
+                optimization_settings['max_concurrent_analyses'] = 2
+            
+            self.logger.info("Performance optimization applied")
+            self.logger.info(f"Optimizations enabled: {optimization_settings['memory_optimizations']}")
+            
+            return optimization_settings
+            
+        except Exception as e:
+            self.logger.error(f"Performance optimization failed: {e}")
+            return {'error': str(e)}
+    
+    def test_system_robustness(self, num_iterations: int = 5) -> Dict:
+        """
+        Test system robustness with multiple runs and edge cases.
+        
+        Args:
+            num_iterations: Number of test iterations
+            
+        Returns:
+            Robustness test results
+        """
+        try:
+            self.logger.info(f"Testing system robustness with {num_iterations} iterations")
+            
+            robustness_results = {
+                'iterations_completed': 0,
+                'consistency_check': {},
+                'error_handling_test': {},
+                'performance_stability': [],
+                'edge_case_results': {}
+            }
+            
+            test_image = "test_data/normal_chest.png"
+            
+            # Test 1: Consistency across multiple runs
+            self.logger.info("Testing consistency across multiple runs...")
+            consistency_results = []
+            
+            for i in range(num_iterations):
+                try:
+                    result = self.generate_comprehensive_analysis(test_image)
+                    if result['success']:
+                        # Extract key metrics for consistency check
+                        metrics = {
+                            'top_condition': max(result['model_predictions'].items(), 
+                                               key=lambda x: x[1]['probability'])[0],
+                            'num_keywords': result['keyword_summary']['total_keywords'],
+                            'attention_regions': len(result['attention_analysis']['significant_regions']),
+                            'processing_time': result['performance_metrics']['total_processing_time']
+                        }
+                        consistency_results.append(metrics)
+                        robustness_results['iterations_completed'] += 1
+                        
+                except Exception as e:
+                    self.logger.error(f"Iteration {i+1} failed: {e}")
+            
+            # Analyze consistency
+            if consistency_results:
+                top_conditions = [r['top_condition'] for r in consistency_results]
+                consistency_rate = max(set(top_conditions), key=top_conditions.count)
+                robustness_results['consistency_check'] = {
+                    'consistent_predictions': top_conditions.count(consistency_rate) / len(top_conditions),
+                    'average_keywords': sum(r['num_keywords'] for r in consistency_results) / len(consistency_results),
+                    'average_processing_time': sum(r['processing_time'] for r in consistency_results) / len(consistency_results),
+                    'most_common_prediction': consistency_rate
+                }
+            
+            # Test 2: Error handling
+            self.logger.info("Testing error handling...")
+            error_test_cases = [
+                ("nonexistent_image.png", "File not found"),
+                ("", "Empty path"),
+                (None, "None input")
+            ]
+            
+            error_handling_results = {}
+            for test_input, expected_error in error_test_cases:
+                try:
+                    result = self.generate_comprehensive_analysis(test_input)
+                    error_handling_results[expected_error] = {
+                        'handled_gracefully': not result['success'],
+                        'error_logged': len(result.get('error_log', [])) > 0
+                    }
+                except Exception as e:
+                    error_handling_results[expected_error] = {
+                        'handled_gracefully': False,
+                        'exception_raised': str(e)
+                    }
+            
+            robustness_results['error_handling_test'] = error_handling_results
+            
+            # Test 3: Edge cases
+            self.logger.info("Testing edge cases...")
+            edge_cases = {}
+            
+            # Test with different templates
+            for template in ['standard', 'detailed', 'concise']:
+                try:
+                    result = self.generate_comprehensive_analysis(test_image, template=template)
+                    edge_cases[f'template_{template}'] = result['success']
+                except Exception as e:
+                    edge_cases[f'template_{template}'] = False
+            
+            robustness_results['edge_case_results'] = edge_cases
+            
+            # Calculate overall robustness score
+            total_tests = (num_iterations + len(error_test_cases) + len(edge_cases))
+            successful_tests = (
+                robustness_results['iterations_completed'] + 
+                sum(1 for r in error_handling_results.values() if r.get('handled_gracefully', False)) +
+                sum(1 for success in edge_cases.values() if success)
+            )
+            
+            robustness_results['overall_robustness_score'] = successful_tests / total_tests * 100
+            
+            self.logger.info(f"Robustness testing completed. Score: {robustness_results['overall_robustness_score']:.1f}%")
+            return robustness_results
+            
+        except Exception as e:
+            self.logger.error(f"Robustness testing failed: {e}")
+            return {'error': str(e), 'iterations_completed': 0}
+    
+    def get_system_status(self) -> Dict:
+        """
+        Get comprehensive system status and health check.
+        
+        Returns:
+            System status dictionary
+        """
+        try:
+            status = {
+                'timestamp': str(datetime.now()),
+                'system_health': {},
+                'component_status': {},
+                'performance_info': {},
+                'configuration': {}
+            }
+            
+            # System health
+            status['system_health'] = {
+                'model_loaded': self.model is not None,
+                'device_available': torch.cuda.is_available() if self.device == 'cuda' else True,
+                'memory_mode': 'low_memory' if self.low_memory else 'standard',
+                'llm_connection': self.test_llm_connection()
+            }
+            
+            # Component status
+            status['component_status'] = {
+                'image_preprocessing': True,  # Always available
+                'model_inference': self.model is not None,
+                'keyword_extraction': len(self.condition_keywords) > 0,
+                'attention_visualization': hasattr(self, 'anatomical_regions'),
+                'llm_integration': hasattr(self, 'llm_config'),
+                'batch_processing': True  # Always available
+            }
+            
+            # Performance info
+            if torch.cuda.is_available():
+                gpu_memory = torch.cuda.get_device_properties(0).total_memory / (1024**3)
+                status['performance_info']['gpu_memory_gb'] = gpu_memory
+            
+            system_memory = psutil.virtual_memory().total / (1024**3)
+            status['performance_info']['system_memory_gb'] = system_memory
+            status['performance_info']['device'] = str(self.device)
+            
+            # Configuration
+            status['configuration'] = {
+                'conditions_supported': len(CONDITIONS),
+                'keyword_mappings': len(self.condition_keywords),
+                'anatomical_regions': len(self.anatomical_regions),
+                'report_templates': list(self.report_templates.keys()),
+                'llm_model': self.llm_config['model_name'],
+                'attention_caching': hasattr(self, 'attention_cache')
+            }
+            
+            # Overall health score - properly count boolean values
+            health_checks = list(status['system_health'].values()) + list(status['component_status'].values())
+            health_count = sum(1 for check in health_checks if check is True)
+            health_score = (health_count / len(health_checks)) * 100
+            status['overall_health_score'] = health_score
+            
+            return status
+            
+        except Exception as e:
+            self.logger.error(f"Error getting system status: {e}")
+            return {
+                'error': str(e),
+                'timestamp': str(datetime.now()),
+                'overall_health_score': 0.0
+            }

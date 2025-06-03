@@ -1,0 +1,381 @@
+{
+  "success": true,
+  "image_path": "..\\data_dump\\output\\img_png\\002da0d9-ce49c30d-4dfcc1f8-746d2401-d8044d48.png",
+  "template_used": "standard",
+  "processing_steps": {
+    "image_processing": {
+      "success": true,
+      "shape": [
+        1,
+        3,
+        224,
+        224
+      ],
+      "device": "cuda:0",
+      "processing_time": 0.009773969650268555
+    },
+    "model_inference": {
+      "success": true,
+      "num_conditions": 8,
+      "processing_time": 0.03223991394042969
+    },
+    "keyword_extraction": {
+      "success": true,
+      "total_keywords": 27,
+      "conditions_with_keywords": 6,
+      "processing_time": 0.0
+    },
+    "attention_analysis": {
+      "success": true,
+      "significant_regions": 4,
+      "spatial_keywords": 16,
+      "target_condition": "No Finding",
+      "processing_time": 0.08585929870605469
+    },
+    "report_generation": {
+      "success": true,
+      "used_fallback": false,
+      "report_length": 1886,
+      "sections_found": 4,
+      "processing_time": 9.323298215866089
+    }
+  },
+  "performance_metrics": {
+    "total_processing_time": 9.458374977111816,
+    "steps_completed": 5,
+    "total_steps": 5,
+    "errors_encountered": 0,
+    "memory_efficient": false,
+    "device_used": "cuda"
+  },
+  "error_log": [],
+  "model_predictions": {
+    "Atelectasis": {
+      "probability": 0.258478581905365,
+      "predicted": false,
+      "logit": -1.0538911819458008
+    },
+    "Cardiomegaly": {
+      "probability": 0.2443796694278717,
+      "predicted": false,
+      "logit": -1.1288158893585205
+    },
+    "Edema": {
+      "probability": 0.15076851844787598,
+      "predicted": false,
+      "logit": -1.728586196899414
+    },
+    "Lung Opacity": {
+      "probability": 0.264210045337677,
+      "predicted": false,
+      "logit": -1.024200201034546
+    },
+    "No Finding": {
+      "probability": 0.7741017937660217,
+      "predicted": true,
+      "logit": 1.2316185235977173
+    },
+    "Pleural Effusion": {
+      "probability": 0.14076046645641327,
+      "predicted": false,
+      "logit": -1.808988094329834
+    },
+    "Pneumonia": {
+      "probability": 0.25549647212028503,
+      "predicted": false,
+      "logit": -1.0695090293884277
+    },
+    "Support Devices": {
+      "probability": 0.2955881655216217,
+      "predicted": false,
+      "logit": -0.8683959245681763
+    }
+  },
+  "prediction_keywords": {
+    "Atelectasis": [
+      "slight collapse",
+      "lower lobe",
+      "minor atelectasis",
+      "minimal atelectasis"
+    ],
+    "Cardiomegaly": [
+      "left ventricular",
+      "mild cardiomegaly",
+      "borderline cardiomegaly",
+      "slight enlargement"
+    ],
+    "Lung Opacity": [
+      "right lung",
+      "patchy opacity",
+      "minimal infiltrate",
+      "subtle opacity"
+    ],
+    "No Finding": [
+      "normal",
+      "clear",
+      "unremarkable",
+      "no acute findings",
+      "clear lung fields",
+      "normal cardiac silhouette",
+      "no infiltrates",
+      "no consolidation"
+    ],
+    "Pneumonia": [
+      "right lung",
+      "minimal infection",
+      "mild pneumonia",
+      "early pneumonia"
+    ],
+    "Support Devices": [
+      "single device",
+      "endotracheal tube",
+      "properly positioned"
+    ]
+  },
+  "keyword_summary": {
+    "primary_findings": [
+      "normal",
+      "no acute findings",
+      "clear",
+      "unremarkable"
+    ],
+    "anatomical_locations": [
+      "left ventricular",
+      "lower lobe",
+      "right lung",
+      "endotracheal tube"
+    ],
+    "severity_indicators": [
+      "early pneumonia",
+      "minimal atelectasis",
+      "slight enlargement",
+      "subtle opacity",
+      "patchy opacity",
+      "mild cardiomegaly",
+      "single device",
+      "mild pneumonia",
+      "minor atelectasis",
+      "borderline cardiomegaly",
+      "slight collapse",
+      "minimal infiltrate",
+      "minimal infection",
+      "properly positioned"
+    ],
+    "descriptive_terms": [
+      "normal cardiac silhouette",
+      "no infiltrates",
+      "clear lung fields",
+      "no consolidation"
+    ],
+    "total_keywords": 27,
+    "conditions_detected": [
+      "Atelectasis",
+      "Cardiomegaly",
+      "Lung Opacity",
+      "No Finding",
+      "Pneumonia",
+      "Support Devices"
+    ]
+  },
+  "attention_analysis": {
+    "regions": {
+      "upper_left": {
+        "name": "left upper lung field",
+        "max_attention": 0.5842003226280212,
+        "mean_attention": 0.1356288343667984,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "left upper lobe",
+          "left apical region",
+          "left clavicular area"
+        ]
+      },
+      "upper_right": {
+        "name": "right upper lung field",
+        "max_attention": 0.49873971939086914,
+        "mean_attention": 0.13199684023857117,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "right upper lobe",
+          "right apical region",
+          "right clavicular area"
+        ]
+      },
+      "middle_left": {
+        "name": "left middle lung field",
+        "max_attention": 0.6361487507820129,
+        "mean_attention": 0.18207481503486633,
+        "attention_coverage": 0.001732409381663113,
+        "is_significant": true,
+        "keywords": [
+          "left middle lobe",
+          "left perihilar region",
+          "left cardiac border"
+        ]
+      },
+      "middle_right": {
+        "name": "right middle lung field",
+        "max_attention": 0.4002891778945923,
+        "mean_attention": 0.1670660525560379,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "right middle lobe",
+          "right perihilar region",
+          "right cardiac border"
+        ]
+      },
+      "lower_left": {
+        "name": "left lower lung field",
+        "max_attention": 1.0,
+        "mean_attention": 0.16792626678943634,
+        "attention_coverage": 0.013130252100840336,
+        "is_significant": true,
+        "keywords": [
+          "left lower lobe",
+          "left costophrenic angle",
+          "left diaphragmatic region"
+        ]
+      },
+      "lower_right": {
+        "name": "right lower lung field",
+        "max_attention": 0.42594099044799805,
+        "mean_attention": 0.13832098245620728,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "right lower lobe",
+          "right costophrenic angle",
+          "right diaphragmatic region"
+        ]
+      },
+      "central_cardiac": {
+        "name": "cardiac silhouette",
+        "max_attention": 1.0,
+        "mean_attention": 0.22571028769016266,
+        "attention_coverage": 0.011336276083467095,
+        "is_significant": true,
+        "keywords": [
+          "heart border",
+          "mediastinum",
+          "cardiac shadow",
+          "central region"
+        ]
+      },
+      "hilum_left": {
+        "name": "left hilum",
+        "max_attention": 0.6361487507820129,
+        "mean_attention": 0.2072441279888153,
+        "attention_coverage": 0.0028959679215860993,
+        "is_significant": true,
+        "keywords": [
+          "left hilar region",
+          "left pulmonary vessels",
+          "left bronchial tree"
+        ]
+      },
+      "hilum_right": {
+        "name": "right hilum",
+        "max_attention": 0.4002891778945923,
+        "mean_attention": 0.18004858493804932,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "right hilar region",
+          "right pulmonary vessels",
+          "right bronchial tree"
+        ]
+      }
+    },
+    "top_regions": [
+      "lower_left",
+      "central_cardiac",
+      "middle_left"
+    ],
+    "significant_regions": [
+      "middle_left",
+      "lower_left",
+      "central_cardiac",
+      "hilum_left"
+    ],
+    "overall_attention_intensity": 0.15186594426631927,
+    "max_attention_location": {
+      "y": 167,
+      "x": 87
+    },
+    "visualization_saved": "test_data\\attention_visualizations\\attention_002da0d9-ce49c30d-4dfcc1f8-746d2401-d8044d48.png"
+  },
+  "spatial_keywords": [
+    "left middle lobe",
+    "left perihilar region",
+    "increased attention in left middle lung field",
+    "left lower lobe",
+    "left costophrenic angle",
+    "left diaphragmatic region",
+    "focal attention in left lower lung field",
+    "heart border",
+    "mediastinum",
+    "cardiac shadow",
+    "central region",
+    "focal attention in cardiac silhouette",
+    "left hilar region",
+    "left pulmonary vessels",
+    "increased attention in left hilum",
+    "diffuse attention pattern"
+  ],
+  "llm_response": {
+    "success": true,
+    "report": "## CHEST RADIOGRAPH REPORT\n\n**Patient:** [Insert Patient Name/ID Here - *This information is crucial for a real report*]\n**Date of Examination:** [Insert Date Here - *This information is crucial for a real report*]\n**Examination:** Chest Radiograph, PA and Lateral (if applicable \u2013 specify views)\n\n---\n\n**FINDINGS:**\n\nThe lungs are generally clear. However, subtle increased opacity is noted within the left middle lung field with focal attention extending to the left lower lung field and perihilar region. No consolidation, pleural effusion or pneumothorax is identified. The cardiac silhouette appears normal in size and contour, demonstrating prominent border definition. Costophrenic angles are intact bilaterally, though subtle increased attention is observed at the left costophrenic angle. Mediastinal contours are within normal limits. \n\n**IMPRESSION:**\n\nSubtle findings within the left middle and lower lung fields warrant further evaluation. While the overall probability of a significant acute process is low (77.4% probability of No Finding), the localized increased attention suggests possible early inflammatory changes, subtle consolidation, or underlying parenchymal abnormality. The prominence of the cardiac silhouette border may be related to technical factors but should be considered in conjunction with clinical context.\n\n**RECOMMENDATIONS:**\n\nCorrelation with the patient\u2019s clinical history and physical examination is recommended. Consideration should be given to repeat chest radiography in [Specify timeframe - e.g., 6-8 weeks] for comparison, or further investigation with computed tomography (CT) of the chest without contrast if clinically indicated, particularly if symptoms develop or persist.\n\n\n\n**Radiologist:** [Insert Radiologist Name and Credentials Here - *This information is crucial for a real report*]\n**Signature:** ____________________________\n",
+    "raw_response": {
+      "id": "chatcmpl-1ooe5hryl7uj8jox8u1te",
+      "object": "chat.completion",
+      "created": 1748986935,
+      "model": "gemma-3-27b-it-qat",
+      "choices": [
+        {
+          "index": 0,
+          "logprobs": null,
+          "finish_reason": "stop",
+          "message": {
+            "role": "assistant",
+            "content": "## CHEST RADIOGRAPH REPORT\n\n**Patient:** [Insert Patient Name/ID Here - *This information is crucial for a real report*]\n**Date of Examination:** [Insert Date Here - *This information is crucial for a real report*]\n**Examination:** Chest Radiograph, PA and Lateral (if applicable \u2013 specify views)\n\n---\n\n**FINDINGS:**\n\nThe lungs are generally clear. However, subtle increased opacity is noted within the left middle lung field with focal attention extending to the left lower lung field and perihilar region. No consolidation, pleural effusion or pneumothorax is identified. The cardiac silhouette appears normal in size and contour, demonstrating prominent border definition. Costophrenic angles are intact bilaterally, though subtle increased attention is observed at the left costophrenic angle. Mediastinal contours are within normal limits. \n\n**IMPRESSION:**\n\nSubtle findings within the left middle and lower lung fields warrant further evaluation. While the overall probability of a significant acute process is low (77.4% probability of No Finding), the localized increased attention suggests possible early inflammatory changes, subtle consolidation, or underlying parenchymal abnormality. The prominence of the cardiac silhouette border may be related to technical factors but should be considered in conjunction with clinical context.\n\n**RECOMMENDATIONS:**\n\nCorrelation with the patient\u2019s clinical history and physical examination is recommended. Consideration should be given to repeat chest radiography in [Specify timeframe - e.g., 6-8 weeks] for comparison, or further investigation with computed tomography (CT) of the chest without contrast if clinically indicated, particularly if symptoms develop or persist.\n\n\n\n**Radiologist:** [Insert Radiologist Name and Credentials Here - *This information is crucial for a real report*]\n**Signature:** ____________________________\n"
+          }
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 356,
+        "completion_tokens": 366,
+        "total_tokens": 722
+      },
+      "stats": {},
+      "system_fingerprint": "gemma-3-27b-it-qat"
+    },
+    "used_fallback": false,
+    "attempt": 1
+  },
+  "medical_report": {
+    "report_text": "## CHEST RADIOGRAPH REPORT\n\n**Patient:** [Insert Patient Name/ID Here - *This information is crucial for a real report*]\n**Date of Examination:** [Insert Date Here - *This information is crucial for a real report*]\n**Examination:** Chest Radiograph, PA and Lateral (if applicable \u2013 specify views)\n\n---\n\n**FINDINGS:**\n\nThe lungs are generally clear. However, subtle increased opacity is noted within the left middle lung field with focal attention extending to the left lower lung field and perihilar region. No consolidation, pleural effusion or pneumothorax is identified. The cardiac silhouette appears normal in size and contour, demonstrating prominent border definition. Costophrenic angles are intact bilaterally, though subtle increased attention is observed at the left costophrenic angle. Mediastinal contours are within normal limits. \n\n**IMPRESSION:**\n\nSubtle findings within the left middle and lower lung fields warrant further evaluation. While the overall probability of a significant acute process is low (77.4% probability of No Finding), the localized increased attention suggests possible early inflammatory changes, subtle consolidation, or underlying parenchymal abnormality. The prominence of the cardiac silhouette border may be related to technical factors but should be considered in conjunction with clinical context.\n\n**RECOMMENDATIONS:**\n\nCorrelation with the patient\u2019s clinical history and physical examination is recommended. Consideration should be given to repeat chest radiography in [Specify timeframe - e.g., 6-8 weeks] for comparison, or further investigation with computed tomography (CT) of the chest without contrast if clinically indicated, particularly if symptoms develop or persist.\n\n\n\n**Radiologist:** [Insert Radiologist Name and Credentials Here - *This information is crucial for a real report*]\n**Signature:** ____________________________",
+    "sections": {
+      "report": "## CHEST RADIOGRAPH REPORT\n**Patient:** [Insert Patient Name/ID Here - *This information is crucial for a real report*]\n**Date of Examination:** [Insert Date Here - *This information is crucial for a real report*]\n**Examination:** Chest Radiograph, PA and Lateral (if applicable \u2013 specify views)\n---",
+      "**findings**": "The lungs are generally clear. However, subtle increased opacity is noted within the left middle lung field with focal attention extending to the left lower lung field and perihilar region. No consolidation, pleural effusion or pneumothorax is identified. The cardiac silhouette appears normal in size and contour, demonstrating prominent border definition. Costophrenic angles are intact bilaterally, though subtle increased attention is observed at the left costophrenic angle. Mediastinal contours are within normal limits.",
+      "**impression**": "Subtle findings within the left middle and lower lung fields warrant further evaluation. While the overall probability of a significant acute process is low (77.4% probability of No Finding), the localized increased attention suggests possible early inflammatory changes, subtle consolidation, or underlying parenchymal abnormality. The prominence of the cardiac silhouette border may be related to technical factors but should be considered in conjunction with clinical context.",
+      "**recommendations**": "Correlation with the patient\u2019s clinical history and physical examination is recommended. Consideration should be given to repeat chest radiography in [Specify timeframe - e.g., 6-8 weeks] for comparison, or further investigation with computed tomography (CT) of the chest without contrast if clinically indicated, particularly if symptoms develop or persist.\n**Radiologist:** [Insert Radiologist Name and Credentials Here - *This information is crucial for a real report*]\n**Signature:** ____________________________"
+    },
+    "metadata": {
+      "generated_at": "2025-06-03T21:42:24",
+      "generator": "Medical Report Generator v1.0",
+      "model_used": "gemma-3-27b-it-qat",
+      "word_count": 254,
+      "character_count": 1886,
+      "image_path": "..\\data_dump\\output\\img_png\\002da0d9-ce49c30d-4dfcc1f8-746d2401-d8044d48.png",
+      "template_used": "standard",
+      "llm_success": true,
+      "used_fallback": false,
+      "total_keywords": 27,
+      "attention_regions": 4,
+      "patient_info_included": false
+    }
+  }
+}

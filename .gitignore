@@ -44,6 +44,7 @@
 /output_multimodal_vit_features_image_bbox_fixseq
 /output_multimodal_vit_features_image_bbox
 /new_scripts/output/
+/new_scripts/__pycache__
 # windsurf rules
 .windsurfrules
 instructions.txt
@@ -52,3 +53,12 @@ s_main_scripts_disregard_all/__pycache__/5.multimodal_of_mimiceye_feat_image_bbo
 s_main_scripts_disregard_all/__pycache__/finetune_utils.cpython-310.pyc
 s_main_scripts_disregard_all/__pycache__/0.multimodal_vit_features_image_bbox_fixseq_transcript.cpython-310.pyc
 .cursorrules
+new_scripts/__pycache__/medical_report_generator.cpython-310.pyc
+logs/medical_report_generator.log
+demo_phase4_llm_integration.py
+demo_phase3_attention.py
+demo_phase2_keywords.py
+comprehensive_test_suite.py
+new_scripts/checklist.md
+new_scripts/tasks.md
+new_scripts/logs/medical_report_generator.log
