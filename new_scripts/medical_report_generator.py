@@ -163,22 +163,25 @@ LLM_CONFIG = {
     'retry_delay': 2  # seconds
 }
 
-# Medical Report Templates
+# Medical Report Templates - Optimized for Clinical Accuracy
 REPORT_TEMPLATES = {
     'standard': {
         'sections': ['findings', 'impression', 'recommendations'],
-        'style': 'formal medical report',
-        'length': 'concise but comprehensive'
+        'style': 'professional radiological report',
+        'length': 'appropriate clinical detail',
+        'confidence_based': True
     },
     'detailed': {
-        'sections': ['clinical_history', 'technique', 'findings', 'impression', 'recommendations'],
-        'style': 'detailed radiological report',
-        'length': 'comprehensive with technical details'
+        'sections': ['technique', 'findings', 'impression', 'recommendations'],
+        'style': 'comprehensive radiological assessment',
+        'length': 'detailed clinical analysis',
+        'confidence_based': True
     },
     'concise': {
         'sections': ['findings', 'impression'],
-        'style': 'brief clinical summary',
-        'length': 'concise and direct'
+        'style': 'concise clinical summary',
+        'length': 'brief and direct',
+        'confidence_based': True
     }
 }
 
@@ -1885,13 +1888,15 @@ class MedicalReportGenerator:
                                    patient_info: Dict = None,
                                    include_image: bool = False) -> str:
         """
-        Create a comprehensive prompt for medical report generation.
+        Create an optimized prompt for clinical-grade medical report generation.
+        Uses advanced prompt engineering to solve attention-pathology confusion
+        and implement confidence-based reporting.
         
         Args:
             condition_predictions: Model predictions for conditions
             prediction_keywords: Keywords extracted from predictions
-            spatial_keywords: Keywords from attention analysis
-            attention_analysis: Detailed attention analysis results
+            spatial_keywords: Keywords from attention analysis (visualization only)
+            attention_analysis: Detailed attention analysis results (visualization only)
             template: Report template to use ('standard', 'detailed', 'concise')
             patient_info: Optional patient information
             
@@ -1901,96 +1906,148 @@ class MedicalReportGenerator:
         try:
             template_config = self.report_templates.get(template, self.report_templates['standard'])
             
-            # Build prompt sections
-            prompt_sections = []
+            # Determine primary finding and confidence level
+            primary_finding, primary_confidence = self._get_primary_finding(condition_predictions)
+            reporting_style = self._determine_reporting_style(primary_finding, primary_confidence)
             
-            # System instruction
-            image_note = "\n\nNOTE: The actual chest X-ray image being analyzed has also been provided along with this analysis data for your review." if include_image else ""
+            # System instruction with critical clinical guidelines
+            image_note = "\n\nNOTE: You also have access to the actual chest X-ray image for visual correlation." if include_image else ""
             
-            system_instruction = f"""You are an expert radiologist generating a professional {template_config['style']}. 
-Generate a {template_config['length']} medical report based on the provided chest X-ray analysis data.{image_note}
+            system_instruction = f"""You are an expert radiologist with 20+ years of experience generating professional medical reports. Generate a clinically accurate chest X-ray report.{image_note}
 
-IMPORTANT GUIDELINES:
-- Use professional medical terminology
-- Be accurate and evidence-based
-- Include relevant anatomical details
-- Maintain appropriate clinical tone
-- Focus on significant findings
-- Provide actionable recommendations when appropriate
-{"- Review the provided chest X-ray image along with the AI analysis results" if include_image else ""}
+🚨 CRITICAL CLINICAL GUIDELINES:
+1. ATTENTION DATA PROHIBITION: Do NOT interpret "attention analysis", "spatial keywords", "attention intensity", or "focus areas" as clinical findings. These are AI computational artifacts, NOT pathological findings.
+
+2. CONFIDENCE-BASED REPORTING:
+   - No Finding >70%: Use simple, direct language like practicing radiologists
+   - Pathology >70%: Focus on the specific medical condition only  
+   - Mixed confidence 50-70%: Provide appropriate clinical uncertainty
+
+3. ANATOMICAL PRECISION: Only describe anatomical locations if directly supported by high-confidence predictions, not attention maps.
+
+4. CLINICAL SIMPLICITY: Match the complexity level to the findings - normal studies need 1-2 sentences, not paragraphs.
+
+5. MEDICAL ACCURACY: Base conclusions exclusively on the condition prediction probabilities, ignore all attention/spatial data.
+
+REPORTING STYLE: {reporting_style}
 """
-            
-            # Context section
-            context_section = "\n=== CHEST X-RAY ANALYSIS DATA ===\n"
-            
-            # Add condition predictions
-            context_section += "\n📊 CONDITION PREDICTIONS:\n"
-            significant_predictions = []
-            for condition, pred_info in condition_predictions.items():
-                prob = pred_info.get('probability', 0)
-                predicted = pred_info.get('predicted', False)
-                if prob > 0.3 or predicted:
-                    confidence = "High" if prob > 0.7 else "Moderate" if prob > 0.5 else "Low"
-                    context_section += f"- {condition}: {prob:.3f} probability ({confidence} confidence)\n"
-                    significant_predictions.append(condition)
-            
-            # Add prediction-based keywords
-            context_section += "\n🔑 CLINICAL KEYWORDS (by condition):\n"
-            for condition, keywords in prediction_keywords.items():
-                if keywords and condition in significant_predictions:
-                    context_section += f"- {condition}: {', '.join(keywords[:5])}\n"
-            
-            # Add spatial attention analysis
-            context_section += "\n🗺️ SPATIAL ATTENTION ANALYSIS:\n"
-            if attention_analysis:
-                intensity = attention_analysis.get('overall_attention_intensity', 0)
-                significant_regions = attention_analysis.get('significant_regions', [])
-                
-                context_section += f"- Overall attention intensity: {intensity:.3f}\n"
-                context_section += f"- Significant regions detected: {len(significant_regions)}\n"
-                
-                if significant_regions:
-                    context_section += "- Key focus areas:\n"
-                    for region_id in significant_regions[:3]:
-                        region_data = attention_analysis['regions'].get(region_id, {})
-                        region_name = region_data.get('name', 'Unknown region')
-                        max_attention = region_data.get('max_attention', 0)
-                        context_section += f"  • {region_name}: {max_attention:.3f} attention intensity\n"
-            
-            # Add spatial keywords
-            if spatial_keywords:
-                context_section += f"\n📍 SPATIAL KEYWORDS:\n"
-                context_section += f"- Anatomical focus: {', '.join(spatial_keywords[:8])}\n"
-            
-            # Add patient information if provided
+
+            # Clinical data section - SEPARATED from attention data
+            clinical_data = f"""
+=== CLINICAL ANALYSIS DATA ===
+
+🔬 MODEL PREDICTIONS (Clinical Decision Basis):
+{self._format_clinical_predictions(condition_predictions)}
+
+📋 CLINICAL KEYWORDS (Condition-Based):
+{self._format_clinical_keywords(prediction_keywords, condition_predictions)}
+"""
+
+            # Patient context if available
             if patient_info:
-                context_section += "\n👤 PATIENT INFORMATION:\n"
+                clinical_data += f"\n👤 PATIENT INFORMATION:\n"
                 for key, value in patient_info.items():
-                    context_section += f"- {key.replace('_', ' ').title()}: {value}\n"
-            
-            # Task instruction
-            image_instruction = "\nPlease correlate your visual examination of the provided chest X-ray image with the AI analysis results below." if include_image else ""
-            
+                    clinical_data += f"- {key.replace('_', ' ').title()}: {value}\n"
+
+            # Task instruction with confidence-based guidance
             task_instruction = f"""
-=== TASK ==={image_instruction}
-Based on the above analysis data{"and the provided chest X-ray image" if include_image else ""}, generate a professional chest X-ray report with the following sections:
-{', '.join(template_config['sections']).upper()}
+=== REPORTING TASK ===
+Generate a {template_config['style']} with sections: {', '.join(template_config['sections']).upper()}
 
-The report should be {template_config['length']} and written in a {template_config['style']} format.
-Focus on the significant findings and provide clear, actionable medical insights.
+🎯 SPECIFIC INSTRUCTIONS FOR THIS CASE:
+{self._get_case_specific_instructions(primary_finding, primary_confidence, template)}
 
-REPORT:
+⚠️ REMEMBER: Ignore all attention/spatial analysis data. Report only what the medical predictions indicate.
+
+CHEST X-RAY REPORT:
 """
             
-            # Combine all sections
-            full_prompt = system_instruction + context_section + task_instruction
+            # Combine sections
+            full_prompt = system_instruction + clinical_data + task_instruction
             
-            self.logger.debug(f"Created medical report prompt ({len(full_prompt)} characters)")
+            self.logger.debug(f"Created optimized medical report prompt ({len(full_prompt)} characters)")
             return full_prompt
             
         except Exception as e:
             self.logger.error(f"Error creating medical report prompt: {e}")
             return "Error creating prompt. Please provide chest X-ray analysis for medical report generation."
+
+    def _get_primary_finding(self, condition_predictions: Dict) -> tuple:
+        """Determine the primary finding and its confidence level."""
+        # Find highest confidence prediction
+        max_prob = 0
+        primary_condition = "No Finding"
+        
+        for condition, pred_info in condition_predictions.items():
+            prob = pred_info.get('probability', 0)
+            if prob > max_prob:
+                max_prob = prob
+                primary_condition = condition
+                
+        return primary_condition, max_prob
+
+    def _determine_reporting_style(self, primary_finding: str, confidence: float) -> str:
+        """Determine appropriate reporting style based on findings and confidence."""
+        if primary_finding == "No Finding" and confidence > 0.70:
+            return "SIMPLE & DIRECT (Normal Study - Radiologist-style brevity required)"
+        elif confidence > 0.70:
+            return "FOCUSED PATHOLOGY (High-confidence finding - focus on medical significance)"
+        elif confidence > 0.50:
+            return "BALANCED ANALYSIS (Moderate confidence - appropriate clinical uncertainty)"
+        else:
+            return "CONSERVATIVE ASSESSMENT (Low confidence - emphasize limitations)"
+
+    def _format_clinical_predictions(self, condition_predictions: Dict) -> str:
+        """Format only clinically significant predictions."""
+        formatted = ""
+        for condition, pred_info in condition_predictions.items():
+            prob = pred_info.get('probability', 0)
+            predicted = pred_info.get('predicted', False)
+            
+            if prob > 0.30 or predicted:  # Only show clinically relevant predictions
+                confidence_level = "HIGH" if prob > 0.70 else "MODERATE" if prob > 0.50 else "LOW"
+                formatted += f"- {condition}: {prob:.1%} probability ({confidence_level} confidence)\n"
+                
+        return formatted.strip()
+
+    def _format_clinical_keywords(self, prediction_keywords: Dict, condition_predictions: Dict) -> str:
+        """Format keywords only for significant clinical findings."""
+        formatted = ""
+        for condition, keywords in prediction_keywords.items():
+            if keywords and condition_predictions.get(condition, {}).get('probability', 0) > 0.30:
+                formatted += f"- {condition}: {', '.join(keywords[:3])}\n"  # Limit to 3 keywords
+                
+        return formatted.strip() if formatted else "- Based on model predictions only"
+
+    def _get_case_specific_instructions(self, primary_finding: str, confidence: float, template: str) -> str:
+        """Provide specific instructions based on the case characteristics."""
+        if primary_finding == "No Finding" and confidence > 0.70:
+            return """- This is a NORMAL study with high confidence
+- Use simple, direct language: "Normal chest radiograph" or similar
+- Keep findings section to 1-2 sentences maximum
+- Impression should be brief and definitive
+- No need for extensive descriptions or follow-up recommendations"""
+            
+        elif confidence > 0.70 and primary_finding != "No Finding":
+            return f"""- This shows {primary_finding} with HIGH confidence
+- Focus specifically on this pathological finding
+- Describe the medical significance clearly
+- Provide appropriate clinical recommendations
+- Do not mention normal areas unless clinically relevant"""
+            
+        elif confidence > 0.50:
+            return f"""- Moderate confidence for {primary_finding}
+- Express appropriate clinical uncertainty
+- Suggest correlation with clinical findings
+- Consider differential diagnoses if appropriate
+- Recommend follow-up if clinically indicated"""
+            
+        else:
+            return """- Low confidence findings
+- Emphasize limitations of the analysis
+- Suggest clinical correlation
+- Consider additional imaging if warranted
+- Use conservative language throughout"""
     
     def call_llm_for_report(self, prompt: str, include_image: bool = False, 
                            image_tensor: torch.Tensor = None) -> Dict:

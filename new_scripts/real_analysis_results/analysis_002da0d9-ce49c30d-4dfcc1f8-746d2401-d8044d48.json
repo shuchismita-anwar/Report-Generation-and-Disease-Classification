@@ -12,12 +12,12 @@
         224
       ],
       "device": "cuda:0",
-      "processing_time": 0.011814594268798828
+      "processing_time": 0.006936073303222656
     },
     "model_inference": {
       "success": true,
       "num_conditions": 8,
-      "processing_time": 0.07365274429321289
+      "processing_time": 0.05744314193725586
     },
     "keyword_extraction": {
       "success": true,
@@ -27,21 +27,21 @@
     },
     "attention_analysis": {
       "success": true,
-      "significant_regions": 9,
-      "spatial_keywords": 33,
+      "significant_regions": 4,
+      "spatial_keywords": 16,
       "target_condition": "No Finding",
-      "processing_time": 0.19730782508850098
+      "processing_time": 0.15117907524108887
     },
     "report_generation": {
       "success": true,
       "used_fallback": false,
-      "report_length": 2258,
+      "report_length": 422,
       "sections_found": 4,
-      "processing_time": 10.633265256881714
+      "processing_time": 2.8479859828948975
     }
   },
   "performance_metrics": {
-    "total_processing_time": 10.916720390319824,
+    "total_processing_time": 3.063544273376465,
     "steps_completed": 5,
     "total_steps": 5,
     "errors_encountered": 0,
@@ -51,44 +51,44 @@
   "error_log": [],
   "model_predictions": {
     "Atelectasis": {
-      "probability": 0.25890830159187317,
+      "probability": 0.2609265446662903,
       "predicted": false,
-      "logit": -1.0516504049301147
+      "logit": -1.0411584377288818
     },
     "Cardiomegaly": {
-      "probability": 0.24592188000679016,
+      "probability": 0.24862976372241974,
       "predicted": false,
-      "logit": -1.1204819679260254
+      "logit": -1.105933666229248
     },
     "Edema": {
-      "probability": 0.14858388900756836,
+      "probability": 0.14737458527088165,
       "predicted": false,
-      "logit": -1.745751142501831
+      "logit": -1.755342721939087
     },
     "Lung Opacity": {
-      "probability": 0.26966986060142517,
+      "probability": 0.2656750977039337,
       "predicted": false,
-      "logit": -0.9962981939315796
+      "logit": -1.0166774988174438
     },
     "No Finding": {
-      "probability": 0.7732203006744385,
+      "probability": 0.7708934545516968,
       "predicted": true,
-      "logit": 1.226584553718567
+      "logit": 1.2133629322052002
     },
     "Pleural Effusion": {
-      "probability": 0.14189352095127106,
+      "probability": 0.14169582724571228,
       "predicted": false,
-      "logit": -1.7996512651443481
+      "logit": -1.8012758493423462
     },
     "Pneumonia": {
-      "probability": 0.2517959475517273,
+      "probability": 0.2514079213142395,
       "predicted": false,
-      "logit": -1.0890567302703857
+      "logit": -1.09111750125885
     },
     "Support Devices": {
-      "probability": 0.29759398102760315,
+      "probability": 0.2984493672847748,
       "predicted": false,
-      "logit": -0.8587815761566162
+      "logit": -0.8546927571296692
     }
   },
   "prediction_keywords": {
@@ -100,9 +100,9 @@
   },
   "keyword_summary": {
     "primary_findings": [
-      "no acute findings",
       "normal chest X-ray",
-      "unremarkable study"
+      "unremarkable study",
+      "no acute findings"
     ],
     "anatomical_locations": [],
     "severity_indicators": [],
@@ -112,9 +112,9 @@
       "No Finding"
     ],
     "high_confidence_findings": [
-      "no acute findings",
       "normal chest X-ray",
-      "unremarkable study"
+      "unremarkable study",
+      "no acute findings"
     ],
     "medium_confidence_findings": [],
     "low_confidence_findings": []
@@ -123,9 +123,9 @@
     "regions": {
       "upper_left": {
         "name": "left upper lung field",
-        "max_attention": 0.6396579146385193,
-        "mean_attention": 0.1949048638343811,
-        "attention_coverage": 0.0007022471910112359,
+        "max_attention": 0.6381599307060242,
+        "mean_attention": 0.14305129647254944,
+        "attention_coverage": 0.0006019261637239165,
         "is_significant": true,
         "keywords": [
           "left upper lobe",
@@ -135,9 +135,9 @@
       },
       "upper_right": {
         "name": "right upper lung field",
-        "max_attention": 0.616943895816803,
-        "mean_attention": 0.19502204656600952,
-        "attention_coverage": 0.0005016051364365971,
+        "max_attention": 0.6372647881507874,
+        "mean_attention": 0.13807834684848785,
+        "attention_coverage": 0.0006019261637239165,
         "is_significant": true,
         "keywords": [
           "right upper lobe",
@@ -147,10 +147,10 @@
       },
       "middle_left": {
         "name": "left middle lung field",
-        "max_attention": 0.9765026569366455,
-        "mean_attention": 0.2779151499271393,
-        "attention_coverage": 0.02785181236673774,
-        "is_significant": true,
+        "max_attention": 0.5841830968856812,
+        "mean_attention": 0.1895730197429657,
+        "attention_coverage": 0.0,
+        "is_significant": false,
         "keywords": [
           "left middle lobe",
           "left perihilar region",
@@ -159,10 +159,10 @@
       },
       "middle_right": {
         "name": "right middle lung field",
-        "max_attention": 0.6791545152664185,
-        "mean_attention": 0.2556740939617157,
-        "attention_coverage": 0.002398720682302772,
-        "is_significant": true,
+        "max_attention": 0.4705049395561218,
+        "mean_attention": 0.1733434945344925,
+        "attention_coverage": 0.0,
+        "is_significant": false,
         "keywords": [
           "right middle lobe",
           "right perihilar region",
@@ -172,8 +172,8 @@
       "lower_left": {
         "name": "left lower lung field",
         "max_attention": 1.0,
-        "mean_attention": 0.22500167787075043,
-        "attention_coverage": 0.03768382352941176,
+        "mean_attention": 0.1694113314151764,
+        "attention_coverage": 0.012605042016806723,
         "is_significant": true,
         "keywords": [
           "left lower lobe",
@@ -183,10 +183,10 @@
       },
       "lower_right": {
         "name": "right lower lung field",
-        "max_attention": 0.76370769739151,
-        "mean_attention": 0.19959844648838043,
-        "attention_coverage": 0.0038077731092436974,
-        "is_significant": true,
+        "max_attention": 0.5011674761772156,
+        "mean_attention": 0.14200204610824585,
+        "attention_coverage": 0.0,
+        "is_significant": false,
         "keywords": [
           "right lower lobe",
           "right costophrenic angle",
@@ -196,8 +196,8 @@
       "central_cardiac": {
         "name": "cardiac silhouette",
         "max_attention": 1.0,
-        "mean_attention": 0.3230167627334595,
-        "attention_coverage": 0.028491171749598716,
+        "mean_attention": 0.22133101522922516,
+        "attention_coverage": 0.009630818619582664,
         "is_significant": true,
         "keywords": [
           "heart border",
@@ -208,10 +208,10 @@
       },
       "hilum_left": {
         "name": "left hilum",
-        "max_attention": 0.9765026569366455,
-        "mean_attention": 0.3394656777381897,
-        "attention_coverage": 0.03363778124303854,
-        "is_significant": true,
+        "max_attention": 0.5841830968856812,
+        "mean_attention": 0.2267751842737198,
+        "attention_coverage": 0.0,
+        "is_significant": false,
         "keywords": [
           "left hilar region",
           "left pulmonary vessels",
@@ -220,10 +220,10 @@
       },
       "hilum_right": {
         "name": "right hilum",
-        "max_attention": 0.6791545152664185,
-        "mean_attention": 0.29154282808303833,
-        "attention_coverage": 0.004009801737580753,
-        "is_significant": true,
+        "max_attention": 0.4086485505104065,
+        "mean_attention": 0.19251768290996552,
+        "attention_coverage": 0.0,
+        "is_significant": false,
         "keywords": [
           "right hilar region",
           "right pulmonary vessels",
@@ -234,23 +234,18 @@
     "top_regions": [
       "lower_left",
       "central_cardiac",
-      "middle_left"
+      "upper_left"
     ],
     "significant_regions": [
       "upper_left",
       "upper_right",
-      "middle_left",
-      "middle_right",
       "lower_left",
-      "lower_right",
-      "central_cardiac",
-      "hilum_left",
-      "hilum_right"
+      "central_cardiac"
     ],
-    "overall_attention_intensity": 0.22171154618263245,
+    "overall_attention_intensity": 0.1573929786682129,
     "max_attention_location": {
-      "y": 168,
-      "x": 86
+      "y": 167,
+      "x": 87
     },
     "visualization_saved": "test_data\\attention_visualizations\\attention_002da0d9-ce49c30d-4dfcc1f8-746d2401-d8044d48.png"
   },
@@ -261,41 +256,24 @@
     "right upper lobe",
     "right apical region",
     "increased attention in right upper lung field",
-    "left middle lobe",
-    "left perihilar region",
-    "left cardiac border",
-    "focal attention in left middle lung field",
-    "right middle lobe",
-    "right perihilar region",
-    "increased attention in right middle lung field",
     "left lower lobe",
     "left costophrenic angle",
     "left diaphragmatic region",
     "focal attention in left lower lung field",
-    "right lower lobe",
-    "right costophrenic angle",
-    "increased attention in right lower lung field",
     "heart border",
     "mediastinum",
     "cardiac shadow",
     "central region",
     "focal attention in cardiac silhouette",
-    "left hilar region",
-    "left pulmonary vessels",
-    "left bronchial tree",
-    "focal attention in left hilum",
-    "right hilar region",
-    "right pulmonary vessels",
-    "increased attention in right hilum",
     "diffuse attention pattern"
   ],
   "llm_response": {
     "success": true,
-    "report": "## CHEST RADIOGRAPH REPORT\n\n**Patient:** [Insert Patient Name/ID Here - *Required for complete report*]\n**Date of Study:** [Insert Date Here - *Required for complete report*]\n**Study Performed:** Chest Radiograph (PA and Lateral \u2013 *Assume standard views unless specified otherwise*)\n\n---\n\n**FINDINGS:**\n\nThe chest radiograph demonstrates generally normal pulmonary parenchymal architecture. However, subtle increased attention is noted within the left upper lung field and right upper lung field as identified by spatial analysis. Specifically, there is focal prominence of soft tissue opacity in the left middle lobe and perihilar region with an overall attention intensity of 0.977. The left apical region and left upper lobe demonstrate increased attention (intensity 0.640), mirrored by similar findings within the right upper lobe and right apical region (intensity 0.617).  Mediastinal contours are stable, and no significant lymphadenopathy is identified. Cardiac silhouette size is within normal limits. No pleural effusions or pneumothorax are present. Osseous structures appear intact.\n\n**IMPRESSION:**\n\nSubtle increased attention in the upper lobes bilaterally, particularly prominent in the left middle lobe/perihilar region, raises suspicion for early inflammatory process, subtle consolidation, or possible superimposed atelectasis. While the overall probability of \u201cNo Finding\u201d is high (77.3%), these focal areas warrant further evaluation to exclude underlying pathology. \n\n**RECOMMENDATIONS:**\n\nCorrelation with clinical history and physical examination findings is recommended.  Consider follow-up chest radiography in [6-8 weeks/as clinically indicated] to assess for stability or progression of the observed findings. If clinical suspicion remains high, a higher resolution imaging modality such as Computed Tomography (CT) of the chest without contrast should be considered for further characterization.\n\n\n\n**Radiologist:** [Insert Radiologist Name and Credentials Here - *Required for complete report*]\n---\n\n**Disclaimer:** This report is based solely on the interpretation of the provided chest radiograph data and should be interpreted in conjunction with the patient\u2019s clinical presentation and other relevant diagnostic information.",
+    "report": "## CHEST X-RAY REPORT\n\n**Patient Name:** [Insert Patient Name Here]\n**Date of Study:** [Insert Date Here]\n**Study Type:** Chest Radiograph (PA and Lateral)\n\n**FINDINGS:**\n\nNormal chest radiograph. There are no acute cardiopulmonary abnormalities identified. \n\n**IMPRESSION:**\n\nNo significant radiographic findings.\n\n**RECOMMENDATIONS:**\n\nNone.\n\n\n\n____________________________\n[Radiologist Name/Signature]\nMD, [Credentials]\n",
     "raw_response": {
-      "id": "chatcmpl-1mf5yurmdw5kusstxymqzh",
+      "id": "chatcmpl-zq9di96j2xd6u5x7974958",
       "object": "chat.completion",
-      "created": 1749064779,
+      "created": 1749066351,
       "model": "gemma-3-27b-it-qat",
       "choices": [
         {
@@ -304,14 +282,14 @@
           "finish_reason": "stop",
           "message": {
             "role": "assistant",
-            "content": "## CHEST RADIOGRAPH REPORT\n\n**Patient:** [Insert Patient Name/ID Here - *Required for complete report*]\n**Date of Study:** [Insert Date Here - *Required for complete report*]\n**Study Performed:** Chest Radiograph (PA and Lateral \u2013 *Assume standard views unless specified otherwise*)\n\n---\n\n**FINDINGS:**\n\nThe chest radiograph demonstrates generally normal pulmonary parenchymal architecture. However, subtle increased attention is noted within the left upper lung field and right upper lung field as identified by spatial analysis. Specifically, there is focal prominence of soft tissue opacity in the left middle lobe and perihilar region with an overall attention intensity of 0.977. The left apical region and left upper lobe demonstrate increased attention (intensity 0.640), mirrored by similar findings within the right upper lobe and right apical region (intensity 0.617).  Mediastinal contours are stable, and no significant lymphadenopathy is identified. Cardiac silhouette size is within normal limits. No pleural effusions or pneumothorax are present. Osseous structures appear intact.\n\n**IMPRESSION:**\n\nSubtle increased attention in the upper lobes bilaterally, particularly prominent in the left middle lobe/perihilar region, raises suspicion for early inflammatory process, subtle consolidation, or possible superimposed atelectasis. While the overall probability of \u201cNo Finding\u201d is high (77.3%), these focal areas warrant further evaluation to exclude underlying pathology. \n\n**RECOMMENDATIONS:**\n\nCorrelation with clinical history and physical examination findings is recommended.  Consider follow-up chest radiography in [6-8 weeks/as clinically indicated] to assess for stability or progression of the observed findings. If clinical suspicion remains high, a higher resolution imaging modality such as Computed Tomography (CT) of the chest without contrast should be considered for further characterization.\n\n\n\n**Radiologist:** [Insert Radiologist Name and Credentials Here - *Required for complete report*]\n---\n\n**Disclaimer:** This report is based solely on the interpretation of the provided chest radiograph data and should be interpreted in conjunction with the patient\u2019s clinical presentation and other relevant diagnostic information."
+            "content": "## CHEST X-RAY REPORT\n\n**Patient Name:** [Insert Patient Name Here]\n**Date of Study:** [Insert Date Here]\n**Study Type:** Chest Radiograph (PA and Lateral)\n\n**FINDINGS:**\n\nNormal chest radiograph. There are no acute cardiopulmonary abnormalities identified. \n\n**IMPRESSION:**\n\nNo significant radiographic findings.\n\n**RECOMMENDATIONS:**\n\nNone.\n\n\n\n____________________________\n[Radiologist Name/Signature]\nMD, [Credentials]\n"
           }
         }
       ],
       "usage": {
-        "prompt_tokens": 354,
-        "completion_tokens": 445,
-        "total_tokens": 799
+        "prompt_tokens": 431,
+        "completion_tokens": 102,
+        "total_tokens": 533
       },
       "stats": {},
       "system_fingerprint": "gemma-3-27b-it-qat"
@@ -320,25 +298,25 @@
     "attempt": 1
   },
   "medical_report": {
-    "report_text": "## CHEST RADIOGRAPH REPORT\n\n**Patient:** [Insert Patient Name/ID Here - *Required for complete report*]\n**Date of Study:** [Insert Date Here - *Required for complete report*]\n**Study Performed:** Chest Radiograph (PA and Lateral \u2013 *Assume standard views unless specified otherwise*)\n\n---\n\n**FINDINGS:**\n\nThe chest radiograph demonstrates generally normal pulmonary parenchymal architecture. However, subtle increased attention is noted within the left upper lung field and right upper lung field as identified by spatial analysis. Specifically, there is focal prominence of soft tissue opacity in the left middle lobe and perihilar region with an overall attention intensity of 0.977. The left apical region and left upper lobe demonstrate increased attention (intensity 0.640), mirrored by similar findings within the right upper lobe and right apical region (intensity 0.617).  Mediastinal contours are stable, and no significant lymphadenopathy is identified. Cardiac silhouette size is within normal limits. No pleural effusions or pneumothorax are present. Osseous structures appear intact.\n\n**IMPRESSION:**\n\nSubtle increased attention in the upper lobes bilaterally, particularly prominent in the left middle lobe/perihilar region, raises suspicion for early inflammatory process, subtle consolidation, or possible superimposed atelectasis. While the overall probability of \u201cNo Finding\u201d is high (77.3%), these focal areas warrant further evaluation to exclude underlying pathology. \n\n**RECOMMENDATIONS:**\n\nCorrelation with clinical history and physical examination findings is recommended.  Consider follow-up chest radiography in [6-8 weeks/as clinically indicated] to assess for stability or progression of the observed findings. If clinical suspicion remains high, a higher resolution imaging modality such as Computed Tomography (CT) of the chest without contrast should be considered for further characterization.\n\n\n\n**Radiologist:** [Insert Radiologist Name and Credentials Here - *Required for complete report*]\n---\n\n**Disclaimer:** This report is based solely on the interpretation of the provided chest radiograph data and should be interpreted in conjunction with the patient\u2019s clinical presentation and other relevant diagnostic information.",
+    "report_text": "## CHEST X-RAY REPORT\n\n**Patient Name:** [Insert Patient Name Here]\n**Date of Study:** [Insert Date Here]\n**Study Type:** Chest Radiograph (PA and Lateral)\n\n**FINDINGS:**\n\nNormal chest radiograph. There are no acute cardiopulmonary abnormalities identified. \n\n**IMPRESSION:**\n\nNo significant radiographic findings.\n\n**RECOMMENDATIONS:**\n\nNone.\n\n\n\n____________________________\n[Radiologist Name/Signature]\nMD, [Credentials]",
     "sections": {
-      "report": "## CHEST RADIOGRAPH REPORT\n**Patient:** [Insert Patient Name/ID Here - *Required for complete report*]\n**Date of Study:** [Insert Date Here - *Required for complete report*]\n**Study Performed:** Chest Radiograph (PA and Lateral \u2013 *Assume standard views unless specified otherwise*)\n---",
-      "**findings**": "The chest radiograph demonstrates generally normal pulmonary parenchymal architecture. However, subtle increased attention is noted within the left upper lung field and right upper lung field as identified by spatial analysis. Specifically, there is focal prominence of soft tissue opacity in the left middle lobe and perihilar region with an overall attention intensity of 0.977. The left apical region and left upper lobe demonstrate increased attention (intensity 0.640), mirrored by similar findings within the right upper lobe and right apical region (intensity 0.617).  Mediastinal contours are stable, and no significant lymphadenopathy is identified. Cardiac silhouette size is within normal limits. No pleural effusions or pneumothorax are present. Osseous structures appear intact.",
-      "**impression**": "Subtle increased attention in the upper lobes bilaterally, particularly prominent in the left middle lobe/perihilar region, raises suspicion for early inflammatory process, subtle consolidation, or possible superimposed atelectasis. While the overall probability of \u201cNo Finding\u201d is high (77.3%), these focal areas warrant further evaluation to exclude underlying pathology.",
-      "**recommendations**": "Correlation with clinical history and physical examination findings is recommended.  Consider follow-up chest radiography in [6-8 weeks/as clinically indicated] to assess for stability or progression of the observed findings. If clinical suspicion remains high, a higher resolution imaging modality such as Computed Tomography (CT) of the chest without contrast should be considered for further characterization.\n**Radiologist:** [Insert Radiologist Name and Credentials Here - *Required for complete report*]\n---\n**Disclaimer:** This report is based solely on the interpretation of the provided chest radiograph data and should be interpreted in conjunction with the patient\u2019s clinical presentation and other relevant diagnostic information."
+      "report": "## CHEST X-RAY REPORT\n**Patient Name:** [Insert Patient Name Here]\n**Date of Study:** [Insert Date Here]\n**Study Type:** Chest Radiograph (PA and Lateral)",
+      "**findings**": "Normal chest radiograph. There are no acute cardiopulmonary abnormalities identified.",
+      "**impression**": "No significant radiographic findings.",
+      "**recommendations**": "None.\n____________________________\n[Radiologist Name/Signature]\nMD, [Credentials]"
     },
     "metadata": {
-      "generated_at": "2025-06-04T19:19:50",
+      "generated_at": "2025-06-04T19:45:54",
       "generator": "Medical Report Generator v1.0",
       "model_used": "gemma-3-27b-it-qat",
-      "word_count": 301,
-      "character_count": 2258,
+      "word_count": 46,
+      "character_count": 422,
       "image_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\data_dump\\output\\img_png\\002da0d9-ce49c30d-4dfcc1f8-746d2401-d8044d48.png",
       "template_used": "standard",
       "llm_success": true,
       "used_fallback": false,
       "total_keywords": 3,
-      "attention_regions": 9,
+      "attention_regions": 4,
       "patient_info_included": false
     }
   }
