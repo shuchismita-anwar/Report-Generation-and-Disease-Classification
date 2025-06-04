@@ -96,7 +96,7 @@ def main():
     comprehensive_result = generator.generate_comprehensive_analysis(
         image_path=test_image,
         template='detailed',
-        include_image_in_llm=False,
+        include_image_in_llm=True,  # Send the same image being analyzed to the LLM
         patient_info=patient_info,
         save_visualizations=True,
         progress_callback=progress_tracker

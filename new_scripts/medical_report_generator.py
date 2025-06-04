@@ -1916,7 +1916,8 @@ class MedicalReportGenerator:
                                    spatial_keywords: List[str],
                                    attention_analysis: Dict,
                                    template: str = 'standard',
-                                   patient_info: Dict = None) -> str:
+                                   patient_info: Dict = None,
+                                   include_image: bool = False) -> str:
         """
         Create a comprehensive prompt for medical report generation.
         
@@ -1938,8 +1939,10 @@ class MedicalReportGenerator:
             prompt_sections = []
             
             # System instruction
+            image_note = "\n\nNOTE: The actual chest X-ray image being analyzed has also been provided along with this analysis data for your review." if include_image else ""
+            
             system_instruction = f"""You are an expert radiologist generating a professional {template_config['style']}. 
-Generate a {template_config['length']} medical report based on the provided chest X-ray analysis data.
+Generate a {template_config['length']} medical report based on the provided chest X-ray analysis data.{image_note}
 
 IMPORTANT GUIDELINES:
 - Use professional medical terminology
@@ -1948,6 +1951,7 @@ IMPORTANT GUIDELINES:
 - Maintain appropriate clinical tone
 - Focus on significant findings
 - Provide actionable recommendations when appropriate
+{"- Review the provided chest X-ray image along with the AI analysis results" if include_image else ""}
 """
             
             # Context section
@@ -1999,9 +2003,11 @@ IMPORTANT GUIDELINES:
                     context_section += f"- {key.replace('_', ' ').title()}: {value}\n"
             
             # Task instruction
+            image_instruction = "\nPlease correlate your visual examination of the provided chest X-ray image with the AI analysis results below." if include_image else ""
+            
             task_instruction = f"""
-=== TASK ===
-Based on the above analysis data, generate a professional chest X-ray report with the following sections:
+=== TASK ==={image_instruction}
+Based on the above analysis data{"and the provided chest X-ray image" if include_image else ""}, generate a professional chest X-ray report with the following sections:
 {', '.join(template_config['sections']).upper()}
 
 The report should be {template_config['length']} and written in a {template_config['style']} format.
@@ -2051,7 +2057,7 @@ REPORT:
                 try:
                     image_b64 = self.encode_image_for_llm(image_tensor)
                     if image_b64:
-                        message_content += f"\n\n[IMAGE DATA: base64_encoded_xray_image]\n{image_b64[:100]}..."
+                        message_content += f"\n\n=== CHEST X-RAY IMAGE ===\nThe following is the actual chest X-ray image being analyzed (base64 encoded):\n[IMAGE_DATA_START]\ndata:image/png;base64,{image_b64}\n[IMAGE_DATA_END]\n\nPlease review this image along with the analysis data provided above."
                 except Exception as e:
                     self.logger.warning(f"Failed to include image in LLM request: {e}")
             
@@ -2535,7 +2541,7 @@ Please ensure proper clinical review of all automated findings.
             # Step 5: LLM Report Generation (85%)
             update_progress("Report Generation", 85, "Generating medical report")
             step_start = time.time()
-            
+                        
             try:
                 # Create comprehensive prompt
                 prompt = self.create_medical_report_prompt(
@@ -2544,7 +2550,8 @@ Please ensure proper clinical review of all automated findings.
                     spatial_keywords=analysis_result['spatial_keywords'],
                     attention_analysis=analysis_result['attention_analysis'],
                     template=template,
-                    patient_info=patient_info
+                    patient_info=patient_info,
+                    include_image=include_image_in_llm
                 )
                 
                 # Generate report

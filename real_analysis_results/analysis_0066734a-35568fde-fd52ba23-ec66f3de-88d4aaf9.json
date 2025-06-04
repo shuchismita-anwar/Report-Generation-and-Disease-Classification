@@ -12,36 +12,36 @@
         224
       ],
       "device": "cuda:0",
-      "processing_time": 0.010678291320800781
+      "processing_time": 0.006403207778930664
     },
     "model_inference": {
       "success": true,
       "num_conditions": 8,
-      "processing_time": 0.03027176856994629
+      "processing_time": 0.031228303909301758
     },
     "keyword_extraction": {
       "success": true,
       "total_keywords": 47,
       "conditions_with_keywords": 8,
-      "processing_time": 0.0
+      "processing_time": 0.0011992454528808594
     },
     "attention_analysis": {
       "success": true,
       "significant_regions": 1,
       "spatial_keywords": 5,
       "target_condition": "Lung Opacity",
-      "processing_time": 0.0902254581451416
+      "processing_time": 0.09502482414245605
     },
     "report_generation": {
       "success": true,
       "used_fallback": false,
-      "report_length": 2200,
+      "report_length": 1758,
       "sections_found": 4,
-      "processing_time": 10.173734188079834
+      "processing_time": 8.671310424804688
     }
   },
   "performance_metrics": {
-    "total_processing_time": 10.30593752861023,
+    "total_processing_time": 8.805166006088257,
     "steps_completed": 5,
     "total_steps": 5,
     "errors_encountered": 0,
@@ -51,159 +51,159 @@
   "error_log": [],
   "model_predictions": {
     "Atelectasis": {
-      "probability": 0.38265565037727356,
+      "probability": 0.3796198070049286,
       "predicted": false,
-      "logit": -0.47829151153564453
+      "logit": -0.49116218090057373
     },
     "Cardiomegaly": {
-      "probability": 0.2831844091415405,
+      "probability": 0.27818563580513,
       "predicted": false,
-      "logit": -0.9287202954292297
+      "logit": -0.9534793496131897
     },
     "Edema": {
-      "probability": 0.26940467953681946,
+      "probability": 0.2703407108783722,
       "predicted": false,
-      "logit": -0.9976450800895691
+      "logit": -0.9928946495056152
     },
     "Lung Opacity": {
-      "probability": 0.5764485001564026,
+      "probability": 0.5983033776283264,
       "predicted": true,
-      "logit": 0.308211088180542
+      "logit": 0.39840102195739746
     },
     "No Finding": {
-      "probability": 0.4161823093891144,
+      "probability": 0.40547242760658264,
       "predicted": false,
-      "logit": -0.3384653627872467
+      "logit": -0.38271427154541016
     },
     "Pleural Effusion": {
-      "probability": 0.2179788053035736,
+      "probability": 0.22378042340278625,
       "predicted": false,
-      "logit": -1.2774840593338013
+      "logit": -1.2437700033187866
     },
     "Pneumonia": {
-      "probability": 0.5356501340866089,
+      "probability": 0.5470635294914246,
       "predicted": true,
-      "logit": 0.1428428739309311
+      "logit": 0.18881328403949738
     },
     "Support Devices": {
-      "probability": 0.3557054400444031,
+      "probability": 0.3624136447906494,
       "predicted": false,
-      "logit": -0.5940530300140381
+      "logit": -0.5649035573005676
     }
   },
   "prediction_keywords": {
     "Atelectasis": [
-      "slight collapse",
-      "minor atelectasis",
       "lower lobe",
-      "minimal atelectasis"
+      "minimal atelectasis",
+      "slight collapse",
+      "minor atelectasis"
     ],
     "Cardiomegaly": [
-      "left ventricular",
+      "slight enlargement",
       "borderline cardiomegaly",
-      "mild cardiomegaly",
-      "slight enlargement"
+      "left ventricular",
+      "mild cardiomegaly"
     ],
     "Edema": [
+      "minimal fluid",
       "early edema",
       "bilateral",
-      "mild edema",
-      "minimal fluid"
+      "mild edema"
     ],
     "Lung Opacity": [
-      "minimal infiltrate",
-      "patchy opacity",
-      "bilateral",
-      "subtle opacity",
       "left lung",
+      "subtle opacity",
+      "opacity",
       "consolidation",
       "shadowing",
-      "opacity",
+      "bilateral",
+      "minimal infiltrate",
+      "patchy opacity",
       "right lung",
       "infiltrate"
     ],
     "No Finding": [
-      "normal",
-      "lungs",
-      "no acute findings",
-      "unremarkable",
-      "heart",
-      "clear lungs",
       "clear",
-      "mediastinum"
+      "lungs",
+      "normal",
+      "no acute findings",
+      "heart",
+      "unremarkable",
+      "mediastinum",
+      "clear lungs"
     ],
     "Pleural Effusion": [
-      "small effusion",
-      "right pleural",
+      "minimal fluid",
       "trace effusion",
-      "minimal fluid"
+      "right pleural",
+      "small effusion"
     ],
     "Pneumonia": [
-      "inflammatory changes",
-      "infection",
-      "pneumonia",
-      "bilateral",
-      "pneumonitis",
       "left lung",
-      "early pneumonia",
+      "pneumonitis",
+      "infection",
+      "inflammatory changes",
       "minimal infection",
+      "bilateral",
+      "pneumonia",
+      "mild pneumonia",
       "right lung",
-      "mild pneumonia"
+      "early pneumonia"
     ],
     "Support Devices": [
-      "single device",
+      "endotracheal tube",
       "properly positioned",
-      "endotracheal tube"
+      "single device"
     ]
   },
   "keyword_summary": {
     "primary_findings": [
-      "normal",
-      "inflammatory changes",
-      "no acute findings",
-      "unremarkable",
-      "infection",
-      "pneumonia",
-      "pneumonitis",
       "clear",
+      "pneumonitis",
+      "infection",
+      "opacity",
       "consolidation",
       "shadowing",
-      "opacity",
+      "inflammatory changes",
+      "normal",
+      "no acute findings",
+      "pneumonia",
+      "unremarkable",
       "infiltrate"
     ],
     "anatomical_locations": [
+      "left lung",
       "lungs",
+      "endotracheal tube",
+      "lower lobe",
+      "right pleural",
+      "left ventricular",
       "bilateral",
       "heart",
-      "left ventricular",
-      "left lung",
-      "right pleural",
-      "mediastinum",
-      "lower lobe",
-      "endotracheal tube",
-      "right lung"
+      "right lung",
+      "mediastinum"
     ],
     "severity_indicators": [
-      "borderline cardiomegaly",
-      "mild edema",
-      "slight enlargement",
-      "trace effusion",
-      "mild cardiomegaly",
-      "minimal fluid",
-      "single device",
-      "mild pneumonia",
-      "minimal infiltrate",
-      "early pneumonia",
-      "properly positioned",
-      "patchy opacity",
-      "clear lungs",
-      "minimal infection",
       "slight collapse",
-      "subtle opacity",
-      "early edema",
-      "minimal atelectasis",
+      "borderline cardiomegaly",
+      "minimal infiltrate",
+      "mild cardiomegaly",
+      "early pneumonia",
+      "clear lungs",
+      "minor atelectasis",
       "small effusion",
-      "minor atelectasis"
+      "slight enlargement",
+      "minimal fluid",
+      "trace effusion",
+      "early edema",
+      "mild pneumonia",
+      "subtle opacity",
+      "mild edema",
+      "patchy opacity",
+      "minimal infection",
+      "properly positioned",
+      "single device",
+      "minimal atelectasis"
     ],
     "descriptive_terms": [],
     "total_keywords": 47,
@@ -222,8 +222,8 @@
     "regions": {
       "upper_left": {
         "name": "left upper lung field",
-        "max_attention": 0.32633647322654724,
-        "mean_attention": 0.06944488734006882,
+        "max_attention": 0.26627081632614136,
+        "mean_attention": 0.05745508521795273,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
@@ -234,8 +234,8 @@
       },
       "upper_right": {
         "name": "right upper lung field",
-        "max_attention": 0.14521706104278564,
-        "mean_attention": 0.05324184522032738,
+        "max_attention": 0.14283613860607147,
+        "mean_attention": 0.04376750811934471,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
@@ -246,8 +246,8 @@
       },
       "middle_left": {
         "name": "left middle lung field",
-        "max_attention": 0.1994011551141739,
-        "mean_attention": 0.07677476108074188,
+        "max_attention": 0.16108295321464539,
+        "mean_attention": 0.061170656234025955,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
@@ -258,8 +258,8 @@
       },
       "middle_right": {
         "name": "right middle lung field",
-        "max_attention": 0.23100684583187103,
-        "mean_attention": 0.07970675826072693,
+        "max_attention": 0.23033076524734497,
+        "mean_attention": 0.0643036812543869,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
@@ -270,8 +270,8 @@
       },
       "lower_left": {
         "name": "left lower lung field",
-        "max_attention": 0.2068396955728531,
-        "mean_attention": 0.04214388132095337,
+        "max_attention": 0.20770426094532013,
+        "mean_attention": 0.037278007715940475,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
@@ -283,7 +283,7 @@
       "lower_right": {
         "name": "right lower lung field",
         "max_attention": 1.0,
-        "mean_attention": 0.07982924580574036,
+        "mean_attention": 0.07107115536928177,
         "attention_coverage": 0.008272058823529412,
         "is_significant": true,
         "keywords": [
@@ -294,8 +294,8 @@
       },
       "central_cardiac": {
         "name": "cardiac silhouette",
-        "max_attention": 0.2627555727958679,
-        "mean_attention": 0.08252167701721191,
+        "max_attention": 0.21160639822483063,
+        "mean_attention": 0.06536312401294708,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
@@ -307,8 +307,8 @@
       },
       "hilum_left": {
         "name": "left hilum",
-        "max_attention": 0.19705350697040558,
-        "mean_attention": 0.08904353529214859,
+        "max_attention": 0.155674010515213,
+        "mean_attention": 0.0725385919213295,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
@@ -319,8 +319,8 @@
       },
       "hilum_right": {
         "name": "right hilum",
-        "max_attention": 0.22708828747272491,
-        "mean_attention": 0.07793085277080536,
+        "max_attention": 0.181453675031662,
+        "mean_attention": 0.06436801701784134,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
@@ -333,12 +333,12 @@
     "top_regions": [
       "lower_right",
       "upper_left",
-      "central_cardiac"
+      "middle_right"
     ],
     "significant_regions": [
       "lower_right"
     ],
-    "overall_attention_intensity": 0.06628917902708054,
+    "overall_attention_intensity": 0.05531994253396988,
     "max_attention_location": {
       "y": 199,
       "x": 152
@@ -354,11 +354,11 @@
   ],
   "llm_response": {
     "success": true,
-    "report": "## CHEST RADIOGRAPH REPORT\n\n**Patient:** [Insert Patient Name/ID Here - *Required for complete report*]\n**Date of Study:** [Insert Date Here - *Required for complete report*]\n**Study:** Chest Radiograph (AP View \u2013 *Assume AP view based on standard practice, specify if different*)\n\n---\n\n**FINDINGS:**\n\nThe lungs are generally clear bilaterally; however, a subtle opacity is noted within the right lower lung field. This appears as a patchy infiltrate predominantly involving the right costophrenic angle and extending into the right diaphragmatic region. There is low probability evidence suggestive of minimal atelectasis in the same location. No significant consolidation or pleural effusion is identified. The cardiac silhouette is normal in size and contour. Mediastinal contours are within normal limits. A single endotracheal tube is present, appearing properly positioned. \n\n**IMPRESSION:**\n\n1. **Right Lower Lobe Opacity:** Moderate probability of pneumonia versus inflammatory changes/pneumonitis cannot be entirely excluded given the subtle patchy nature of the infiltrate. Low confidence evidence suggests possible minimal atelectasis contributing to this finding.\n2. **No Acute Cardiopulmonary Findings:** Overall, there are no other significant acute cardiopulmonary abnormalities identified on this examination.\n\n**RECOMMENDATIONS:**\n\nCorrelation with clinical presentation and laboratory data is recommended. Consider follow-up chest radiography in 24-48 hours to assess for stability or progression of the right lower lobe opacity. Clinical assessment for possible infectious etiology and initiation of appropriate treatment should be considered based on patient\u2019s symptoms and risk factors. Further investigation, such as CT imaging of the chest, may be warranted if clinical suspicion remains high or there is failure to improve with initial management.\n\n\n\n**Radiologist:** [Insert Radiologist Name/Signature Here - *Required for complete report*]\n**Date of Report:** [Insert Date Here - *Required for complete report*]\n\n---\n\n**Disclaimer:** This report is based solely on the provided analysis data and does not constitute a definitive diagnosis. Clinical correlation is essential.\n\n\n\n",
+    "report": "## CHEST RADIOGRAPH REPORT\n\n**Patient:** [Patient Name/ID - *To be completed*]\n**Date of Exam:** [Date - *To be completed*]\n**Exam Performed:** Chest Radiograph (AP View \u2013 *Assume AP view based on standard practice, specify if different*)\n\n---\n\n**FINDINGS:**\n\nThe lungs are generally clear bilaterally. However, subtle opacity is noted within the right lower lung field, with focal attention extending to the right costophrenic angle and diaphragmatic region. There is a low probability of minimal atelectasis identified in the lower lobes; however, this finding is not definitively established on current imaging. No acute consolidation or pleural effusion is readily apparent elsewhere. The cardiac silhouette is within normal limits in size and contour. A single device, presumed to be an endotracheal tube, is present and appears appropriately positioned. \n\n**IMPRESSION:**\n\n1. **Right Lower Lung Opacity:** Moderate probability of a localized process within the right lower lung field, potentially representing early consolidation or pneumonitis. Differential considerations include pneumonia versus minimal atelectasis; however, the overall attention intensity remains low.\n2. **Low Probability Atelectasis:**  Minimal suspicion for subsegmental atelectasis bilaterally. \n\n**RECOMMENDATIONS:**\n\nCorrelation with clinical presentation and laboratory data is recommended to determine appropriate management. Consideration should be given to repeat chest radiography in 24-48 hours to assess for progression or resolution of the right lower lung opacity, particularly if clinical symptoms worsen or persist. Clinical evaluation for potential infectious etiology is advised.\n\n\n\n**Radiologist:** [Your Name/Signature - *To be completed*]\n**MD, [Specialty]**\n",
     "raw_response": {
-      "id": "chatcmpl-wha7aj3x1spukr7x7xvt7b",
+      "id": "chatcmpl-zem7ngd5udbgtazo8pj5b",
       "object": "chat.completion",
-      "created": 1749060474,
+      "created": 1749064247,
       "model": "gemma-3-27b-it-qat",
       "choices": [
         {
@@ -367,14 +367,14 @@
           "finish_reason": "stop",
           "message": {
             "role": "assistant",
-            "content": "## CHEST RADIOGRAPH REPORT\n\n**Patient:** [Insert Patient Name/ID Here - *Required for complete report*]\n**Date of Study:** [Insert Date Here - *Required for complete report*]\n**Study:** Chest Radiograph (AP View \u2013 *Assume AP view based on standard practice, specify if different*)\n\n---\n\n**FINDINGS:**\n\nThe lungs are generally clear bilaterally; however, a subtle opacity is noted within the right lower lung field. This appears as a patchy infiltrate predominantly involving the right costophrenic angle and extending into the right diaphragmatic region. There is low probability evidence suggestive of minimal atelectasis in the same location. No significant consolidation or pleural effusion is identified. The cardiac silhouette is normal in size and contour. Mediastinal contours are within normal limits. A single endotracheal tube is present, appearing properly positioned. \n\n**IMPRESSION:**\n\n1. **Right Lower Lobe Opacity:** Moderate probability of pneumonia versus inflammatory changes/pneumonitis cannot be entirely excluded given the subtle patchy nature of the infiltrate. Low confidence evidence suggests possible minimal atelectasis contributing to this finding.\n2. **No Acute Cardiopulmonary Findings:** Overall, there are no other significant acute cardiopulmonary abnormalities identified on this examination.\n\n**RECOMMENDATIONS:**\n\nCorrelation with clinical presentation and laboratory data is recommended. Consider follow-up chest radiography in 24-48 hours to assess for stability or progression of the right lower lobe opacity. Clinical assessment for possible infectious etiology and initiation of appropriate treatment should be considered based on patient\u2019s symptoms and risk factors. Further investigation, such as CT imaging of the chest, may be warranted if clinical suspicion remains high or there is failure to improve with initial management.\n\n\n\n**Radiologist:** [Insert Radiologist Name/Signature Here - *Required for complete report*]\n**Date of Report:** [Insert Date Here - *Required for complete report*]\n\n---\n\n**Disclaimer:** This report is based solely on the provided analysis data and does not constitute a definitive diagnosis. Clinical correlation is essential.\n\n\n\n"
+            "content": "## CHEST RADIOGRAPH REPORT\n\n**Patient:** [Patient Name/ID - *To be completed*]\n**Date of Exam:** [Date - *To be completed*]\n**Exam Performed:** Chest Radiograph (AP View \u2013 *Assume AP view based on standard practice, specify if different*)\n\n---\n\n**FINDINGS:**\n\nThe lungs are generally clear bilaterally. However, subtle opacity is noted within the right lower lung field, with focal attention extending to the right costophrenic angle and diaphragmatic region. There is a low probability of minimal atelectasis identified in the lower lobes; however, this finding is not definitively established on current imaging. No acute consolidation or pleural effusion is readily apparent elsewhere. The cardiac silhouette is within normal limits in size and contour. A single device, presumed to be an endotracheal tube, is present and appears appropriately positioned. \n\n**IMPRESSION:**\n\n1. **Right Lower Lung Opacity:** Moderate probability of a localized process within the right lower lung field, potentially representing early consolidation or pneumonitis. Differential considerations include pneumonia versus minimal atelectasis; however, the overall attention intensity remains low.\n2. **Low Probability Atelectasis:**  Minimal suspicion for subsegmental atelectasis bilaterally. \n\n**RECOMMENDATIONS:**\n\nCorrelation with clinical presentation and laboratory data is recommended to determine appropriate management. Consideration should be given to repeat chest radiography in 24-48 hours to assess for progression or resolution of the right lower lung opacity, particularly if clinical symptoms worsen or persist. Clinical evaluation for potential infectious etiology is advised.\n\n\n\n**Radiologist:** [Your Name/Signature - *To be completed*]\n**MD, [Specialty]**\n"
           }
         }
       ],
       "usage": {
         "prompt_tokens": 445,
-        "completion_tokens": 427,
-        "total_tokens": 872
+        "completion_tokens": 356,
+        "total_tokens": 801
       },
       "stats": {},
       "system_fingerprint": "gemma-3-27b-it-qat"
@@ -383,19 +383,19 @@
     "attempt": 1
   },
   "medical_report": {
-    "report_text": "## CHEST RADIOGRAPH REPORT\n\n**Patient:** [Insert Patient Name/ID Here - *Required for complete report*]\n**Date of Study:** [Insert Date Here - *Required for complete report*]\n**Study:** Chest Radiograph (AP View \u2013 *Assume AP view based on standard practice, specify if different*)\n\n---\n\n**FINDINGS:**\n\nThe lungs are generally clear bilaterally; however, a subtle opacity is noted within the right lower lung field. This appears as a patchy infiltrate predominantly involving the right costophrenic angle and extending into the right diaphragmatic region. There is low probability evidence suggestive of minimal atelectasis in the same location. No significant consolidation or pleural effusion is identified. The cardiac silhouette is normal in size and contour. Mediastinal contours are within normal limits. A single endotracheal tube is present, appearing properly positioned. \n\n**IMPRESSION:**\n\n1. **Right Lower Lobe Opacity:** Moderate probability of pneumonia versus inflammatory changes/pneumonitis cannot be entirely excluded given the subtle patchy nature of the infiltrate. Low confidence evidence suggests possible minimal atelectasis contributing to this finding.\n2. **No Acute Cardiopulmonary Findings:** Overall, there are no other significant acute cardiopulmonary abnormalities identified on this examination.\n\n**RECOMMENDATIONS:**\n\nCorrelation with clinical presentation and laboratory data is recommended. Consider follow-up chest radiography in 24-48 hours to assess for stability or progression of the right lower lobe opacity. Clinical assessment for possible infectious etiology and initiation of appropriate treatment should be considered based on patient\u2019s symptoms and risk factors. Further investigation, such as CT imaging of the chest, may be warranted if clinical suspicion remains high or there is failure to improve with initial management.\n\n\n\n**Radiologist:** [Insert Radiologist Name/Signature Here - *Required for complete report*]\n**Date of Report:** [Insert Date Here - *Required for complete report*]\n\n---\n\n**Disclaimer:** This report is based solely on the provided analysis data and does not constitute a definitive diagnosis. Clinical correlation is essential.",
+    "report_text": "## CHEST RADIOGRAPH REPORT\n\n**Patient:** [Patient Name/ID - *To be completed*]\n**Date of Exam:** [Date - *To be completed*]\n**Exam Performed:** Chest Radiograph (AP View \u2013 *Assume AP view based on standard practice, specify if different*)\n\n---\n\n**FINDINGS:**\n\nThe lungs are generally clear bilaterally. However, subtle opacity is noted within the right lower lung field, with focal attention extending to the right costophrenic angle and diaphragmatic region. There is a low probability of minimal atelectasis identified in the lower lobes; however, this finding is not definitively established on current imaging. No acute consolidation or pleural effusion is readily apparent elsewhere. The cardiac silhouette is within normal limits in size and contour. A single device, presumed to be an endotracheal tube, is present and appears appropriately positioned. \n\n**IMPRESSION:**\n\n1. **Right Lower Lung Opacity:** Moderate probability of a localized process within the right lower lung field, potentially representing early consolidation or pneumonitis. Differential considerations include pneumonia versus minimal atelectasis; however, the overall attention intensity remains low.\n2. **Low Probability Atelectasis:**  Minimal suspicion for subsegmental atelectasis bilaterally. \n\n**RECOMMENDATIONS:**\n\nCorrelation with clinical presentation and laboratory data is recommended to determine appropriate management. Consideration should be given to repeat chest radiography in 24-48 hours to assess for progression or resolution of the right lower lung opacity, particularly if clinical symptoms worsen or persist. Clinical evaluation for potential infectious etiology is advised.\n\n\n\n**Radiologist:** [Your Name/Signature - *To be completed*]\n**MD, [Specialty]**",
     "sections": {
-      "report": "## CHEST RADIOGRAPH REPORT\n**Patient:** [Insert Patient Name/ID Here - *Required for complete report*]\n**Date of Study:** [Insert Date Here - *Required for complete report*]\n**Study:** Chest Radiograph (AP View \u2013 *Assume AP view based on standard practice, specify if different*)\n---",
-      "**findings**": "The lungs are generally clear bilaterally; however, a subtle opacity is noted within the right lower lung field. This appears as a patchy infiltrate predominantly involving the right costophrenic angle and extending into the right diaphragmatic region. There is low probability evidence suggestive of minimal atelectasis in the same location. No significant consolidation or pleural effusion is identified. The cardiac silhouette is normal in size and contour. Mediastinal contours are within normal limits. A single endotracheal tube is present, appearing properly positioned.",
-      "**impression**": "1. **Right Lower Lobe Opacity:** Moderate probability of pneumonia versus inflammatory changes/pneumonitis cannot be entirely excluded given the subtle patchy nature of the infiltrate. Low confidence evidence suggests possible minimal atelectasis contributing to this finding.",
-      "**recommendations**": "Correlation with clinical presentation and laboratory data is recommended. Consider follow-up chest radiography in 24-48 hours to assess for stability or progression of the right lower lobe opacity. Clinical assessment for possible infectious etiology and initiation of appropriate treatment should be considered based on patient\u2019s symptoms and risk factors. Further investigation, such as CT imaging of the chest, may be warranted if clinical suspicion remains high or there is failure to improve with initial management.\n**Radiologist:** [Insert Radiologist Name/Signature Here - *Required for complete report*]\n**Date of Report:** [Insert Date Here - *Required for complete report*]\n---\n**Disclaimer:** This report is based solely on the provided analysis data and does not constitute a definitive diagnosis. Clinical correlation is essential."
+      "report": "## CHEST RADIOGRAPH REPORT\n**Patient:** [Patient Name/ID - *To be completed*]\n**Date of Exam:** [Date - *To be completed*]\n**Exam Performed:** Chest Radiograph (AP View \u2013 *Assume AP view based on standard practice, specify if different*)\n---",
+      "**findings**": "The lungs are generally clear bilaterally. However, subtle opacity is noted within the right lower lung field, with focal attention extending to the right costophrenic angle and diaphragmatic region. There is a low probability of minimal atelectasis identified in the lower lobes; however, this finding is not definitively established on current imaging. No acute consolidation or pleural effusion is readily apparent elsewhere. The cardiac silhouette is within normal limits in size and contour. A single device, presumed to be an endotracheal tube, is present and appears appropriately positioned.",
+      "**impression**": "1. **Right Lower Lung Opacity:** Moderate probability of a localized process within the right lower lung field, potentially representing early consolidation or pneumonitis. Differential considerations include pneumonia versus minimal atelectasis; however, the overall attention intensity remains low.\n2. **Low Probability Atelectasis:**  Minimal suspicion for subsegmental atelectasis bilaterally.",
+      "**recommendations**": "Correlation with clinical presentation and laboratory data is recommended to determine appropriate management. Consideration should be given to repeat chest radiography in 24-48 hours to assess for progression or resolution of the right lower lung opacity, particularly if clinical symptoms worsen or persist. Clinical evaluation for potential infectious etiology is advised.\n**Radiologist:** [Your Name/Signature - *To be completed*]\n**MD, [Specialty]**"
     },
     "metadata": {
-      "generated_at": "2025-06-04T18:08:05",
+      "generated_at": "2025-06-04T19:10:56",
       "generator": "Medical Report Generator v1.0",
       "model_used": "gemma-3-27b-it-qat",
-      "word_count": 299,
-      "character_count": 2200,
+      "word_count": 235,
+      "character_count": 1758,
       "image_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\data_dump\\output\\img_png\\0066734a-35568fde-fd52ba23-ec66f3de-88d4aaf9.png",
       "template_used": "standard",
       "llm_success": true,
