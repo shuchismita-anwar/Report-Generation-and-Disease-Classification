@@ -36,8 +36,27 @@ CONDITIONS = [
 VIT_MODEL_NAME = "google/vit-base-patch16-224-in21k"
 TEXT_MODEL_NAME = "emilyalsentzer/Bio_ClinicalBERT"
 
-# Real chest X-ray image directory
-CHEST_XRAY_DIR = os.path.join("..", "data_dump", "output", "img_png")
+# Real chest X-ray image directory - try multiple possible paths
+def get_chest_xray_directory():
+    """Find the correct chest X-ray directory based on current working directory"""
+    possible_paths = [
+        os.path.join("..", "data_dump", "output", "img_png"),  # From new_scripts/
+        os.path.join("data_dump", "output", "img_png"),        # From root/
+        os.path.join(".", "data_dump", "output", "img_png"),   # From root/ explicit
+    ]
+    
+    for path in possible_paths:
+        abs_path = os.path.abspath(path)
+        if os.path.exists(abs_path) and os.path.isdir(abs_path):
+            # Check if it has PNG files
+            png_files = [f for f in os.listdir(abs_path) if f.lower().endswith('.png')]
+            if png_files:
+                return abs_path
+    
+    # Fallback to first path if none found
+    return os.path.abspath(possible_paths[0])
+
+CHEST_XRAY_DIR = get_chest_xray_directory()
 
 # Add medical terminology mapping for keyword extraction
 CONDITION_KEYWORDS = {
@@ -488,10 +507,30 @@ class MedicalReportGenerator:
         self.device = detect_device()
         self.low_memory = check_system_memory()
         self.model = None
-        self.model_path = model_path or os.path.join(
-            "output", "training_mimic_on_chexpert_optimized", 
-            "model_training_mimic_on_chexpert_optimized", "model.safetensors"
-        )
+        
+        # Fix model path - try multiple possible locations
+        if model_path is None:
+            possible_paths = [
+                os.path.join("new_scripts", "output", "training_mimic_on_chexpert_optimized", "model_training_mimic_on_chexpert_optimized", "model.safetensors"),
+                os.path.join("output", "training_mimic_on_chexpert_optimized", "model_training_mimic_on_chexpert_optimized", "model.safetensors"),
+                os.path.join("new_scripts", "output", "training_mimic_on_chexpert_optimized", "model.safetensors"),
+                os.path.join("results", "final_model", "model.safetensors"),
+                "model.safetensors"  # Current directory fallback
+            ]
+            
+            self.model_path = None
+            for path in possible_paths:
+                if os.path.exists(path):
+                    self.model_path = path
+                    break
+            
+            if self.model_path is None:
+                self.model_path = possible_paths[0]  # Use first path as default even if not found
+        else:
+            self.model_path = model_path
+        
+        # Initialize test data directory (fix missing initialization)
+        self.test_data_dir = "test_data"
         
         # Enhanced logging setup
         self._setup_logging(log_level)
@@ -525,7 +564,9 @@ class MedicalReportGenerator:
         self.logger.info(f"Initialized MedicalReportGenerator")
         self.logger.info(f"Device: {self.device}")
         self.logger.info(f"Low memory mode: {self.low_memory}")
+        self.logger.info(f"Model path: {self.model_path} (exists: {os.path.exists(self.model_path)})")
         self.logger.info(f"Real chest X-ray directory: {self.chest_xray_dir}")
+        self.logger.info(f"Test data directory: {self.test_data_dir}")
         self.logger.info(f"Keyword extraction system loaded with {len(self.condition_keywords)} conditions")
         self.logger.info(f"Attention visualization system loaded with {len(self.anatomical_regions)} anatomical regions")
         self.logger.info(f"LLM integration configured for {self.llm_config['model_name']} at {self.llm_config['base_url']}")
@@ -577,8 +618,30 @@ class MedicalReportGenerator:
             List of available image file paths
         """
         try:
+            self.logger.debug(f"Current working directory: {os.getcwd()}")
+            self.logger.debug(f"Checking chest X-ray directory: {self.chest_xray_dir}")
+            self.logger.debug(f"Absolute path: {os.path.abspath(self.chest_xray_dir)}")
+            
             if not os.path.exists(self.chest_xray_dir):
                 self.logger.error(f"Chest X-ray directory not found: {self.chest_xray_dir}")
+                
+                # Try to find alternative paths
+                self.logger.info("Searching for data_dump directory...")
+                alternative_paths = [
+                    os.path.join("..", "data_dump", "output", "img_png"),
+                    os.path.join("data_dump", "output", "img_png"),
+                    os.path.join(".", "data_dump", "output", "img_png"),
+                ]
+                
+                for alt_path in alternative_paths:
+                    abs_alt_path = os.path.abspath(alt_path)
+                    self.logger.debug(f"Trying alternative path: {abs_alt_path}")
+                    if os.path.exists(abs_alt_path):
+                        self.logger.info(f"Found alternative path: {abs_alt_path}")
+                        # Update the path and try again
+                        self.chest_xray_dir = abs_alt_path
+                        return self.get_available_chest_xrays()
+                
                 return []
             
             # Get all PNG files
@@ -589,10 +652,14 @@ class MedicalReportGenerator:
                     image_files.append(image_path)
             
             self.logger.info(f"Found {len(image_files)} chest X-ray images in {self.chest_xray_dir}")
+            if len(image_files) > 0:
+                self.logger.debug(f"Sample images: {[os.path.basename(f) for f in image_files[:3]]}")
+            
             return sorted(image_files)
             
         except Exception as e:
             self.logger.error(f"Error getting available chest X-rays: {e}")
+            self.logger.exception("Full traceback:")
             return []
 
     def get_random_chest_xray(self) -> str:
@@ -724,6 +791,32 @@ class MedicalReportGenerator:
             self.logger.info(f"Loading model from {self.model_path}")
             
             if not os.path.exists(self.model_path):
+                # Provide helpful error message with possible locations
+                self.logger.error(f"Model file not found: {self.model_path}")
+                self.logger.info("Searching for model in possible locations...")
+                
+                # Search more broadly for model files
+                search_patterns = [
+                    "new_scripts/output/**/model.safetensors",
+                    "output/**/model.safetensors", 
+                    "results/**/model.safetensors",
+                    "**/model.safetensors"
+                ]
+                
+                import glob
+                found_models = []
+                for pattern in search_patterns:
+                    found_models.extend(glob.glob(pattern, recursive=True))
+                
+                if found_models:
+                    self.logger.info("Found these model files:")
+                    for model_file in found_models:
+                        self.logger.info(f"  - {model_file}")
+                    self.logger.info("You can specify the correct path when initializing MedicalReportGenerator")
+                else:
+                    self.logger.info("No model.safetensors files found in the project directory")
+                    self.logger.info("Please ensure you have trained a model first by running the training script")
+                
                 raise FileNotFoundError(f"Model file not found: {self.model_path}")
             
             # Initialize model
@@ -731,13 +824,20 @@ class MedicalReportGenerator:
             
             # Load weights
             state_dict = safetensors.torch.load_file(self.model_path, device="cpu")
-            self.model.load_state_dict(state_dict, strict=False)
+            missing_keys, unexpected_keys = self.model.load_state_dict(state_dict, strict=False)
+            
+            if missing_keys:
+                self.logger.warning(f"Missing keys in model state_dict: {len(missing_keys)} keys")
+            if unexpected_keys:
+                self.logger.warning(f"Unexpected keys in model state_dict: {len(unexpected_keys)} keys")
             
             # Move to device and set to eval mode
             self.model = self.model.to(self.device)
             self.model.eval()
             
-            self.logger.info("Model loaded successfully")
+            # Get model size info
+            total_params = sum(p.numel() for p in self.model.parameters())
+            self.logger.info(f"Model loaded successfully: {total_params:,} parameters")
             return True
             
         except Exception as e:
