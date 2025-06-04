@@ -61,84 +61,44 @@ CHEST_XRAY_DIR = get_chest_xray_directory()
 # Add medical terminology mapping for keyword extraction
 CONDITION_KEYWORDS = {
     'Atelectasis': {
-        'primary': ['atelectasis', 'collapse', 'collapsed lung', 'lung collapse'],
-        'anatomical': ['lower lobe', 'upper lobe', 'middle lobe', 'bibasilar', 'subsegmental', 'segmental'],
-        'severity': {
-            'mild': ['minimal atelectasis', 'slight collapse', 'minor atelectasis'],
-            'moderate': ['atelectasis', 'partial collapse', 'moderate atelectasis'],
-            'severe': ['complete atelectasis', 'total collapse', 'massive atelectasis']
-        },
-        'descriptors': ['linear', 'plate-like', 'bandlike', 'discoid', 'compressive', 'obstructive']
+        'high_confidence': ['atelectasis detected', 'lung collapse present', 'volume loss identified'],
+        'medium_confidence': ['possible atelectasis', 'suspected collapse', 'potential volume loss'],
+        'low_confidence': ['no atelectasis', 'no collapse', 'normal lung expansion']
     },
     'Cardiomegaly': {
-        'primary': ['cardiomegaly', 'enlarged heart', 'cardiac enlargement', 'heart enlargement'],
-        'anatomical': ['left ventricular', 'right ventricular', 'biventricular', 'left atrial', 'right atrial'],
-        'severity': {
-            'mild': ['mild cardiomegaly', 'borderline cardiomegaly', 'slight enlargement'],
-            'moderate': ['cardiomegaly', 'moderate enlargement', 'cardiac enlargement'],
-            'severe': ['severe cardiomegaly', 'marked enlargement', 'massive cardiomegaly']
-        },
-        'descriptors': ['globular', 'boot-shaped', 'water bottle', 'enlarged cardiac silhouette']
+        'high_confidence': ['cardiomegaly detected', 'heart enlargement present', 'enlarged cardiac silhouette'],
+        'medium_confidence': ['possible cardiomegaly', 'borderline heart size', 'cardiac enlargement suspected'],
+        'low_confidence': ['normal heart size', 'no cardiomegaly', 'normal cardiac silhouette']
     },
     'Edema': {
-        'primary': ['pulmonary edema', 'lung edema', 'fluid overload', 'congestion'],
-        'anatomical': ['bilateral', 'perihilar', 'peripheral', 'alveolar', 'interstitial', 'peribronchial'],
-        'severity': {
-            'mild': ['mild edema', 'minimal fluid', 'early edema'],
-            'moderate': ['pulmonary edema', 'moderate congestion', 'fluid overload'],
-            'severe': ['severe edema', 'acute pulmonary edema', 'flash edema']
-        },
-        'descriptors': ['butterfly pattern', 'bat wing', 'ground glass', 'reticular', 'nodular']
+        'high_confidence': ['pulmonary edema detected', 'lung fluid present', 'edema identified'],
+        'medium_confidence': ['possible edema', 'suspected fluid', 'potential pulmonary edema'],
+        'low_confidence': ['no edema', 'no lung fluid', 'clear lung fields']
     },
     'Lung Opacity': {
-        'primary': ['opacity', 'infiltrate', 'consolidation', 'shadowing'],
-        'anatomical': ['right lung', 'left lung', 'bilateral', 'upper lobe', 'lower lobe', 'lingula'],
-        'severity': {
-            'mild': ['patchy opacity', 'minimal infiltrate', 'subtle opacity'],
-            'moderate': ['opacity', 'consolidation', 'infiltrate'],
-            'severe': ['dense opacity', 'complete consolidation', 'white out']
-        },
-        'descriptors': ['airspace', 'ground glass', 'reticular', 'nodular', 'confluent', 'patchy']
+        'high_confidence': ['lung opacity detected', 'infiltrate present', 'consolidation identified'],
+        'medium_confidence': ['possible opacity', 'suspected infiltrate', 'potential consolidation'],
+        'low_confidence': ['no opacity', 'no infiltrates', 'clear lungs']
     },
     'No Finding': {
-        'primary': ['normal', 'clear', 'unremarkable', 'no acute findings'],
-        'anatomical': ['lungs', 'heart', 'mediastinum', 'pleura', 'bones'],
-        'severity': {
-            'mild': ['normal', 'clear lungs', 'unremarkable'],
-            'moderate': ['normal', 'clear lungs', 'unremarkable'],
-            'severe': ['normal', 'clear lungs', 'unremarkable']
-        },
-        'descriptors': ['clear lung fields', 'normal cardiac silhouette', 'no infiltrates', 'no consolidation']
+        'high_confidence': ['normal chest X-ray', 'no acute findings', 'unremarkable study'],
+        'medium_confidence': ['essentially normal', 'largely unremarkable', 'no significant abnormalities'],
+        'low_confidence': ['abnormalities present', 'findings detected', 'pathology identified']
     },
     'Pleural Effusion': {
-        'primary': ['pleural effusion', 'fluid', 'effusion', 'pleural fluid'],
-        'anatomical': ['right pleural', 'left pleural', 'bilateral', 'costophrenic angle', 'meniscus'],
-        'severity': {
-            'mild': ['small effusion', 'minimal fluid', 'trace effusion'],
-            'moderate': ['pleural effusion', 'moderate effusion', 'fluid collection'],
-            'severe': ['large effusion', 'massive effusion', 'complete opacification']
-        },
-        'descriptors': ['blunted costophrenic angle', 'meniscus sign', 'layering', 'loculated']
+        'high_confidence': ['pleural effusion detected', 'pleural fluid present', 'effusion identified'],
+        'medium_confidence': ['possible effusion', 'suspected pleural fluid', 'potential effusion'],
+        'low_confidence': ['no effusion', 'no pleural fluid', 'clear pleural spaces']
     },
     'Pneumonia': {
-        'primary': ['pneumonia', 'pneumonitis', 'infection', 'inflammatory changes'],
-        'anatomical': ['right lung', 'left lung', 'bilateral', 'multilobar', 'lobar', 'bronchopneumonia'],
-        'severity': {
-            'mild': ['mild pneumonia', 'early pneumonia', 'minimal infection'],
-            'moderate': ['pneumonia', 'consolidation', 'infectious process'],
-            'severe': ['severe pneumonia', 'extensive pneumonia', 'necrotizing pneumonia']
-        },
-        'descriptors': ['airspace disease', 'consolidative', 'patchy', 'confluent', 'cavitary']
+        'high_confidence': ['pneumonia detected', 'infection present', 'pneumonia identified'],
+        'medium_confidence': ['possible pneumonia', 'suspected infection', 'potential pneumonia'],
+        'low_confidence': ['no pneumonia', 'no infection', 'no inflammatory changes']
     },
     'Support Devices': {
-        'primary': ['medical device', 'support device', 'hardware', 'prosthesis'],
-        'anatomical': ['endotracheal tube', 'central line', 'pacemaker', 'chest tube', 'nasogastric tube'],
-        'severity': {
-            'mild': ['single device', 'properly positioned'],
-            'moderate': ['multiple devices', 'medical hardware'],
-            'severe': ['extensive hardware', 'multiple support devices']
-        },
-        'descriptors': ['properly positioned', 'appropriate placement', 'unchanged position', 'stable position']
+        'high_confidence': ['support devices present', 'medical devices detected', 'equipment identified'],
+        'medium_confidence': ['possible devices', 'suspected equipment', 'potential support devices'],
+        'low_confidence': ['no devices', 'no support equipment', 'no medical devices']
     }
 }
 
@@ -542,8 +502,8 @@ class MedicalReportGenerator:
         self.condition_keywords = CONDITION_KEYWORDS
         self.confidence_thresholds = {
             'high': 0.7,    # Strong indication of condition
-            'medium': 0.4,  # Moderate indication
-            'low': 0.2      # Weak indication
+            'medium': 0.5,  # Moderate indication  
+            'low': 0.3      # Weak indication (below this = no keywords)
         }
         
         # Initialize attention visualization system (Phase 3)
@@ -1226,7 +1186,8 @@ class MedicalReportGenerator:
     
     def extract_keywords_from_predictions(self, condition_predictions: Dict) -> Dict:
         """
-        Extract medical keywords based on model predictions and confidence levels.
+        Extract keywords from model predictions using simplified confidence-based approach.
+        Only claims what the model was actually trained to detect.
         
         Args:
             condition_predictions: Dictionary with condition names as keys and 
@@ -1247,47 +1208,41 @@ class MedicalReportGenerator:
                     continue
                 
                 probability = pred_info.get('probability', 0.0)
-                predicted = pred_info.get('predicted', False)
+                condition_kw = self.condition_keywords[condition]
                 
-                # Skip if confidence is too low
-                if probability < self.confidence_thresholds['low']:
+                # Determine confidence level and extract appropriate keywords
+                if probability >= self.confidence_thresholds['high']:
+                    # High confidence: positive finding
+                    keywords = condition_kw['high_confidence']
+                    confidence_level = 'high'
+                elif probability >= self.confidence_thresholds['medium']:
+                    # Medium confidence: possible finding
+                    keywords = condition_kw['medium_confidence']
+                    confidence_level = 'medium'
+                elif probability >= self.confidence_thresholds['low']:
+                    # Low confidence: likely negative, but include for completeness
+                    keywords = condition_kw['low_confidence']
+                    confidence_level = 'low'
+                else:
+                    # Below low threshold: skip entirely
                     continue
                 
-                # Get keywords for this condition
-                condition_kw = self.condition_keywords[condition]
-                keywords = []
-                
-                # Always include primary keywords for detected conditions
-                if predicted or probability >= self.confidence_thresholds['medium']:
-                    keywords.extend(condition_kw['primary'])
-                
-                # Add severity-based keywords
-                severity_level = self._determine_severity_level(probability)
-                if severity_level in condition_kw['severity']:
-                    keywords.extend(condition_kw['severity'][severity_level])
-                
-                # Add anatomical keywords based on confidence
-                if probability >= self.confidence_thresholds['medium']:
-                    # For higher confidence, include more anatomical details
-                    keywords.extend(condition_kw['anatomical'][:3])  # Top 3 anatomical terms
-                elif probability >= self.confidence_thresholds['low']:
-                    # For lower confidence, include fewer details
-                    keywords.extend(condition_kw['anatomical'][:1])  # Top 1 anatomical term
-                
-                # Add descriptive keywords for high confidence predictions
-                if probability >= self.confidence_thresholds['high']:
-                    keywords.extend(condition_kw['descriptors'][:2])  # Top 2 descriptors
-                
-                # Remove duplicates and store
                 if keywords:
-                    extracted_keywords[condition] = list(set(keywords))
-                    self.logger.debug(f"{condition} (p={probability:.3f}): {len(keywords)} keywords extracted")
+                    extracted_keywords[condition] = list(keywords)  # Make a copy
+                    self.logger.debug(f"{condition} (p={probability:.3f}, {confidence_level}): {len(keywords)} keywords extracted")
             
-            # Special handling for "No Finding" - only if it has highest probability
+            # Special handling for "No Finding" - only if it's the dominant prediction
             if self._should_include_no_finding(condition_predictions):
                 if 'No Finding' in condition_predictions:
+                    no_finding_prob = condition_predictions['No Finding'].get('probability', 0.0)
                     no_finding_kw = self.condition_keywords['No Finding']
-                    extracted_keywords['No Finding'] = no_finding_kw['primary'] + no_finding_kw['descriptors']
+                    
+                    if no_finding_prob >= self.confidence_thresholds['high']:
+                        extracted_keywords['No Finding'] = list(no_finding_kw['high_confidence'])
+                    elif no_finding_prob >= self.confidence_thresholds['medium']:
+                        extracted_keywords['No Finding'] = list(no_finding_kw['medium_confidence'])
+                    else:
+                        extracted_keywords['No Finding'] = list(no_finding_kw['low_confidence'])
             
             self.logger.info(f"Keyword extraction completed: {len(extracted_keywords)} conditions with keywords")
             return extracted_keywords
@@ -1335,7 +1290,7 @@ class MedicalReportGenerator:
     
     def get_keyword_summary(self, extracted_keywords: Dict) -> Dict:
         """
-        Create a summary of extracted keywords organized by category.
+        Create a summary of extracted keywords organized by confidence level.
         
         Args:
             extracted_keywords: Output from extract_keywords_from_predictions
@@ -1346,12 +1301,17 @@ class MedicalReportGenerator:
         try:
             summary = {
                 'primary_findings': [],
-                'anatomical_locations': [],
-                'severity_indicators': [],
-                'descriptive_terms': [],
+                'anatomical_locations': [],  # Empty since we removed anatomical keywords
+                'severity_indicators': [],   # Empty since we removed severity keywords  
+                'descriptive_terms': [],     # Keywords organized by confidence instead
                 'total_keywords': 0,
                 'conditions_detected': list(extracted_keywords.keys())
             }
+            
+            # New structure: organize by confidence level rather than keyword type
+            high_confidence_findings = []
+            medium_confidence_findings = []
+            low_confidence_findings = []
             
             for condition, keywords in extracted_keywords.items():
                 if condition not in self.condition_keywords:
@@ -1359,22 +1319,25 @@ class MedicalReportGenerator:
                 
                 condition_kw = self.condition_keywords[condition]
                 
-                # Categorize keywords
+                # Categorize keywords by confidence level
                 for keyword in keywords:
-                    if keyword in condition_kw['primary']:
-                        summary['primary_findings'].append(keyword)
-                    elif keyword in condition_kw['anatomical']:
-                        summary['anatomical_locations'].append(keyword)
-                    elif any(keyword in sev_list for sev_list in condition_kw['severity'].values()):
-                        summary['severity_indicators'].append(keyword)
-                    elif keyword in condition_kw['descriptors']:
-                        summary['descriptive_terms'].append(keyword)
+                    if keyword in condition_kw['high_confidence']:
+                        high_confidence_findings.append(keyword)
+                        summary['primary_findings'].append(keyword)  # High confidence = primary
+                    elif keyword in condition_kw['medium_confidence']:
+                        medium_confidence_findings.append(keyword)
+                    elif keyword in condition_kw['low_confidence']:
+                        low_confidence_findings.append(keyword)
                 
                 summary['total_keywords'] += len(keywords)
             
-            # Remove duplicates
-            for category in ['primary_findings', 'anatomical_locations', 'severity_indicators', 'descriptive_terms']:
-                summary[category] = list(set(summary[category]))
+            # Store findings by confidence level
+            summary['high_confidence_findings'] = list(set(high_confidence_findings))
+            summary['medium_confidence_findings'] = list(set(medium_confidence_findings))
+            summary['low_confidence_findings'] = list(set(low_confidence_findings))
+            
+            # Remove duplicates from existing categories
+            summary['primary_findings'] = list(set(summary['primary_findings']))
             
             self.logger.debug(f"Keyword summary: {summary['total_keywords']} total keywords across {len(summary['conditions_detected'])} conditions")
             return summary
@@ -1387,7 +1350,10 @@ class MedicalReportGenerator:
                 'severity_indicators': [],
                 'descriptive_terms': [],
                 'total_keywords': 0,
-                'conditions_detected': []
+                'conditions_detected': [],
+                'high_confidence_findings': [],
+                'medium_confidence_findings': [],
+                'low_confidence_findings': []
             }
     
     def test_keyword_extraction_system(self) -> bool:

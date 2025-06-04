@@ -183,7 +183,7 @@ def main():
         template='standard',
         max_concurrent=2,
         save_results=True,
-        output_dir="real_analysis_results"
+        output_dir=r".\new_scripts\real_analysis_results"
     )
     
     batch_time = time.time() - batch_start
