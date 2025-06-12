@@ -1915,7 +1915,7 @@ class MedicalReportGenerator:
             
             system_instruction = f"""You are an expert radiologist with 20+ years of experience generating professional medical reports. Generate a clinically accurate chest X-ray report.{image_note}
 
-🚨 CRITICAL CLINICAL GUIDELINES:
+CRITICAL CLINICAL GUIDELINES:
 1. ATTENTION DATA PROHIBITION: Do NOT interpret "attention analysis", "spatial keywords", "attention intensity", or "focus areas" as clinical findings. These are AI computational artifacts, NOT pathological findings.
 
 2. CONFIDENCE-BASED REPORTING:
@@ -1928,6 +1928,8 @@ class MedicalReportGenerator:
 4. CLINICAL SIMPLICITY: Match the complexity level to the findings - normal studies need 1-2 sentences, not paragraphs.
 
 5. MEDICAL ACCURACY: Base conclusions exclusively on the condition prediction probabilities, ignore all attention/spatial data.
+
+6. REPORT FORMAT: Do NOT include patient name fields, exam date fields, or radiologist signature lines. Focus only on the clinical content (FINDINGS, IMPRESSION, RECOMMENDATIONS).
 
 REPORTING STYLE: {reporting_style}
 """
@@ -2095,6 +2097,10 @@ CHEST X-RAY REPORT:
             }
             
             url = f"{self.llm_config['base_url']}{self.llm_config['chat_endpoint']}"
+            
+            # Debug: Log the prompt being sent
+            self.logger.info(f"DEBUG: Prompt length: {len(message_content)} chars")
+            self.logger.info(f"DEBUG: First 200 chars of prompt: {message_content[:200]}...")
             
             # Make request with retries
             for attempt in range(self.llm_config['max_retries']):

@@ -1,0 +1,8 @@
+🔍 CLINICAL FINDINGS:
+--------------------------------------------------
+   **FINDINGS:**
+   Pulmonary edema is present, characterized by increased interstitial and alveolar fluid distribution bilaterally. This manifests as hazy opacities predominantly in the perihilar regions with some extension to the lung bases. Vascular prominence is also noted.
+   **IMPRESSION:**
+   Radiographic findings are consistent with pulmonary edema. Clinical correlation is recommended to determine the etiology (e.g., congestive heart failure, acute respiratory distress syndrome) and guide appropriate management.
+   **RECOMMENDATIONS:**
+   Clinical evaluation for underlying cause of edema is advised. Consider echocardiogram to assess cardiac function if not already performed. Serial chest radiographs may be useful to monitor response to treatment.
