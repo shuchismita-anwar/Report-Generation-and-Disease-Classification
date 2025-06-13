@@ -815,12 +815,105 @@ def test_evaluator_instantiation() -> bool:
         return False
 
 
-if __name__ == "__main__":
-    """Run basic tests when script is executed directly."""
+def main():
+    """Main entry point with command-line argument parsing."""
+    import argparse
+    import sys
+    
+    parser = argparse.ArgumentParser(
+        description="Medical Report Evaluation System",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python medical_report_evaluator.py                    # System health check
+  python medical_report_evaluator.py --auto             # Full automation
+  python medical_report_evaluator.py --discover         # Discovery only
+  python medical_report_evaluator.py --auto --verbose   # Full automation with detailed logging
+        """
+    )
+    
+    parser.add_argument('--auto', action='store_true',
+                       help='Run full automation pipeline')
+    parser.add_argument('--discover', action='store_true',
+                       help='Run discovery and matching only')
+    parser.add_argument('--verbose', '-v', action='store_true',
+                       help='Enable verbose logging')
+    parser.add_argument('--config', type=str, default='config/evaluation_config.json',
+                       help='Path to configuration file')
+    
+    args = parser.parse_args()
+    
+    if args.auto:
+        run_full_automation(args)
+    elif args.discover:
+        run_discovery_only(args)
+    else:
+        run_health_check(args)
+
+def run_full_automation(args):
+    """Execute complete automation pipeline."""
+    try:
+        from automation.evaluation_controller import AutomatedEvaluationController
+        
+        print("🚀 Starting full automation pipeline...")
+        controller = AutomatedEvaluationController(
+            config_path=args.config
+        )
+        results = controller.run_full_automation()
+        
+        print(f"\n🎉 Automation completed successfully!")
+        print(f"📊 Processed {len(results)} report pairs")
+        print(f"📁 Results saved to output/ directory")
+        
+    except ImportError as e:
+        print(f"❌ Automation components not yet implemented: {e}")
+        print("💡 Please complete Phase A and B implementation first")
+    except Exception as e:
+        print(f"❌ Automation failed: {e}")
+        import traceback
+        if args.verbose:
+            traceback.print_exc()
+
+def run_discovery_only(args):
+    """Run discovery and matching only."""
+    try:
+        from automation.data_discovery import discover_and_match_reports
+        
+        print("🔍 Starting data discovery and matching...")
+        matched_pairs, unmatched_llm, unmatched_gt = discover_and_match_reports()
+        
+        print(f"\n🔍 Discovery completed:")
+        print(f"✅ Found {len(matched_pairs)} matched pairs")
+        print(f"⚠️  {len(unmatched_llm)} unmatched LLM reports")
+        print(f"⚠️  {len(unmatched_gt)} unmatched ground truth reports")
+        
+        if matched_pairs:
+            print(f"\n📋 Sample matched pairs:")
+            for i, pair in enumerate(matched_pairs[:3]):
+                print(f"  {i+1}. Study ID: {pair['study_id']}")
+        
+    except ImportError as e:
+        print(f"❌ Discovery components not yet implemented: {e}")
+        print("💡 Please complete Phase A implementation first")
+    except Exception as e:
+        print(f"❌ Discovery failed: {e}")
+        import traceback
+        if args.verbose:
+            traceback.print_exc()
+
+def run_health_check(args):
+    """Run system health check and validation."""
     print("🧪 Testing Medical Report Evaluator...")
     success = test_evaluator_instantiation()
     
     if success:
         print("\n🎉 All basic tests passed!")
+        print("\nUsage:")
+        print("  python medical_report_evaluator.py --auto     # Run full automation")
+        print("  python medical_report_evaluator.py --discover # Discovery only")
+        print("  python medical_report_evaluator.py --help     # Show all options")
     else:
-        print("\n❌ Some tests failed!") 
+        print("\n❌ Some tests failed!")
+
+if __name__ == "__main__":
+    main() 

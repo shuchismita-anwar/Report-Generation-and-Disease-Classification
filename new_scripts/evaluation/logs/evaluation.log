@@ -114,3 +114,48 @@
 2025-06-13 07:33:19 - MedicalReportEvaluator - ERROR - Transformers library not available. Install with: pip install transformers torch
 2025-06-13 07:33:19 - MedicalReportEvaluator - ERROR - Error calculating bert_score: BERTScore requires transformers library
 2025-06-13 07:33:19 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1664, Quality: very_poor, Time: 0.0171s
+2025-06-13 10:10:14 - MedicalReportEvaluator - INFO - Logging system initialized successfully
+2025-06-13 10:10:14 - MedicalReportEvaluator - INFO - Configuration loaded successfully from config/evaluation_config.json
+2025-06-13 10:10:14 - MedicalReportEvaluator - INFO - Successfully initialized 6 metrics
+2025-06-13 10:10:14 - MedicalReportEvaluator - INFO - Initialized Medical Report Evaluator - Session: eval_20250613_101014
+2025-06-13 10:10:14 - MedicalReportEvaluator - INFO - Loaded 6 metrics: ['bleu', 'rouge', 'meteor', 'bert_score', 'cider', 'medical']
+2025-06-13 10:20:22 - MedicalReportEvaluator - INFO - Logging system initialized successfully
+2025-06-13 10:20:22 - MedicalReportEvaluator - INFO - Configuration loaded successfully from config/evaluation_config.json
+2025-06-13 10:20:23 - MedicalReportEvaluator - INFO - Successfully initialized 6 metrics
+2025-06-13 10:20:23 - MedicalReportEvaluator - INFO - Initialized Medical Report Evaluator - Session: eval_20250613_102023
+2025-06-13 10:20:23 - MedicalReportEvaluator - INFO - Loaded 6 metrics: ['bleu', 'rouge', 'meteor', 'bert_score', 'cider', 'medical']
+2025-06-13 10:20:49 - MedicalReportEvaluator - INFO - Logging system initialized successfully
+2025-06-13 10:20:49 - MedicalReportEvaluator - INFO - Configuration loaded successfully from config/evaluation_config.json
+2025-06-13 10:20:50 - MedicalReportEvaluator - INFO - Successfully initialized 6 metrics
+2025-06-13 10:20:50 - MedicalReportEvaluator - INFO - Initialized Medical Report Evaluator - Session: eval_20250613_102050
+2025-06-13 10:20:50 - MedicalReportEvaluator - INFO - Loaded 6 metrics: ['bleu', 'rouge', 'meteor', 'bert_score', 'cider', 'medical']
+2025-06-13 10:21:16 - MedicalReportEvaluator - INFO - Logging system initialized successfully
+2025-06-13 10:21:16 - MedicalReportEvaluator - INFO - Configuration loaded successfully from config/evaluation_config.json
+2025-06-13 10:21:17 - MedicalReportEvaluator - INFO - Successfully initialized 6 metrics
+2025-06-13 10:21:17 - MedicalReportEvaluator - INFO - Initialized Medical Report Evaluator - Session: eval_20250613_102117
+2025-06-13 10:21:17 - MedicalReportEvaluator - INFO - Loaded 6 metrics: ['bleu', 'rouge', 'meteor', 'bert_score', 'cider', 'medical']
+2025-06-13 10:21:17 - MedicalReportEvaluator - INFO - Starting batch evaluation - ID: batch_20250613_102117_1, Size: 1
+2025-06-13 10:21:17 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 005aff0f-0c236062-06df954a-25ad1874-bcdffcb0
+2025-06-13 10:21:17 - MedicalReportEvaluator - ERROR - Transformers library not available. Install with: pip install transformers torch
+2025-06-13 10:21:17 - MedicalReportEvaluator - ERROR - Error calculating bert_score: BERTScore requires transformers library
+2025-06-13 10:21:17 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.0604, Quality: very_poor, Time: 0.3132s
+2025-06-13 10:21:17 - MedicalReportEvaluator - INFO - Processed 1/1 reports
+2025-06-13 10:21:17 - MedicalReportEvaluator - INFO - Saved batch results to evaluation_results/batch_20250613_102117_1_final.json
+2025-06-13 10:21:17 - MedicalReportEvaluator - INFO - Batch evaluation completed - ID: batch_20250613_102117_1
+2025-06-13 10:21:17 - MedicalReportEvaluator - INFO - Success: 1/1, Time: 0.31s, Avg: 0.313s/report
+2025-06-13 10:21:17 - MedicalReportEvaluator - INFO - Batch Overall Score: 0.0604
+2025-06-13 10:21:35 - MedicalReportEvaluator - INFO - Logging system initialized successfully
+2025-06-13 10:21:35 - MedicalReportEvaluator - INFO - Configuration loaded successfully from config/evaluation_config.json
+2025-06-13 10:21:36 - MedicalReportEvaluator - INFO - Successfully initialized 6 metrics
+2025-06-13 10:21:36 - MedicalReportEvaluator - INFO - Initialized Medical Report Evaluator - Session: eval_20250613_102136
+2025-06-13 10:21:36 - MedicalReportEvaluator - INFO - Loaded 6 metrics: ['bleu', 'rouge', 'meteor', 'bert_score', 'cider', 'medical']
+2025-06-13 10:21:36 - MedicalReportEvaluator - INFO - Starting batch evaluation - ID: batch_20250613_102136_1, Size: 1
+2025-06-13 10:21:36 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 005aff0f-0c236062-06df954a-25ad1874-bcdffcb0
+2025-06-13 10:21:36 - MedicalReportEvaluator - ERROR - Transformers library not available. Install with: pip install transformers torch
+2025-06-13 10:21:36 - MedicalReportEvaluator - ERROR - Error calculating bert_score: BERTScore requires transformers library
+2025-06-13 10:21:36 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.0604, Quality: very_poor, Time: 0.3220s
+2025-06-13 10:21:36 - MedicalReportEvaluator - INFO - Processed 1/1 reports
+2025-06-13 10:21:36 - MedicalReportEvaluator - INFO - Saved batch results to evaluation_results/batch_20250613_102136_1_final.json
+2025-06-13 10:21:36 - MedicalReportEvaluator - INFO - Batch evaluation completed - ID: batch_20250613_102136_1
+2025-06-13 10:21:36 - MedicalReportEvaluator - INFO - Success: 1/1, Time: 0.32s, Avg: 0.322s/report
+2025-06-13 10:21:36 - MedicalReportEvaluator - INFO - Batch Overall Score: 0.0604

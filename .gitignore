@@ -69,3 +69,8 @@ new_scripts/evaluation/checklist.md
 new_scripts/evaluation/__pycache__/medical_report_evaluator.cpython-312.pyc
 new_scripts/evaluation/metrics/__pycache__/
 new_scripts/evaluation/utils/__pycache__/
+new_scripts/evaluation/automation_plan.md
+new_scripts/evaluation/phase5_completion_status.md
+new_scripts/evaluation/automation/__pycache__/
+new_scripts/evaluation/evaluation_results/batch_20250613_102117_1_final.json
+new_scripts/evaluation/evaluation_results/batch_20250613_102136_1_final.json
