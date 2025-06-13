@@ -1,0 +1,158 @@
+{
+  "evaluation_settings": {
+    "version": "1.0",
+    "description": "Medical Report Evaluation System Configuration",
+    "created": "2025-06-13"
+  },
+
+  "paths": {
+    "ground_truth_base": "ground_truth/",
+    "evaluation_results": "evaluation_results/",
+    "llm_outputs": "../real_analysis_results/",
+    "mimic_dataset_base": "../../mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0/mimic-eye/",
+    "logs": "logs/"
+  },
+
+  "metrics": {
+    "weights": {
+      "bleu": 0.2,
+      "rouge_1": 0.15,
+      "rouge_2": 0.15,
+      "rouge_l": 0.15,
+      "meteor": 0.1,
+      "bert_score": 0.15,
+      "medical_terminology": 0.05,
+      "clinical_accuracy": 0.05
+    },
+    "enabled": {
+      "bleu": true,
+      "rouge": true,
+      "meteor": true,
+      "bert_score": true,
+      "medical_terminology": true,
+      "clinical_accuracy": true
+    },
+    "parameters": {
+      "bleu": {
+        "max_n": 4,
+        "smoothing": true,
+        "sentence_level": false
+      },
+      "rouge": {
+        "rouge_types": ["rouge1", "rouge2", "rougeL"],
+        "use_stemmer": true,
+        "split_summaries": true
+      },
+      "meteor": {
+        "alpha": 0.9,
+        "beta": 3.0,
+        "gamma": 0.5
+      },
+      "bert_score": {
+        "model_type": "emilyalsentzer/Bio_ClinicalBERT",
+        "num_layers": 12,
+        "batch_size": 64,
+        "idf": false,
+        "device": "auto"
+      }
+    }
+  },
+
+  "thresholds": {
+    "quality_levels": {
+      "excellent": 0.8,
+      "good": 0.65,
+      "fair": 0.5,
+      "poor": 0.35
+    },
+    "minimum_scores": {
+      "bleu": 0.1,
+      "rouge_1": 0.2,
+      "rouge_l": 0.2,
+      "bert_score": 0.7
+    }
+  },
+
+  "output_formats": {
+    "supported": ["json", "csv", "txt", "html"],
+    "default": "json",
+    "precision": 4,
+    "include_metadata": true,
+    "save_individual_scores": true,
+    "generate_summary": true
+  },
+
+  "processing": {
+    "batch_size": 10,
+    "max_workers": 4,
+    "timeout_seconds": 300,
+    "retry_attempts": 3,
+    "cache_results": true,
+    "cleanup_temp_files": true
+  },
+
+  "ground_truth": {
+    "sources": {
+      "eyegaze_transcripts": {
+        "enabled": true,
+        "path_pattern": "patient_*/EyeGaze/audio_segmentation_transcripts/*/transcript.json",
+        "text_field": "full_text",
+        "priority": 1
+      },
+      "reflacx_transcripts": {
+        "enabled": true,
+        "path_pattern": "patient_*/REFLACX/main_data/*/transcript.json",
+        "text_field": "full_text",
+        "priority": 2
+      }
+    },
+    "text_preprocessing": {
+      "lowercase": true,
+      "remove_timestamps": true,
+      "normalize_whitespace": true,
+      "remove_special_chars": false,
+      "min_length": 5,
+      "max_length": 10000
+    }
+  },
+
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "file": "logs/evaluation.log",
+    "max_file_size": "10MB",
+    "backup_count": 5,
+    "console_output": true
+  },
+
+  "medical_specific": {
+    "condition_mapping": {
+      "Atelectasis": ["atelectasis", "collapse", "volume loss"],
+      "Cardiomegaly": [
+        "cardiomegaly",
+        "heart enlargement",
+        "cardiac enlargement"
+      ],
+      "Edema": ["edema", "fluid", "pulmonary edema"],
+      "Lung Opacity": ["opacity", "infiltrate", "consolidation"],
+      "No Finding": ["normal", "unremarkable", "no acute findings"],
+      "Pleural Effusion": ["effusion", "pleural fluid"],
+      "Pneumonia": ["pneumonia", "infection"],
+      "Support Devices": ["devices", "tubes", "lines"]
+    },
+    "clinical_keywords": {
+      "anatomy": ["lung", "heart", "chest", "cardiac", "pulmonary", "pleural"],
+      "pathology": ["abnormal", "findings", "lesion", "disease", "pathology"],
+      "severity": ["mild", "moderate", "severe", "acute", "chronic"],
+      "location": ["bilateral", "unilateral", "left", "right", "upper", "lower"]
+    }
+  },
+
+  "validation": {
+    "check_file_existence": true,
+    "validate_json_format": true,
+    "check_text_encoding": "utf-8",
+    "min_report_pairs": 1,
+    "max_missing_percentage": 0.2
+  }
+}
