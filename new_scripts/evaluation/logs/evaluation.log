@@ -58,3 +58,31 @@
 2025-06-13 18:12:08 - MedicalReportEvaluator - INFO - Batch evaluation completed - ID: batch_20250613_181204_1
 2025-06-13 18:12:08 - MedicalReportEvaluator - INFO - Success: 1/1, Time: 4.50s, Avg: 4.497s/report
 2025-06-13 18:12:08 - MedicalReportEvaluator - INFO - Batch Overall Score: 0.0484
+2025-06-13 18:37:33 - MedicalReportEvaluator - INFO - Logging system initialized successfully
+2025-06-13 18:37:33 - MedicalReportEvaluator - INFO - Configuration loaded successfully from config/evaluation_config.json
+2025-06-13 18:37:34 - MedicalReportEvaluator - INFO - Successfully initialized 6 metrics
+2025-06-13 18:37:34 - MedicalReportEvaluator - INFO - Initialized Medical Report Evaluator - Session: eval_20250613_183734
+2025-06-13 18:37:34 - MedicalReportEvaluator - INFO - Loaded 6 metrics: ['bleu', 'rouge', 'meteor', 'bert_score', 'cider', 'medical']
+2025-06-13 18:37:57 - MedicalReportEvaluator - INFO - Logging system initialized successfully
+2025-06-13 18:37:57 - MedicalReportEvaluator - INFO - Configuration loaded successfully from config/evaluation_config.json
+2025-06-13 18:37:57 - MedicalReportEvaluator - INFO - Successfully initialized 6 metrics
+2025-06-13 18:37:57 - MedicalReportEvaluator - INFO - Initialized Medical Report Evaluator - Session: eval_20250613_183757
+2025-06-13 18:37:57 - MedicalReportEvaluator - INFO - Loaded 6 metrics: ['bleu', 'rouge', 'meteor', 'bert_score', 'cider', 'medical']
+2025-06-13 18:37:57 - MedicalReportEvaluator - INFO - Starting batch evaluation - ID: batch_20250613_183757_3, Size: 3
+2025-06-13 18:37:57 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 002da0d9-ce49c30d-4dfcc1f8-746d2401-d8044d48
+2025-06-13 18:37:57 - MedicalReportEvaluator - ERROR - Transformers library not available. Install with: pip install transformers torch
+2025-06-13 18:37:57 - MedicalReportEvaluator - ERROR - Error calculating bert_score: BERTScore requires transformers library
+2025-06-13 18:37:57 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1085, Quality: very_poor, Time: 0.0098s
+2025-06-13 18:37:57 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 005aff0f-0c236062-06df954a-25ad1874-bcdffcb0
+2025-06-13 18:37:57 - MedicalReportEvaluator - ERROR - Transformers library not available. Install with: pip install transformers torch
+2025-06-13 18:37:57 - MedicalReportEvaluator - ERROR - Error calculating bert_score: BERTScore requires transformers library
+2025-06-13 18:37:57 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.0845, Quality: very_poor, Time: 0.0398s
+2025-06-13 18:37:57 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 0066734a-35568fde-fd52ba23-ec66f3de-88d4aaf9
+2025-06-13 18:37:57 - MedicalReportEvaluator - ERROR - Transformers library not available. Install with: pip install transformers torch
+2025-06-13 18:37:57 - MedicalReportEvaluator - ERROR - Error calculating bert_score: BERTScore requires transformers library
+2025-06-13 18:37:57 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1085, Quality: very_poor, Time: 0.0132s
+2025-06-13 18:37:57 - MedicalReportEvaluator - INFO - Processed 3/3 reports
+2025-06-13 18:37:57 - MedicalReportEvaluator - INFO - Saved batch results to evaluation_results/batch_20250613_183757_3_final.json
+2025-06-13 18:37:57 - MedicalReportEvaluator - INFO - Batch evaluation completed - ID: batch_20250613_183757_3
+2025-06-13 18:37:57 - MedicalReportEvaluator - INFO - Success: 3/3, Time: 0.06s, Avg: 0.021s/report
+2025-06-13 18:37:57 - MedicalReportEvaluator - INFO - Batch Overall Score: 0.1005

@@ -1,471 +1,222 @@
 #!/usr/bin/env python3
 """
-Data Discovery Module
-====================
-Automated discovery and cataloging of LLM outputs and ground truth reports.
-
-This module provides functions to:
-- Discover LLM-generated reports from real_analysis_results/
-- Discover ground truth transcripts from MIMIC-Eye dataset
-- Match reports by study IDs
-- Validate discovered data
+Enhanced Data Discovery System for MIMIC-Eye Evaluation
+========================================================
+Proper CSV-based discovery using the master dataset files.
 
 Author: Medical Report Evaluation System
-Version: 1.0
+Version: 2.0 (Fixed)
 """
 
 import json
 import os
-import glob
+import pandas as pd
 import logging
-import re
+from typing import Dict, List, Tuple
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
-from datetime import datetime
 
+logger = logging.getLogger(__name__)
 
-def extract_study_id_from_filename(filepath: str) -> Optional[str]:
+def discover_and_match_reports(
+    llm_path: str = "../../real_analysis_results/",
+    dataset_csv_path: str = "../../dataset_splits/val.csv",
+    use_all_splits: bool = True
+) -> Tuple[List[Dict], List[str], List[str]]:
     """
-    Extract study ID from LLM analysis filename.
+    Enhanced discovery using CSV master files for precise mapping.
     
-    Args:
-        filepath (str): Path to analysis file (e.g., analysis_002da0d9-ce49c30d-4dfcc1f8-746d2401-d8044d48.json)
-        
     Returns:
-        Optional[str]: Extracted study ID or None if not found
+        Tuple of (matched_pairs, unmatched_llm_reports, unmatched_ground_truth)
     """
-    # Pattern for study ID: analysis_{study_id}.json
-    pattern = r'analysis_([a-f0-9]{8}-[a-f0-9]{8}-[a-f0-9]{8}-[a-f0-9]{8}-[a-f0-9]{8})\.json'
-    match = re.search(pattern, os.path.basename(filepath))
+    logger.info("🔍 Starting CSV-based data discovery...")
     
-    if match:
-        return match.group(1)
+    # Step 1: Load LLM reports
+    llm_reports = _load_llm_reports(llm_path)
+    logger.info(f"📊 Found {len(llm_reports)} LLM reports")
     
-    # Fallback: try to extract any UUID-like pattern
-    uuid_pattern = r'([a-f0-9]{8}-[a-f0-9]{8}-[a-f0-9]{8}-[a-f0-9]{8}-[a-f0-9]{8})'
-    match = re.search(uuid_pattern, os.path.basename(filepath))
+    # Step 2: Load and combine dataset CSVs
+    dataset_df = _load_dataset_files(use_all_splits)
+    logger.info(f"📊 Loaded {len(dataset_df)} entries from dataset CSV(s)")
     
-    return match.group(1) if match else None
+    # Step 3: Match reports using CSV mapping
+    matched_pairs, unmatched_llm, unmatched_gt = _match_reports_csv_based(
+        llm_reports, dataset_df
+    )
+    
+    logger.info(f"✅ Discovery complete: {len(matched_pairs)} matched, {len(unmatched_llm)} unmatched LLM, {len(unmatched_gt)} unmatched GT")
+    
+    return matched_pairs, unmatched_llm, unmatched_gt
 
-
-def extract_patient_id(patient_dir: str) -> str:
-    """
-    Extract patient ID from patient directory path.
+def _load_llm_reports(llm_path: str) -> Dict[str, str]:
+    """Load all LLM report files and extract study IDs."""
+    llm_reports = {}
+    llm_dir = Path(llm_path)
     
-    Args:
-        patient_dir (str): Path to patient directory
-        
-    Returns:
-        str: Patient ID
-    """
-    return os.path.basename(patient_dir.rstrip('/'))
-
-
-def extract_session_id(session_dir: str) -> str:
-    """
-    Extract session ID from session directory path.
+    if not llm_dir.exists():
+        logger.warning(f"LLM directory not found: {llm_path}")
+        return llm_reports
     
-    Args:
-        session_dir (str): Path to session directory
-        
-    Returns:
-        str: Session ID
-    """
-    return os.path.basename(session_dir.rstrip('/'))
-
-
-def discover_llm_reports(base_path: str = "../../real_analysis_results/") -> Dict[str, Dict]:
-    """
-    Scan real_analysis_results/ for analysis_*.json files and catalog them.
-    
-    Args:
-        base_path (str): Base path to LLM analysis results
-        
-    Returns:
-        Dict[str, Dict]: Dictionary mapping study_id to file information
-        
-    Example:
-        {
-            "002da0d9-ce49c30d-4dfcc1f8-746d2401-d8044d48": {
-                "file_path": "../../real_analysis_results/analysis_002da0d9-ce49c30d-4dfcc1f8-746d2401-d8044d48.json",
-                "report_text": "Chest X-ray shows...",
-                "timestamp": 1671234567.89,
-                "file_size": 18432
-            }
-        }
-    """
-    logger = logging.getLogger(__name__)
-    llm_index = {}
-    
-    # Resolve absolute path
-    abs_base_path = os.path.abspath(base_path)
-    logger.info(f"Discovering LLM reports in: {abs_base_path}")
-    
-    if not os.path.exists(abs_base_path):
-        logger.warning(f"LLM reports directory does not exist: {abs_base_path}")
-        return llm_index
-    
-    # Find all analysis_*.json files
-    pattern = os.path.join(abs_base_path, "analysis_*.json")
-    analysis_files = glob.glob(pattern)
-    
-    logger.info(f"Found {len(analysis_files)} potential LLM analysis files")
-    
-    for file_path in analysis_files:
+    for report_file in llm_dir.glob("analysis_*.json"):
         try:
-            # Extract study_id from filename
-            study_id = extract_study_id_from_filename(file_path)
-            
-            if not study_id:
-                logger.warning(f"Could not extract study ID from filename: {file_path}")
-                continue
-            
-            # Read and validate file content
-            with open(file_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            
-            # Validate study_id matches content
-            content_study_id = data.get("study_id")
-            if content_study_id and content_study_id != study_id:
-                logger.warning(f"Study ID mismatch in {file_path}: filename={study_id}, content={content_study_id}")
-                # Use content study_id as authoritative
-                study_id = content_study_id
-            
-            # Extract report text from various possible locations
-            report_text = None
-            
-            # Check medical_report.report_text (primary location)
-            if "medical_report" in data and isinstance(data["medical_report"], dict):
-                report_text = data["medical_report"].get("report_text", "")
-            # Check llm_response.report (secondary location)
-            elif "llm_response" in data and isinstance(data["llm_response"], dict):
-                report_text = data["llm_response"].get("report", "")
-            # Check analysis.report (fallback)
-            elif "analysis" in data and isinstance(data["analysis"], dict):
-                report_text = data["analysis"].get("report", "")
-            # Check direct report field (fallback)
-            elif "report" in data:
-                report_text = data["report"]
-            else:
-                logger.warning(f"No report text found in {file_path}")
-                continue
-            
-            if not report_text or not report_text.strip():
-                logger.warning(f"Empty report text in {file_path}")
-                continue
-            
-            # Store in index
-            llm_index[study_id] = {
-                "file_path": file_path,
-                "report_text": report_text.strip(),
-                "timestamp": os.path.getmtime(file_path),
-                "file_size": os.path.getsize(file_path),
-                "raw_data": data  # Store full data for debugging
-            }
-            
-            logger.debug(f"Indexed LLM report: {study_id} ({len(report_text)} chars)")
-            
-        except json.JSONDecodeError as e:
-            logger.error(f"Invalid JSON in {file_path}: {e}")
+            # Extract study ID from filename
+            study_id = report_file.stem.replace("analysis_", "")
+            llm_reports[study_id] = str(report_file)
+            logger.debug(f"Found LLM report: {study_id}")
         except Exception as e:
-            logger.error(f"Error processing {file_path}: {e}")
+            logger.warning(f"Error processing {report_file}: {e}")
     
-    logger.info(f"Successfully indexed {len(llm_index)} LLM reports")
-    return llm_index
+    return llm_reports
 
-
-def discover_ground_truth_reports(base_path: str = "../../mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0/mimic-eye/") -> Dict[str, Dict]:
-    """
-    Scan mimic-eye patient folders for transcription.txt files and catalog them.
+def _load_dataset_files(use_all_splits: bool = True) -> pd.DataFrame:
+    """Load dataset CSV files with all the metadata."""
+    dataset_files = []
     
-    Args:
-        base_path (str): Base path to MIMIC-Eye dataset
-        
-    Returns:
-        Dict[str, Dict]: Dictionary mapping study_id to transcript information
-        
-    Example:
-        {
-            "fa771fa1-d9571d07-bff8f655-327734a7-6e10b29d": {
-                "file_path": "../../mimic-eye/.../transcription.txt",
-                "transcript": "The heart size is normal...",
-                "patient_id": "patient_10002428",
-                "session_id": "P300R081391"
-            }
-        }
-    """
-    logger = logging.getLogger(__name__)
-    gt_index = {}
+    if use_all_splits:
+        # Load all splits for comprehensive coverage
+        split_files = [
+            "../../dataset_splits/train.csv",
+            "../../dataset_splits/val.csv", 
+            "../../dataset_splits/test.csv"
+        ]
+    else:
+        # Just validation set
+        split_files = ["../../dataset_splits/val.csv"]
     
-    # Resolve absolute path
-    abs_base_path = os.path.abspath(base_path)
-    logger.info(f"Discovering ground truth reports in: {abs_base_path}")
+    combined_df = pd.DataFrame()
     
-    if not os.path.exists(abs_base_path):
-        logger.warning(f"Ground truth directory does not exist: {abs_base_path}")
-        return gt_index
-    
-    # Find all patient directories
-    patient_pattern = os.path.join(abs_base_path, "patient_*")
-    patient_dirs = glob.glob(patient_pattern)
-    
-    logger.info(f"Found {len(patient_dirs)} patient directories")
-    
-    for patient_dir in patient_dirs:
-        if not os.path.isdir(patient_dir):
-            continue
-            
-        patient_id = extract_patient_id(patient_dir)
-        reflacx_path = os.path.join(patient_dir, "REFLACX", "main_data")
-        
-        if not os.path.exists(reflacx_path):
-            logger.debug(f"No REFLACX/main_data in {patient_id}")
-            continue
-        
-        # Find session directories
-        session_dirs = glob.glob(os.path.join(reflacx_path, "*"))
-        session_dirs = [d for d in session_dirs if os.path.isdir(d)]
-        
-        for session_dir in session_dirs:
-            session_id = extract_session_id(session_dir)
-            transcription_file = os.path.join(session_dir, "transcription.txt")
-            
-            if not os.path.exists(transcription_file):
-                logger.debug(f"No transcription.txt in {patient_id}/{session_id}")
-                continue
-            
+    for csv_file in split_files:
+        if os.path.exists(csv_file):
             try:
-                # Extract study_id from norm_fixations CSV filename in the same directory
-                study_id = None
-                norm_fixations_files = glob.glob(os.path.join(session_dir, "norm_fixations_*.csv"))
-                if norm_fixations_files:
-                    # Extract study ID from filename like: norm_fixations_fa771fa1-d9571d07-bff8f655-327734a7-6e10b29d.csv
-                    norm_file = norm_fixations_files[0]
-                    filename = os.path.basename(norm_file)
-                    # Pattern: norm_fixations_{study_id}.csv
-                    match = re.search(r'norm_fixations_([a-f0-9]{8}-[a-f0-9]{8}-[a-f0-9]{8}-[a-f0-9]{8}-[a-f0-9]{8})\.csv', filename)
-                    if match:
-                        study_id = match.group(1)
-                
-                if not study_id:
-                    logger.warning(f"No study_id found in {session_dir}")
-                    continue
-                
-                # Read the actual radiologist report from transcription.txt
-                with open(transcription_file, 'r', encoding='utf-8') as f:
-                    transcript_text = f.read().strip()
-                
-                if not transcript_text:
-                    logger.warning(f"Empty transcription in {transcription_file}")
-                    continue
-                
-                # Store in index
-                gt_index[study_id] = {
-                    "file_path": transcription_file,
-                    "transcript": transcript_text,
-                    "patient_id": patient_id,
-                    "session_id": session_id,
-                    "raw_data": {"transcription": transcript_text}  # Store for consistency
-                }
-                
-                logger.debug(f"Indexed ground truth: {study_id} ({patient_id}/{session_id})")
-                
+                df = pd.read_csv(csv_file)
+                combined_df = pd.concat([combined_df, df], ignore_index=True)
+                logger.info(f"Loaded {len(df)} entries from {csv_file}")
             except Exception as e:
-                logger.error(f"Error processing {transcription_file}: {e}")
+                logger.error(f"Error loading {csv_file}: {e}")
+        else:
+            logger.warning(f"CSV file not found: {csv_file}")
     
-    logger.info(f"Successfully indexed {len(gt_index)} ground truth reports")
-    return gt_index
+    if combined_df.empty:
+        logger.error("No dataset files could be loaded!")
+        return pd.DataFrame()
+    
+    # Clean and standardize column names
+    if 'dicom_id' in combined_df.columns:
+        combined_df['study_id'] = combined_df['dicom_id']
+    
+    logger.info(f"Combined dataset: {len(combined_df)} total entries")
+    return combined_df
 
-
-def create_matched_pairs(llm_index: Dict[str, Dict], gt_index: Dict[str, Dict]) -> Tuple[List[Dict], List[str], List[str]]:
-    """
-    Match LLM reports with ground truth by study_id.
-    
-    Args:
-        llm_index (Dict[str, Dict]): LLM reports index
-        gt_index (Dict[str, Dict]): Ground truth reports index
-        
-    Returns:
-        Tuple[List[Dict], List[str], List[str]]: (matched_pairs, unmatched_llm, unmatched_gt)
-        
-    Example matched pair:
-        {
-            "study_id": "002da0d9-ce49c30d-4dfcc1f8-746d2401-d8044d48",
-            "llm_report": "Chest X-ray shows...",
-            "ground_truth": "The heart size is normal...",
-            "llm_file": "path/to/analysis.json",
-            "gt_file": "path/to/transcript.json",
-            "metadata": {...}
-        }
-    """
-    logger = logging.getLogger(__name__)
-    
+def _match_reports_csv_based(
+    llm_reports: Dict[str, str], 
+    dataset_df: pd.DataFrame
+) -> Tuple[List[Dict], List[str], List[str]]:
+    """Match reports using CSV-based precise mapping."""
     matched_pairs = []
     unmatched_llm = []
     unmatched_gt = []
     
-    # Find matches
-    for study_id in llm_index:
-        if study_id in gt_index:
-            llm_data = llm_index[study_id]
-            gt_data = gt_index[study_id]
+    # Track which ground truth entries we've matched
+    matched_gt_ids = set()
+    
+    # Process each LLM report
+    for study_id, llm_file in llm_reports.items():
+        # Look for matching entry in dataset
+        mask = dataset_df['dicom_id'] == study_id
+        matching_rows = dataset_df[mask]
+        
+        if not matching_rows.empty:
+            # Found a match!
+            row = matching_rows.iloc[0]
             
-            matched_pair = {
-                "study_id": study_id,
-                "llm_report": llm_data["report_text"],
-                "ground_truth": gt_data["transcript"],
-                "llm_file": llm_data["file_path"],
-                "gt_file": gt_data["file_path"],
-                "metadata": {
-                    "patient_id": gt_data["patient_id"],
-                    "session_id": gt_data["session_id"],
-                    "llm_timestamp": llm_data["timestamp"],
-                    "llm_file_size": llm_data["file_size"],
-                    "llm_report_length": len(llm_data["report_text"]),
-                    "gt_transcript_length": len(gt_data["transcript"])
+            # Extract transcript path from CSV
+            transcript_path = row.get('transcript_path', '')
+            
+            if transcript_path and _validate_transcript_path(transcript_path):
+                # Create matched pair
+                matched_pair = {
+                    'study_id': study_id,
+                    'llm_report': llm_file,
+                    'ground_truth': transcript_path,
+                    'patient_folder': row.get('patient_folder', ''),
+                    'has_reflacx': row.get('ifReflacx', False),
+                    'has_eyegaze': row.get('ifEyegaze', False),
+                    'condition': row.get('condition', ''),
+                    'report_path': row.get('report_path', ''),
+                    'image_path': row.get('image_path', '')
                 }
-            }
-            
-            matched_pairs.append(matched_pair)
-            logger.debug(f"Matched: {study_id}")
+                matched_pairs.append(matched_pair)
+                matched_gt_ids.add(study_id)
+                
+                logger.debug(f"✅ Matched: {study_id}")
+            else:
+                logger.warning(f"⚠️ Invalid transcript path for {study_id}: {transcript_path}")
+                unmatched_llm.append(study_id)
         else:
+            logger.debug(f"❌ No CSV entry found for LLM report: {study_id}")
             unmatched_llm.append(study_id)
-            logger.debug(f"Unmatched LLM: {study_id}")
     
-    # Find unmatched ground truth
-    for study_id in gt_index:
-        if study_id not in llm_index:
-            unmatched_gt.append(study_id)
-            logger.debug(f"Unmatched GT: {study_id}")
-    
-    logger.info(f"Matching results: {len(matched_pairs)} matched, {len(unmatched_llm)} unmatched LLM, {len(unmatched_gt)} unmatched GT")
-    
-    return matched_pairs, unmatched_llm, unmatched_gt
-
-
-def discover_and_match_reports(llm_path: str = "../../real_analysis_results/", 
-                              gt_path: str = "../../mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0/mimic-eye/") -> Tuple[List[Dict], List[str], List[str]]:
-    """
-    Complete discovery and matching pipeline.
-    
-    Args:
-        llm_path (str): Path to LLM analysis results
-        gt_path (str): Path to MIMIC-Eye ground truth
-        
-    Returns:
-        Tuple[List[Dict], List[str], List[str]]: (matched_pairs, unmatched_llm, unmatched_gt)
-    """
-    logger = logging.getLogger(__name__)
-    
-    logger.info("Starting complete discovery and matching pipeline")
-    
-    # Phase 1: Discover LLM reports
-    logger.info("Phase 1: Discovering LLM reports...")
-    llm_index = discover_llm_reports(llm_path)
-    
-    # Phase 2: Discover ground truth reports
-    logger.info("Phase 2: Discovering ground truth reports...")
-    gt_index = discover_ground_truth_reports(gt_path)
-    
-    # Phase 3: Create matched pairs
-    logger.info("Phase 3: Creating matched pairs...")
-    matched_pairs, unmatched_llm, unmatched_gt = create_matched_pairs(llm_index, gt_index)
-    
-    # Summary
-    total_llm = len(llm_index)
-    total_gt = len(gt_index)
-    total_matched = len(matched_pairs)
-    
-    logger.info(f"Discovery complete: {total_llm} LLM reports, {total_gt} GT reports, {total_matched} matched pairs")
-    
-    if total_llm > 0:
-        match_rate = total_matched / total_llm * 100
-        logger.info(f"LLM match rate: {match_rate:.1f}%")
-    
-    if total_gt > 0:
-        coverage_rate = total_matched / total_gt * 100
-        logger.info(f"GT coverage rate: {coverage_rate:.1f}%")
+    # Find unmatched ground truth entries (those in CSV but not in LLM reports)
+    for _, row in dataset_df.iterrows():
+        study_id = row.get('dicom_id', '')
+        if study_id and study_id not in matched_gt_ids and study_id not in llm_reports:
+            transcript_path = row.get('transcript_path', '')
+            if transcript_path and _validate_transcript_path(transcript_path):
+                unmatched_gt.append(study_id)
     
     return matched_pairs, unmatched_llm, unmatched_gt
 
+def _validate_transcript_path(transcript_path: str) -> bool:
+    """Validate that a transcript path exists and is accessible."""
+    if not transcript_path:
+        return False
+    
+    # Try both absolute and relative paths
+    if os.path.exists(transcript_path):
+        return True
+    
+    # Try relative to current directory
+    relative_path = os.path.join("..", "..", transcript_path)
+    if os.path.exists(relative_path):
+        return True
+    
+    return False
 
-def validate_discovered_data(matched_pairs: List[Dict]) -> Dict[str, any]:
-    """
-    Validate the quality and consistency of discovered data.
-    
-    Args:
-        matched_pairs (List[Dict]): List of matched report pairs
+def load_ground_truth_report(transcript_path: str) -> Dict:
+    """Load and parse a ground truth transcript file."""
+    try:
+        # Try multiple path variations
+        paths_to_try = [
+            transcript_path,
+            os.path.join("..", "..", transcript_path),
+            transcript_path.replace("\\", "/"),
+            os.path.join("..", "..", transcript_path.replace("\\", "/"))
+        ]
         
-    Returns:
-        Dict[str, any]: Validation results and statistics
-    """
-    logger = logging.getLogger(__name__)
-    
-    validation_results = {
-        "total_pairs": len(matched_pairs),
-        "valid_pairs": 0,
-        "issues": [],
-        "statistics": {
-            "avg_llm_length": 0,
-            "avg_gt_length": 0,
-            "min_llm_length": float('inf'),
-            "max_llm_length": 0,
-            "min_gt_length": float('inf'),
-            "max_gt_length": 0
-        }
-    }
-    
-    if not matched_pairs:
-        validation_results["issues"].append("No matched pairs to validate")
-        return validation_results
-    
-    llm_lengths = []
-    gt_lengths = []
-    
-    for i, pair in enumerate(matched_pairs):
-        try:
-            # Check required fields
-            required_fields = ["study_id", "llm_report", "ground_truth"]
-            missing_fields = [field for field in required_fields if not pair.get(field)]
-            
-            if missing_fields:
-                validation_results["issues"].append(f"Pair {i}: Missing fields {missing_fields}")
-                continue
-            
-            # Check text lengths
-            llm_len = len(pair["llm_report"])
-            gt_len = len(pair["ground_truth"])
-            
-            if llm_len < 10:
-                validation_results["issues"].append(f"Pair {i}: LLM report too short ({llm_len} chars)")
-            
-            if gt_len < 10:
-                validation_results["issues"].append(f"Pair {i}: Ground truth too short ({gt_len} chars)")
-            
-            llm_lengths.append(llm_len)
-            gt_lengths.append(gt_len)
-            
-            validation_results["valid_pairs"] += 1
-            
-        except Exception as e:
-            validation_results["issues"].append(f"Pair {i}: Validation error - {e}")
-    
-    # Calculate statistics
-    if llm_lengths:
-        validation_results["statistics"]["avg_llm_length"] = sum(llm_lengths) / len(llm_lengths)
-        validation_results["statistics"]["min_llm_length"] = min(llm_lengths)
-        validation_results["statistics"]["max_llm_length"] = max(llm_lengths)
-    
-    if gt_lengths:
-        validation_results["statistics"]["avg_gt_length"] = sum(gt_lengths) / len(gt_lengths)
-        validation_results["statistics"]["min_gt_length"] = min(gt_lengths)
-        validation_results["statistics"]["max_gt_length"] = max(gt_lengths)
-    
-    logger.info(f"Validation complete: {validation_results['valid_pairs']}/{validation_results['total_pairs']} valid pairs")
-    
-    if validation_results["issues"]:
-        logger.warning(f"Found {len(validation_results['issues'])} validation issues")
-    
-    return validation_results
+        for path in paths_to_try:
+            if os.path.exists(path):
+                with open(path, 'r', encoding='utf-8') as f:
+                    content = json.load(f)
+                
+                # Extract the full text
+                if 'full_text' in content:
+                    return {
+                        'report_text': content['full_text'].strip(),
+                        'time_stamped_text': content.get('time_stamped_text', []),
+                        'source_path': path
+                    }
+                else:
+                    logger.warning(f"No 'full_text' found in {path}")
+                    return None
+        
+        logger.error(f"Transcript file not found: {transcript_path}")
+        return None
+        
+    except Exception as e:
+        logger.error(f"Error loading transcript {transcript_path}: {e}")
+        return None
+
+def create_data_discovery() -> callable:
+    """Factory function to create a data discovery function."""
+    return discover_and_match_reports
 
 
