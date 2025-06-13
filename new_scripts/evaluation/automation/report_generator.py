@@ -23,37 +23,208 @@ class AutomatedReportGenerator:
     
     def generate_executive_summary(self, results: Dict) -> str:
         """Generate executive summary report."""
+        # Extract key metrics
+        batch_summary = results.get("batch_summary", {})
+        aggregate_metrics = results.get("aggregate_metrics", {})
+        individual_results = results.get("individual_results", [])
+        
+        total_evaluated = batch_summary.get("total", len(individual_results))
+        success_rate = batch_summary.get("success_rate", 0) * 100
+        overall_score = aggregate_metrics.get("batch_overall_score", 0)
+        processing_time = batch_summary.get("processing_time", 0)
+        
+        # Quality assessment
+        quality_level = "Excellent" if overall_score > 0.8 else \
+                       "Good" if overall_score > 0.6 else \
+                       "Fair" if overall_score > 0.4 else \
+                       "Needs Improvement" if overall_score > 0.2 else \
+                       "Poor"
+        
+        # Individual report quality breakdown
+        quality_breakdown = {"excellent": 0, "good": 0, "fair": 0, "poor": 0}
+        metric_details = {}
+        
+        for result in individual_results:
+            score = result.get("overall_score", 0)
+            if score > 0.8:
+                quality_breakdown["excellent"] += 1
+            elif score > 0.6:
+                quality_breakdown["good"] += 1
+            elif score > 0.4:
+                quality_breakdown["fair"] += 1
+            else:
+                quality_breakdown["poor"] += 1
+            
+            # Collect metric information
+            metrics = result.get("metrics", {})
+            for metric_name, metric_data in metrics.items():
+                if metric_name not in metric_details:
+                    metric_details[metric_name] = []
+                
+                if isinstance(metric_data, dict):
+                    if metric_name == "bleu":
+                        metric_details[metric_name].append(metric_data.get("bleu", 0))
+                    elif metric_name == "rouge":
+                        metric_details[metric_name].append(metric_data.get("rouge_avg_f1", 0))
+                    elif metric_name == "meteor":
+                        metric_details[metric_name].append(metric_data.get("meteor", 0))
+                    elif metric_name == "cider":
+                        metric_details[metric_name].append(metric_data.get("cider", 0))
+                    elif metric_name == "medical":
+                        metric_details[metric_name].append(metric_data.get("medical_score", 0))
+        
+        # Calculate metric averages
+        metric_averages = {}
+        for metric, scores in metric_details.items():
+            if scores and metric != "bert_score":  # Skip BERT if it has errors
+                metric_averages[metric] = sum(scores) / len(scores)
+        
+        # Best and worst performing reports
+        sorted_results = sorted(individual_results, key=lambda x: x.get("overall_score", 0), reverse=True)
+        best_report = sorted_results[0] if sorted_results else None
+        worst_report = sorted_results[-1] if sorted_results else None
+        
         summary = f"""
-# MIMIC-Eye Evaluation Executive Summary
-Generated: {datetime.now().isoformat()}
+# 📊 MIMIC-Eye Medical Report Evaluation Summary
+**Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
-## Overview
-- **Total Evaluations**: {results.get('batch_summary', {}).get('total_evaluated', 0)}
-- **Success Rate**: {results.get('batch_summary', {}).get('success_rate', 0)*100:.1f}%
-- **Overall Score**: {results.get('aggregate_metrics', {}).get('batch_overall_score', 0):.4f}
+## 🎯 Overall Performance
+- **Reports Evaluated**: {total_evaluated}
+- **Overall Quality Score**: {overall_score:.4f} ({quality_level})
+- **Success Rate**: {success_rate:.1f}%
+- **Processing Time**: {processing_time:.3f} seconds
 
-## Key Findings
-- Primary strength: {'High semantic similarity' if results.get('aggregate_metrics', {}).get('batch_overall_score', 0) > 0.5 else 'Room for improvement in alignment'}
-- Processing efficiency: {results.get('batch_summary', {}).get('processing_time', 0):.2f}s total
+## 📈 Quality Distribution
+- **Excellent (>80%)**: {quality_breakdown['excellent']} reports
+- **Good (60-80%)**: {quality_breakdown['good']} reports  
+- **Fair (40-60%)**: {quality_breakdown['fair']} reports
+- **Poor (<40%)**: {quality_breakdown['poor']} reports
 
-## Recommendations
-- {'Continue current approach' if results.get('batch_summary', {}).get('success_rate', 0) > 0.9 else 'Review error patterns and optimize'}
+## 📋 Individual Metric Performance
 """
+        
+        # Add metric details
+        for metric, avg_score in metric_averages.items():
+            metric_name = metric.upper()
+            performance = "Excellent" if avg_score > 0.8 else \
+                         "Good" if avg_score > 0.6 else \
+                         "Fair" if avg_score > 0.4 else \
+                         "Needs Work" if avg_score > 0.2 else \
+                         "Poor"
+            summary += f"- **{metric_name}**: {avg_score:.4f} ({performance})\n"
+        
+        # Add best/worst analysis
+        if best_report and worst_report and len(individual_results) > 1:
+            summary += f"""
+## 🏆 Report Analysis
+- **Best Performing**: {best_report.get('image_id', 'N/A')} (Score: {best_report.get('overall_score', 0):.4f})
+- **Needs Most Improvement**: {worst_report.get('image_id', 'N/A')} (Score: {worst_report.get('overall_score', 0):.4f})
+"""
+        
+        # Add recommendations based on scores
+        summary += f"""
+## 💡 Key Insights & Recommendations
+
+"""
+        
+        if overall_score < 0.3:
+            summary += """
+**🚨 Critical Areas for Improvement:**
+- Overall quality is below acceptable threshold
+- Consider reviewing LLM training data and prompts
+- Focus on medical terminology and clinical accuracy
+- Evaluate report structure and length optimization
+
+"""
+        elif overall_score < 0.6:
+            summary += """
+**⚠️ Areas for Improvement:**
+- Moderate performance with room for enhancement
+- Review specific weak metrics identified above
+- Consider fine-tuning on medical report datasets
+- Improve alignment with radiologist writing patterns
+
+"""
+        else:
+            summary += """
+**✅ Strong Performance:**
+- Quality scores are within acceptable range
+- Continue current approach with minor optimizations
+- Monitor consistency across different report types
+
+"""
+        
+        # Add metric-specific recommendations
+        if metric_averages:
+            weakest_metric = min(metric_averages.keys(), key=lambda k: metric_averages[k])
+            strongest_metric = max(metric_averages.keys(), key=lambda k: metric_averages[k])
+            
+            summary += f"""
+**Metric-Specific Insights:**
+- **Strongest**: {strongest_metric.upper()} ({metric_averages[strongest_metric]:.4f}) - maintain this strength
+- **Weakest**: {weakest_metric.upper()} ({metric_averages[weakest_metric]:.4f}) - focus improvement here
+
+"""
+        
+        summary += f"""
+## 📁 Complete Results Location
+- **Main Results**: `evaluation_results/` directory
+- **Visualizations**: `output/visualizations/` directory  
+- **Detailed Analysis**: `output/automation/` directory
+
+---
+*This summary provides a high-level overview. Check the HTML dashboard and detailed JSON files for complete metrics.*
+"""
+        
         return summary
     
-    def save_report(self, content: str, filename: str) -> str:
-        """Save report to file."""
-        filepath = os.path.join(self.output_dir, filename)
-        with open(filepath, 'w', encoding='utf-8') as f:
-            f.write(content)
-        return filepath
+    def generate_detailed_report(self, results: Dict) -> str:
+        """Generate detailed technical report."""
+        report = f"""
+# Detailed MIMIC-Eye Evaluation Report
+Generated: {datetime.now().isoformat()}
+
+## Batch Information
+- Batch ID: {results.get('batch_id', 'N/A')}
+- Session ID: {results.get('session_id', 'N/A')}
+- Total Reports: {len(results.get('individual_results', []))}
+
+## Individual Results Summary
+"""
+        
+        for i, result in enumerate(results.get('individual_results', []), 1):
+            report += f"""
+### Report {i}: {result.get('image_id', 'Unknown')}
+- Overall Score: {result.get('overall_score', 0):.4f}
+- Quality Level: {result.get('quality_level', 'unknown')}
+- Processing Time: {result.get('evaluation_time', 0):.3f}s
+"""
+        
+        return report
+    
+    def save_reports(self, results: Dict) -> Dict[str, str]:
+        """Save all reports and return file paths."""
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        # Generate and save executive summary
+        executive_summary = self.generate_executive_summary(results)
+        exec_file = os.path.join(self.output_dir, f"executive_summary_{timestamp}.md")
+        with open(exec_file, 'w', encoding='utf-8') as f:
+            f.write(executive_summary)
+        
+        # Generate and save detailed report
+        detailed_report = self.generate_detailed_report(results)
+        detail_file = os.path.join(self.output_dir, f"detailed_report_{timestamp}.md")
+        with open(detail_file, 'w', encoding='utf-8') as f:
+            f.write(detailed_report)
+        
+        return {
+            "executive_summary": exec_file,
+            "detailed_report": detail_file
+        }
 
 
 def generate_reports(results: Dict) -> Dict:
     """Generate all reports for automation results."""
     generator = AutomatedReportGenerator()
-    
-    executive_summary = generator.generate_executive_summary(results)
-    exec_file = generator.save_report(executive_summary, f"executive_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md")
-    
-    return {"executive_summary": exec_file} 
+    return generator.save_reports(results) 
