@@ -1,0 +1,31 @@
+{
+  "performance_analysis": {
+    "overall_score": 0.04835616354575234,
+    "performance_level": "needs_improvement",
+    "success_rate": 1.0,
+    "processing_efficiency": 4.496708154678345,
+    "key_strength": "High reliability"
+  },
+  "metric_analysis": {
+    "strongest_metric": "meteor",
+    "strongest_score": 0.23895886479591838,
+    "weakest_metric": "cider",
+    "weakest_score": 0.0,
+    "metric_count": 4,
+    "average_score": 0.1193023191159403
+  },
+  "recommendations": [
+    "Consider reviewing LLM training data alignment with radiologist writing style",
+    "Evaluate if the model is generating appropriate medical terminology",
+    "Focus on improving bleu scores - consider metric-specific training",
+    "Focus on improving meteor scores - consider metric-specific training",
+    "Focus on improving cider scores - consider metric-specific training",
+    "Focus on improving medical scores - consider metric-specific training"
+  ],
+  "quality_patterns": {
+    "consistency": "high",
+    "trend": "stable",
+    "outliers": false
+  },
+  "generated_at": "2025-06-13T18:12:09.366383"
+}

@@ -38,7 +38,7 @@ class AutomatedEvaluationController:
     Orchestrates the complete process from discovery to results generation.
     """
     
-    def __init__(self, config_path: str = "../config/evaluation_config.json"):
+    def __init__(self, config_path: str = "config/evaluation_config.json"):
         """
         Initialize the automated evaluation controller.
         
@@ -218,6 +218,38 @@ class AutomatedEvaluationController:
         with open(discovery_file, 'w', encoding='utf-8') as f:
             json.dump(discovery_summary, f, indent=2, ensure_ascii=False)
         
+        # Generate automated reports
+        self.logger.info("📊 Generating automated reports...")
+        try:
+            from .report_generator import generate_reports
+            report_files = generate_reports(self.results)
+            self.logger.info(f"   📄 Executive summary: {report_files.get('executive_summary', 'N/A')}")
+        except Exception as e:
+            self.logger.error(f"Error generating reports: {e}")
+        
+        # Generate visualizations
+        self.logger.info("📈 Generating visualizations...")
+        try:
+            from .visualization_engine import generate_visualizations
+            viz_files = generate_visualizations(self.results)
+            self.logger.info(f"   📊 Metric chart: {viz_files.get('metric_distribution', 'N/A')}")
+            self.logger.info(f"   🌐 Dashboard: {viz_files.get('dashboard', 'N/A')}")
+        except Exception as e:
+            self.logger.error(f"Error generating visualizations: {e}")
+        
+        # Generate insights
+        self.logger.info("🧠 Generating insights...")
+        try:
+            from .insights_generator import generate_insights
+            insights = generate_insights(self.results)
+            insights_file = os.path.join(output_dir, f"insights_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+            with open(insights_file, 'w', encoding='utf-8') as f:
+                json.dump(insights, f, indent=2, ensure_ascii=False)
+            self.logger.info(f"   🎯 Insights: {insights_file}")
+            self.logger.info(f"   💡 Recommendations: {len(insights.get('recommendations', []))} generated")
+        except Exception as e:
+            self.logger.error(f"Error generating insights: {e}")
+        
         self.logger.info(f"📁 Results saved to: {output_dir}")
         self.logger.info(f"   📄 Main results: {results_file}")
         self.logger.info(f"   📄 Discovery summary: {discovery_file}")
@@ -252,8 +284,8 @@ class AutomatedEvaluationController:
 
 def run_automation_pipeline(llm_path: str = "../../real_analysis_results/",
                            gt_path: str = "../../mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0/mimic-eye/",
-                           output_dir: str = "../output/automation/",
-                           config_path: str = "../config/evaluation_config.json") -> Dict:
+                           output_dir: str = "output/automation/",
+                           config_path: str = "config/evaluation_config.json") -> Dict:
     """
     Convenience function to run the complete automation pipeline.
     

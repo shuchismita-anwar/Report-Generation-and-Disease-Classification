@@ -154,5 +154,41 @@
     "check_text_encoding": "utf-8",
     "min_report_pairs": 1,
     "max_missing_percentage": 0.2
+  },
+
+  "automation": {
+    "batch_processing": {
+      "batch_size": 50,
+      "max_workers": 4,
+      "use_multiprocessing": false,
+      "save_interval": 10,
+      "checkpoint_interval": 100,
+      "output_dir": "output/automation",
+      "temp_dir": "temp/automation"
+    },
+    "monitoring": {
+      "update_interval": 1.0,
+      "log_file": "logs/automation_monitor.log",
+      "memory_threshold_mb": 8192
+    },
+    "error_recovery": {
+      "max_retries": 3,
+      "retry_delay": 1.0,
+      "exponential_backoff": true,
+      "max_consecutive_errors": 10,
+      "checkpoint_dir": "checkpoints"
+    },
+    "data_discovery": {
+      "llm_output_dir": "../real_analysis_results/",
+      "mimic_dataset_dir": "../../mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0/mimic-eye/",
+      "supported_file_types": [".txt", ".json"],
+      "max_discovery_depth": 5
+    },
+    "reporting": {
+      "generate_executive_summary": true,
+      "generate_visualizations": true,
+      "generate_insights": true,
+      "output_formats": ["json", "html", "markdown"]
+    }
   }
 }

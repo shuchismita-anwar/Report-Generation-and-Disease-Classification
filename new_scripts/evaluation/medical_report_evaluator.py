@@ -862,7 +862,7 @@ def run_full_automation(args):
         results = controller.run_full_automation()
         
         print(f"\n🎉 Automation completed successfully!")
-        print(f"📊 Processed {len(results)} report pairs")
+        print(f"📊 Processed {results.get('evaluation_results', {}).get('total_pairs', 0)} report pairs")
         print(f"📁 Results saved to output/ directory")
         
     except ImportError as e:

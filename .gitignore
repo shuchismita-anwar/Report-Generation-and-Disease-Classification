@@ -74,3 +74,13 @@ new_scripts/evaluation/phase5_completion_status.md
 new_scripts/evaluation/automation/__pycache__/
 new_scripts/evaluation/evaluation_results/batch_20250613_102117_1_final.json
 new_scripts/evaluation/evaluation_results/batch_20250613_102136_1_final.json
+new_scripts/evaluation/logs/evaluation_monitor.log
+new_scripts/evaluation/logs/evaluation.log
+new_scripts/evaluation/output/batch_processing/
+new_scripts/evaluation/checkpoints/
+new_scripts/evaluation/evaluation_results/
+new_scripts/evaluation/logs/
+new_scripts/evaluation/output/visualizations/
+new_scripts/evaluation/temp/batch_processing/
+new_scripts/evaluation/__pycache__/
+new_scripts/evaluation/output/reports/
