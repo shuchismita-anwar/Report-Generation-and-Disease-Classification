@@ -1,0 +1,41 @@
+{
+  "task": "5.2 - Data Quality Analysis",
+  "timestamp": "2025-06-15",
+  "dataset_stats": {
+    "train_samples": 1984,
+    "val_samples": 493,
+    "test_samples": 400,
+    "total_samples": 2877
+  },
+  "data_integrity": {
+    "patient_overlap_detected": 108,
+    "severity": "CRITICAL",
+    "recommendation": "Fix data splits to prevent overfitting"
+  },
+  "transcript_quality": {
+    "status": "Files exist but not analyzed due to path issues"
+  },
+  "vocabulary_analysis": {
+    "status": "No vocabulary files found - expected before keyword extraction"
+  },
+  "region_patterns": {
+    "status": "Not analyzed - bbox files exist but need parsing"
+  },
+  "overall_score": 50,
+  "critical_issues": [
+    "Patient overlap between train/val/test splits"
+  ],
+  "recommendations": [
+    {
+      "priority": "CRITICAL",
+      "issue": "Patient overlap between splits",
+      "action": "Regenerate dataset splits with proper patient separation"
+    },
+    {
+      "priority": "MEDIUM",
+      "issue": "Detailed file analysis not completed",
+      "action": "Run comprehensive analysis when file access issues resolved"
+    }
+  ],
+  "status": "COMPLETED_WITH_ISSUES"
+}

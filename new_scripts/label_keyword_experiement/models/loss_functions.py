@@ -422,8 +422,11 @@ class MultiTaskLoss(nn.Module):
                 region_mask
             )
         
-        # 5. Optional contrastive loss (placeholder for future MedCLIP integration)
-        if 'contrastive_loss' in predictions:
+        # 5. MedCLIP contrastive loss
+        if 'medclip_contrastive_loss' in predictions and predictions['medclip_contrastive_loss'] is not None:
+            losses['medclip_contrastive'] = predictions['medclip_contrastive_loss']
+        elif 'contrastive_loss' in predictions:
+            # Backward compatibility
             losses['contrastive'] = predictions['contrastive_loss']
         
         # Compute weighted combination

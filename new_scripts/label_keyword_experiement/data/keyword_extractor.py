@@ -2,8 +2,8 @@
 Keyword Extractor for Hybrid RadBERT + MedCLIP Label & Keyword Prediction
 =========================================================================
 
-This module handles extraction of medical keywords from transcript text using basic patterns.
-Later this will be enhanced with RadBERT for more sophisticated medical NLP.
+This module handles extraction of medical keywords from transcript text using RadBERT
+for sophisticated medical NLP and entity recognition.
 """
 
 import re
@@ -13,6 +13,16 @@ from pathlib import Path
 from typing import Dict, List, Set, Optional, Tuple, Union
 from collections import Counter, defaultdict
 
+# Import RadBERT module
+try:
+    from models.radbert_module import RadBERTModule, create_radbert_processor
+except ImportError:
+    # Fallback for when running as script
+    import sys
+    from pathlib import Path
+    sys.path.append(str(Path(__file__).parent.parent))
+    from models.radbert_module import RadBERTModule, create_radbert_processor
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -20,17 +30,41 @@ logger = logging.getLogger(__name__)
 
 class KeywordExtractor:
     """
-    Extracts medical keywords from transcript text using basic patterns.
+    Extracts medical keywords from transcript text using RadBERT for sophisticated medical NLP.
     
     This class provides functionality to:
-    - Extract medical terms using regex patterns and medical dictionaries
-    - Filter and rank keywords by clinical relevance
-    - Create dummy keyword lists for testing
+    - Extract medical entities using RadBERT semantic understanding
+    - Filter and rank keywords by clinical relevance and confidence scores
+    - Create fallback keyword lists when RadBERT is unavailable
     - Save extracted keywords to JSON format
     """
     
-    def __init__(self):
-        """Initialize the KeywordExtractor with medical patterns and vocabularies."""
+    def __init__(self, use_radbert: bool = True, radbert_model: str = "UCSD-VA-health/RadBERT-RoBERTa-4m"):
+        """
+        Initialize the KeywordExtractor with RadBERT or fallback to basic patterns.
+        
+        Args:
+            use_radbert: Whether to use RadBERT for extraction
+            radbert_model: RadBERT model name for HuggingFace
+        """
+        self.use_radbert = use_radbert
+        
+        # Initialize RadBERT processor
+        if use_radbert:
+            try:
+                logger.info("Initializing RadBERT processor for keyword extraction")
+                self.radbert_processor = create_radbert_processor(model_name=radbert_model)
+                logger.info("RadBERT processor initialized successfully")
+            except Exception as e:
+                logger.warning(f"Failed to initialize RadBERT: {e}")
+                logger.warning("Falling back to basic pattern extraction")
+                self.use_radbert = False
+                self.radbert_processor = None
+        else:
+            self.radbert_processor = None
+            logger.info("Using basic pattern extraction (RadBERT disabled)")
+        
+        # Fallback basic patterns (kept for compatibility and fallback)
         self.medical_patterns = self._create_medical_patterns()
         self.anatomical_terms = self._create_anatomical_vocabulary()
         self.pathology_terms = self._create_pathology_vocabulary()
@@ -43,7 +77,8 @@ class KeywordExtractor:
             'total_transcripts_processed': 0,
             'total_keywords_extracted': 0,
             'unique_keywords': 0,
-            'avg_keywords_per_transcript': 0.0
+            'avg_keywords_per_transcript': 0.0,
+            'radbert_used': self.use_radbert
         }
     
     def _create_medical_patterns(self) -> List[Dict[str, Union[str, re.Pattern]]]:
@@ -181,7 +216,7 @@ class KeywordExtractor:
     
     def extract_keywords_from_text(self, text: str) -> Dict[str, List[str]]:
         """
-        Extract medical keywords from transcript text using pattern matching.
+        Extract medical keywords from transcript text using RadBERT or fallback patterns.
         
         Args:
             text: Transcript text to process
@@ -190,8 +225,59 @@ class KeywordExtractor:
             Dictionary with categorized keywords
         """
         if not text or not text.strip():
-            return {'anatomy': [], 'pathology': [], 'devices': [], 'descriptors': [], 'negation': []}
+            return {'anatomy': [], 'pathology': [], 'devices': [], 'descriptors': [], 'location': []}
         
+        # Use RadBERT if available
+        if self.use_radbert and self.radbert_processor is not None:
+            return self._extract_with_radbert(text)
+        else:
+            return self._extract_with_patterns(text)
+    
+    def _extract_with_radbert(self, text: str) -> Dict[str, List[str]]:
+        """
+        Extract keywords using RadBERT semantic understanding.
+        
+        Args:
+            text: Transcript text to process
+            
+        Returns:
+            Dictionary with categorized keywords
+        """
+        try:
+            # Use RadBERT for medical keyword extraction
+            radbert_keywords = self.radbert_processor.extract_medical_keywords(text, top_k=10)
+            
+            # Convert RadBERT format to expected format
+            categorized_keywords = {}
+            for category, keyword_list in radbert_keywords.items():
+                # Extract just the keyword strings (remove confidence scores for compatibility)
+                keywords = [item['keyword'] for item in keyword_list if item['confidence'] > 0.3]
+                categorized_keywords[category] = keywords
+            
+            # Ensure all expected categories are present
+            expected_categories = ['anatomy', 'pathology', 'devices', 'descriptors', 'location']
+            for category in expected_categories:
+                if category not in categorized_keywords:
+                    categorized_keywords[category] = []
+            
+            logger.debug(f"RadBERT extracted {sum(len(v) for v in categorized_keywords.values())} keywords")
+            return categorized_keywords
+            
+        except Exception as e:
+            logger.warning(f"RadBERT extraction failed: {e}")
+            logger.warning("Falling back to pattern-based extraction")
+            return self._extract_with_patterns(text)
+    
+    def _extract_with_patterns(self, text: str) -> Dict[str, List[str]]:
+        """
+        Extract keywords using basic pattern matching (fallback method).
+        
+        Args:
+            text: Transcript text to process
+            
+        Returns:
+            Dictionary with categorized keywords
+        """
         # Clean and normalize text
         cleaned_text = self._clean_text(text)
         
@@ -311,7 +397,86 @@ class KeywordExtractor:
     
     def extract_keywords_from_transcripts(self, transcripts: Dict[str, str]) -> Dict[str, Dict[str, List[str]]]:
         """
-        Extract keywords from multiple transcripts.
+        Extract keywords from multiple transcripts using RadBERT or fallback pattern matching.
+        
+        Args:
+            transcripts: Dictionary mapping transcript paths to text content
+            
+        Returns:
+            Dictionary mapping transcript paths to extracted keywords
+        """
+        # Use RadBERT batch processing if available
+        if self.use_radbert and self.radbert_processor is not None:
+            return self._extract_from_transcripts_radbert(transcripts)
+        else:
+            return self._extract_from_transcripts_patterns(transcripts)
+    
+    def _extract_from_transcripts_radbert(self, transcripts: Dict[str, str]) -> Dict[str, Dict[str, List[str]]]:
+        """
+        Extract keywords from multiple transcripts using RadBERT.
+        
+        Args:
+            transcripts: Dictionary mapping transcript IDs to text content
+            
+        Returns:
+            Dictionary mapping transcript IDs to categorized keywords
+        """
+        logger.info(f"Processing {len(transcripts)} transcripts with RadBERT")
+        
+        try:
+            # Use RadBERT's batch processing method
+            radbert_results = self.radbert_processor.extract_keywords_from_transcripts(transcripts)
+            
+            # Convert RadBERT format to expected format
+            all_keywords = {}
+            processed_count = 0
+            total_keywords = 0
+            
+            for transcript_id, radbert_keywords in radbert_results.items():
+                categorized_keywords = {}
+                
+                for category, keyword_list in radbert_keywords.items():
+                    # Extract just the keyword strings (remove confidence scores)
+                    keywords = [item['keyword'] for item in keyword_list if item['confidence'] > 0.3]
+                    categorized_keywords[category] = keywords
+                    total_keywords += len(keywords)
+                
+                # Ensure all expected categories are present
+                expected_categories = ['anatomy', 'pathology', 'devices', 'descriptors', 'location']
+                for category in expected_categories:
+                    if category not in categorized_keywords:
+                        categorized_keywords[category] = []
+                
+                all_keywords[transcript_id] = categorized_keywords
+                processed_count += 1
+            
+            # Update statistics
+            self.extraction_stats['total_transcripts_processed'] = processed_count
+            self.extraction_stats['total_keywords_extracted'] = total_keywords
+            
+            unique_keywords = set()
+            for keywords in all_keywords.values():
+                for keyword_list in keywords.values():
+                    unique_keywords.update(keyword_list)
+            
+            self.extraction_stats['unique_keywords'] = len(unique_keywords)
+            self.extraction_stats['avg_keywords_per_transcript'] = (
+                total_keywords / processed_count if processed_count > 0 else 0.0
+            )
+            
+            logger.info(f"RadBERT extraction completed: {processed_count} transcripts, "
+                       f"{total_keywords} total keywords, {len(unique_keywords)} unique keywords")
+            
+            return all_keywords
+            
+        except Exception as e:
+            logger.warning(f"RadBERT batch processing failed: {e}")
+            logger.warning("Falling back to pattern-based extraction")
+            return self._extract_from_transcripts_patterns(transcripts)
+    
+    def _extract_from_transcripts_patterns(self, transcripts: Dict[str, str]) -> Dict[str, Dict[str, List[str]]]:
+        """
+        Extract keywords from multiple transcripts using basic pattern matching (fallback).
         
         Args:
             transcripts: Dictionary mapping transcript paths to text content
@@ -322,16 +487,18 @@ class KeywordExtractor:
         all_keywords = {}
         total_keywords = 0
         
+        logger.info(f"Processing {len(transcripts)} transcripts with pattern matching")
+        
         for transcript_path, text in transcripts.items():
             if text is not None:
-                keywords = self.extract_keywords_from_text(text)
+                keywords = self._extract_with_patterns(text)
                 all_keywords[transcript_path] = keywords
                 
                 # Count total keywords
                 for category_keywords in keywords.values():
                     total_keywords += len(category_keywords)
             else:
-                all_keywords[transcript_path] = {'anatomy': [], 'pathology': [], 'devices': [], 'descriptors': [], 'negation': []}
+                all_keywords[transcript_path] = {'anatomy': [], 'pathology': [], 'devices': [], 'descriptors': [], 'location': []}
         
         # Update statistics
         self.extraction_stats['total_transcripts_processed'] = len(transcripts)
@@ -345,7 +512,7 @@ class KeywordExtractor:
                 all_unique_keywords.update(category_keywords)
         self.extraction_stats['unique_keywords'] = len(all_unique_keywords)
         
-        logger.info(f"Extracted keywords from {len(transcripts)} transcripts")
+        logger.info(f"Pattern extraction completed: {len(transcripts)} transcripts")
         logger.info(f"Total keywords: {total_keywords}, Unique: {len(all_unique_keywords)}")
         logger.info(f"Average keywords per transcript: {self.extraction_stats['avg_keywords_per_transcript']:.2f}")
         
@@ -363,13 +530,15 @@ class KeywordExtractor:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         
         # Prepare data for JSON serialization
+        extractor_type = 'radbert_extraction' if self.use_radbert else 'basic_pattern_matching'
         output_data = {
             'extraction_stats': self.extraction_stats,
             'keywords_by_transcript': keywords,
             'metadata': {
-                'extractor_type': 'basic_pattern_matching',
+                'extractor_type': extractor_type,
                 'total_transcripts': len(keywords),
-                'categories': ['anatomy', 'pathology', 'devices', 'descriptors', 'negation']
+                'categories': ['anatomy', 'pathology', 'devices', 'descriptors', 'location'],
+                'radbert_used': self.use_radbert
             }
         }
         

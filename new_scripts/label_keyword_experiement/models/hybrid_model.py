@@ -22,6 +22,7 @@ from transformers import AutoTokenizer, AutoModel
 # Import our custom components
 from .keyword_heads import GlobalKeywordHead, RegionKeywordHead, CombinedKeywordHead
 from .loss_functions import MultiTaskLoss
+from .medclip_module import MedCLIPModule, create_medclip_processor
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,8 @@ class HybridMedicalModel(nn.Module):
         loss_type: str = "focal",
         low_memory: bool = False,
         enable_keywords: bool = True,
+        enable_medclip: bool = True,
+        medclip_weight: float = 0.3,
         vit_model_name: str = "google/vit-base-patch16-224-in21k",
         text_model_name: str = "emilyalsentzer/Bio_ClinicalBERT"
     ):
@@ -56,6 +59,8 @@ class HybridMedicalModel(nn.Module):
         self.loss_type = loss_type
         self.low_memory = low_memory
         self.enable_keywords = enable_keywords
+        self.enable_medclip = enable_medclip
+        self.medclip_weight = medclip_weight
         
         logger.info(f"Initializing HybridMedicalModel:")
         logger.info(f"  - Conditions: {num_conditions}")
@@ -63,6 +68,7 @@ class HybridMedicalModel(nn.Module):
         logger.info(f"  - Regions: {num_regions}")
         logger.info(f"  - Hidden dim: {self.hidden_dim}")
         logger.info(f"  - Keywords enabled: {enable_keywords}")
+        logger.info(f"  - MedCLIP enabled: {enable_medclip}")
         logger.info(f"  - Low memory mode: {low_memory}")
         
         # Add compatibility with Transformers trainer
@@ -74,6 +80,10 @@ class HybridMedicalModel(nn.Module):
         # Initialize keyword prediction components (if enabled)
         if self.enable_keywords:
             self._init_keyword_components()
+        
+        # Initialize MedCLIP components (if enabled)
+        if self.enable_medclip:
+            self._init_medclip_components()
         
         # Initialize loss functions
         self._init_loss_functions()
@@ -288,22 +298,52 @@ class HybridMedicalModel(nn.Module):
         logger.info(f"  - Global head: {self.hidden_dim} -> {self.vocab_size}")
         logger.info(f"  - Region head: {self.hidden_dim} -> {self.num_regions} x {self.vocab_size}")
     
+    def _init_medclip_components(self):
+        """Initialize MedCLIP components for contrastive learning"""
+        try:
+            self.medclip_module = create_medclip_processor(
+                embedding_dim=self.hidden_dim,
+                temperature=0.07
+            )
+            
+            # Image-text alignment projection layers
+            self.image_text_proj = nn.Linear(self.hidden_dim, self.hidden_dim)
+            
+            logger.info(f"MedCLIP components initialized:")
+            logger.info(f"  - Text encoder: BiomedCLIP")
+            logger.info(f"  - Embedding dim: {self.hidden_dim}")
+            logger.info(f"  - Contrastive weight: {self.medclip_weight}")
+            
+        except Exception as e:
+            logger.warning(f"Failed to initialize MedCLIP: {e}")
+            logger.warning("Continuing without MedCLIP integration")
+            self.medclip_module = None
+            self.enable_medclip = False
+    
     def _init_loss_functions(self):
         """Initialize loss functions"""
         # Disease classification loss (existing)
         self.disease_loss_fn = None  # Will be set via set_loss_function
         
         # Multi-task loss (new)
-        if self.enable_keywords:
-            self.multi_task_loss = MultiTaskLoss(
-                loss_weights={
-                    'disease': 1.0,
-                    'keyword_global': 0.5,
-                    'keyword_region': 0.3,
-                    'consistency': 0.2
-                }
-            )
-            logger.info("Multi-task loss initialized with keyword prediction")
+        if self.enable_keywords or self.enable_medclip:
+            loss_weights = {
+                'disease': 1.0,
+                'keyword_global': 0.5 if self.enable_keywords else 0.0,
+                'keyword_region': 0.3 if self.enable_keywords else 0.0,
+                'consistency': 0.2 if self.enable_keywords else 0.0,
+                'medclip_contrastive': self.medclip_weight if self.enable_medclip else 0.0
+            }
+            
+            self.multi_task_loss = MultiTaskLoss(loss_weights=loss_weights)
+            
+            enabled_tasks = []
+            if self.enable_keywords:
+                enabled_tasks.append("keyword prediction")
+            if self.enable_medclip:
+                enabled_tasks.append("MedCLIP contrastive learning")
+            
+            logger.info(f"Multi-task loss initialized with: {', '.join(enabled_tasks)}")
         else:
             self.multi_task_loss = None
             logger.info("Single-task mode: disease classification only")
@@ -539,17 +579,45 @@ class HybridMedicalModel(nn.Module):
             )
             keyword_outputs.update(keyword_results)
         
+        # --- MedCLIP contrastive learning (if enabled) ---
+        medclip_outputs = {}
+        if self.enable_medclip and self.medclip_module is not None:
+            try:
+                # Project image features for MedCLIP alignment
+                image_features_for_medclip = self.image_text_proj(final_fused)
+                
+                # Create keyword texts for MedCLIP
+                if isinstance(transcript, list) and len(transcript) > 0:
+                    keyword_texts = transcript  # Use original transcripts
+                else:
+                    # Fallback: create dummy keyword texts
+                    keyword_texts = ["medical image"] * batch_size
+                
+                # Compute MedCLIP features and loss
+                medclip_results = self.medclip_module(
+                    image_features=image_features_for_medclip,
+                    keyword_texts=keyword_texts,
+                    compute_loss=True
+                )
+                
+                medclip_outputs.update(medclip_results)
+                
+            except Exception as e:
+                logger.warning(f"MedCLIP processing failed: {e}")
+                medclip_outputs['contrastive_loss'] = torch.tensor(0.0, device=device)
+        
         # --- Loss computation ---
         total_loss = None
         loss_components = {}
         
         if labels is not None:
-            if self.enable_keywords and (global_keywords is not None or region_keywords is not None):
+            if (self.enable_keywords and (global_keywords is not None or region_keywords is not None)) or self.enable_medclip:
                 # Multi-task loss
                 predictions_dict = {
                     'disease_logits': disease_logits,
                     'global_keyword_logits': keyword_outputs.get('global_logits'),
-                    'region_keyword_logits': keyword_outputs.get('region_logits')
+                    'region_keyword_logits': keyword_outputs.get('region_logits'),
+                    'medclip_contrastive_loss': medclip_outputs.get('contrastive_loss')
                 }
                 
                 targets_dict = {
@@ -602,6 +670,10 @@ class HybridMedicalModel(nn.Module):
         if self.enable_keywords:
             output.update(keyword_outputs)
         
+        # Add MedCLIP outputs if enabled
+        if self.enable_medclip:
+            output.update(medclip_outputs)
+        
         # Add loss information
         if total_loss is not None:
             output['loss'] = total_loss
@@ -648,6 +720,8 @@ class HybridMedicalModel(nn.Module):
             'num_regions': self.num_regions,
             'hidden_dim': self.hidden_dim,
             'enable_keywords': self.enable_keywords,
+            'enable_medclip': self.enable_medclip,
+            'medclip_weight': self.medclip_weight,
             'low_memory': self.low_memory,
             'loss_type': self.loss_type,
             'total_parameters': sum(p.numel() for p in self.parameters()),

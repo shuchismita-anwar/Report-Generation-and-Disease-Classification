@@ -25,31 +25,31 @@ class RegionHandler:
     
     This class provides functionality to:
     - Load bbox paths from dataset CSV files
-    - Detect available regions per sample
+    - Detect available regions per sample from actual bbox files
     - Create region availability masks (17 regions)
     - Generate consistent region representations
-    - Handle missing regions with dummy data for testing
+    - Handle missing regions and different data formats (REFLACX vs EyeGaze)
     """
     
-    # Define the 17 anatomical regions
+    # Define the 17 anatomical regions (standardized names)
     ANATOMICAL_REGIONS = [
-        'cardiac_silhouette',           # 0
-        'left_clavicle',               # 1
-        'right_clavicle',              # 2
-        'left_costophrenic_angle',     # 3
-        'right_costophrenic_angle',    # 4
-        'left_hilar_structures',       # 5
-        'right_hilar_structures',      # 6
-        'left_lower_lung_zone',        # 7
-        'left_mid_lung_zone',          # 8
-        'left_upper_lung_zone',        # 9
-        'right_lower_lung_zone',       # 10
-        'right_mid_lung_zone',         # 11
-        'right_upper_lung_zone',       # 12
-        'left_lung',                   # 13
-        'right_lung',                  # 14
+        'cardiac silhouette',           # 0
+        'left clavicle',               # 1
+        'right clavicle',              # 2
+        'left costophrenic angle',     # 3
+        'right costophrenic angle',    # 4
+        'left hilar structures',       # 5
+        'right hilar structures',      # 6
+        'left lower lung zone',        # 7
+        'left mid lung zone',          # 8
+        'left upper lung zone',        # 9
+        'right lower lung zone',       # 10
+        'right mid lung zone',         # 11
+        'right upper lung zone',       # 12
+        'left lung',                   # 13
+        'right lung',                  # 14
         'trachea',                     # 15
-        'upper_mediastinum'            # 16
+        'upper mediastinum'            # 16
     ]
     
     def __init__(self, base_path: str = "../../"):
@@ -126,7 +126,7 @@ class RegionHandler:
     
     def detect_available_regions_from_bbox(self, bbox_path: str) -> List[bool]:
         """
-        Detect available regions from bbox file.
+        Detect available regions from actual bbox file.
         
         Args:
             bbox_path: Path to bbox file
@@ -134,21 +134,28 @@ class RegionHandler:
         Returns:
             List of 17 boolean values indicating region availability
         """
-        # For now, create dummy region detection
-        # In a real implementation, this would analyze the actual bbox file
-        
         full_bbox_path = self.base_path / bbox_path
         
         # Check if bbox file exists
         if not full_bbox_path.exists():
             logger.debug(f"Bbox file not found: {full_bbox_path}")
-            return self._create_dummy_region_mask("missing_file")
+            return [False] * self.num_regions
         
-        # Determine dataset type from path
-        dataset_type = self._determine_dataset_type(bbox_path)
-        
-        # Create region mask based on dataset type
-        return self._create_dummy_region_mask(dataset_type)
+        try:
+            # Determine dataset type and load accordingly
+            dataset_type = self._determine_dataset_type(bbox_path)
+            
+            if dataset_type == 'reflacx':
+                return self._detect_regions_reflacx(full_bbox_path)
+            elif dataset_type == 'eyegaze':
+                return self._detect_regions_eyegaze(full_bbox_path)
+            else:
+                logger.warning(f"Unknown dataset type for {bbox_path}")
+                return [False] * self.num_regions
+                
+        except Exception as e:
+            logger.error(f"Error processing bbox file {bbox_path}: {e}")
+            return [False] * self.num_regions
     
     def _determine_dataset_type(self, bbox_path: str) -> str:
         """
@@ -162,149 +169,188 @@ class RegionHandler:
         """
         bbox_path_lower = bbox_path.lower()
         
-        if 'eyegaze' in bbox_path_lower:
-            return 'eyegaze'
-        elif 'reflacx' in bbox_path_lower:
+        if 'reflacx' in bbox_path_lower:
             return 'reflacx'
+        elif 'eyegaze' in bbox_path_lower:
+            return 'eyegaze'
         else:
             return 'unknown'
     
-    def _create_dummy_region_mask(self, dataset_type: str) -> List[bool]:
+    def _detect_regions_reflacx(self, bbox_file_path: Path) -> List[bool]:
         """
-        Create dummy region availability mask based on dataset type.
+        Detect available regions from REFLACX bbox file.
         
         Args:
-            dataset_type: Type of dataset ('eyegaze', 'reflacx', 'unknown', 'missing_file')
+            bbox_file_path: Path to REFLACX bbox CSV file
             
         Returns:
             List of 17 boolean values indicating region availability
         """
-        if dataset_type == 'eyegaze':
-            # EyeGaze data: assume all 17 regions are available
-            return [True] * self.num_regions
-        
-        elif dataset_type == 'reflacx':
-            # REFLACX data: assume some regions are missing (simulate real scenario)
-            # Based on the project context, REFLACX might be missing some regions
-            region_mask = [True] * self.num_regions
+        try:
+            bbox_df = pd.read_csv(bbox_file_path)
             
-            # Simulate some missing regions in REFLACX data
-            # Make some regions randomly unavailable (but consistently for testing)
-            missing_regions = [1, 2, 5, 6, 15]  # Some clavicles, hilar, trachea
-            for region_idx in missing_regions:
-                if region_idx < self.num_regions:
-                    region_mask[region_idx] = False
+            # Check if this is actually EyeGaze format (has 'bbox_name' instead of 'class_name')
+            if 'bbox_name' in bbox_df.columns and 'class_name' not in bbox_df.columns:
+                logger.debug(f"File appears to be EyeGaze format, switching detection method: {bbox_file_path}")
+                return self._detect_regions_eyegaze(bbox_file_path)
+            
+            # REFLACX format: columns include 'class_name'
+            if 'class_name' not in bbox_df.columns:
+                logger.warning(f"No 'class_name' column in REFLACX file: {bbox_file_path}")
+                return [False] * self.num_regions
+            
+            # Get available region names
+            available_regions = set(bbox_df['class_name'].unique())
+            
+            # Create boolean mask for 17 standard regions
+            region_mask = []
+            for region in self.ANATOMICAL_REGIONS:
+                region_mask.append(region in available_regions)
             
             return region_mask
-        
-        elif dataset_type == 'missing_file':
-            # File doesn't exist: assume no regions available
+            
+        except Exception as e:
+            logger.error(f"Error processing REFLACX bbox file {bbox_file_path}: {e}")
             return [False] * self.num_regions
-        
-        else:
-            # Unknown dataset: assume partial availability
-            return [True if i % 2 == 0 else False for i in range(self.num_regions)]
     
+    def _detect_regions_eyegaze(self, bbox_file_path: Path) -> List[bool]:
+        """
+        Detect available regions from EyeGaze bbox file.
+        
+        Args:
+            bbox_file_path: Path to EyeGaze bbox CSV file
+            
+        Returns:
+            List of 17 boolean values indicating region availability
+        """
+        try:
+            bbox_df = pd.read_csv(bbox_file_path)
+            
+            # EyeGaze format: columns include 'bbox_name'
+            if 'bbox_name' not in bbox_df.columns:
+                logger.warning(f"No 'bbox_name' column in EyeGaze file: {bbox_file_path}")
+                return [False] * self.num_regions
+            
+            # Get available region names
+            available_regions = set(bbox_df['bbox_name'].unique())
+            
+            # Create boolean mask for 17 standard regions
+            region_mask = []
+            for region in self.ANATOMICAL_REGIONS:
+                region_mask.append(region in available_regions)
+            
+            return region_mask
+            
+        except Exception as e:
+            logger.error(f"Error processing EyeGaze bbox file {bbox_file_path}: {e}")
+            return [False] * self.num_regions
+
     def get_region_mask(self, bbox_path: str) -> np.ndarray:
         """
-        Get region availability mask for a bbox path.
+        Get region availability mask for a single sample.
         
         Args:
             bbox_path: Path to bbox file
             
         Returns:
-            NumPy array of shape [17] with boolean values
+            Boolean numpy array of shape [17] indicating region availability
         """
         # Check cache first
         if bbox_path in self._region_mask_cache:
             return self._region_mask_cache[bbox_path]
         
-        # Detect available regions
-        region_availability = self.detect_available_regions_from_bbox(bbox_path)
-        
-        # Convert to numpy array
-        region_mask = np.array(region_availability, dtype=bool)
+        # Detect regions from actual bbox file
+        region_mask = self.detect_available_regions_from_bbox(bbox_path)
+        region_array = np.array(region_mask, dtype=bool)
         
         # Cache the result
-        self._region_mask_cache[bbox_path] = region_mask
+        self._region_mask_cache[bbox_path] = region_array
         
-        return region_mask
-    
+        # Update statistics
+        self.region_stats['total_samples_processed'] += 1
+        if region_array.any():
+            self.region_stats['samples_with_bbox'] += 1
+            for idx, available in enumerate(region_array):
+                if available:
+                    region_name = self.ANATOMICAL_REGIONS[idx]
+                    self.region_stats['region_availability_counts'][region_name] += 1
+        else:
+            self.region_stats['samples_without_bbox'] += 1
+        
+        return region_array
+
     def process_multiple_samples(self, bbox_paths: Dict[str, str]) -> Dict[str, np.ndarray]:
         """
-        Process multiple samples to get region masks.
+        Process multiple samples and return region masks.
         
         Args:
-            bbox_paths: Dictionary mapping sample IDs to bbox paths
+            bbox_paths: Dictionary mapping sample IDs to bbox file paths
             
         Returns:
             Dictionary mapping sample IDs to region masks
         """
-        logger.info(f"Processing region masks for {len(bbox_paths)} samples...")
+        logger.info(f"Processing {len(bbox_paths)} samples for region detection...")
         
         region_masks = {}
-        dataset_type_counts = defaultdict(int)
-        region_availability_counts = defaultdict(int)
+        dataset_stats = defaultdict(lambda: {'total': 0, 'reflacx': 0, 'eyegaze': 0, 'unknown': 0})
         
         for sample_id, bbox_path in bbox_paths.items():
             # Get region mask
             region_mask = self.get_region_mask(bbox_path)
             region_masks[sample_id] = region_mask
             
-            # Update statistics
+            # Track dataset type statistics
             dataset_type = self._determine_dataset_type(bbox_path)
-            dataset_type_counts[dataset_type] += 1
+            dataset_stats['overall']['total'] += 1
+            dataset_stats['overall'][dataset_type] += 1
             
-            # Count available regions
-            for region_idx, is_available in enumerate(region_mask):
-                if is_available:
-                    region_name = self.ANATOMICAL_REGIONS[region_idx]
-                    region_availability_counts[region_name] += 1
+            # Progress logging
+            if len(region_masks) % 100 == 0:
+                logger.info(f"Processed {len(region_masks)}/{len(bbox_paths)} samples...")
         
-        # Update overall statistics
-        self.region_stats['total_samples_processed'] = len(bbox_paths)
-        self.region_stats['samples_with_bbox'] = len([p for p in bbox_paths.values() if p])
-        self.region_stats['samples_without_bbox'] = len(bbox_paths) - self.region_stats['samples_with_bbox']
-        self.region_stats['region_availability_counts'] = dict(region_availability_counts)
-        self.region_stats['dataset_type_stats'] = dict(dataset_type_counts)
-        
-        # Calculate region coverage by dataset
+        # Update statistics
         self._calculate_region_coverage_by_dataset(bbox_paths, region_masks)
+        self.region_stats['dataset_type_stats'] = dict(dataset_stats)
         
-        logger.info(f"Processed {len(region_masks)} region masks")
-        logger.info(f"Dataset types: {dict(dataset_type_counts)}")
+        logger.info(f"Region processing complete: {len(region_masks)} samples processed")
+        logger.info(f"Dataset distribution: REFLACX={dataset_stats['overall']['reflacx']}, "
+                   f"EyeGaze={dataset_stats['overall']['eyegaze']}, "
+                   f"Unknown={dataset_stats['overall']['unknown']}")
         
         return region_masks
     
     def _calculate_region_coverage_by_dataset(self, bbox_paths: Dict[str, str], region_masks: Dict[str, np.ndarray]):
         """Calculate region coverage statistics by dataset type."""
-        dataset_region_stats = defaultdict(lambda: defaultdict(int))
-        dataset_sample_counts = defaultdict(int)
+        reflacx_coverage = np.zeros(self.num_regions, dtype=int)
+        eyegaze_coverage = np.zeros(self.num_regions, dtype=int)
+        reflacx_total = 0
+        eyegaze_total = 0
         
         for sample_id, bbox_path in bbox_paths.items():
             dataset_type = self._determine_dataset_type(bbox_path)
-            dataset_sample_counts[dataset_type] += 1
-            
             region_mask = region_masks[sample_id]
-            for region_idx, is_available in enumerate(region_mask):
-                region_name = self.ANATOMICAL_REGIONS[region_idx]
-                if is_available:
-                    dataset_region_stats[dataset_type][region_name] += 1
+            
+            if dataset_type == 'reflacx':
+                reflacx_coverage += region_mask.astype(int)
+                reflacx_total += 1
+            elif dataset_type == 'eyegaze':
+                eyegaze_coverage += region_mask.astype(int)
+                eyegaze_total += 1
         
-        # Calculate coverage percentages
-        coverage_stats = {}
-        for dataset_type, region_counts in dataset_region_stats.items():
-            total_samples = dataset_sample_counts[dataset_type]
-            coverage_stats[dataset_type] = {
-                'total_samples': total_samples,
-                'region_coverage': {
-                    region: count / total_samples if total_samples > 0 else 0
-                    for region, count in region_counts.items()
-                }
+        # Calculate percentages
+        self.region_stats['region_coverage_by_dataset'] = {
+            'reflacx': {
+                'total_samples': reflacx_total,
+                'region_coverage': (reflacx_coverage / max(reflacx_total, 1) * 100).tolist(),
+                'region_names': self.ANATOMICAL_REGIONS
+            },
+            'eyegaze': {
+                'total_samples': eyegaze_total,
+                'region_coverage': (eyegaze_coverage / max(eyegaze_total, 1) * 100).tolist(),
+                'region_names': self.ANATOMICAL_REGIONS
             }
-        
-        self.region_stats['region_coverage_by_dataset'] = coverage_stats
-    
+        }
+
     def get_region_statistics(self) -> Dict[str, Union[int, float, Dict]]:
         """
         Get comprehensive region statistics.
