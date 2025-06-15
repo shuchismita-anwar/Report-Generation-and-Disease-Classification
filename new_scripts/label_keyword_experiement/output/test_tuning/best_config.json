@@ -1,0 +1,21 @@
+{
+  "disease_weight": 1.0,
+  "global_keyword_weight": 0.5,
+  "region_keyword_weight": 0.3,
+  "radbert_semantic_weight": 0.2,
+  "medclip_contrastive_weight": 0.3,
+  "base_learning_rate": 0.0001,
+  "backbone_lr_multiplier": 0.4,
+  "keyword_head_lr_multiplier": 0.8,
+  "medclip_lr_multiplier": 0.6,
+  "batch_size": 16,
+  "gradient_accumulation_steps": 2,
+  "max_grad_norm": 1.0,
+  "warmup_ratio": 0.1,
+  "vocab_size": 1000,
+  "dropout_rate": 0.15,
+  "hidden_dim": 768,
+  "num_epochs": 10,
+  "eval_steps": 100,
+  "save_steps": 500
+}

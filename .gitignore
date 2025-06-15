@@ -94,3 +94,7 @@ new_scripts/label_keyword_experiement/models/__pycache__/
 new_scripts/label_keyword_experiement/training/__pycache__/
 new_scripts/label_keyword_experiement/scripts/__pycache__/
 new_scripts/label_keyword_experiement/inference/__pycache__/
+new_scripts/label_keyword_experiement/utils/__pycache__/
+new_scripts/label_keyword_experiement/output/logs/
+new_scripts/label_keyword_experiement/output/hyperparameter_tuning/
+new_scripts/label_keyword_experiement/output/test_tuning/tuning_history.csv

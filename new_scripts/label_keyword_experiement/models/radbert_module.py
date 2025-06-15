@@ -226,6 +226,35 @@ class RadBERTModule(nn.Module):
         
         return categorized_keywords
     
+    def extract_keywords(self, text: str, top_k: int = 10) -> List[str]:
+        """
+        Extract keywords from text (simplified interface for compatibility).
+        
+        Args:
+            text: Medical transcript text
+            top_k: Number of keywords to extract
+            
+        Returns:
+            List of extracted keyword strings
+        """
+        categorized_keywords = self.extract_medical_keywords(text, top_k=top_k)
+        
+        # Flatten all categories into a single list
+        all_keywords = []
+        for category, keywords in categorized_keywords.items():
+            for keyword_data in keywords:
+                all_keywords.append(keyword_data['keyword'])
+        
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_keywords = []
+        for keyword in all_keywords:
+            if keyword not in seen:
+                seen.add(keyword)
+                unique_keywords.append(keyword)
+        
+        return unique_keywords[:top_k]
+    
     def _compute_medical_relevance(self, token: str, vocabulary: Set[str], token_embedding: torch.Tensor) -> float:
         """
         Compute medical relevance score for a token.

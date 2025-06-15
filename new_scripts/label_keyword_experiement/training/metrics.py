@@ -152,6 +152,17 @@ class HybridMetrics:
         
         return metrics
     
+    def compute_metrics(
+        self,
+        predictions: Dict[str, Union[torch.Tensor, np.ndarray]],
+        targets: Dict[str, Union[torch.Tensor, np.ndarray]],
+        **kwargs
+    ) -> Dict[str, float]:
+        """
+        Alias for compute method for compatibility.
+        """
+        return self.compute(predictions, targets, **kwargs)
+    
     def _convert_to_numpy(self, data: Dict[str, Union[torch.Tensor, np.ndarray]]) -> Dict[str, np.ndarray]:
         """Convert tensors to numpy arrays."""
         result = {}

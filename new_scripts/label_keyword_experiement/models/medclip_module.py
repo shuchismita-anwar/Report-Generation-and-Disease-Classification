@@ -46,6 +46,7 @@ class MedCLIPModule(nn.Module):
     def __init__(self, 
                  model_name: str = 'hf-hub:microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224',
                  embedding_dim: int = 512,  # BiomedCLIP outputs 512-dim embeddings
+                 target_dim: int = 768,     # Target dimension for alignment with hybrid model
                  temperature: float = 0.07,
                  max_context_length: int = 256,
                  cache_dir: Optional[str] = None):
@@ -54,7 +55,8 @@ class MedCLIPModule(nn.Module):
         
         Args:
             model_name: HuggingFace model identifier for BiomedCLIP
-            embedding_dim: Dimension of text embeddings
+            embedding_dim: Dimension of text embeddings from BiomedCLIP
+            target_dim: Target dimension for alignment with hybrid model (768)
             temperature: Temperature for contrastive loss
             max_context_length: Maximum text context length
             cache_dir: Directory to cache downloaded models
@@ -62,7 +64,8 @@ class MedCLIPModule(nn.Module):
         super().__init__()
         
         self.model_name = model_name
-        self.embedding_dim = embedding_dim
+        self.embedding_dim = embedding_dim  # 512 from BiomedCLIP
+        self.target_dim = target_dim        # 768 for hybrid model
         self.temperature = temperature
         self.max_context_length = max_context_length
         self.cache_dir = cache_dir
@@ -73,13 +76,13 @@ class MedCLIPModule(nn.Module):
         # Learnable temperature parameter
         self.logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / temperature))
         
-        # Projection layers for alignment
-        self.text_projection = nn.Linear(embedding_dim, embedding_dim)
-        self.image_projection = nn.Linear(embedding_dim, embedding_dim)
+        # Projection layers for alignment - handle dimension mismatch
+        self.text_projection = nn.Linear(embedding_dim, target_dim)  # 512 -> 768
+        self.image_projection = nn.Linear(target_dim, target_dim)    # 768 -> 768
         
-        # Layer normalization
-        self.text_norm = nn.LayerNorm(embedding_dim)
-        self.image_norm = nn.LayerNorm(embedding_dim)
+        # Layer normalization - use target dimension
+        self.text_norm = nn.LayerNorm(target_dim)
+        self.image_norm = nn.LayerNorm(target_dim)
         
         # Dropout for regularization
         self.dropout = nn.Dropout(0.1)
@@ -122,14 +125,14 @@ class MedCLIPModule(nn.Module):
             batch_size: Batch size for processing
             
         Returns:
-            Text embeddings tensor [len(keywords), embedding_dim]
+            Text embeddings tensor [len(keywords), target_dim] (projected to target dimension)
         """
         if not keywords:
-            return torch.zeros(0, self.embedding_dim, device=self.device)
+            return torch.zeros(0, self.target_dim, device=self.device)
         
         if self.medclip_model is None:
-            # Fallback: random embeddings
-            return torch.randn(len(keywords), self.embedding_dim, device=self.device)
+            # Fallback: random embeddings with target dimension
+            return torch.randn(len(keywords), self.target_dim, device=self.device)
         
         all_embeddings = []
         
@@ -147,6 +150,9 @@ class MedCLIPModule(nn.Module):
             with torch.no_grad():
                 _, text_features, _ = self.medclip_model(None, text_inputs)
                 text_features = text_features / text_features.norm(dim=-1, keepdim=True)
+                
+                # Project from 512 to target_dim (768)
+                text_features = self.text_projection(text_features)
             
             all_embeddings.append(text_features)
         
@@ -172,7 +178,7 @@ class MedCLIPModule(nn.Module):
                 embeddings = self.encode_keywords(keywords)
                 category_embeddings[category] = embeddings
             else:
-                category_embeddings[category] = torch.zeros(0, self.embedding_dim, device=self.device)
+                category_embeddings[category] = torch.zeros(0, self.target_dim, device=self.device)
         
         return category_embeddings
     
@@ -197,7 +203,7 @@ class MedCLIPModule(nn.Module):
         
         # Project features to common space
         image_features = self.image_projection(image_features)
-        text_features = self.text_projection(text_features)
+        # text_features already projected in encode_keywords
         
         # Apply layer normalization
         image_features = self.image_norm(image_features)
@@ -326,13 +332,15 @@ class MedCLIPModule(nn.Module):
 
 def create_medclip_processor(model_name: str = 'hf-hub:microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224',
                             embedding_dim: int = 512,  # BiomedCLIP outputs 512-dim embeddings
+                            target_dim: int = 768,     # Target dimension for hybrid model
                             temperature: float = 0.07) -> MedCLIPModule:
     """
     Factory function to create MedCLIP processor.
     
     Args:
         model_name: BiomedCLIP model name
-        embedding_dim: Embedding dimension
+        embedding_dim: BiomedCLIP embedding dimension (512)
+        target_dim: Target dimension for hybrid model (768)
         temperature: Contrastive learning temperature
         
     Returns:
@@ -341,6 +349,7 @@ def create_medclip_processor(model_name: str = 'hf-hub:microsoft/BiomedCLIP-PubM
     return MedCLIPModule(
         model_name=model_name,
         embedding_dim=embedding_dim,
+        target_dim=target_dim,
         temperature=temperature
     )
 
@@ -368,7 +377,7 @@ def test_medclip_integration():
         
         # Test contrastive loss computation
         batch_size = len(sample_keywords)
-        dummy_image_features = torch.randn(batch_size, 512)  # Match BiomedCLIP embedding dim
+        dummy_image_features = torch.randn(batch_size, 768)  # Match target dimension
         
         contrastive_loss = medclip.compute_contrastive_loss(dummy_image_features, text_embeddings)
         logger.info(f"✅ Contrastive loss: {contrastive_loss.item():.4f}")

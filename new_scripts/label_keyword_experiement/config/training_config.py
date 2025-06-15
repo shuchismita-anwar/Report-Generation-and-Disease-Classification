@@ -8,7 +8,7 @@ This file contains all training-related configuration parameters.
 import os
 
 # Basic Training Configuration
-TRAINING_CONFIG = {
+BASIC_TRAINING_CONFIG = {
     "num_epochs": 40,
     "learning_rate": 6e-6,
     "weight_decay": 8e-4,
@@ -198,6 +198,21 @@ HARDWARE_CONFIG = {
     "dataloader_num_workers": 2,
     "dataloader_pin_memory": True,
     "torch_compile": False,  # PyTorch 2.0 compilation (experimental)
+}
+
+# Unified Training Configuration (for convenience)
+TRAINING_CONFIG = {
+    'num_epochs': BASIC_TRAINING_CONFIG['num_epochs'],
+    'learning_rate': BASIC_TRAINING_CONFIG['learning_rate'],
+    'weight_decay': BASIC_TRAINING_CONFIG['weight_decay'],
+    'warmup_steps': BASIC_TRAINING_CONFIG['warmup_steps'],
+    'max_grad_norm': BASIC_TRAINING_CONFIG['max_grad_norm'],
+    'seed': BASIC_TRAINING_CONFIG['seed'],
+    'batch_size': BATCH_CONFIG['batch_size'],
+    'gradient_accumulation_steps': BATCH_CONFIG['gradient_accumulation_steps'],
+    'eval_steps': EVALUATION_CONFIG['eval_steps'],
+    'save_steps': CHECKPOINT_CONFIG['save_steps'],
+    'low_memory': MEMORY_CONFIG['gradient_checkpointing'],
 }
 
 # Export all configurations

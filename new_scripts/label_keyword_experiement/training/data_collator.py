@@ -86,8 +86,8 @@ class HybridDataCollator:
         # 4. Collate region masks (if available)
         batch.update(self._collate_region_masks(features))
         
-        # 5. Add batch metadata
-        batch["batch_size"] = batch_size
+        # 5. Batch metadata (don't add to batch dict - model doesn't expect it)
+        # batch_size is available as len(features) if needed
         
         logger.debug(f"Collated batch with {batch_size} samples")
         return batch

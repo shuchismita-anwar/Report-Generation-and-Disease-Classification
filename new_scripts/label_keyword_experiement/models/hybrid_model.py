@@ -302,7 +302,8 @@ class HybridMedicalModel(nn.Module):
         """Initialize MedCLIP components for contrastive learning"""
         try:
             self.medclip_module = create_medclip_processor(
-                embedding_dim=self.hidden_dim,
+                embedding_dim=512,           # BiomedCLIP native dimension
+                target_dim=self.hidden_dim,  # Project to hybrid model dimension (768)
                 temperature=0.07
             )
             

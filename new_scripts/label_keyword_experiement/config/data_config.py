@@ -192,6 +192,21 @@ REGION_AVAILABILITY_CONFIG = {
     "log_region_statistics": True,
 }
 
+# Unified Data Configuration (for convenience)
+DATA_CONFIG = {
+    'train_csv': DATASET_PATHS['train_csv'],
+    'val_csv': DATASET_PATHS['val_csv'],
+    'test_csv': DATASET_PATHS['test_csv'],
+    'img_dir': DATA_DIRS['img_dir'],
+    'bbox_dir': DATA_DIRS['bbox_dir'],
+    'fixseq_dir': DATA_DIRS['fixseq_dir'],
+    'image_size': IMAGE_CONFIG['image_size'],
+    'max_fixation_length': FIXATION_CONFIG['max_sequence_length'],
+    'max_transcript_length': TRANSCRIPT_CONFIG['max_length'],
+    'batch_size': DATALOADER_CONFIG['batch_size'],
+    'num_workers': DATALOADER_CONFIG['num_workers'],
+}
+
 # Export all configurations
 __all__ = [
     'DATASET_PATHS',
@@ -208,5 +223,6 @@ __all__ = [
     'MEMORY_CONFIG',
     'QUALITY_CONFIG',
     'OUTPUT_CONFIG',
-    'REGION_AVAILABILITY_CONFIG'
+    'REGION_AVAILABILITY_CONFIG',
+    'DATA_CONFIG'
 ] 

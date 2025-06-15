@@ -121,6 +121,20 @@ INIT_CONFIG = {
     "init_method": "xavier_uniform",  # Options: "xavier_uniform", "kaiming_normal", "normal"
 }
 
+# Unified Model Configuration (for convenience)
+MODEL_CONFIG = {
+    'num_diseases': DISEASE_CONFIG['num_conditions'],
+    'vocab_size': KEYWORD_CONFIG['vocab_size'],
+    'num_regions': REGION_CONFIG['num_regions'],
+    'hidden_dim': VISION_MODEL['hidden_size'],
+    'dropout': VISION_MODEL['dropout'],
+    'use_keywords': ARCHITECTURE_CONFIG['use_keyword_prediction'],
+    'use_regions': ARCHITECTURE_CONFIG['use_region_keyword_prediction'],
+    'disease_loss_weight': LOSS_CONFIG['disease_loss_weight'],
+    'keyword_loss_weight': LOSS_CONFIG['global_keyword_loss_weight'],
+    'region_loss_weight': LOSS_CONFIG['region_keyword_loss_weight'],
+}
+
 # Export all configurations
 __all__ = [
     'VISION_MODEL',
@@ -133,5 +147,6 @@ __all__ = [
     'REGION_CONFIG',
     'ARCHITECTURE_CONFIG',
     'LOSS_CONFIG',
-    'INIT_CONFIG'
+    'INIT_CONFIG',
+    'MODEL_CONFIG'
 ] 

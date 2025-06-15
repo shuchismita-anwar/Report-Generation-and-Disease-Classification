@@ -125,6 +125,29 @@ class KeywordDecoder:
                 })
                 
         return keywords
+    
+    def decode_top_k(self, 
+                    keyword_logits: torch.Tensor, 
+                    k: int = 10) -> List[str]:
+        """
+        Decode top-k keywords (simplified interface for compatibility).
+        
+        Args:
+            keyword_logits: Keyword prediction logits [batch_size, vocab_size] or [vocab_size]
+            k: Number of top keywords to return
+            
+        Returns:
+            List of keyword strings
+        """
+        # Handle batched input - take first sample
+        if keyword_logits.dim() == 2:
+            keyword_logits = keyword_logits[0]
+        
+        # Decode using existing method
+        keyword_dicts = self.decode_global_keywords(keyword_logits, top_k=k, threshold=0.0)
+        
+        # Extract just the keyword strings
+        return [kw['keyword'] for kw in keyword_dicts]
         
     def decode_region_keywords(self, 
                              region_keyword_logits: torch.Tensor,

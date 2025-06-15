@@ -292,7 +292,7 @@ class RegionKeywordHead(nn.Module):
         if region_mask is not None:
             # Mask unavailable regions (set logits to very negative values)
             mask_expanded = region_mask.unsqueeze(-1).expand(-1, -1, self.vocab_size)
-            region_keyword_logits = region_keyword_logits.masked_fill(~mask_expanded, -1e9)
+            region_keyword_logits = region_keyword_logits.masked_fill(~mask_expanded, -1e4)
         
         return region_keyword_logits
     

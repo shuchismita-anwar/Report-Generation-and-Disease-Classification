@@ -112,6 +112,27 @@ class VocabularyBuilder:
         
         return self._get_vocabulary_data()
     
+    def build_vocabulary_from_keywords_list(self, keywords_list: List[str]) -> Dict[str, Union[Dict, int, float]]:
+        """
+        Build vocabulary from a simple list of keywords.
+        
+        Args:
+            keywords_list: Simple list of keyword strings
+            
+        Returns:
+            Dictionary containing vocabulary mappings and statistics
+        """
+        logger.info("Building vocabulary from extracted keywords...")
+        
+        # Convert simple list to expected format
+        keywords_data = {
+            'sample_transcript': {
+                'medical_terms': keywords_list
+            }
+        }
+        
+        return self.build_vocabulary_from_keywords(keywords_data)
+    
     def build_vocabulary_from_json(self, keywords_json_path: str) -> Dict[str, Union[Dict, int, float]]:
         """
         Build vocabulary from saved keywords JSON file.
