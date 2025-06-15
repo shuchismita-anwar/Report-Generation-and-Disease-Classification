@@ -1,0 +1,165 @@
+{
+  "extraction_stats": {
+    "total_transcripts_processed": 5,
+    "total_keywords_extracted": 87,
+    "unique_keywords": 31,
+    "avg_keywords_per_transcript": 17.4
+  },
+  "keywords_by_transcript": {
+    "mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0\\mimic-eye\\patient_18891030\\REFLACX\\main_data\\P300R149905\\transcript.json": {
+      "anatomy": [
+        "thorax",
+        "cardiomediastinal",
+        "pleura",
+        "right",
+        "pleural"
+      ],
+      "pathology": [
+        "pneumothorax",
+        "atelectasis",
+        "effusion",
+        "abnormal",
+        "abnormality"
+      ],
+      "devices": [
+        "tube",
+        "ng tube",
+        "endotracheal tube",
+        "endotracheal"
+      ],
+      "descriptors": [
+        "normal",
+        "acute",
+        "abnormality",
+        "right"
+      ],
+      "negation": [
+        "normal"
+      ]
+    },
+    "mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0\\mimic-eye\\patient_12733339\\REFLACX\\main_data\\P300R606477\\transcript.json": {
+      "anatomy": [
+        "lung",
+        "thorax"
+      ],
+      "pathology": [
+        "cardiomegaly",
+        "pneumothorax",
+        "atelectasis",
+        "effusion",
+        "abnormal",
+        "abnormality",
+        "effusions"
+      ],
+      "devices": [],
+      "descriptors": [
+        "acute",
+        "abnormality",
+        "small"
+      ],
+      "negation": []
+    },
+    "mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0\\mimic-eye\\patient_15526304\\REFLACX\\main_data\\P300R769045\\transcript.json": {
+      "anatomy": [
+        "upper",
+        "hilar",
+        "thorax",
+        "cardiac",
+        "left",
+        "pleura",
+        "right",
+        "pleural"
+      ],
+      "pathology": [
+        "consolidation",
+        "pneumothorax",
+        "atelectasis",
+        "effusion",
+        "abnormal",
+        "abnormality"
+      ],
+      "devices": [
+        "picc"
+      ],
+      "descriptors": [
+        "upper",
+        "acute",
+        "normal",
+        "left",
+        "abnormality",
+        "right"
+      ],
+      "negation": [
+        "normal"
+      ]
+    },
+    "mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0\\mimic-eye\\patient_11629754\\REFLACX\\main_data\\P300R995637\\transcript.json": {
+      "anatomy": [
+        "lung",
+        "cardiac",
+        "mediastinal",
+        "left",
+        "pleura",
+        "pleural"
+      ],
+      "pathology": [
+        "abnormal",
+        "effusion",
+        "abnormality",
+        "consolidation"
+      ],
+      "devices": [
+        "tube"
+      ],
+      "descriptors": [
+        "acute",
+        "normal",
+        "small",
+        "left",
+        "abnormality"
+      ],
+      "negation": [
+        "normal"
+      ]
+    },
+    "mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0\\mimic-eye\\patient_13881772\\REFLACX\\main_data\\P300R234120\\transcript.json": {
+      "anatomy": [
+        "thorax",
+        "cardiac",
+        "lower",
+        "left",
+        "right"
+      ],
+      "pathology": [
+        "abnormal",
+        "abnormality",
+        "consolidation",
+        "pneumothorax"
+      ],
+      "devices": [
+        "catheter"
+      ],
+      "descriptors": [
+        "acute",
+        "enlarged",
+        "lower",
+        "left",
+        "large",
+        "abnormality",
+        "right"
+      ],
+      "negation": []
+    }
+  },
+  "metadata": {
+    "extractor_type": "basic_pattern_matching",
+    "total_transcripts": 5,
+    "categories": [
+      "anatomy",
+      "pathology",
+      "devices",
+      "descriptors",
+      "negation"
+    ]
+  }
+}

@@ -12,12 +12,12 @@
         224
       ],
       "device": "cuda:0",
-      "processing_time": 0.005003452301025391
+      "processing_time": 0.05360865592956543
     },
     "model_inference": {
       "success": true,
       "num_conditions": 8,
-      "processing_time": 0.03388190269470215
+      "processing_time": 0.031187772750854492
     },
     "keyword_extraction": {
       "success": true,
@@ -30,18 +30,18 @@
       "significant_regions": 1,
       "spatial_keywords": 5,
       "target_condition": "Lung Opacity",
-      "processing_time": 0.09496164321899414
+      "processing_time": 0.09109950065612793
     },
     "report_generation": {
       "success": true,
       "used_fallback": false,
-      "report_length": 1155,
-      "sections_found": 4,
-      "processing_time": 5.897252798080444
+      "report_length": 748,
+      "sections_found": 3,
+      "processing_time": 3.2654778957366943
     }
   },
   "performance_metrics": {
-    "total_processing_time": 6.032254457473755,
+    "total_processing_time": 3.445481300354004,
     "steps_completed": 5,
     "total_steps": 5,
     "errors_encountered": 0,
@@ -51,44 +51,44 @@
   "error_log": [],
   "model_predictions": {
     "Atelectasis": {
-      "probability": 0.3822321891784668,
+      "probability": 0.38192978501319885,
       "predicted": false,
-      "logit": -0.4800844192504883
+      "logit": -0.4813653826713562
     },
     "Cardiomegaly": {
-      "probability": 0.28549155592918396,
+      "probability": 0.28018471598625183,
       "predicted": false,
-      "logit": -0.9173823595046997
+      "logit": -0.9435455799102783
     },
     "Edema": {
-      "probability": 0.2752915620803833,
+      "probability": 0.26997071504592896,
       "predicted": false,
-      "logit": -0.9679386615753174
+      "logit": -0.9947712421417236
     },
     "Lung Opacity": {
-      "probability": 0.5770801305770874,
+      "probability": 0.6036065220832825,
       "predicted": true,
-      "logit": 0.310798317193985
+      "logit": 0.4205150902271271
     },
     "No Finding": {
-      "probability": 0.40755870938301086,
+      "probability": 0.40180012583732605,
       "predicted": false,
-      "logit": -0.37406671047210693
+      "logit": -0.39797019958496094
     },
     "Pleural Effusion": {
-      "probability": 0.21904489398002625,
+      "probability": 0.22188478708267212,
       "predicted": false,
-      "logit": -1.2712409496307373
+      "logit": -1.254716396331787
     },
     "Pneumonia": {
-      "probability": 0.5423756241798401,
+      "probability": 0.5457684993743896,
       "predicted": true,
-      "logit": 0.1699099838733673
+      "logit": 0.18358799815177917
     },
     "Support Devices": {
-      "probability": 0.35295262932777405,
+      "probability": 0.36467432975769043,
       "predicted": false,
-      "logit": -0.6060856580734253
+      "logit": -0.5551329255104065
     }
   },
   "prediction_keywords": {
@@ -133,31 +133,31 @@
     ],
     "high_confidence_findings": [],
     "medium_confidence_findings": [
-      "suspected infiltrate",
       "possible opacity",
-      "possible pneumonia",
       "potential consolidation",
+      "suspected infiltrate",
       "potential pneumonia",
+      "possible pneumonia",
       "suspected infection"
     ],
     "low_confidence_findings": [
-      "pathology identified",
-      "no devices",
-      "no collapse",
-      "normal lung expansion",
       "abnormalities present",
-      "findings detected",
-      "no medical devices",
+      "no collapse",
+      "no support equipment",
       "no atelectasis",
-      "no support equipment"
+      "pathology identified",
+      "findings detected",
+      "no devices",
+      "no medical devices",
+      "normal lung expansion"
     ]
   },
   "attention_analysis": {
     "regions": {
       "upper_left": {
         "name": "left upper lung field",
-        "max_attention": 0.2740834355354309,
-        "mean_attention": 0.05190066620707512,
+        "max_attention": 0.353047639131546,
+        "mean_attention": 0.07253731042146683,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
@@ -168,8 +168,8 @@
       },
       "upper_right": {
         "name": "right upper lung field",
-        "max_attention": 0.20026153326034546,
-        "mean_attention": 0.04281363636255264,
+        "max_attention": 0.20468474924564362,
+        "mean_attention": 0.05330626294016838,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
@@ -180,8 +180,8 @@
       },
       "middle_left": {
         "name": "left middle lung field",
-        "max_attention": 0.24554508924484253,
-        "mean_attention": 0.06247350201010704,
+        "max_attention": 0.20111049711704254,
+        "mean_attention": 0.07671070843935013,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
@@ -192,8 +192,8 @@
       },
       "middle_right": {
         "name": "right middle lung field",
-        "max_attention": 0.2259688824415207,
-        "mean_attention": 0.06801684200763702,
+        "max_attention": 0.29613953828811646,
+        "mean_attention": 0.08128595352172852,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
@@ -204,8 +204,8 @@
       },
       "lower_left": {
         "name": "left lower lung field",
-        "max_attention": 0.22620098292827606,
-        "mean_attention": 0.03670510649681091,
+        "max_attention": 0.1984909623861313,
+        "mean_attention": 0.03646509349346161,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
@@ -217,7 +217,7 @@
       "lower_right": {
         "name": "right lower lung field",
         "max_attention": 1.0,
-        "mean_attention": 0.06777074187994003,
+        "mean_attention": 0.07392929494380951,
         "attention_coverage": 0.008272058823529412,
         "is_significant": true,
         "keywords": [
@@ -228,8 +228,8 @@
       },
       "central_cardiac": {
         "name": "cardiac silhouette",
-        "max_attention": 0.2259688824415207,
-        "mean_attention": 0.06541647017002106,
+        "max_attention": 0.28360515832901,
+        "mean_attention": 0.08017788827419281,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
@@ -241,8 +241,8 @@
       },
       "hilum_left": {
         "name": "left hilum",
-        "max_attention": 0.16248762607574463,
-        "mean_attention": 0.07135985791683197,
+        "max_attention": 0.2164706438779831,
+        "mean_attention": 0.09339135885238647,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
@@ -253,8 +253,8 @@
       },
       "hilum_right": {
         "name": "right hilum",
-        "max_attention": 0.2259688824415207,
-        "mean_attention": 0.06967245042324066,
+        "max_attention": 0.2472221851348877,
+        "mean_attention": 0.0809989720582962,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
@@ -267,12 +267,12 @@
     "top_regions": [
       "lower_right",
       "upper_left",
-      "middle_left"
+      "middle_right"
     ],
     "significant_regions": [
       "lower_right"
     ],
-    "overall_attention_intensity": 0.054189249873161316,
+    "overall_attention_intensity": 0.06538543105125427,
     "max_attention_location": {
       "y": 199,
       "x": 152
@@ -288,11 +288,11 @@
   ],
   "llm_response": {
     "success": true,
-    "report": "## CHEST X-RAY REPORT\n\n**Patient Name:** [Patient Name - *To be completed*]\n**Date of Study:** [Date - *To be completed*]\n**Study Type:** Chest Radiograph (PA/AP View)\n\n**FINDINGS:**\n\nThere is a suggestion of lung opacity identified on this chest radiograph. The extent and precise location are not definitively characterized, but appear to involve the [Specify Location if confidently predicted \u2013 otherwise omit]. No acute collapse or lobar consolidation is clearly seen. \n\n**IMPRESSION:**\n\nPossible pneumonia or other inflammatory/infectious process cannot be entirely excluded given the presence of lung opacity. Differential considerations include early pneumonia, pulmonary infiltrate secondary to another etiology, or less likely, atelectasis. \n\n**RECOMMENDATIONS:**\n\nCorrelation with clinical findings and patient history is recommended. Follow-up imaging (repeat chest radiograph) may be considered if clinically indicated to assess for stability or progression of the observed opacity.\n\n\n\n____________________________\n[Radiologist Name - *To be completed*]\n[Radiologist Signature - *To be completed*]\n[Radiologist Credentials - *To be completed*] \n",
+    "report": "**FINDINGS:**\n\nThere is a suggestion of lung opacity identified on this chest radiograph. The extent and precise location are not definitively characterized, but appear to involve [anatomical location \u2013 *omitted due to low confidence in specific localization*]. No acute pleuroeffusion or pneumothorax is seen. \n\n**IMPRESSION:**\n\nPossible lung opacity, concerning for potential pneumonia or other infiltrative process. The differential diagnosis includes infectious etiology versus non-infectious inflammatory conditions. Correlation with clinical presentation and laboratory data is recommended.\n\n**RECOMMENDATIONS:**\n\nFollow-up imaging may be considered to assess stability of the opacity if clinically indicated. Clinical correlation is advised.\n\n\n\n",
     "raw_response": {
-      "id": "chatcmpl-0lu9sgbkawdos96qh1iistr",
+      "id": "chatcmpl-hhj905tz2i5og2omljrk5",
       "object": "chat.completion",
-      "created": 1749066357,
+      "created": 1749821668,
       "model": "gemma-3-27b-it-qat",
       "choices": [
         {
@@ -301,14 +301,14 @@
           "finish_reason": "stop",
           "message": {
             "role": "assistant",
-            "content": "## CHEST X-RAY REPORT\n\n**Patient Name:** [Patient Name - *To be completed*]\n**Date of Study:** [Date - *To be completed*]\n**Study Type:** Chest Radiograph (PA/AP View)\n\n**FINDINGS:**\n\nThere is a suggestion of lung opacity identified on this chest radiograph. The extent and precise location are not definitively characterized, but appear to involve the [Specify Location if confidently predicted \u2013 otherwise omit]. No acute collapse or lobar consolidation is clearly seen. \n\n**IMPRESSION:**\n\nPossible pneumonia or other inflammatory/infectious process cannot be entirely excluded given the presence of lung opacity. Differential considerations include early pneumonia, pulmonary infiltrate secondary to another etiology, or less likely, atelectasis. \n\n**RECOMMENDATIONS:**\n\nCorrelation with clinical findings and patient history is recommended. Follow-up imaging (repeat chest radiograph) may be considered if clinically indicated to assess for stability or progression of the observed opacity.\n\n\n\n____________________________\n[Radiologist Name - *To be completed*]\n[Radiologist Signature - *To be completed*]\n[Radiologist Credentials - *To be completed*] \n"
+            "content": "**FINDINGS:**\n\nThere is a suggestion of lung opacity identified on this chest radiograph. The extent and precise location are not definitively characterized, but appear to involve [anatomical location \u2013 *omitted due to low confidence in specific localization*]. No acute pleuroeffusion or pneumothorax is seen. \n\n**IMPRESSION:**\n\nPossible lung opacity, concerning for potential pneumonia or other infiltrative process. The differential diagnosis includes infectious etiology versus non-infectious inflammatory conditions. Correlation with clinical presentation and laboratory data is recommended.\n\n**RECOMMENDATIONS:**\n\nFollow-up imaging may be considered to assess stability of the opacity if clinically indicated. Clinical correlation is advised.\n\n\n\n"
           }
         }
       ],
       "usage": {
-        "prompt_tokens": 530,
-        "completion_tokens": 242,
-        "total_tokens": 772
+        "prompt_tokens": 568,
+        "completion_tokens": 139,
+        "total_tokens": 707
       },
       "stats": {},
       "system_fingerprint": "gemma-3-27b-it-qat"
@@ -317,19 +317,18 @@
     "attempt": 1
   },
   "medical_report": {
-    "report_text": "## CHEST X-RAY REPORT\n\n**Patient Name:** [Patient Name - *To be completed*]\n**Date of Study:** [Date - *To be completed*]\n**Study Type:** Chest Radiograph (PA/AP View)\n\n**FINDINGS:**\n\nThere is a suggestion of lung opacity identified on this chest radiograph. The extent and precise location are not definitively characterized, but appear to involve the [Specify Location if confidently predicted \u2013 otherwise omit]. No acute collapse or lobar consolidation is clearly seen. \n\n**IMPRESSION:**\n\nPossible pneumonia or other inflammatory/infectious process cannot be entirely excluded given the presence of lung opacity. Differential considerations include early pneumonia, pulmonary infiltrate secondary to another etiology, or less likely, atelectasis. \n\n**RECOMMENDATIONS:**\n\nCorrelation with clinical findings and patient history is recommended. Follow-up imaging (repeat chest radiograph) may be considered if clinically indicated to assess for stability or progression of the observed opacity.\n\n\n\n____________________________\n[Radiologist Name - *To be completed*]\n[Radiologist Signature - *To be completed*]\n[Radiologist Credentials - *To be completed*]",
+    "report_text": "**FINDINGS:**\n\nThere is a suggestion of lung opacity identified on this chest radiograph. The extent and precise location are not definitively characterized, but appear to involve [anatomical location \u2013 *omitted due to low confidence in specific localization*]. No acute pleuroeffusion or pneumothorax is seen. \n\n**IMPRESSION:**\n\nPossible lung opacity, concerning for potential pneumonia or other infiltrative process. The differential diagnosis includes infectious etiology versus non-infectious inflammatory conditions. Correlation with clinical presentation and laboratory data is recommended.\n\n**RECOMMENDATIONS:**\n\nFollow-up imaging may be considered to assess stability of the opacity if clinically indicated. Clinical correlation is advised.",
     "sections": {
-      "report": "## CHEST X-RAY REPORT\n**Patient Name:** [Patient Name - *To be completed*]\n**Date of Study:** [Date - *To be completed*]\n**Study Type:** Chest Radiograph (PA/AP View)",
-      "**findings**": "There is a suggestion of lung opacity identified on this chest radiograph. The extent and precise location are not definitively characterized, but appear to involve the [Specify Location if confidently predicted \u2013 otherwise omit]. No acute collapse or lobar consolidation is clearly seen.",
-      "**impression**": "Possible pneumonia or other inflammatory/infectious process cannot be entirely excluded given the presence of lung opacity. Differential considerations include early pneumonia, pulmonary infiltrate secondary to another etiology, or less likely, atelectasis.",
-      "**recommendations**": "Correlation with clinical findings and patient history is recommended. Follow-up imaging (repeat chest radiograph) may be considered if clinically indicated to assess for stability or progression of the observed opacity.\n____________________________\n[Radiologist Name - *To be completed*]\n[Radiologist Signature - *To be completed*]\n[Radiologist Credentials - *To be completed*]"
+      "**findings**": "There is a suggestion of lung opacity identified on this chest radiograph. The extent and precise location are not definitively characterized, but appear to involve [anatomical location \u2013 *omitted due to low confidence in specific localization*]. No acute pleuroeffusion or pneumothorax is seen.",
+      "**impression**": "Possible lung opacity, concerning for potential pneumonia or other infiltrative process. The differential diagnosis includes infectious etiology versus non-infectious inflammatory conditions. Correlation with clinical presentation and laboratory data is recommended.",
+      "**recommendations**": "Follow-up imaging may be considered to assess stability of the opacity if clinically indicated. Clinical correlation is advised."
     },
     "metadata": {
-      "generated_at": "2025-06-04T19:46:03",
+      "generated_at": "2025-06-13T13:34:31",
       "generator": "Medical Report Generator v1.0",
       "model_used": "gemma-3-27b-it-qat",
-      "word_count": 152,
-      "character_count": 1155,
+      "word_count": 94,
+      "character_count": 748,
       "image_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\data_dump\\output\\img_png\\0066734a-35568fde-fd52ba23-ec66f3de-88d4aaf9.png",
       "template_used": "standard",
       "llm_success": true,

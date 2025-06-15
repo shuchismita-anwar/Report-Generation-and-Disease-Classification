@@ -109,3 +109,22 @@
 2025-06-13 18:44:08 - MedicalReportEvaluator - INFO - Batch evaluation completed - ID: batch_20250613_184408_3
 2025-06-13 18:44:08 - MedicalReportEvaluator - INFO - Success: 3/3, Time: 0.06s, Avg: 0.020s/report
 2025-06-13 18:44:08 - MedicalReportEvaluator - INFO - Batch Overall Score: 0.1005
+2025-06-13 20:01:20 - MedicalReportEvaluator - INFO - Logging system initialized successfully
+2025-06-13 20:01:20 - MedicalReportEvaluator - INFO - Configuration loaded successfully from config/evaluation_config.json
+2025-06-13 20:01:20 - MedicalReportEvaluator - INFO - Successfully initialized 6 metrics
+2025-06-13 20:01:20 - MedicalReportEvaluator - INFO - Initialized Medical Report Evaluator - Session: eval_20250613_200120
+2025-06-13 20:01:20 - MedicalReportEvaluator - INFO - Loaded 6 metrics: ['bleu', 'rouge', 'meteor', 'bert_score', 'cider', 'medical']
+2025-06-13 20:01:21 - MedicalReportEvaluator - INFO - Starting batch evaluation - ID: batch_20250613_200121_3, Size: 3
+2025-06-13 20:01:21 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 002da0d9-ce49c30d-4dfcc1f8-746d2401-d8044d48
+2025-06-13 20:01:23 - MedicalReportEvaluator - INFO - Loading BERT model: bert-base-uncased
+2025-06-13 20:01:25 - MedicalReportEvaluator - INFO - BERTScore model loaded on device: cuda
+2025-06-13 20:01:25 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.0868, Quality: very_poor, Time: 3.9520s
+2025-06-13 20:01:25 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 005aff0f-0c236062-06df954a-25ad1874-bcdffcb0
+2025-06-13 20:01:25 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.0676, Quality: very_poor, Time: 0.1089s
+2025-06-13 20:01:25 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 0066734a-35568fde-fd52ba23-ec66f3de-88d4aaf9
+2025-06-13 20:01:25 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.0868, Quality: very_poor, Time: 0.0544s
+2025-06-13 20:01:25 - MedicalReportEvaluator - INFO - Processed 3/3 reports
+2025-06-13 20:01:25 - MedicalReportEvaluator - INFO - Saved batch results to evaluation_results/batch_20250613_200121_3_final.json
+2025-06-13 20:01:25 - MedicalReportEvaluator - INFO - Batch evaluation completed - ID: batch_20250613_200121_3
+2025-06-13 20:01:25 - MedicalReportEvaluator - INFO - Success: 3/3, Time: 4.12s, Avg: 1.372s/report
+2025-06-13 20:01:25 - MedicalReportEvaluator - INFO - Batch Overall Score: 0.0804

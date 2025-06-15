@@ -1,0 +1,365 @@
+{
+  "word2idx": {
+    "<PAD>": 0,
+    "<UNK>": 1,
+    "<START>": 2,
+    "<END>": 3,
+    "abnormality": 4,
+    "right": 5,
+    "normal": 6,
+    "left": 7,
+    "abnormal": 8,
+    "acute": 9,
+    "thorax": 10,
+    "pneumothorax": 11,
+    "effusion": 12,
+    "pleura": 13,
+    "pleural": 14,
+    "atelectasis": 15,
+    "cardiac": 16,
+    "consolidation": 17,
+    "tube": 18,
+    "lung": 19,
+    "small": 20,
+    "upper": 21,
+    "lower": 22,
+    "cardiomediastinal": 23,
+    "ng tube": 24,
+    "endotracheal tube": 25,
+    "endotracheal": 26,
+    "cardiomegaly": 27,
+    "effusions": 28,
+    "hilar": 29,
+    "picc": 30,
+    "mediastinal": 31,
+    "catheter": 32,
+    "enlarged": 33,
+    "large": 34
+  },
+  "idx2word": {
+    "0": "<PAD>",
+    "1": "<UNK>",
+    "2": "<START>",
+    "3": "<END>",
+    "4": "abnormality",
+    "5": "right",
+    "6": "normal",
+    "7": "left",
+    "8": "abnormal",
+    "9": "acute",
+    "10": "thorax",
+    "11": "pneumothorax",
+    "12": "effusion",
+    "13": "pleura",
+    "14": "pleural",
+    "15": "atelectasis",
+    "16": "cardiac",
+    "17": "consolidation",
+    "18": "tube",
+    "19": "lung",
+    "20": "small",
+    "21": "upper",
+    "22": "lower",
+    "23": "cardiomediastinal",
+    "24": "ng tube",
+    "25": "endotracheal tube",
+    "26": "endotracheal",
+    "27": "cardiomegaly",
+    "28": "effusions",
+    "29": "hilar",
+    "30": "picc",
+    "31": "mediastinal",
+    "32": "catheter",
+    "33": "enlarged",
+    "34": "large"
+  },
+  "word_frequencies": {
+    "abnormality": 10,
+    "right": 6,
+    "normal": 6,
+    "left": 6,
+    "abnormal": 5,
+    "acute": 5,
+    "thorax": 4,
+    "pneumothorax": 4,
+    "effusion": 4,
+    "pleura": 3,
+    "pleural": 3,
+    "atelectasis": 3,
+    "cardiac": 3,
+    "consolidation": 3,
+    "tube": 2,
+    "lung": 2,
+    "small": 2,
+    "upper": 2,
+    "lower": 2,
+    "cardiomediastinal": 1,
+    "ng tube": 1,
+    "endotracheal tube": 1,
+    "endotracheal": 1,
+    "cardiomegaly": 1,
+    "effusions": 1,
+    "hilar": 1,
+    "picc": 1,
+    "mediastinal": 1,
+    "catheter": 1,
+    "enlarged": 1,
+    "large": 1
+  },
+  "category_frequencies": {
+    "anatomy": {
+      "thorax": 4,
+      "cardiomediastinal": 1,
+      "pleura": 3,
+      "right": 3,
+      "pleural": 3,
+      "lung": 2,
+      "upper": 1,
+      "hilar": 1,
+      "cardiac": 3,
+      "left": 3,
+      "mediastinal": 1,
+      "lower": 1
+    },
+    "pathology": {
+      "pneumothorax": 4,
+      "atelectasis": 3,
+      "effusion": 4,
+      "abnormal": 5,
+      "abnormality": 5,
+      "cardiomegaly": 1,
+      "effusions": 1,
+      "consolidation": 3
+    },
+    "devices": {
+      "tube": 2,
+      "ng tube": 1,
+      "endotracheal tube": 1,
+      "endotracheal": 1,
+      "picc": 1,
+      "catheter": 1
+    },
+    "descriptors": {
+      "normal": 3,
+      "acute": 5,
+      "abnormality": 5,
+      "right": 3,
+      "small": 2,
+      "upper": 1,
+      "left": 3,
+      "enlarged": 1,
+      "lower": 1,
+      "large": 1
+    },
+    "negation": {
+      "normal": 3
+    }
+  },
+  "special_tokens": {
+    "<PAD>": 0,
+    "<UNK>": 1,
+    "<START>": 2,
+    "<END>": 3
+  },
+  "config": {
+    "min_frequency": 1,
+    "max_vocab_size": 500
+  },
+  "statistics": {
+    "total_keywords_processed": 87,
+    "unique_keywords_before_filtering": 31,
+    "unique_keywords_after_filtering": 31,
+    "final_vocab_size": 35,
+    "keywords_by_category": {
+      "anatomy": {
+        "count": 12,
+        "total_frequency": 26,
+        "top_keywords": [
+          [
+            "thorax",
+            4
+          ],
+          [
+            "pleura",
+            3
+          ],
+          [
+            "right",
+            3
+          ],
+          [
+            "pleural",
+            3
+          ],
+          [
+            "cardiac",
+            3
+          ],
+          [
+            "left",
+            3
+          ],
+          [
+            "lung",
+            2
+          ],
+          [
+            "cardiomediastinal",
+            1
+          ],
+          [
+            "upper",
+            1
+          ],
+          [
+            "hilar",
+            1
+          ]
+        ]
+      },
+      "pathology": {
+        "count": 8,
+        "total_frequency": 26,
+        "top_keywords": [
+          [
+            "abnormal",
+            5
+          ],
+          [
+            "abnormality",
+            5
+          ],
+          [
+            "pneumothorax",
+            4
+          ],
+          [
+            "effusion",
+            4
+          ],
+          [
+            "atelectasis",
+            3
+          ],
+          [
+            "consolidation",
+            3
+          ],
+          [
+            "cardiomegaly",
+            1
+          ],
+          [
+            "effusions",
+            1
+          ]
+        ]
+      },
+      "devices": {
+        "count": 6,
+        "total_frequency": 7,
+        "top_keywords": [
+          [
+            "tube",
+            2
+          ],
+          [
+            "ng tube",
+            1
+          ],
+          [
+            "endotracheal tube",
+            1
+          ],
+          [
+            "endotracheal",
+            1
+          ],
+          [
+            "picc",
+            1
+          ],
+          [
+            "catheter",
+            1
+          ]
+        ]
+      },
+      "descriptors": {
+        "count": 10,
+        "total_frequency": 25,
+        "top_keywords": [
+          [
+            "acute",
+            5
+          ],
+          [
+            "abnormality",
+            5
+          ],
+          [
+            "normal",
+            3
+          ],
+          [
+            "right",
+            3
+          ],
+          [
+            "left",
+            3
+          ],
+          [
+            "small",
+            2
+          ],
+          [
+            "upper",
+            1
+          ],
+          [
+            "enlarged",
+            1
+          ],
+          [
+            "lower",
+            1
+          ],
+          [
+            "large",
+            1
+          ]
+        ]
+      },
+      "negation": {
+        "count": 1,
+        "total_frequency": 3,
+        "top_keywords": [
+          [
+            "normal",
+            3
+          ]
+        ]
+      }
+    },
+    "frequency_distribution": {
+      "min_frequency": 1,
+      "max_frequency": 10,
+      "avg_frequency": 2.806451612903226,
+      "frequency_bins": {
+        "10": 1,
+        "6": 3,
+        "5": 2,
+        "4": 3,
+        "3": 5,
+        "2": 5,
+        "1": 12
+      }
+    },
+    "coverage_stats": {
+      "total_keyword_instances": 87,
+      "vocab_coverage": 1.0,
+      "frequency_coverage": 1.0
+    }
+  }
+}

@@ -12,36 +12,36 @@
         224
       ],
       "device": "cuda:0",
-      "processing_time": 0.008266448974609375
+      "processing_time": 0.07079410552978516
     },
     "model_inference": {
       "success": true,
       "num_conditions": 8,
-      "processing_time": 0.028308629989624023
+      "processing_time": 0.02956223487854004
     },
     "keyword_extraction": {
       "success": true,
       "total_keywords": 3,
       "conditions_with_keywords": 1,
-      "processing_time": 0.0004107952117919922
+      "processing_time": 0.0
     },
     "attention_analysis": {
       "success": true,
       "significant_regions": 5,
-      "spatial_keywords": 21,
+      "spatial_keywords": 19,
       "target_condition": "No Finding",
-      "processing_time": 0.08696913719177246
+      "processing_time": 0.0973961353302002
     },
     "report_generation": {
       "success": true,
       "used_fallback": false,
-      "report_length": 387,
-      "sections_found": 4,
-      "processing_time": 2.4529635906219482
+      "report_length": 178,
+      "sections_found": 3,
+      "processing_time": 1.0627069473266602
     }
   },
   "performance_metrics": {
-    "total_processing_time": 2.5824856758117676,
+    "total_processing_time": 1.2672927379608154,
     "steps_completed": 5,
     "total_steps": 5,
     "errors_encountered": 0,
@@ -51,44 +51,44 @@
   "error_log": [],
   "model_predictions": {
     "Atelectasis": {
-      "probability": 0.24359802901744843,
+      "probability": 0.24448426067829132,
       "predicted": false,
-      "logit": -1.1330534219741821
+      "logit": -1.1282497644424438
     },
     "Cardiomegaly": {
-      "probability": 0.25998613238334656,
+      "probability": 0.25921785831451416,
       "predicted": false,
-      "logit": -1.046040654182434
+      "logit": -1.0500377416610718
     },
     "Edema": {
-      "probability": 0.1583487093448639,
+      "probability": 0.15995514392852783,
       "predicted": false,
-      "logit": -1.6705660820007324
+      "logit": -1.6585619449615479
     },
     "Lung Opacity": {
-      "probability": 0.2925354838371277,
+      "probability": 0.29066556692123413,
       "predicted": false,
-      "logit": -0.8831014633178711
+      "logit": -0.892153799533844
     },
     "No Finding": {
-      "probability": 0.7457865476608276,
+      "probability": 0.7462320327758789,
       "predicted": true,
-      "logit": 1.0762652158737183
+      "logit": 1.0786163806915283
     },
     "Pleural Effusion": {
-      "probability": 0.13301637768745422,
+      "probability": 0.13431572914123535,
       "predicted": false,
-      "logit": -1.8745478391647339
+      "logit": -1.8633270263671875
     },
     "Pneumonia": {
-      "probability": 0.2850266396999359,
+      "probability": 0.27997320890426636,
       "predicted": false,
-      "logit": -0.919662594795227
+      "logit": -0.9445945024490356
     },
     "Support Devices": {
-      "probability": 0.25561240315437317,
+      "probability": 0.25796517729759216,
       "predicted": false,
-      "logit": -1.0688996315002441
+      "logit": -1.0565714836120605
     }
   },
   "prediction_keywords": {
@@ -100,9 +100,9 @@
   },
   "keyword_summary": {
     "primary_findings": [
+      "no acute findings",
       "normal chest X-ray",
-      "unremarkable study",
-      "no acute findings"
+      "unremarkable study"
     ],
     "anatomical_locations": [],
     "severity_indicators": [],
@@ -112,9 +112,9 @@
       "No Finding"
     ],
     "high_confidence_findings": [
+      "no acute findings",
       "normal chest X-ray",
-      "unremarkable study",
-      "no acute findings"
+      "unremarkable study"
     ],
     "medium_confidence_findings": [],
     "low_confidence_findings": []
@@ -123,8 +123,8 @@
     "regions": {
       "upper_left": {
         "name": "left upper lung field",
-        "max_attention": 0.38870489597320557,
-        "mean_attention": 0.12275136262178421,
+        "max_attention": 0.3713327646255493,
+        "mean_attention": 0.1118444874882698,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
@@ -135,9 +135,9 @@
       },
       "upper_right": {
         "name": "right upper lung field",
-        "max_attention": 0.7383474707603455,
-        "mean_attention": 0.1640169322490692,
-        "attention_coverage": 0.003009630818619583,
+        "max_attention": 0.7408124208450317,
+        "mean_attention": 0.1487364023923874,
+        "attention_coverage": 0.002407704654895666,
         "is_significant": true,
         "keywords": [
           "right upper lobe",
@@ -147,8 +147,8 @@
       },
       "middle_left": {
         "name": "left middle lung field",
-        "max_attention": 0.5809884071350098,
-        "mean_attention": 0.18502934277057648,
+        "max_attention": 0.5957515239715576,
+        "mean_attention": 0.1716947853565216,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
@@ -159,9 +159,9 @@
       },
       "middle_right": {
         "name": "right middle lung field",
-        "max_attention": 1.0,
-        "mean_attention": 0.29761630296707153,
-        "attention_coverage": 0.05223880597014925,
+        "max_attention": 0.9811238646507263,
+        "mean_attention": 0.2773703932762146,
+        "attention_coverage": 0.045442430703624734,
         "is_significant": true,
         "keywords": [
           "right middle lobe",
@@ -171,9 +171,9 @@
       },
       "lower_left": {
         "name": "left lower lung field",
-        "max_attention": 0.9260398149490356,
-        "mean_attention": 0.14250224828720093,
-        "attention_coverage": 0.005252100840336135,
+        "max_attention": 1.0,
+        "mean_attention": 0.12359582632780075,
+        "attention_coverage": 0.006959033613445379,
         "is_significant": true,
         "keywords": [
           "left lower lobe",
@@ -183,8 +183,8 @@
       },
       "lower_right": {
         "name": "right lower lung field",
-        "max_attention": 0.5329036712646484,
-        "mean_attention": 0.11390524357557297,
+        "max_attention": 0.4699589014053345,
+        "mean_attention": 0.10408471524715424,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
@@ -195,9 +195,9 @@
       },
       "central_cardiac": {
         "name": "cardiac silhouette",
-        "max_attention": 0.8396365642547607,
-        "mean_attention": 0.2580213248729706,
-        "attention_coverage": 0.01795746388443018,
+        "max_attention": 0.7610675096511841,
+        "mean_attention": 0.23265065252780914,
+        "attention_coverage": 0.015248796147672551,
         "is_significant": true,
         "keywords": [
           "heart border",
@@ -208,8 +208,8 @@
       },
       "hilum_left": {
         "name": "left hilum",
-        "max_attention": 0.5695657730102539,
-        "mean_attention": 0.20802007615566254,
+        "max_attention": 0.5957515239715576,
+        "mean_attention": 0.19847428798675537,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
@@ -220,9 +220,9 @@
       },
       "hilum_right": {
         "name": "right hilum",
-        "max_attention": 1.0,
-        "mean_attention": 0.3785106837749481,
-        "attention_coverage": 0.09400757406994877,
+        "max_attention": 0.9811238646507263,
+        "mean_attention": 0.3604114353656769,
+        "attention_coverage": 0.08130986856760972,
         "is_significant": true,
         "keywords": [
           "right hilar region",
@@ -232,9 +232,9 @@
       }
     },
     "top_regions": [
+      "lower_left",
       "middle_right",
-      "hilum_right",
-      "lower_left"
+      "hilum_right"
     ],
     "significant_regions": [
       "upper_right",
@@ -243,10 +243,10 @@
       "central_cardiac",
       "hilum_right"
     ],
-    "overall_attention_intensity": 0.1680699735879898,
+    "overall_attention_intensity": 0.15348514914512634,
     "max_attention_location": {
-      "y": 119,
-      "x": 168
+      "y": 199,
+      "x": 72
     },
     "visualization_saved": "test_data\\attention_visualizations\\attention_005aff0f-0c236062-06df954a-25ad1874-bcdffcb0.png"
   },
@@ -264,9 +264,7 @@
     "focal attention in left lower lung field",
     "heart border",
     "mediastinum",
-    "cardiac shadow",
-    "central region",
-    "focal attention in cardiac silhouette",
+    "increased attention in cardiac silhouette",
     "right hilar region",
     "right pulmonary vessels",
     "right bronchial tree",
@@ -275,11 +273,11 @@
   ],
   "llm_response": {
     "success": true,
-    "report": "## CHEST X-RAY REPORT\n\n**Patient Name:** [Insert Patient Name Here]\n**Date of Study:** [Insert Date Here]\n**Study Type:** Chest Radiograph (PA and Lateral)\n\n**FINDINGS:**\n\nNormal chest radiograph. There are no acute cardiopulmonary abnormalities identified. \n\n**IMPRESSION:**\n\nNo evidence of acute disease.\n\n**RECOMMENDATIONS:**\n\nNone.\n\n\n\n[Radiologist Name/Signature]\n[Radiologist Title]\n",
+    "report": "**FINDINGS:**\n\nNormal chest radiograph. There are no acute cardiopulmonary abnormalities identified. \n\n**IMPRESSION:**\n\nNo evidence of acute disease.\n\n**RECOMMENDATIONS:**\n\nNone.\n\n\n\n",
     "raw_response": {
-      "id": "chatcmpl-j2nuyz5q3xltdmau0ca1pl",
+      "id": "chatcmpl-vyv0dsa9eeaea1wq01gu9",
       "object": "chat.completion",
-      "created": 1749066354,
+      "created": 1749821667,
       "model": "gemma-3-27b-it-qat",
       "choices": [
         {
@@ -288,14 +286,14 @@
           "finish_reason": "stop",
           "message": {
             "role": "assistant",
-            "content": "## CHEST X-RAY REPORT\n\n**Patient Name:** [Insert Patient Name Here]\n**Date of Study:** [Insert Date Here]\n**Study Type:** Chest Radiograph (PA and Lateral)\n\n**FINDINGS:**\n\nNormal chest radiograph. There are no acute cardiopulmonary abnormalities identified. \n\n**IMPRESSION:**\n\nNo evidence of acute disease.\n\n**RECOMMENDATIONS:**\n\nNone.\n\n\n\n[Radiologist Name/Signature]\n[Radiologist Title]\n"
+            "content": "**FINDINGS:**\n\nNormal chest radiograph. There are no acute cardiopulmonary abnormalities identified. \n\n**IMPRESSION:**\n\nNo evidence of acute disease.\n\n**RECOMMENDATIONS:**\n\nNone.\n\n\n\n"
           }
         }
       ],
       "usage": {
-        "prompt_tokens": 431,
-        "completion_tokens": 100,
-        "total_tokens": 531
+        "prompt_tokens": 469,
+        "completion_tokens": 43,
+        "total_tokens": 512
       },
       "stats": {},
       "system_fingerprint": "gemma-3-27b-it-qat"
@@ -304,19 +302,18 @@
     "attempt": 1
   },
   "medical_report": {
-    "report_text": "## CHEST X-RAY REPORT\n\n**Patient Name:** [Insert Patient Name Here]\n**Date of Study:** [Insert Date Here]\n**Study Type:** Chest Radiograph (PA and Lateral)\n\n**FINDINGS:**\n\nNormal chest radiograph. There are no acute cardiopulmonary abnormalities identified. \n\n**IMPRESSION:**\n\nNo evidence of acute disease.\n\n**RECOMMENDATIONS:**\n\nNone.\n\n\n\n[Radiologist Name/Signature]\n[Radiologist Title]",
+    "report_text": "**FINDINGS:**\n\nNormal chest radiograph. There are no acute cardiopulmonary abnormalities identified. \n\n**IMPRESSION:**\n\nNo evidence of acute disease.\n\n**RECOMMENDATIONS:**\n\nNone.",
     "sections": {
-      "report": "## CHEST X-RAY REPORT\n**Patient Name:** [Insert Patient Name Here]\n**Date of Study:** [Insert Date Here]\n**Study Type:** Chest Radiograph (PA and Lateral)",
       "**findings**": "Normal chest radiograph. There are no acute cardiopulmonary abnormalities identified.",
       "**impression**": "No evidence of acute disease.",
-      "**recommendations**": "None.\n[Radiologist Name/Signature]\n[Radiologist Title]"
+      "**recommendations**": "None."
     },
     "metadata": {
-      "generated_at": "2025-06-04T19:45:56",
+      "generated_at": "2025-06-13T13:34:28",
       "generator": "Medical Report Generator v1.0",
       "model_used": "gemma-3-27b-it-qat",
-      "word_count": 46,
-      "character_count": 387,
+      "word_count": 19,
+      "character_count": 178,
       "image_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\data_dump\\output\\img_png\\005aff0f-0c236062-06df954a-25ad1874-bcdffcb0.png",
       "template_used": "standard",
       "llm_success": true,
