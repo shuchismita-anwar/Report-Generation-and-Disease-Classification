@@ -60,9 +60,9 @@ SCHEDULER_CONFIG = {
 
 # Loss Function Configuration
 LOSS_CONFIG = {
-    "disease_loss_type": "hard_negative",  # 🔥 PRIORITY 2 FIX: Use hard negative mining
+    "disease_loss_type": "focal",  # 🔥 PHASE 2.5: Switch from hard_negative to focal loss
     "focal_alpha": 1.10,
-    "focal_gamma": 3.0,  # Increased from 2.5 → 3.0 to focus more on hard examples
+    "focal_gamma": 3.0,  # 🔥 PHASE 2.5: High gamma to focus strongly on hard examples
     "label_smoothing": 0.2,  # 🔥 PHASE 2.4: Increased from 0.15 → 0.2 for better calibration
     "pos_weight_cap": 16.0,
     "pos_weight_smoothing": 0.07,

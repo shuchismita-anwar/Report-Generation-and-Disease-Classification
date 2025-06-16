@@ -55,7 +55,7 @@ from config.data_config import DATA_CONFIG
 from training.data_collator import HybridDataCollator, create_data_collator
 from training.metrics import HybridMetrics, MetricsConfig, create_hybrid_metrics
 from models.hybrid_model import HybridMedicalModel
-from models.loss_functions import HardNegativeLoss  # 🔥 PRIORITY 2 FIX: Import hard negative loss
+from models.loss_functions import FocalLoss  # 🔥 PHASE 2.5: Import focal loss instead of hard negative loss
 from utils.memory_utils import *
 from utils.training_improvements import (
     temperature_scale, compute_class_weights, mixup_data, mixup_criterion,
@@ -201,8 +201,16 @@ class SimpleHybridTrainer:
                 low_memory=self.training_config.get('low_memory', False)
             )
             
-            # 🔥 PRIORITY 2 FIX: Setup hard negative mining loss
-            if LOSS_CONFIG.get('disease_loss_type') == 'hard_negative':
+            # 🔥 PHASE 2.5: Setup focal loss for better hard example handling
+            if LOSS_CONFIG.get('disease_loss_type') == 'focal':
+                self.model.disease_loss_fn = FocalLoss(
+                    alpha=LOSS_CONFIG.get('focal_alpha', 1.10),
+                    gamma=LOSS_CONFIG.get('focal_gamma', 3.0),
+                    label_smoothing=LOSS_CONFIG.get('label_smoothing', 0.2)
+                )
+                logger.info("🔥 PHASE 2.5: Focal loss enabled for hard example focus")
+            elif LOSS_CONFIG.get('disease_loss_type') == 'hard_negative':
+                from models.loss_functions import HardNegativeLoss
                 self.model.disease_loss_fn = HardNegativeLoss()
                 logger.info("🔥 PRIORITY 2 FIX: Hard negative mining loss enabled")
             
@@ -713,6 +721,7 @@ class SimpleHybridTrainer:
                 'priority_fixes_applied': {
                     'multi_task_disabled': not MODEL_CONFIG.get('use_keywords', True),
                     'vision_unfrozen': not INIT_CONFIG.get('freeze_vision_backbone', True),
+                    'focal_loss': LOSS_CONFIG.get('disease_loss_type') == 'focal',  # 🔥 PHASE 2.5: Track focal loss usage
                     'hard_negative_loss': LOSS_CONFIG.get('disease_loss_type') == 'hard_negative',
                     'auc_early_stopping': EVALUATION_CONFIG['metric_for_best_model'] == 'eval_auc',
                     'explicit_negatives': True,
