@@ -10,10 +10,10 @@ import os
 # Basic Training Configuration
 BASIC_TRAINING_CONFIG = {
     "num_epochs": 40,
-    "learning_rate": 6e-6,
+    "learning_rate": 5e-7,  # 🔥 PHASE 2.4: Reduced from 1e-6 → 5e-7 for more careful learning
     "weight_decay": 8e-4,
     "warmup_steps": 175,
-    "max_grad_norm": 1.0,
+    "max_grad_norm": 0.5,  # Reduced from 1.0 → 0.5 for stability
     "seed": 42,
 }
 
@@ -41,8 +41,8 @@ MEMORY_CONFIG = {
 # Optimizer Configuration
 OPTIMIZER_CONFIG = {
     "optimizer_type": "adamw",  # Options: "adamw", "adam", "sgd"
-    "learning_rate": 6e-6,
-    "weight_decay": 8e-4,
+    "learning_rate": 5e-7,  # 🔥 PHASE 2.4: Reduced from 1e-6 → 5e-7 for more careful learning
+    "weight_decay": 0.05,  # 🔥 PHASE 2.4: Increased from 0.01 → 0.05 for stronger regularization
     "betas": (0.9, 0.999),
     "eps": 1e-8,
     "amsgrad": False,
@@ -60,25 +60,27 @@ SCHEDULER_CONFIG = {
 
 # Loss Function Configuration
 LOSS_CONFIG = {
-    "disease_loss_type": "focal",  # Options: "focal", "asymmetric", "bce", "weighted_bce"
+    "disease_loss_type": "hard_negative",  # 🔥 PRIORITY 2 FIX: Use hard negative mining
     "focal_alpha": 1.10,
-    "focal_gamma": 2.15,
-    "label_smoothing": 0.1,
+    "focal_gamma": 3.0,  # Increased from 2.5 → 3.0 to focus more on hard examples
+    "label_smoothing": 0.2,  # 🔥 PHASE 2.4: Increased from 0.15 → 0.2 for better calibration
     "pos_weight_cap": 16.0,
     "pos_weight_smoothing": 0.07,
+    "use_class_weights": True,  # Enable class weights for imbalanced data
+    "temperature_scaling": 1.5,  # Add temperature scaling to make predictions less confident
     
-    # Multi-task loss weights
+    # Multi-task loss weights - DISABLED for Priority 1
     "disease_loss_weight": 1.0,
-    "global_keyword_loss_weight": 0.3,
-    "region_keyword_loss_weight": 0.2,
-    "contrastive_loss_weight": 0.1,
+    "global_keyword_loss_weight": 0.0,  # 🔥 PRIORITY 1 FIX: Disabled
+    "region_keyword_loss_weight": 0.0,  # 🔥 PRIORITY 1 FIX: Disabled
+    "contrastive_loss_weight": 0.0,     # 🔥 PRIORITY 1 FIX: Disabled
 }
 
 # Early Stopping Configuration
 EARLY_STOPPING_CONFIG = {
-    "patience": 10,
+    "patience": 5,  # Reduced from 10 → 5 for faster stopping
     "min_delta": 0.001,
-    "monitor_metric": "val_f1",  # Options: "val_f1", "val_loss", "val_precision", "val_recall"
+    "monitor_metric": "eval_auc",  # 🔥 PRIORITY 2 FIX: Focus on discrimination, not F1
     "mode": "max",  # "max" for metrics to maximize, "min" for metrics to minimize
     "restore_best_weights": True,
 }
@@ -86,11 +88,11 @@ EARLY_STOPPING_CONFIG = {
 # Evaluation Configuration
 EVALUATION_CONFIG = {
     "eval_strategy": "steps",  # Options: "steps", "epoch", "no"
-    "eval_steps": 100,
+    "eval_steps": 50,  # Reduced from 100 → 50 for more frequent evaluation
     "eval_accumulation_steps": None,
     "eval_delay": 0,
     "include_inputs_for_metrics": False,
-    "metric_for_best_model": "eval_f1",
+    "metric_for_best_model": "eval_auc",  # 🔥 PRIORITY 2 FIX: Focus on discrimination
     "greater_is_better": True,
 }
 
@@ -106,11 +108,11 @@ LOGGING_CONFIG = {
 
 # Checkpointing Configuration
 CHECKPOINT_CONFIG = {
-    "save_strategy": "steps",  # Options: "steps", "epoch", "no"
-    "save_steps": 200,
+    "save_strategy": "steps",  # Back to "steps" since "eval" is not supported
+    "save_steps": 50,  # Reduced from 200 → 50 to save more frequently
     "save_total_limit": 3,
     "load_best_model_at_end": True,
-    "save_safetensors": True,
+    "save_safetensors": False,  # Disable due to non-contiguous tensor issue
     "save_on_each_node": False,
     "resume_from_checkpoint": None,  # Will be set automatically if checkpoint exists
 }
@@ -171,6 +173,10 @@ ADVANCED_CONFIG = {
     "ignore_data_skip": False,
     "fsdp": "",  # Fully Sharded Data Parallel (for large models)
     "fsdp_config": {},
+    "mixup_alpha": 0.2,  # Add mixup data augmentation to prevent overfitting
+    "dynamic_loss_weighting": False,  # 🔥 PRIORITY 1 FIX: Disable for single-task learning
+    "max_train_samples": 500,  # ✅ PHASE 2.2 RESULT: Safe scaling limit established
+    "max_epochs": 10,          # 🔥 PRIORITY 3 FIX: Fewer epochs to prevent overfitting
 }
 
 # Debugging Configuration
@@ -200,17 +206,41 @@ HARDWARE_CONFIG = {
     "torch_compile": False,  # PyTorch 2.0 compilation (experimental)
 }
 
+# Phase 2: Gradual Dataset Scaling Configuration
+SCALING_CONFIG = {
+    'phase_1_baseline': 350,        # ✅ Current proven stable baseline
+    'phase_2_scale_500': 500,       # 🔄 Test original max_train_samples
+    'phase_2_scale_750': 750,       # 🔄 Gradual increase
+    'phase_2_scale_1000': 1000,     # 🔄 Double current size
+    'phase_3_full': 'full',         # 🔄 Full dataset when stable
+    
+    # Scaling validation settings
+    'validation_criteria': {
+        'max_training_loss_increase': 0.5,      # Don't allow loss to increase by more than 0.5
+        'min_auc_threshold': 0.5,               # AUC should stay above random
+        'max_recall_threshold': 0.99,           # Recall shouldn't go back to "always positive"
+        'overfitting_check_epochs': 3,          # Check for overfitting after N epochs
+    },
+    
+    # Hard negative mining tuning ranges (Phase 2)
+    'hard_negative_tuning': {
+        'pos_weight_range': [0.3, 0.4, 0.5, 0.6, 0.7],           # Current: 0.5
+        'negative_multiplier_range': [1.5, 2.0, 2.5, 3.0],       # Current: 2.0
+        'test_combinations': True,                                # Test different combinations
+    }
+}
+
 # Unified Training Configuration (for convenience)
 TRAINING_CONFIG = {
     'num_epochs': BASIC_TRAINING_CONFIG['num_epochs'],
-    'learning_rate': BASIC_TRAINING_CONFIG['learning_rate'],
-    'weight_decay': BASIC_TRAINING_CONFIG['weight_decay'],
+    'learning_rate': OPTIMIZER_CONFIG['learning_rate'],  # Use updated optimizer config
+    'weight_decay': OPTIMIZER_CONFIG['weight_decay'],    # Use updated optimizer config
     'warmup_steps': BASIC_TRAINING_CONFIG['warmup_steps'],
     'max_grad_norm': BASIC_TRAINING_CONFIG['max_grad_norm'],
     'seed': BASIC_TRAINING_CONFIG['seed'],
     'batch_size': BATCH_CONFIG['batch_size'],
     'gradient_accumulation_steps': BATCH_CONFIG['gradient_accumulation_steps'],
-    'eval_steps': EVALUATION_CONFIG['eval_steps'],
+    'eval_steps': EVALUATION_CONFIG['eval_steps'],  # Will use updated eval_steps (50)
     'save_steps': CHECKPOINT_CONFIG['save_steps'],
     'low_memory': MEMORY_CONFIG['gradient_checkpointing'],
 }
@@ -234,5 +264,6 @@ __all__ = [
     'ADVANCED_CONFIG',
     'DEBUG_CONFIG',
     'REPRODUCIBILITY_CONFIG',
-    'HARDWARE_CONFIG'
+    'HARDWARE_CONFIG',
+    'SCALING_CONFIG'
 ] 

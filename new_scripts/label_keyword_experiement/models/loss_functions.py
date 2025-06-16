@@ -46,20 +46,32 @@ if not TORCH_AVAILABLE:
 
 class FocalLoss(nn.Module):
     """
-    Focal Loss for addressing class imbalance in disease classification.
+    Enhanced Focal Loss for addressing class imbalance in disease classification.
     
     Focal Loss = -α(1-pt)^γ * log(pt)
     where pt = p if y=1 else 1-p
+    
+    Enhanced with:
+    - Higher gamma for focusing on hard examples
+    - Optional class weights for severe imbalance
+    - Label smoothing support
     """
     
-    def __init__(self, alpha: float = 1.0, gamma: float = 2.0, reduction: str = 'mean'):
+    def __init__(self, 
+                 alpha: float = 1.0, 
+                 gamma: float = 3.0,  # Increased default gamma
+                 reduction: str = 'mean',
+                 class_weights: Optional[torch.Tensor] = None,
+                 label_smoothing: float = 0.0):
         """
-        Initialize Focal Loss.
+        Initialize Enhanced Focal Loss.
         
         Args:
             alpha: Weighting factor for rare class (default: 1.0)
-            gamma: Focusing parameter (default: 2.0)
+            gamma: Focusing parameter (default: 3.0, increased from 2.0)
             reduction: Reduction method ('mean', 'sum', 'none')
+            class_weights: Per-class weights [num_classes]
+            label_smoothing: Label smoothing factor (0.0 = no smoothing)
         """
         super(FocalLoss, self).__init__()
         
@@ -69,25 +81,38 @@ class FocalLoss(nn.Module):
         self.alpha = alpha
         self.gamma = gamma
         self.reduction = reduction
+        self.class_weights = class_weights
+        self.label_smoothing = label_smoothing
     
     def forward(self, inputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
         """
-        Compute focal loss.
+        Compute enhanced focal loss with class weights and label smoothing.
         
         Args:
             inputs: Predicted logits [batch_size, num_classes]
             targets: Ground truth labels [batch_size, num_classes]
             
         Returns:
-            Focal loss tensor
+            Enhanced focal loss tensor
         """
-        # Compute BCE loss
-        bce_loss = F.binary_cross_entropy_with_logits(inputs, targets, reduction='none')
+        # Apply label smoothing if specified
+        if self.label_smoothing > 0:
+            targets = targets * (1 - self.label_smoothing) + 0.5 * self.label_smoothing
+        
+        # Apply class weights if specified
+        pos_weight = self.class_weights if self.class_weights is not None else None
+        
+        # Compute BCE loss with optional class weighting
+        bce_loss = F.binary_cross_entropy_with_logits(
+            inputs, targets, 
+            pos_weight=pos_weight,
+            reduction='none'
+        )
         
         # Compute probabilities
         pt = torch.exp(-bce_loss)
         
-        # Compute focal loss
+        # Compute focal loss with higher gamma to focus more on hard examples
         focal_loss = self.alpha * (1 - pt) ** self.gamma * bce_loss
         
         if self.reduction == 'mean':
@@ -302,6 +327,83 @@ class ConsistencyLoss(nn.Module):
         return loss
 
 
+class HardNegativeLoss(nn.Module):
+    """
+    Hard Negative Mining Loss for preventing "always positive" predictions.
+    
+    This loss heavily penalizes false positives to force the model to learn
+    proper negative examples instead of predicting positive for everything.
+    
+    From improvements.md Priority 2: Force model to learn negative examples.
+    """
+    
+    def __init__(self, 
+                 pos_weight: Optional[torch.Tensor] = None,
+                 reduction: str = 'mean',
+                 negative_weight_multiplier: float = 2.0):
+        """
+        Initialize Hard Negative Mining Loss.
+        
+        Args:
+            pos_weight: Reduced positive weights to combat over-prediction
+            reduction: Reduction method ('mean', 'sum', 'none')
+            negative_weight_multiplier: Extra penalty for false positives
+        """
+        super(HardNegativeLoss, self).__init__()
+        
+        if not TORCH_AVAILABLE:
+            raise ImportError("PyTorch is not available. Please install torch to use loss functions.")
+        
+        # 🔥 PRIORITY 2 FIX: Reduce positive bias - use pos_weight < 1.0
+        if pos_weight is None:
+            # Default: Equal weighting (0.5) to reduce positive bias
+            self.pos_weight = torch.tensor([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
+        else:
+            self.pos_weight = pos_weight
+            
+        self.reduction = reduction
+        self.negative_weight_multiplier = negative_weight_multiplier
+    
+    def forward(self, inputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+        """
+        Compute hard negative mining loss.
+        
+        Args:
+            inputs: Predicted logits [batch_size, num_classes]
+            targets: Ground truth labels [batch_size, num_classes]
+            
+        Returns:
+            Hard negative mining loss with extra penalty for false positives
+        """
+        # Ensure pos_weight is on the same device as inputs
+        pos_weight = self.pos_weight.to(inputs.device) if self.pos_weight is not None else None
+        
+        # Standard BCE loss with reduced positive weights
+        bce_loss = F.binary_cross_entropy_with_logits(
+            inputs, targets, 
+            pos_weight=pos_weight,
+            reduction='none'
+        )
+        
+        # Extra penalty for false positives (predictions > 0.5 when target = 0)
+        predictions = torch.sigmoid(inputs)
+        false_positives = (predictions > 0.5) & (targets == 0)
+        
+        # Apply extra penalty to false positives
+        penalty = torch.where(
+            false_positives, 
+            bce_loss * self.negative_weight_multiplier,
+            bce_loss
+        )
+        
+        if self.reduction == 'mean':
+            return penalty.mean()
+        elif self.reduction == 'sum':
+            return penalty.sum()
+        else:
+            return penalty
+
+
 class MultiTaskLoss(nn.Module):
     """
     Combined multi-task loss for disease classification and keyword prediction.
@@ -373,38 +475,34 @@ class MultiTaskLoss(nn.Module):
         Compute multi-task loss.
         
         Args:
-            predictions: Dictionary of model predictions
-                - 'disease_logits': [batch_size, num_diseases]
-                - 'global_keyword_logits': [batch_size, vocab_size]
-                - 'region_keyword_logits': [batch_size, num_regions, vocab_size]
-            targets: Dictionary of ground truth targets
-                - 'disease_labels': [batch_size, num_diseases]
-                - 'global_keyword_labels': [batch_size, vocab_size]
-                - 'region_keyword_labels': [batch_size, num_regions, vocab_size]
-                - 'region_mask': [batch_size, num_regions] (optional)
-            return_individual_losses: Whether to return individual loss components
+            predictions: Dictionary with model predictions
+            targets: Dictionary with target labels
+            return_individual_losses: Whether to return breakdown of individual losses
             
         Returns:
-            Combined loss tensor or dictionary of individual losses
+            Total loss (scalar) or dictionary with individual losses
         """
         losses = {}
         
         # 1. Disease classification loss
-        if 'disease_logits' in predictions and 'disease_labels' in targets:
+        if ('disease_logits' in predictions and 'disease_labels' in targets and 
+            targets['disease_labels'] is not None):
             losses['disease'] = self.disease_loss(
                 predictions['disease_logits'], 
                 targets['disease_labels']
             )
         
-        # 2. Global keyword prediction loss
-        if 'global_keyword_logits' in predictions and 'global_keyword_labels' in targets:
+        # 2. Global keyword prediction loss - 🔥 FIX: Check for None targets
+        if ('global_keyword_logits' in predictions and 'global_keyword_labels' in targets and 
+            targets['global_keyword_labels'] is not None):
             losses['keyword_global'] = self.keyword_loss(
                 predictions['global_keyword_logits'],
                 targets['global_keyword_labels']
             )
         
-        # 3. Region-specific keyword prediction loss
-        if 'region_keyword_logits' in predictions and 'region_keyword_labels' in targets:
+        # 3. Region-specific keyword prediction loss - 🔥 FIX: Check for None targets
+        if ('region_keyword_logits' in predictions and 'region_keyword_labels' in targets and
+            targets['region_keyword_labels'] is not None):
             region_mask = targets.get('region_mask', None)
             losses['keyword_region'] = self.region_loss(
                 predictions['region_keyword_logits'],
@@ -412,9 +510,11 @@ class MultiTaskLoss(nn.Module):
                 region_mask
             )
         
-        # 4. Consistency loss between global and region predictions
+        # 4. Consistency loss between global and region predictions - 🔥 FIX: Check for None targets
         if ('global_keyword_logits' in predictions and 
-            'region_keyword_logits' in predictions):
+            'region_keyword_logits' in predictions and
+            targets.get('global_keyword_labels') is not None and
+            targets.get('region_keyword_labels') is not None):
             region_mask = targets.get('region_mask', None)
             losses['consistency'] = self.consistency_loss(
                 predictions['global_keyword_logits'],

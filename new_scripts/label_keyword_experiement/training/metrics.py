@@ -243,6 +243,8 @@ class HybridMetrics:
                 if len(np.unique(labels[:, i])) > 1:
                     auc_scores.append(roc_auc_score(labels[:, i], probs[:, i]))
             metrics['disease_mean_auc'] = np.mean(auc_scores) if auc_scores else 0.0
+            # ✅ FIX: Add alias for eval_auc (for early stopping compatibility)
+            metrics['eval_auc'] = metrics['disease_mean_auc']
             
             # Comparison with 0.5 threshold
             metrics['disease_micro_f1_05'] = f1_score(labels.flatten(), preds_05.flatten(), zero_division=0)
