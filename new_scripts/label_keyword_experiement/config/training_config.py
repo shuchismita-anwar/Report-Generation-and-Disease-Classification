@@ -69,11 +69,11 @@ LOSS_CONFIG = {
     "use_class_weights": True,  # Enable class weights for imbalanced data
     "temperature_scaling": 1.5,  # Add temperature scaling to make predictions less confident
     
-    # Multi-task loss weights - DISABLED for Priority 1
+    # Multi-task loss weights - PHASE 3 REVERT: Return to single-task due to regression
     "disease_loss_weight": 1.0,
-    "global_keyword_loss_weight": 0.0,  # 🔥 PRIORITY 1 FIX: Disabled
-    "region_keyword_loss_weight": 0.0,  # 🔥 PRIORITY 1 FIX: Disabled
-    "contrastive_loss_weight": 0.0,     # 🔥 PRIORITY 1 FIX: Disabled
+    "global_keyword_loss_weight": 0.0,  # 🔥 PHASE 3 REVERT: Multi-task caused regression
+    "region_keyword_loss_weight": 0.0,  # 🔥 PHASE 3 REVERT: Keep disabled
+    "contrastive_loss_weight": 0.0,     # 🔥 PHASE 3 REVERT: Keep disabled
 }
 
 # Early Stopping Configuration

@@ -128,11 +128,11 @@ MODEL_CONFIG = {
     'num_regions': REGION_CONFIG['num_regions'],
     'hidden_dim': VISION_MODEL['hidden_size'],
     'dropout': VISION_MODEL['dropout'],  # 🔥 PHASE 2.4: Now 0.5 for stronger regularization
-    'use_keywords': False,  # 🔥 PRIORITY 1 FIX: Disable keyword prediction temporarily
-    'use_regions': False,   # 🔥 PRIORITY 1 FIX: Disable region prediction temporarily
+    'use_keywords': False,  # 🔥 PHASE 3 REVERT: Multi-task caused regression, return to single-task
+    'use_regions': False,   # 🔥 PHASE 3: Keep regions disabled
     'disease_loss_weight': LOSS_CONFIG['disease_loss_weight'],
-    'keyword_loss_weight': 0.0,  # 🔥 PRIORITY 1 FIX: Zero weight for keyword loss
-    'region_loss_weight': 0.0,   # 🔥 PRIORITY 1 FIX: Zero weight for region loss
+    'keyword_loss_weight': 0.0,   # 🔥 PHASE 3 REVERT: Return to zero weight
+    'region_loss_weight': 0.0,    # 🔥 PHASE 3: Keep region loss disabled
 }
 
 # Export all configurations
