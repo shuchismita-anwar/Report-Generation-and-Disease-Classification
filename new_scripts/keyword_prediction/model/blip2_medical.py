@@ -181,15 +181,15 @@ class BLIP2Medical(nn.Module):
         
         Args:
             pixel_values: Image tensors
-            input_ids: Text token IDs
+            input_ids: Text token IDs (for decoder input)
             attention_mask: Attention mask for text
-            labels: Target labels for training
+            labels: Target labels for training (for computing loss)
             
         Returns:
             Loss and logits for training
         """
         try:
-            # Prepare inputs
+            # Prepare inputs for both BLIP-1 and BLIP-2
             inputs = {
                 'pixel_values': pixel_values.to(self.device),
             }
@@ -203,11 +203,16 @@ class BLIP2Medical(nn.Module):
             
             # Forward pass
             outputs = self.model(**inputs)
-            
             return outputs
             
         except Exception as e:
             logger.error(f"Error in forward pass: {e}")
+            # For debugging, let's see the actual tensor shapes
+            logger.error(f"pixel_values shape: {pixel_values.shape if pixel_values is not None else None}")
+            logger.error(f"input_ids shape: {input_ids.shape if input_ids is not None else None}")
+            logger.error(f"attention_mask shape: {attention_mask.shape if attention_mask is not None else None}")
+            logger.error(f"labels shape: {labels.shape if labels is not None else None}")
+            
             # Return dummy outputs for error handling
             batch_size = pixel_values.shape[0]
             dummy_loss = torch.tensor(0.0, device=self.device, requires_grad=True)
@@ -272,11 +277,23 @@ def test_blip2_basic_functionality():
         print(f"\n🔄 Testing forward pass for training...")
         
         try:
-            # Create dummy batch
+            # Create dummy batch with proper tokenizer and correct image size
             batch_size = 2
-            dummy_images = torch.randn(batch_size, 3, 512, 512)
-            dummy_input_ids = torch.randint(0, 1000, (batch_size, 32))
-            dummy_attention_mask = torch.ones(batch_size, 32)
+            # BLIP-2 expects 224x224 images, not 512x512
+            dummy_images = torch.randn(batch_size, 3, 224, 224)
+            
+            # Use actual tokenizer to create proper input_ids
+            dummy_text = ["normal chest appearance", "bilateral lung infiltrates"]
+            tokenized = model.processor.tokenizer(
+                dummy_text, 
+                return_tensors="pt", 
+                padding=True, 
+                truncation=True,
+                max_length=32
+            )
+            
+            dummy_input_ids = tokenized['input_ids']
+            dummy_attention_mask = tokenized['attention_mask']
             dummy_labels = dummy_input_ids.clone()
             
             # Test forward pass
@@ -312,5 +329,39 @@ def test_blip2_basic_functionality():
         print(f"\n❌ TASK 4.1 FAILED - Model initialization failed: {e}")
         return False
 
+def debug_blip2_inputs():
+    """Debug script to understand BLIP-2 model inputs"""
+    from transformers import Blip2Processor, Blip2ForConditionalGeneration
+    import torch
+    from PIL import Image
+    
+    print("🔍 Debugging BLIP-2 model inputs...")
+    
+    # Load model and processor
+    processor = Blip2Processor.from_pretrained("Salesforce/blip2-opt-2.7b")
+    model = Blip2ForConditionalGeneration.from_pretrained("Salesforce/blip2-opt-2.7b")
+    
+    # Create dummy data
+    dummy_image = Image.new('RGB', (512, 512), color='gray')
+    dummy_text = "normal chest appearance"
+    
+    # Process inputs
+    inputs = processor(dummy_image, dummy_text, return_tensors="pt")
+    
+    print("📋 Processed inputs keys:", list(inputs.keys()))
+    for key, value in inputs.items():
+        if hasattr(value, 'shape'):
+            print(f"   {key}: {value.shape}")
+        else:
+            print(f"   {key}: {type(value)}")
+    
+    # Check model's forward signature
+    import inspect
+    forward_sig = inspect.signature(model.forward)
+    print(f"\n🔧 Model forward parameters: {list(forward_sig.parameters.keys())}")
+    
+    return inputs
+
 if __name__ == "__main__":
+    # debug_blip2_inputs()  # Debug first
     test_blip2_basic_functionality() 
