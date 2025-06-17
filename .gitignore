@@ -100,3 +100,7 @@ new_scripts/label_keyword_experiement/output/hyperparameter_tuning/
 new_scripts/label_keyword_experiement/output/test_tuning/tuning_history.csv
 new_scripts/label_keyword_experiement/improvements.md
 new_scripts/label_keyword_experiement/output/ 
+new_scripts/keyword_prediction/architecture.md
+new_scripts/keyword_prediction/checklist.md
+new_scripts/keyword_prediction/tasks.md
+new_scripts/keyword_prediction/data/__pycache__/

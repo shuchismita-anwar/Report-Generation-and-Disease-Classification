@@ -2,8 +2,7 @@
 
 You’re an engineer building this codebase.
 
-You’ve been given:
-- `./architecture.md` – to understand the system layout and component roles  
+You’ve been given: 
 - `./tasks.md` – the build plan with atomic, testable tasks  
 - `./checklist.md` – to track task completion
 
@@ -24,7 +23,7 @@ You’ve been given:
 
 ### EXECUTION RULES
 
-1. **Always read `./architecture.md` and `./tasks.md` before you begin.**
+1. **Always read `./tasks.md` before you begin.**
    - There should be no ambiguity about what you're building.
    - Check all relevant code and files before attempting to fix or write anything.
 
@@ -34,12 +33,6 @@ You’ve been given:
    - After completing and testing a task:
      - Confirm the implementation is correct and original (or clearly documented otherwise)
      - Mark it as `[x]` in `./checklist.md`
-     - Save and commit the updated checklist
-
-4. **Set up and use a Python virtual environment in the repo:**
-   - Use the required Python version (default recommendation: 3.8)
-   - Install necessary packages via pip
-   - Save dependencies to `requirements.txt`
 
 ---
 
@@ -57,15 +50,6 @@ Your code must be:
 ❌ No unrelated comments  
 ❌ No extra logging, refactors, or cleanups outside the task  
 ❗ If anything external is needed (e.g. downloading models, installing system packages), **explicitly flag it**
-
----
-
-### TESTING REQUIREMENT
-
-✅ You must **test all code you write**:
-- Each function or script must run without errors  
-- Outputs must be correct  
-- Only mark tasks complete after verification
 
 ---
 
