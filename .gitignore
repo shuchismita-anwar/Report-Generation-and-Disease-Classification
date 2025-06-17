@@ -110,6 +110,7 @@ new_scripts/keyword_prediction/model/__pycache__/
 new_scripts/keyword_prediction/test_learning_rate_scaling.py
 new_scripts/keyword_prediction/test_memory_optimized.py
 new_scripts/keyword_prediction/test_production_training.py
-
 new_scripts/keyword_prediction/debug_processor.py
 new_scripts/keyword_prediction/debug_tokenization.py
+new_scripts/keyword_prediction/metrics/__pycache__/
+new_scripts/keyword_prediction/test_task_5_4_metrics.py

@@ -3,6 +3,7 @@ Medical Keyword Prediction Trainer
 
 Implements basic training loop for BLIP-2 medical keyword generation.
 Task 5.1: Create Basic Training Loop
+Task 5.4: Add training metrics (BLEU/ROUGE on train and val)
 """
 
 import torch
@@ -12,7 +13,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 import logging
 import time
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 import os
 
 # Set up logging
@@ -23,7 +24,8 @@ class MedicalKeywordTrainer:
     """
     Trainer for BLIP-2 medical keyword generation model.
     
-    Handles single epoch training with loss computation and backpropagation.
+    Handles single epoch training with loss computation, backpropagation,
+    and comprehensive metrics evaluation (BLEU/ROUGE/Medical-specific).
     """
     
     def __init__(
@@ -33,7 +35,8 @@ class MedicalKeywordTrainer:
         val_loader: Optional[DataLoader] = None,
         learning_rate: float = 5e-8,  # 🔧 OPTIMAL: Updated to optimal rate from testing
         device: str = "auto",
-        gradient_accumulation_steps: int = 4  # 🔧 NEW: Gradient accumulation for stability
+        gradient_accumulation_steps: int = 4,  # 🔧 NEW: Gradient accumulation for stability
+        enable_metrics: bool = True  # 🔧 NEW: Enable comprehensive metrics evaluation
     ):
         """
         Initialize trainer.
@@ -44,12 +47,15 @@ class MedicalKeywordTrainer:
             val_loader: Validation data loader (optional)
             learning_rate: Learning rate for optimizer
             device: Device to use for training
+            gradient_accumulation_steps: Steps to accumulate gradients
+            enable_metrics: Whether to compute comprehensive metrics
         """
         self.model = model
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.learning_rate = learning_rate
-        self.gradient_accumulation_steps = gradient_accumulation_steps  # 🔧 NEW
+        self.gradient_accumulation_steps = gradient_accumulation_steps
+        self.enable_metrics = enable_metrics
         
         # Set device
         if device == "auto":
@@ -79,11 +85,82 @@ class MedicalKeywordTrainer:
         self.train_losses = []
         self.val_losses = []
         
+        # 🔧 NEW: Initialize comprehensive metrics system for Task 5.4
+        if self.enable_metrics:
+            try:
+                # Import metrics system (delay import to avoid dependencies in basic usage)
+                import sys
+                import os
+                current_dir = os.path.dirname(os.path.abspath(__file__))
+                parent_dir = os.path.dirname(current_dir)
+                metrics_dir = os.path.join(parent_dir, 'metrics')
+                sys.path.insert(0, parent_dir)  # Add parent dir to path
+                sys.path.insert(0, metrics_dir)  # Add metrics dir to path
+                
+                from metrics.medical_metrics import MedicalKeywordMetrics
+                self.metrics_evaluator = MedicalKeywordMetrics(device=device)
+                logger.info("✅ Comprehensive metrics system enabled (BLEU/ROUGE/Medical)")
+            except Exception as e:
+                logger.warning(f"Failed to initialize metrics system: {e}")
+                logger.info("Continuing without comprehensive metrics")
+                self.enable_metrics = False
+                self.metrics_evaluator = None
+        else:
+            self.metrics_evaluator = None
+            logger.info("Basic training mode - metrics disabled")
+        
         logger.info(f"Trainer initialized on device: {self.device}")
         logger.info(f"Learning rate: {learning_rate}")
         logger.info(f"Train batches: {len(train_loader)}")
         if val_loader:
             logger.info(f"Validation batches: {len(val_loader)}")
+    
+    def _generate_keywords_for_metrics(self, images: torch.Tensor, batch_size: int = None) -> List[str]:
+        """
+        Generate keywords from images for metrics evaluation.
+        
+        Args:
+            images: Batch of images
+            batch_size: Expected batch size for validation
+            
+        Returns:
+            List of generated keyword strings
+        """
+        try:
+            if batch_size is None:
+                batch_size = images.shape[0]
+            
+            # Set model to evaluation mode
+            self.model.eval()
+            
+            generated_keywords = []
+            
+            with torch.no_grad():
+                # Generate keywords for each image in the batch
+                for i in range(batch_size):
+                    try:
+                        # Generate keywords for single image
+                        single_image = images[i:i+1]  # Keep batch dimension
+                        keywords = self.model.generate_keywords(single_image)
+                        
+                        # Extract generated text
+                        if isinstance(keywords, list) and len(keywords) > 0:
+                            generated_keywords.append(keywords[0])
+                        else:
+                            generated_keywords.append("")  # Fallback for failed generation
+                            
+                    except Exception as e:
+                        logger.warning(f"Failed to generate keywords for image {i}: {e}")
+                        generated_keywords.append("")  # Fallback
+            
+            # Restore training mode
+            self.model.train()
+            
+            return generated_keywords
+            
+        except Exception as e:
+            logger.error(f"Error in keyword generation for metrics: {e}")
+            return [""] * batch_size  # Return empty strings as fallback
     
     def train_epoch(self, epoch: int = 0) -> Dict[str, float]:
         """
@@ -290,13 +367,13 @@ class MedicalKeywordTrainer:
     
     def validate(self, epoch: int = 0) -> Dict[str, float]:
         """
-        Run validation.
+        Run validation with comprehensive metrics evaluation.
         
         Args:
             epoch: Current epoch number
             
         Returns:
-            Dictionary with validation metrics
+            Dictionary with validation metrics including BLEU/ROUGE scores
         """
         if self.val_loader is None:
             logger.warning("No validation loader provided")
@@ -312,6 +389,12 @@ class MedicalKeywordTrainer:
         num_batches = 0
         successful_batches = 0
         
+        # 🔧 NEW: Collect data for comprehensive metrics (Task 5.4)
+        all_references = []
+        all_hypotheses = []
+        metrics_sample_limit = 50  # Limit samples for metrics to avoid memory issues
+        metrics_samples_collected = 0
+        
         # Progress bar
         pbar = tqdm(self.val_loader, desc=f"Epoch {epoch} - Validation")
         
@@ -325,10 +408,10 @@ class MedicalKeywordTrainer:
                         input_ids = batch['input_ids'].to(self.device)
                         attention_mask = batch['attention_mask'].to(self.device)
                         labels = batch['labels'].to(self.device)
+                        keywords = batch.get('keywords', [])  # Get original keywords if available
                     elif 'images' in batch:
                         # Manual format - need to process text separately
                         images = batch['images'].to(self.device)
-                        # For manual format, we need to tokenize the keywords
                         keywords = batch['keywords']
                         
                         # Use model's processor to tokenize
@@ -364,11 +447,34 @@ class MedicalKeywordTrainer:
                     num_batches += 1
                     successful_batches += 1
                     
+                    # 🔧 NEW: Collect samples for comprehensive metrics evaluation (Task 5.4)
+                    if (self.enable_metrics and 
+                        metrics_samples_collected < metrics_sample_limit and 
+                        keywords and len(keywords) > 0):
+                        
+                        try:
+                            # Generate keywords for this batch
+                            batch_size = images.shape[0]
+                            generated_keywords = self._generate_keywords_for_metrics(images, batch_size)
+                            
+                            # Add to collections (limit to available keywords)
+                            for i in range(min(len(keywords), len(generated_keywords), batch_size)):
+                                if metrics_samples_collected < metrics_sample_limit:
+                                    all_references.append(keywords[i])
+                                    all_hypotheses.append(generated_keywords[i])
+                                    metrics_samples_collected += 1
+                                else:
+                                    break
+                                    
+                        except Exception as e:
+                            logger.warning(f"Error collecting metrics samples in batch {batch_idx}: {e}")
+                    
                     # Update progress bar
                     avg_loss = total_loss / num_batches
                     pbar.set_postfix({
                         'Val Loss': f'{loss.item():.4f}',
-                        'Avg Val Loss': f'{avg_loss:.4f}'
+                        'Avg Val Loss': f'{avg_loss:.4f}',
+                        'Metrics': f'{metrics_samples_collected}/{metrics_sample_limit}'
                     })
                     
                 except Exception as e:
@@ -376,23 +482,60 @@ class MedicalKeywordTrainer:
                     num_batches += 1
                     continue
         
-        # Calculate final metrics
+        # Calculate final loss metrics
         avg_val_loss = total_loss / num_batches if num_batches > 0 else float('inf')
         success_rate = (successful_batches / num_batches) * 100 if num_batches > 0 else 0
         
         # Store metrics
         self.val_losses.append(avg_val_loss)
         
+        # 🔧 NEW: Compute comprehensive metrics (Task 5.4)
+        comprehensive_metrics = {}
+        if self.enable_metrics and self.metrics_evaluator and len(all_references) > 0:
+            try:
+                logger.info(f"Computing comprehensive metrics on {len(all_references)} samples...")
+                validation_metrics = self.metrics_evaluator.compute_validation_metrics(
+                    all_references, all_hypotheses
+                )
+                comprehensive_metrics = validation_metrics['summary']
+                
+                # Log key metrics
+                logger.info(f"📊 Validation Metrics Summary:")
+                logger.info(f"   BLEU-4: {comprehensive_metrics.get('bleu_4', 0):.4f}")
+                logger.info(f"   ROUGE-1 F1: {comprehensive_metrics.get('rouge1_f1', 0):.4f}")
+                logger.info(f"   ROUGE Avg Recall: {comprehensive_metrics.get('rouge_avg_recall', 0):.4f}")
+                logger.info(f"   Medical Coverage: {comprehensive_metrics.get('medical_coverage', 0):.4f}")
+                logger.info(f"   Overall Quality: {comprehensive_metrics.get('overall_quality', 0):.4f}")
+                
+                # Show best example if available
+                if validation_metrics.get('best_example'):
+                    best = validation_metrics['best_example']
+                    logger.info(f"🏆 Best Example:")
+                    logger.info(f"   Ref: '{best['reference']}'")
+                    logger.info(f"   Gen: '{best['hypothesis']}'")
+                
+            except Exception as e:
+                logger.error(f"Error computing comprehensive metrics: {e}")
+                comprehensive_metrics = {}
+        
+        # Combine all metrics
         metrics = {
             'val_loss': avg_val_loss,
             'successful_batches': successful_batches,
             'total_batches': num_batches,
-            'success_rate': success_rate
+            'success_rate': success_rate,
+            'metrics_samples': metrics_samples_collected
         }
+        
+        # Add comprehensive metrics with 'val_' prefix for consistency
+        for key, value in comprehensive_metrics.items():
+            metrics[f'val_{key}'] = value
         
         logger.info(f"Validation epoch {epoch} completed:")
         logger.info(f"  Average validation loss: {avg_val_loss:.4f}")
         logger.info(f"  Successful batches: {successful_batches}/{num_batches} ({success_rate:.1f}%)")
+        if comprehensive_metrics:
+            logger.info(f"  Overall quality: {comprehensive_metrics.get('overall_quality', 0):.4f}")
         
         return metrics
     
