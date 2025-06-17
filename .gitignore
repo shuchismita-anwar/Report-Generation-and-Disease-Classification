@@ -104,3 +104,12 @@ new_scripts/keyword_prediction/architecture.md
 new_scripts/keyword_prediction/checklist.md
 new_scripts/keyword_prediction/tasks.md
 new_scripts/keyword_prediction/data/__pycache__/
+new_scripts/checkpoints/test/
+new_scripts/keyword_prediction/training/__pycache__/
+new_scripts/keyword_prediction/model/__pycache__/
+new_scripts/keyword_prediction/test_learning_rate_scaling.py
+new_scripts/keyword_prediction/test_memory_optimized.py
+new_scripts/keyword_prediction/test_production_training.py
+
+new_scripts/keyword_prediction/debug_processor.py
+new_scripts/keyword_prediction/debug_tokenization.py

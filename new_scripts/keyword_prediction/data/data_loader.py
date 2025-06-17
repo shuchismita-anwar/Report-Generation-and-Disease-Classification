@@ -26,9 +26,11 @@ logger = logging.getLogger(__name__)
 def create_data_loaders(
     train_csv: str = "../../dataset_splits/train.csv",
     val_csv: str = "../../dataset_splits/val.csv",
+    test_csv: str = "../../dataset_splits/test.csv",
+    batch_size: int = 1,
+    num_workers: int = 0,
+    shuffle: bool = True,
     base_path: str = "../../",
-    batch_size: int = 8,
-    num_workers: int = 2,
     processor: Optional[BlipProcessor] = None,
     max_length: int = 128
 ) -> Dict[str, DataLoader]:
@@ -38,14 +40,16 @@ def create_data_loaders(
     Args:
         train_csv (str): Path to training CSV
         val_csv (str): Path to validation CSV
-        base_path (str): Base path to dataset
+        test_csv (str): Path to test CSV
         batch_size (int): Batch size for data loaders
         num_workers (int): Number of worker processes
+        shuffle (bool): Whether to shuffle the data
+        base_path (str): Base path to dataset
         processor: BLIP processor for tokenization
         max_length (int): Maximum sequence length
         
     Returns:
-        Dict[str, DataLoader]: Dictionary with 'train' and 'val' data loaders
+        Dict[str, DataLoader]: Dictionary with 'train', 'val', and 'test' data loaders
     """
     try:
         logger.info("Creating datasets...")
@@ -65,8 +69,16 @@ def create_data_loaders(
             max_length=max_length
         )
         
+        test_dataset = MedicalKeywordDataset(
+            csv_path=test_csv,
+            base_path=base_path,
+            processor=processor,
+            max_length=max_length
+        )
+        
         logger.info(f"Train dataset: {len(train_dataset)} samples")
         logger.info(f"Val dataset: {len(val_dataset)} samples")
+        logger.info(f"Test dataset: {len(test_dataset)} samples")
         
         # Custom collate function for handling variable text lengths
         def collate_fn(batch):
@@ -102,7 +114,7 @@ def create_data_loaders(
         train_loader = DataLoader(
             train_dataset,
             batch_size=batch_size,
-            shuffle=True,  # Shuffle training data
+            shuffle=shuffle,
             num_workers=num_workers,
             collate_fn=collate_fn,
             pin_memory=torch.cuda.is_available(),  # Speed up GPU transfer
@@ -112,23 +124,36 @@ def create_data_loaders(
         val_loader = DataLoader(
             val_dataset,
             batch_size=batch_size,
-            shuffle=False,  # Don't shuffle validation data
+            shuffle=shuffle,
             num_workers=num_workers,
             collate_fn=collate_fn,
             pin_memory=torch.cuda.is_available(),
-            drop_last=False  # Keep all validation samples
+            drop_last=True  # Drop incomplete batches for consistent validation
+        )
+        
+        test_loader = DataLoader(
+            test_dataset,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            num_workers=num_workers,
+            collate_fn=collate_fn,
+            pin_memory=torch.cuda.is_available(),
+            drop_last=True  # Drop incomplete batches for consistent test
         )
         
         logger.info(f"Created data loaders:")
         logger.info(f"  Train batches: {len(train_loader)}")
         logger.info(f"  Val batches: {len(val_loader)}")
+        logger.info(f"  Test batches: {len(test_loader)}")
         logger.info(f"  Batch size: {batch_size}")
         
         return {
             'train': train_loader,
             'val': val_loader,
+            'test': test_loader,
             'train_dataset': train_dataset,
-            'val_dataset': val_dataset
+            'val_dataset': val_dataset,
+            'test_dataset': test_dataset
         }
         
     except Exception as e:
@@ -244,8 +269,10 @@ def validate_data_pipeline(
             loaders = create_data_loaders(
                 train_csv=csv_path if split == 'train' else "../../dataset_splits/train.csv",
                 val_csv=csv_path if split == 'val' else "../../dataset_splits/val.csv",
+                test_csv=csv_path if split == 'test' else "../../dataset_splits/test.csv",
                 batch_size=batch_size,
                 num_workers=0,  # Avoid multiprocessing issues
+                shuffle=False,  # Don't shuffle for validation
                 processor=None  # Skip BLIP processor for speed
             )
             
@@ -258,8 +285,10 @@ def validate_data_pipeline(
                 test_loaders = create_data_loaders(
                     train_csv="../../dataset_splits/test.csv",
                     val_csv="../../dataset_splits/test.csv",
+                    test_csv="../../dataset_splits/test.csv",
                     batch_size=batch_size,
                     num_workers=0,
+                    shuffle=False,
                     processor=None
                 )
                 all_loaders['test'] = test_loaders['train']  # Use train loader for test data
@@ -476,8 +505,9 @@ def test_data_loaders():
         print("🧪 Creating data loaders...")
         
         loaders = create_data_loaders(
-            batch_size=4,  # Small batch size for testing
+            batch_size=1,  # Small batch size for testing
             num_workers=0,  # Avoid multiprocessing issues in testing
+            shuffle=False,  # Don't shuffle for testing
             processor=None  # Skip BLIP processor for faster testing
         )
         

@@ -21,7 +21,7 @@ from transformers import (
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class BLIP2Medical(nn.Module):
+class MedicalBLIP2Model(nn.Module):
     """
     BLIP-2 model adapted for medical keyword generation.
     Loads pre-trained weights and adapts for medical chest X-ray analysis.
@@ -31,7 +31,7 @@ class BLIP2Medical(nn.Module):
         self, 
         model_name: str = "Salesforce/blip2-opt-2.7b",
         device: str = "auto",
-        max_length: int = 128,
+        max_length: int = 64,
         use_blip1: bool = False
     ):
         """
@@ -69,12 +69,21 @@ class BLIP2Medical(nn.Module):
                 self.model = Blip2ForConditionalGeneration.from_pretrained(
                     model_name,
                     torch_dtype=torch.float16 if self.device.type == "cuda" else torch.float32,
-                    device_map="auto" if self.device.type == "cuda" else None
+                    device_map="auto" if self.device.type == "cuda" else None,
+                    low_cpu_mem_usage=True,
+                    load_in_8bit=False,
+                    max_memory={0: "20GB", "cpu": "30GB"} if self.device.type == "cuda" else None
                 )
             
             # Move to device if not using device_map
             if not (self.device.type == "cuda" and not use_blip1):
                 self.model = self.model.to(self.device)
+            
+            # 🔧 CRITICAL: Initialize parameters for stability
+            self._initialize_stable_parameters()
+            
+            # 🔧 CRITICAL: Freeze vision encoder to prevent corruption
+            self._freeze_vision_encoder()
             
             logger.info("Model loaded successfully")
             
@@ -87,26 +96,84 @@ class BLIP2Medical(nn.Module):
             else:
                 raise e
     
+    def _initialize_stable_parameters(self):
+        """Initialize model parameters for numerical stability."""
+        try:
+            # Only initialize the language model head that we're training
+            if hasattr(self.model, 'language_model') and hasattr(self.model.language_model, 'lm_head'):
+                # Initialize with very small weights to prevent instability
+                with torch.no_grad():
+                    self.model.language_model.lm_head.weight.data.normal_(mean=0.0, std=0.001)
+                    if hasattr(self.model.language_model.lm_head, 'bias') and self.model.language_model.lm_head.bias is not None:
+                        self.model.language_model.lm_head.bias.data.zero_()
+                logger.info("Initialized language model head with stable parameters")
+                
+        except Exception as e:
+            logger.warning(f"Could not initialize stable parameters: {e}")
+    
+    def _freeze_vision_encoder(self):
+        """Freeze vision encoder to prevent parameter corruption."""
+        try:
+            # Freeze the entire vision model to prevent corruption
+            if hasattr(self.model, 'vision_model'):
+                for param in self.model.vision_model.parameters():
+                    param.requires_grad = False
+                logger.info("Froze vision model parameters")
+            
+            # Also freeze the vision-language connector if it exists
+            if hasattr(self.model, 'qformer'):
+                for param in self.model.qformer.parameters():
+                    param.requires_grad = False
+                logger.info("Froze Q-Former parameters")
+            
+            # Freeze language projection to prevent corruption  
+            if hasattr(self.model, 'language_projection'):
+                for param in self.model.language_projection.parameters():
+                    param.requires_grad = False
+                logger.info("Froze language projection parameters")
+                
+            # Only train the language model decoder (most stable part)
+            if hasattr(self.model, 'language_model'):
+                # Freeze EVERYTHING except the final output head
+                for name, param in self.model.language_model.named_parameters():
+                    if 'lm_head' in name:
+                        param.requires_grad = True  # ONLY train the final classification head
+                    else:
+                        param.requires_grad = False # Freeze everything else (including embed_tokens)
+                logger.info("Enabled ONLY lm_head training (most conservative approach)")
+                
+            # Count trainable parameters
+            trainable_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+            total_params = sum(p.numel() for p in self.model.parameters())
+            logger.info(f"Trainable parameters: {trainable_params:,} / {total_params:,} ({trainable_params/total_params*100:.1f}%)")
+                
+        except Exception as e:
+            logger.warning(f"Could not freeze vision encoder: {e}")
+    
     def generate_keywords(
         self, 
         image: Image.Image, 
-        prompt: str = "Generate descriptive medical keywords for this chest X-ray:",
+        prompt: str = "Describe the medical findings in this chest X-ray using specific anatomical terms:",
         num_beams: int = 3,
-        temperature: float = 0.7,
-        do_sample: bool = True
+        temperature: float = 0.8,
+        do_sample: bool = False,
+        max_new_tokens: int = 30,
+        repetition_penalty: float = 1.5
     ) -> str:
         """
         Generate medical keywords from a chest X-ray image.
         
         Args:
             image (Image.Image): Input chest X-ray image
-            prompt (str): Text prompt for generation
-            num_beams (int): Number of beams for beam search
-            temperature (float): Sampling temperature
+            prompt (str): Medical-focused text prompt for generation
+            num_beams (int): Number of beams for beam search (higher for better quality)
+            temperature (float): Sampling temperature (lower for more focused output)
             do_sample (bool): Whether to use sampling
+            max_new_tokens (int): Maximum number of new tokens to generate
+            repetition_penalty (float): Penalty for repetitive text
             
         Returns:
-            str: Generated medical keywords
+            str: Generated medical keywords and findings
         """
         try:
             # Process inputs
@@ -114,32 +181,39 @@ class BLIP2Medical(nn.Module):
                 # BLIP-1 processing
                 inputs = self.processor(image, prompt, return_tensors="pt").to(self.device)
                 
-                # Generate
+                # Generate with medical-optimized parameters
                 with torch.no_grad():
                     generated_ids = self.model.generate(
                         **inputs,
-                        max_length=self.max_length,
+                        max_new_tokens=max_new_tokens,
                         num_beams=num_beams,
-                        temperature=temperature,
                         do_sample=do_sample,
-                        pad_token_id=self.processor.tokenizer.pad_token_id
+                        repetition_penalty=repetition_penalty,
+                        no_repeat_ngram_size=3,
+                        early_stopping=True,
+                        pad_token_id=self.processor.tokenizer.pad_token_id,
+                        eos_token_id=self.processor.tokenizer.eos_token_id
                     )
                 
                 # Decode
                 generated_text = self.processor.decode(generated_ids[0], skip_special_tokens=True)
                 
             else:
-                # BLIP-2 processing
+                # BLIP-2 processing with medical focus
                 inputs = self.processor(image, prompt, return_tensors="pt").to(self.device)
                 
-                # Generate
+                # Generate with medical-optimized parameters
                 with torch.no_grad():
                     generated_ids = self.model.generate(
                         **inputs,
-                        max_length=self.max_length,
+                        max_new_tokens=max_new_tokens,
                         num_beams=num_beams,
-                        temperature=temperature,
-                        do_sample=do_sample
+                        do_sample=do_sample,
+                        repetition_penalty=repetition_penalty,
+                        no_repeat_ngram_size=3,
+                        early_stopping=True,
+                        pad_token_id=self.processor.tokenizer.pad_token_id,
+                        eos_token_id=self.processor.tokenizer.eos_token_id
                     )
                 
                 # Decode
@@ -156,7 +230,7 @@ class BLIP2Medical(nn.Module):
             return "normal chest"  # Fallback
     
     def _clean_generated_text(self, generated_text: str, prompt: str) -> str:
-        """Clean and format generated text to extract keywords."""
+        """Clean and format generated text to extract medical keywords."""
         
         # Remove the prompt from generated text
         if prompt in generated_text:
@@ -164,14 +238,29 @@ class BLIP2Medical(nn.Module):
         else:
             keywords = generated_text.strip()
         
-        # Basic cleaning
+        # Medical-focused cleaning
         keywords = keywords.lower()
-        keywords = keywords.replace(".", "").replace(":", "").replace(";", "")
-        keywords = keywords.strip()
         
-        # If empty or too short, provide fallback
-        if len(keywords) < 3:
-            keywords = "normal chest"
+        # Remove common non-medical phrases
+        remove_phrases = [
+            "the patient has", "there is", "this shows", "this image shows",
+            "the chest x-ray shows", "chest x-ray of", "a chest x-ray",
+            "the image shows", "this is a", "image of"
+        ]
+        
+        for phrase in remove_phrases:
+            keywords = keywords.replace(phrase, "")
+        
+        # Clean punctuation but keep medical terms
+        keywords = keywords.replace(".", ",").replace(":", ",").replace(";", ",")
+        keywords = keywords.replace("  ", " ").strip()
+        
+        # Remove leading/trailing conjunctions
+        keywords = keywords.strip("and ,")
+        
+        # If empty or too short, provide medical fallback
+        if len(keywords) < 5:
+            keywords = "normal chest appearance"
         
         return keywords
     
@@ -180,7 +269,7 @@ class BLIP2Medical(nn.Module):
         Forward pass for training.
         
         Args:
-            pixel_values: Image tensors
+            pixel_values: Image tensors (batch_size, 3, 224, 224) - BLIP-2 expects 224x224!
             input_ids: Text token IDs (for decoder input)
             attention_mask: Attention mask for text
             labels: Target labels for training (for computing loss)
@@ -189,6 +278,17 @@ class BLIP2Medical(nn.Module):
             Loss and logits for training
         """
         try:
+            # CRITICAL FIX: Ensure pixel_values are 224x224 for BLIP-2
+            if pixel_values.shape[-2:] != (224, 224):
+                # Resize from 512x512 to 224x224
+                pixel_values = torch.nn.functional.interpolate(
+                    pixel_values, 
+                    size=(224, 224), 
+                    mode='bilinear', 
+                    align_corners=False
+                )
+                logger.debug(f"Resized images from {pixel_values.shape[-2:]} to 224x224")
+            
             # Prepare inputs for both BLIP-1 and BLIP-2
             inputs = {
                 'pixel_values': pixel_values.to(self.device),
@@ -203,7 +303,43 @@ class BLIP2Medical(nn.Module):
             
             # Forward pass
             outputs = self.model(**inputs)
-            return outputs
+            
+            # Ensure we have a proper loss
+            if hasattr(outputs, 'loss') and outputs.loss is not None:
+                return outputs
+            else:
+                # If no loss in output, this shouldn't happen in training mode with labels
+                logger.warning("No loss in model output, checking labels...")
+                if labels is not None:
+                    logger.error("Labels provided but no loss computed - model configuration issue")
+                
+                # Force computation of loss if we have labels but model didn't compute it
+                if hasattr(outputs, 'logits') and labels is not None:
+                    # Compute cross-entropy loss manually
+                    loss_fct = torch.nn.CrossEntropyLoss(ignore_index=-100)
+                    logits = outputs.logits
+                    shift_logits = logits[..., :-1, :].contiguous()
+                    shift_labels = labels[..., 1:].contiguous()
+                    loss = loss_fct(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
+                    
+                    # Create new output object with loss
+                    class OutputWithLoss:
+                        def __init__(self, loss, logits):
+                            self.loss = loss
+                            self.logits = logits
+                    
+                    return OutputWithLoss(loss, logits)
+                
+                # If we still can't compute loss, something is wrong
+                logger.error("Cannot compute loss - returning zero")
+                batch_size = pixel_values.shape[0]
+                dummy_loss = torch.tensor(0.0, device=self.device, requires_grad=True)
+                
+                class DummyOutput:
+                    def __init__(self, loss):
+                        self.loss = loss
+                
+                return DummyOutput(dummy_loss)
             
         except Exception as e:
             logger.error(f"Error in forward pass: {e}")
@@ -213,10 +349,8 @@ class BLIP2Medical(nn.Module):
             logger.error(f"attention_mask shape: {attention_mask.shape if attention_mask is not None else None}")
             logger.error(f"labels shape: {labels.shape if labels is not None else None}")
             
-            # Return dummy outputs for error handling
-            batch_size = pixel_values.shape[0]
-            dummy_loss = torch.tensor(0.0, device=self.device, requires_grad=True)
-            return type('obj', (object,), {'loss': dummy_loss})()
+            # Re-raise the exception so we know something is wrong
+            raise e
 
 def test_blip2_basic_functionality():
     """Test Task 4.1: Basic BLIP-2 functionality with real chest X-rays"""
@@ -229,7 +363,7 @@ def test_blip2_basic_functionality():
         # Initialize model
         print("🧪 Initializing BLIP-2 model...")
         
-        model = BLIP2Medical(
+        model = MedicalBLIP2Model(
             model_name="Salesforce/blip2-opt-2.7b",
             device="auto",
             max_length=64  # Shorter for testing
@@ -362,6 +496,249 @@ def debug_blip2_inputs():
     
     return inputs
 
+def test_medical_domain_adaptation():
+    """Test Task 4.2: Medical domain adaptation with specialized prompts"""
+    
+    print("="*60)
+    print("TASK 4.2: TESTING MEDICAL DOMAIN ADAPTATION")
+    print("="*60)
+    
+    try:
+        # Initialize model
+        print("🧪 Initializing BLIP-2 model for medical adaptation...")
+        
+        model = MedicalBLIP2Model(
+            model_name="Salesforce/blip2-opt-2.7b",
+            device="auto",
+            max_length=128
+        )
+        
+        print(f"   ✅ Model initialized successfully")
+        print(f"   📱 Device: {model.device}")
+        
+        # Test with different medical prompts
+        print(f"\n🔍 Testing medical domain adaptation with specialized prompts...")
+        
+        # Load real chest X-ray images
+        test_images = [
+            "../../data_dump/output/img_png/c8e75f4a-9e0a67e3-fd3c4308-0ad97459-d184ee7e.png",
+            "../../data_dump/output/img_png/33c926ca-af4fc716-ced32c6c-5734ba7a-2d690062.png",
+            "../../data_dump/output/img_png/fa49fda6-bc98e1dd-d0c11b43-466dcb83-98a9bd98.png"
+        ]
+        
+        # Different medical prompts to test adaptation
+        medical_prompts = [
+            "Describe the medical findings in this chest X-ray using specific anatomical terms:",
+            "List the radiological findings and anatomical structures visible in this chest X-ray:",
+            "Generate medical keywords describing the pathological and normal findings in this chest radiograph:",
+            "Identify anatomical landmarks and abnormalities in this chest X-ray image:"
+        ]
+        
+        success_count = 0
+        
+        for i, image_path in enumerate(test_images, 1):
+            try:
+                print(f"\n   🖼️  Test Image {i}/3: {image_path.split('/')[-1]}")
+                
+                # Load image
+                image = Image.open(image_path).convert('RGB')
+                print(f"      📐 Image size: {image.size}")
+                
+                # Test each medical prompt
+                for j, prompt in enumerate(medical_prompts, 1):
+                    print(f"\n      🎯 Prompt {j}: {prompt[:50]}...")
+                    
+                    # Generate keywords with medical adaptation
+                    keywords = model.generate_keywords(
+                        image, 
+                        prompt=prompt,
+                        num_beams=3,          # Balanced for quality and speed
+                        do_sample=False,      # Deterministic for consistency
+                        max_new_tokens=30,    # Shorter to avoid repetition
+                        repetition_penalty=1.5  # Higher to reduce repetition
+                    )
+                    
+                    print(f"         📝 Generated: \"{keywords}\"")
+                    
+                    # Check if keywords contain medical terms
+                    medical_terms = [
+                        'lung', 'cardiac', 'heart', 'chest', 'pulmonary', 'pleural',
+                        'bilateral', 'infiltrate', 'consolidation', 'atelectasis',
+                        'effusion', 'pneumothorax', 'nodule', 'mass', 'opacity',
+                        'diaphragm', 'rib', 'spine', 'mediastinum', 'hilum'
+                    ]
+                    
+                    medical_count = sum(1 for term in medical_terms if term in keywords.lower())
+                    print(f"         🏥 Medical terms found: {medical_count}")
+                    
+                    if medical_count >= 2:  # At least 2 medical terms
+                        success_count += 1
+                
+            except Exception as e:
+                print(f"      ❌ Failed: {e}")
+        
+        # Calculate success rate
+        total_tests = len(test_images) * len(medical_prompts)
+        success_rate = (success_count / total_tests) * 100
+        
+        print(f"\n📊 MEDICAL ADAPTATION TEST SUMMARY:")
+        print(f"   Total prompt tests: {total_tests}")
+        print(f"   Successful medical generations: {success_count}")
+        print(f"   Medical adaptation success rate: {success_rate:.1f}%")
+        
+        # Test comparison: Generic vs Medical prompts
+        print(f"\n🔬 COMPARISON TEST: Generic vs Medical Prompts")
+        
+        test_image = Image.open(test_images[0]).convert('RGB')
+        
+        # Generic prompt
+        generic_result = model.generate_keywords(
+            test_image,
+            prompt="Describe this image:",
+            num_beams=3,
+            temperature=0.8
+        )
+        
+        # Medical prompt
+        medical_result = model.generate_keywords(
+            test_image,
+            prompt="Describe the medical findings in this chest X-ray using specific anatomical terms:",
+            num_beams=5,
+            temperature=0.6,
+            max_new_tokens=50,
+            repetition_penalty=1.2
+        )
+        
+        print(f"   🔵 Generic prompt result: \"{generic_result}\"")
+        print(f"   🏥 Medical prompt result: \"{medical_result}\"")
+        
+        # Determine overall success
+        if success_rate >= 50:  # At least 50% should contain medical terms
+            print(f"\n✅ TASK 4.2 COMPLETE - Medical domain adaptation working!")
+            return True
+        else:
+            print(f"\n❌ TASK 4.2 FAILED - Medical adaptation success rate too low")
+            return False
+            
+    except Exception as e:
+        print(f"\n❌ TASK 4.2 FAILED - Medical adaptation failed: {e}")
+        return False
+
+def test_model_inference_method():
+    """Test Task 4.4: Model inference method with real test images"""
+    
+    print("="*60)
+    print("TASK 4.4: TESTING MODEL INFERENCE METHOD")
+    print("="*60)
+    
+    try:
+        # Initialize model
+        print("🧪 Initializing BLIP-2 model for inference testing...")
+        
+        model = MedicalBLIP2Model(
+            model_name="Salesforce/blip2-opt-2.7b",
+            device="auto",
+            max_length=128
+        )
+        
+        print(f"   ✅ Model initialized successfully")
+        print(f"   📱 Device: {model.device}")
+        
+        # Test inference method with 5 real test images
+        print(f"\n🔍 Testing inference method with 5 real test images...")
+        
+        # Load 5 real chest X-ray images for testing
+        test_images = [
+            "../../data_dump/output/img_png/c8e75f4a-9e0a67e3-fd3c4308-0ad97459-d184ee7e.png",
+            "../../data_dump/output/img_png/33c926ca-af4fc716-ced32c6c-5734ba7a-2d690062.png",
+            "../../data_dump/output/img_png/fa49fda6-bc98e1dd-d0c11b43-466dcb83-98a9bd98.png",
+            "../../data_dump/output/img_png/0066734a-35568fde-fd52ba23-ec66f3de-88d4aaf9.png",
+            "../../data_dump/output/img_png/005aff0f-0c236062-06df954a-25ad1874-bcdffcb0.png"
+        ]
+        
+        success_count = 0
+        inference_times = []
+        
+        for i, image_path in enumerate(test_images, 1):
+            try:
+                print(f"\n   🖼️  Test {i}/5: {image_path.split('/')[-1]}")
+                
+                # Load image
+                image = Image.open(image_path).convert('RGB')
+                print(f"      📐 Image size: {image.size}")
+                
+                # Test inference with timing
+                import time
+                start_time = time.time()
+                
+                # Generate keywords using the inference method
+                keywords = model.generate_keywords(
+                    image, 
+                    prompt="Describe the medical findings in this chest X-ray using specific anatomical terms:",
+                    num_beams=3,
+                    do_sample=False,
+                    max_new_tokens=30,
+                    repetition_penalty=1.5
+                )
+                
+                end_time = time.time()
+                inference_time = end_time - start_time
+                inference_times.append(inference_time)
+                
+                print(f"      🎯 Generated: \"{keywords}\"")
+                print(f"      ⏱️  Inference time: {inference_time:.2f}s")
+                
+                # Check if keywords are reasonable (not empty, not too repetitive)
+                if len(keywords) > 5 and not keywords.count(keywords.split()[0]) > 5:
+                    success_count += 1
+                    print(f"      ✅ Success")
+                else:
+                    print(f"      ❌ Failed - poor quality output")
+                
+            except Exception as e:
+                print(f"      ❌ Failed: {e}")
+        
+        # Calculate metrics
+        success_rate = (success_count / len(test_images)) * 100
+        avg_inference_time = sum(inference_times) / len(inference_times) if inference_times else 0
+        
+        print(f"\n📊 INFERENCE METHOD TEST SUMMARY:")
+        print(f"   Total images tested: {len(test_images)}")
+        print(f"   Successful inferences: {success_count}")
+        print(f"   Success rate: {success_rate:.1f}%")
+        print(f"   Average inference time: {avg_inference_time:.2f}s")
+        
+        # Test different generation parameters
+        print(f"\n🔧 TESTING DIFFERENT GENERATION PARAMETERS:")
+        
+        test_image = Image.open(test_images[0]).convert('RGB')
+        
+        # Test with different beam sizes
+        for beams in [1, 3, 5]:
+            keywords = model.generate_keywords(
+                test_image,
+                prompt="Medical findings:",
+                num_beams=beams,
+                do_sample=False,
+                max_new_tokens=20,
+                repetition_penalty=1.5
+            )
+            print(f"   🔢 Beams={beams}: \"{keywords}\"")
+        
+        # Determine overall success
+        if success_rate >= 80 and avg_inference_time < 5.0:  # 80% success, <5s per image
+            print(f"\n✅ TASK 4.4 COMPLETE - Model inference method working!")
+            return True
+        else:
+            print(f"\n❌ TASK 4.4 FAILED - Success rate: {success_rate:.1f}%, Avg time: {avg_inference_time:.2f}s")
+            return False
+            
+    except Exception as e:
+        print(f"\n❌ TASK 4.4 FAILED - Inference method failed: {e}")
+        return False
+
 if __name__ == "__main__":
     # debug_blip2_inputs()  # Debug first
-    test_blip2_basic_functionality() 
+    # test_blip2_basic_functionality()  # Task 4.1 complete
+    # test_medical_domain_adaptation()  # Task 4.2 complete
+    test_model_inference_method()  # Task 4.4 

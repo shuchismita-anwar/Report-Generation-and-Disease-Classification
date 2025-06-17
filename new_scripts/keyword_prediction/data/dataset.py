@@ -15,7 +15,7 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
-from transformers import BlipProcessor
+from transformers import BlipProcessor, Blip2Processor
 
 # Import our transcript processor
 try:
@@ -212,20 +212,29 @@ class MedicalKeywordDataset(Dataset):
         self.df = pd.read_csv(csv_path)
         logger.info(f"Loaded dataset with {len(self.df)} samples from {csv_path}")
         
-        # Initialize processor
+        # Initialize processor - CRITICAL FIX: Use correct processor
         if processor is None:
             try:
-                self.processor = BlipProcessor.from_pretrained("Salesforce/blip2-opt-2.7b")
-                logger.info("Loaded BLIP-2 processor")
+                # Import the correct processor for BLIP-2
+                from transformers import Blip2Processor
+                self.processor = Blip2Processor.from_pretrained("Salesforce/blip2-opt-2.7b")
+                logger.info("Loaded BLIP-2 processor successfully")
             except Exception as e:
-                logger.warning(f"Could not load BLIP processor: {e}")
-                self.processor = None
+                logger.warning(f"Could not load BLIP-2 processor: {e}")
+                # Fallback to BLIP-1 processor
+                try:
+                    from transformers import BlipProcessor
+                    self.processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
+                    logger.info("Loaded BLIP-1 processor as fallback")
+                except Exception as e2:
+                    logger.error(f"Could not load any BLIP processor: {e2}")
+                    self.processor = None
         else:
             self.processor = processor
         
-        # Image transforms for consistency
+        # Image transforms for consistency - CRITICAL FIX: Use 224x224 for BLIP-2
         self.image_transform = transforms.Compose([
-            transforms.Resize((512, 512)),  # Ensure consistent size
+            transforms.Resize((224, 224)),  # BLIP-2 expects 224x224, not 512x512!
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # ImageNet normalization
         ])
@@ -291,21 +300,49 @@ class MedicalKeywordDataset(Dataset):
             # Process image
             image = pair['image']
             if self.processor:
-                # Use BLIP processor
-                processed = self.processor(
+                # Process image (this works fine)
+                image_processed = self.processor(
                     images=image,
-                    text=pair['keywords'],
-                    return_tensors="pt",
-                    max_length=self.max_length,
-                    padding="max_length",
-                    truncation=True
+                    return_tensors="pt"
                 )
+                pixel_values = image_processed['pixel_values'].squeeze(0)
+                
+                # 🔧 CRITICAL FIX: Bypass broken processor text handling
+                # The BLIP-2 processor adds too many padding tokens upfront
+                # Use tokenizer directly for clean tokenization
+                tokenizer = self.processor.tokenizer
+                
+                # Tokenize text directly without processor interference
+                text_encoded = tokenizer.encode(
+                    pair['keywords'],
+                    add_special_tokens=True,  # Add BOS/EOS tokens
+                    return_tensors="pt"
+                )
+                input_ids = text_encoded.squeeze(0)
+                
+                # Create attention mask (1 for real tokens, 0 for padding)
+                attention_mask = torch.ones_like(input_ids)
+                
+                # Manual padding to target length
+                target_length = 64
+                if len(input_ids) > target_length:
+                    # Truncate if too long
+                    input_ids = input_ids[:target_length]
+                    attention_mask = attention_mask[:target_length]
+                else:
+                    # Pad if too short (pad with tokenizer's pad_token_id)
+                    pad_length = target_length - len(input_ids)
+                    pad_token_id = tokenizer.pad_token_id if tokenizer.pad_token_id is not None else tokenizer.eos_token_id
+                    
+                    # Right padding (real tokens first, padding after)
+                    input_ids = torch.cat([input_ids, torch.full((pad_length,), pad_token_id, dtype=input_ids.dtype)])
+                    attention_mask = torch.cat([attention_mask, torch.zeros(pad_length, dtype=attention_mask.dtype)])
                 
                 return {
-                    'pixel_values': processed['pixel_values'].squeeze(0),
-                    'input_ids': processed['input_ids'].squeeze(0),
-                    'attention_mask': processed['attention_mask'].squeeze(0),
-                    'labels': processed['input_ids'].squeeze(0),  # For training
+                    'pixel_values': pixel_values,
+                    'input_ids': input_ids,
+                    'attention_mask': attention_mask,
+                    'labels': input_ids,  # For training
                     'keywords': pair['keywords'],
                     'dicom_id': pair['dicom_id'],
                     'patient_folder': pair['patient_folder']
@@ -329,23 +366,39 @@ class MedicalKeywordDataset(Dataset):
     def _get_dummy_sample(self):
         """Return a dummy sample in case of loading errors."""
         if self.processor:
-            dummy_image = Image.new('RGB', (512, 512), color='black')
+            # CRITICAL FIX: Use 224x224 for dummy samples too
+            dummy_image = Image.new('RGB', (224, 224), color='black')
             dummy_text = "normal chest"
             
             processed = self.processor(
                 images=dummy_image,
                 text=dummy_text,
                 return_tensors="pt",
-                max_length=self.max_length,
-                padding="max_length",
+                padding=False,  # 🔧 NO AUTOMATIC PADDING - handle manually
                 truncation=True
             )
             
+            # Manual padding to avoid padding token issues
+            input_ids = processed['input_ids'].squeeze(0)
+            attention_mask = processed['attention_mask'].squeeze(0)
+            
+            # Truncate or pad to desired length
+            target_length = 64
+            if len(input_ids) > target_length:
+                input_ids = input_ids[:target_length]
+                attention_mask = attention_mask[:target_length]
+            else:
+                # 🔧 CRITICAL FIX: Put real tokens FIRST, padding LAST
+                pad_length = target_length - len(input_ids)
+                # Pad at the END (right padding) so real tokens are at the beginning
+                input_ids = torch.cat([input_ids, torch.ones(pad_length, dtype=input_ids.dtype)])
+                attention_mask = torch.cat([attention_mask, torch.zeros(pad_length, dtype=attention_mask.dtype)])
+            
             return {
                 'pixel_values': processed['pixel_values'].squeeze(0),
-                'input_ids': processed['input_ids'].squeeze(0),
-                'attention_mask': processed['attention_mask'].squeeze(0),
-                'labels': processed['input_ids'].squeeze(0),
+                'input_ids': input_ids,
+                'attention_mask': attention_mask,
+                'labels': input_ids,
                 'keywords': dummy_text,
                 'dicom_id': 'dummy',
                 'patient_folder': 'dummy'
