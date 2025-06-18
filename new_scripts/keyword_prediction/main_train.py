@@ -204,7 +204,7 @@ def main():
                 logger.info(f"  Comprehensive Metrics:")
                 logger.info(f"     Overall Quality: {val_results['metrics']['overall_quality']:.4f}")
                 logger.info(f"     BLEU-4: {val_results['metrics']['bleu_4']:.4f}")
-                logger.info(f"     ROUGE-1 F1: {val_results['metrics']['rouge_1_f1']:.4f}")
+                logger.info(f"     ROUGE-1 F1: {val_results['metrics']['rouge1_f1']:.4f}")
                 logger.info(f"     Medical Coverage: {val_results['metrics']['medical_coverage']:.4f}")
             
             logger.info(f"  Epoch time: {val_results['epoch_time']:.2f}s")

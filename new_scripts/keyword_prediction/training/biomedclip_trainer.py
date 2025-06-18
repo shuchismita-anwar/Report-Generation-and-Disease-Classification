@@ -201,7 +201,11 @@ class MedicalKeywordTrainer:
         
         # Add detailed metrics if available
         if detailed_metrics:
-            results['metrics'] = detailed_metrics
+            # Extract key metrics from the nested structure
+            if 'summary' in detailed_metrics:
+                results['metrics'] = detailed_metrics['summary']
+            else:
+                results['metrics'] = detailed_metrics
         
         logger.info(f"Training evaluation completed: {success_rate:.1f}% success rate")
         return results
@@ -332,7 +336,11 @@ class MedicalKeywordTrainer:
         
         # Add detailed metrics if available
         if detailed_metrics:
-            results['metrics'] = detailed_metrics
+            # Extract key metrics from the nested structure
+            if 'summary' in detailed_metrics:
+                results['metrics'] = detailed_metrics['summary']
+            else:
+                results['metrics'] = detailed_metrics
         
         logger.info(f"Validation completed: {success_rate:.1f}% success rate")
         

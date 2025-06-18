@@ -136,6 +136,21 @@ class MedicalKeywordMetrics:
             logger.error(f"Error computing training metrics: {e}")
             return self._get_zero_training_metrics()
     
+    def compute_all_metrics(self, 
+                           predictions: List[str], 
+                           references: List[str]) -> Dict[str, Any]:
+        """
+        Compute all available metrics (compatibility method for trainer).
+        
+        Args:
+            predictions: Generated keywords (hypotheses)
+            references: Ground truth keywords
+            
+        Returns:
+            Dictionary with all metrics
+        """
+        return self.compute_validation_metrics(references, predictions)
+    
     def compute_validation_metrics(self, 
                                   references: List[str], 
                                   hypotheses: List[str]) -> Dict[str, Any]:
