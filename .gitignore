@@ -120,3 +120,8 @@ new_scripts/keyword_prediction/task_6_4_summary.md
 new_scripts/keyword_prediction/logs/training.log
 logs/
 new_scripts/keyword_prediction/checkpoints/
+new_scripts/keyword_prediction/check_image_dims.py
+extract_all_keywords.py
+new_scripts/keyword_prediction/reflacx_region.py
+new_scripts/keyword_prediction/debug_costophrenic.py
+new_scripts/keyword_prediction/keyword_extraction_results/
