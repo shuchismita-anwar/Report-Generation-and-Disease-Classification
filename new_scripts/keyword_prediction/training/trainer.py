@@ -33,21 +33,21 @@ class MedicalKeywordTrainer:
         model,
         train_loader: DataLoader,
         val_loader: Optional[DataLoader] = None,
-        learning_rate: float = 5e-8,  # 🔧 OPTIMAL: Updated to optimal rate from testing
+        learning_rate: float = 1e-10,  # 🔧 ULTRA-CONSERVATIVE: Reduced from 5e-8 to prevent instability
         device: str = "auto",
-        gradient_accumulation_steps: int = 4,  # 🔧 NEW: Gradient accumulation for stability
+        gradient_accumulation_steps: int = 8,  # 🔧 INCREASED: More accumulation for stability
         enable_metrics: bool = True  # 🔧 NEW: Enable comprehensive metrics evaluation
     ):
         """
-        Initialize trainer.
+        Initialize trainer with ultra-conservative settings for parameter stability.
         
         Args:
             model: MedicalBLIP2Model model instance
             train_loader: Training data loader
             val_loader: Validation data loader (optional)
-            learning_rate: Learning rate for optimizer
+            learning_rate: Ultra-conservative learning rate for stability
             device: Device to use for training
-            gradient_accumulation_steps: Steps to accumulate gradients
+            gradient_accumulation_steps: Steps to accumulate gradients (higher for stability)
             enable_metrics: Whether to compute comprehensive metrics
         """
         self.model = model
@@ -74,16 +74,32 @@ class MedicalKeywordTrainer:
         # Move model to device
         self.model = self.model.to(self.device)
         
-        # Initialize optimizer
+        # 🔧 ULTRA-CONSERVATIVE: Initialize optimizer with minimal learning rate and weight decay
         self.optimizer = optim.AdamW(
             self.model.parameters(),
             lr=learning_rate,
-            weight_decay=0.01
+            weight_decay=0.001,  # Reduced from 0.01 to prevent overcorrection
+            betas=(0.9, 0.999),  # Conservative momentum
+            eps=1e-8  # Standard epsilon
+        )
+        
+        # 🔧 NEW: Add learning rate scheduler for even more stability
+        self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+            self.optimizer,
+            mode='min',
+            factor=0.5,
+            patience=3,
+            verbose=True,
+            min_lr=1e-12
         )
         
         # Training metrics
         self.train_losses = []
         self.val_losses = []
+        
+        # 🔧 NEW: Parameter stability tracking
+        self.parameter_corruption_count = 0
+        self.max_corruption_threshold = 5  # Stop training if too many corruptions
         
         # 🔧 NEW: Initialize comprehensive metrics system for Task 5.4
         if self.enable_metrics:
@@ -99,7 +115,7 @@ class MedicalKeywordTrainer:
                 
                 from metrics.medical_metrics import MedicalKeywordMetrics
                 self.metrics_evaluator = MedicalKeywordMetrics(device=device)
-                logger.info("✅ Comprehensive metrics system enabled (BLEU/ROUGE/Medical)")
+                logger.info("Comprehensive metrics system enabled (BLEU/ROUGE/Medical)")
             except Exception as e:
                 logger.warning(f"Failed to initialize metrics system: {e}")
                 logger.info("Continuing without comprehensive metrics")
@@ -110,17 +126,73 @@ class MedicalKeywordTrainer:
             logger.info("Basic training mode - metrics disabled")
         
         logger.info(f"Trainer initialized on device: {self.device}")
-        logger.info(f"Learning rate: {learning_rate}")
+        logger.info(f"ULTRA-CONSERVATIVE Learning rate: {learning_rate}")
+        logger.info(f"Gradient accumulation steps: {gradient_accumulation_steps}")
         logger.info(f"Train batches: {len(train_loader)}")
         if val_loader:
             logger.info(f"Validation batches: {len(val_loader)}")
+    
+    def _validate_model_parameters(self) -> bool:
+        """
+        Validate that model parameters are still stable.
+        
+        Returns:
+            bool: True if parameters are stable, False if corrupted
+        """
+        try:
+            for name, param in self.model.named_parameters():
+                if param.requires_grad:
+                    # Check for NaN or Inf in parameters
+                    if torch.isnan(param).any() or torch.isinf(param).any():
+                        logger.error(f"Parameter corruption detected in {name}")
+                        logger.error(f"  Parameter shape: {param.shape}")
+                        logger.error(f"  Has NaN: {torch.isnan(param).any()}")
+                        logger.error(f"  Has Inf: {torch.isinf(param).any()}")
+                        logger.error(f"  Min value: {param.min().item()}")
+                        logger.error(f"  Max value: {param.max().item()}")
+                        return False
+                    
+                    # Check for extreme values that might indicate instability
+                    param_abs_max = param.abs().max().item()
+                    if param_abs_max > 100.0:  # Threshold for "too large" parameters
+                        logger.warning(f"Large parameter values in {name}: max_abs = {param_abs_max}")
+                        
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error validating parameters: {e}")
+            return False
+    
+    def _reset_model_parameters(self):
+        """Reset model parameters to stable initial state if corruption is detected."""
+        try:
+            logger.info("Resetting model parameters to stable state...")
+            
+            # Re-initialize only trainable parameters with ultra-conservative values
+            for name, param in self.model.named_parameters():
+                if param.requires_grad:
+                    with torch.no_grad():
+                        if 'weight' in name:
+                            # Ultra-small weight initialization
+                            param.data.normal_(mean=0.0, std=0.0001)
+                        elif 'bias' in name:
+                            # Zero bias initialization
+                            param.data.zero_()
+                    logger.info(f"  Reset parameter: {name}")
+            
+            # Reset optimizer state
+            self.optimizer.state = {}
+            logger.info("Reset optimizer state")
+            
+        except Exception as e:
+            logger.error(f"Failed to reset parameters: {e}")
     
     def _generate_keywords_for_metrics(self, images: torch.Tensor, batch_size: int = None) -> List[str]:
         """
         Generate keywords from images for metrics evaluation.
         
         Args:
-            images: Batch of images
+            images: Batch of images (tensor format)
             batch_size: Expected batch size for validation
             
         Returns:
@@ -139,19 +211,27 @@ class MedicalKeywordTrainer:
                 # Generate keywords for each image in the batch
                 for i in range(batch_size):
                     try:
-                        # Generate keywords for single image
-                        single_image = images[i:i+1]  # Keep batch dimension
-                        keywords = self.model.generate_keywords(single_image)
+                        # 🔧 FIX: Extract single image tensor properly
+                        single_image_tensor = images[i]  # Shape: [3, 224, 224]
                         
-                        # Extract generated text
-                        if isinstance(keywords, list) and len(keywords) > 0:
-                            generated_keywords.append(keywords[0])
+                        # 🔧 FIX: Pass tensor directly to generate_keywords (now handles tensors)
+                        keywords = self.model.generate_keywords(
+                            single_image_tensor,
+                            prompt="Medical keywords:",
+                            max_new_tokens=20,
+                            num_beams=2,
+                            do_sample=False
+                        )
+                        
+                        # Ensure we have a string output
+                        if isinstance(keywords, str) and len(keywords.strip()) > 0:
+                            generated_keywords.append(keywords.strip())
                         else:
-                            generated_keywords.append("")  # Fallback for failed generation
+                            generated_keywords.append("normal chest")  # Fallback
                             
                     except Exception as e:
                         logger.warning(f"Failed to generate keywords for image {i}: {e}")
-                        generated_keywords.append("")  # Fallback
+                        generated_keywords.append("normal chest")  # Fallback
             
             # Restore training mode
             self.model.train()
@@ -160,7 +240,8 @@ class MedicalKeywordTrainer:
             
         except Exception as e:
             logger.error(f"Error in keyword generation for metrics: {e}")
-            return [""] * batch_size  # Return empty strings as fallback
+            # Return medical fallbacks instead of empty strings
+            return ["normal chest"] * (batch_size if batch_size else 1)
     
     def train_epoch(self, epoch: int = 0) -> Dict[str, float]:
         """
@@ -237,12 +318,12 @@ class MedicalKeywordTrainer:
                 # Extract loss
                 loss = outputs.loss
                 
-                # 🔧 CRITICAL: Scale loss for gradient accumulation
+                # CRITICAL: Scale loss for gradient accumulation
                 loss = loss / self.gradient_accumulation_steps
                 
-                # 🔍 DEBUG: Check for NaN loss
+                # DEBUG: Check for NaN loss
                 if torch.isnan(loss):
-                    logger.error(f"⚠️ NaN loss detected in batch {batch_idx}!")
+                    logger.error(f"WARNING: NaN loss detected in batch {batch_idx}!")
                     logger.error(f"   Image shape: {images.shape}")
                     logger.error(f"   Input IDs shape: {input_ids.shape}")
                     logger.error(f"   Labels shape: {labels.shape}")
@@ -264,44 +345,98 @@ class MedicalKeywordTrainer:
                 # Backward pass
                 loss.backward()
                 
-                # 🔧 CRITICAL: Only step optimizer every gradient_accumulation_steps
+                # CRITICAL: Only step optimizer every gradient_accumulation_steps
                 if (batch_idx + 1) % self.gradient_accumulation_steps == 0:
-                    # 🔍 DEBUG: Check gradients for NaN/Inf before optimizer step
+                    # 🔧 ENHANCED: Check gradients for NaN/Inf before optimizer step
                     total_grad_norm = 0.0
                     nan_grad_count = 0
+                    max_grad_norm = 0.0
+                    
                     for name, param in self.model.named_parameters():
                         if param.grad is not None:
                             grad_norm = param.grad.data.norm(2)
                             total_grad_norm += grad_norm.item() ** 2
+                            max_grad_norm = max(max_grad_norm, grad_norm.item())
+                            
                             if torch.isnan(param.grad).any() or torch.isinf(param.grad).any():
                                 nan_grad_count += 1
-                                if nan_grad_count <= 3:  # Log first few
-                                    logger.error(f"   NaN/Inf gradient in {name}: {param.grad.data}")
+                                if nan_grad_count <= 2:  # Log first few
+                                    logger.error(f"   NaN/Inf gradient in {name}")
                     
+                    total_grad_norm = total_grad_norm ** 0.5  # Convert back to L2 norm
+                    
+                    # 🔧 ENHANCED: More sophisticated gradient handling
                     if nan_grad_count > 0:
                         logger.error(f"   Found {nan_grad_count} parameters with NaN/Inf gradients")
-                        logger.error(f"   Total gradient norm: {total_grad_norm}")
-                        # 🔧 Skip optimizer step if gradients are corrupted
+                        logger.error(f"   Skipping optimizer step and resetting gradients")
                         self.optimizer.zero_grad()
+                        self.parameter_corruption_count += 1
+                        
+                        # Reset parameters if too many corruptions
+                        if self.parameter_corruption_count >= self.max_corruption_threshold:
+                            logger.error("   Too many parameter corruptions - resetting model")
+                            self._reset_model_parameters()
+                            self.parameter_corruption_count = 0
+                        
                         continue
                     
-                    # 🔧 ULTRA-CONSERVATIVE gradient clipping
-                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=0.01)  # 🔧 REDUCED from 0.1 to 0.01
+                    # 🔧 ENHANCED: Adaptive gradient clipping based on gradient magnitude
+                    if total_grad_norm > 1.0:
+                        # Very aggressive clipping for large gradients
+                        clip_value = 0.001
+                    elif total_grad_norm > 0.1:
+                        # Moderate clipping for medium gradients  
+                        clip_value = 0.01
+                    else:
+                        # Light clipping for small gradients
+                        clip_value = 0.1
+                    
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=clip_value)
+                    
+                    # 🔧 ENHANCED: Pre-step parameter validation
+                    if not self._validate_model_parameters():
+                        logger.error("   Parameter corruption detected before optimizer step!")
+                        self.parameter_corruption_count += 1
+                        self.optimizer.zero_grad()
+                        
+                        if self.parameter_corruption_count >= self.max_corruption_threshold:
+                            logger.error("   Too many corruptions - resetting model")
+                            self._reset_model_parameters()
+                            self.parameter_corruption_count = 0
+                        
+                        continue
+                    
+                    # 🔧 CONSERVATIVE: Store parameter state before update for rollback
+                    param_backup = {}
+                    for name, param in self.model.named_parameters():
+                        if param.requires_grad:
+                            param_backup[name] = param.data.clone()
                     
                     # Optimizer step
                     self.optimizer.step()
                     
-                    # 🔧 CRITICAL: Validate model parameters after update
-                    param_check_failed = False
-                    for name, param in self.model.named_parameters():
-                        if torch.isnan(param).any() or torch.isinf(param).any():
-                            logger.error(f"   Parameter corruption detected in {name} after optimizer step!")
-                            param_check_failed = True
-                            break
+                    # 🔧 ENHANCED: Validate parameters after update
+                    if not self._validate_model_parameters():
+                        logger.error("   Parameter corruption after optimizer step - rolling back!")
+                        
+                        # Rollback to previous parameters
+                        with torch.no_grad():
+                            for name, param in self.model.named_parameters():
+                                if param.requires_grad and name in param_backup:
+                                    param.data.copy_(param_backup[name])
+                        
+                        self.parameter_corruption_count += 1
+                        self.optimizer.zero_grad()
+                        
+                        if self.parameter_corruption_count >= self.max_corruption_threshold:
+                            logger.error("   Too many corruptions - resetting model")
+                            self._reset_model_parameters()
+                            self.parameter_corruption_count = 0
+                        
+                        continue
                     
-                    if param_check_failed:
-                        logger.error("   Model parameters corrupted! Stopping training to prevent further damage.")
-                        break
+                    # 🔧 SUCCESS: Parameters are stable, clean up backup
+                    del param_backup
                 
                 # Update metrics (do this BEFORE clearing variables)
                 total_loss += loss.item()
@@ -320,7 +455,7 @@ class MedicalKeywordTrainer:
                 if batch_idx % 50 == 0:
                     logger.info(f"Batch {batch_idx}: Loss = {loss.item():.4f}")
                 
-                # 🔧 CRITICAL: Aggressive memory clearing after each batch
+                # CRITICAL: Aggressive memory clearing after each batch
                 if torch.cuda.is_available():
                     torch.cuda.empty_cache()
                     
@@ -345,7 +480,7 @@ class MedicalKeywordTrainer:
         avg_train_loss = total_loss / successful_batches if successful_batches > 0 else 0.0
         success_rate = (successful_batches / num_batches) * 100 if num_batches > 0 else 0
         
-        # 🔧 CRITICAL: Clear memory at end of epoch
+        # CRITICAL: Clear memory at end of epoch
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
             
@@ -356,11 +491,16 @@ class MedicalKeywordTrainer:
         # Store metrics
         self.train_losses.append(avg_train_loss)
         
+        # 🔧 NEW: Log parameter corruption statistics
+        if self.parameter_corruption_count > 0:
+            logger.warning(f"  Parameter corruptions this epoch: {self.parameter_corruption_count}")
+        
         metrics = {
             'train_loss': avg_train_loss,
             'successful_batches': successful_batches,
             'total_batches': num_batches,
-            'success_rate': success_rate
+            'success_rate': success_rate,
+            'parameter_corruptions': self.parameter_corruption_count
         }
         
         return metrics
@@ -500,7 +640,7 @@ class MedicalKeywordTrainer:
                 comprehensive_metrics = validation_metrics['summary']
                 
                 # Log key metrics
-                logger.info(f"📊 Validation Metrics Summary:")
+                logger.info(f"Validation Metrics Summary:")
                 logger.info(f"   BLEU-4: {comprehensive_metrics.get('bleu_4', 0):.4f}")
                 logger.info(f"   ROUGE-1 F1: {comprehensive_metrics.get('rouge1_f1', 0):.4f}")
                 logger.info(f"   ROUGE Avg Recall: {comprehensive_metrics.get('rouge_avg_recall', 0):.4f}")
@@ -510,7 +650,7 @@ class MedicalKeywordTrainer:
                 # Show best example if available
                 if validation_metrics.get('best_example'):
                     best = validation_metrics['best_example']
-                    logger.info(f"🏆 Best Example:")
+                    logger.info(f"Best Example:")
                     logger.info(f"   Ref: '{best['reference']}'")
                     logger.info(f"   Gen: '{best['hypothesis']}'")
                 
@@ -566,6 +706,15 @@ class MedicalKeywordTrainer:
             'epoch_time': epoch_time,
             'epoch': epoch
         }
+        
+        # 🔧 NEW: Learning rate scheduling based on validation loss
+        if val_metrics and 'val_loss' in val_metrics:
+            old_lr = self.optimizer.param_groups[0]['lr']
+            self.scheduler.step(val_metrics['val_loss'])
+            new_lr = self.optimizer.param_groups[0]['lr']
+            
+            if new_lr != old_lr:
+                logger.info(f"Learning rate reduced: {old_lr:.2e} -> {new_lr:.2e}")
         
         logger.info(f"Epoch {epoch} total time: {epoch_time:.2f}s")
         

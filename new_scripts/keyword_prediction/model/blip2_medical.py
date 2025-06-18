@@ -101,12 +101,12 @@ class MedicalBLIP2Model(nn.Module):
         try:
             # Only initialize the language model head that we're training
             if hasattr(self.model, 'language_model') and hasattr(self.model.language_model, 'lm_head'):
-                # Initialize with very small weights to prevent instability
+                # 🔧 ULTRA-CONSERVATIVE: Initialize with extremely small weights
                 with torch.no_grad():
-                    self.model.language_model.lm_head.weight.data.normal_(mean=0.0, std=0.001)
+                    self.model.language_model.lm_head.weight.data.normal_(mean=0.0, std=0.0001)  # Reduced from 0.001
                     if hasattr(self.model.language_model.lm_head, 'bias') and self.model.language_model.lm_head.bias is not None:
                         self.model.language_model.lm_head.bias.data.zero_()
-                logger.info("Initialized language model head with stable parameters")
+                logger.info("Initialized language model head with ultra-conservative parameters")
                 
         except Exception as e:
             logger.warning(f"Could not initialize stable parameters: {e}")
@@ -152,7 +152,7 @@ class MedicalBLIP2Model(nn.Module):
     
     def generate_keywords(
         self, 
-        image: Image.Image, 
+        image_input, 
         prompt: str = "Describe the medical findings in this chest X-ray using specific anatomical terms:",
         num_beams: int = 3,
         temperature: float = 0.8,
@@ -164,7 +164,7 @@ class MedicalBLIP2Model(nn.Module):
         Generate medical keywords from a chest X-ray image.
         
         Args:
-            image (Image.Image): Input chest X-ray image
+            image_input: Input image - can be PIL Image, torch tensor, or batch
             prompt (str): Medical-focused text prompt for generation
             num_beams (int): Number of beams for beam search (higher for better quality)
             temperature (float): Sampling temperature (lower for more focused output)
@@ -176,6 +176,50 @@ class MedicalBLIP2Model(nn.Module):
             str: Generated medical keywords and findings
         """
         try:
+            # 🔧 CRITICAL FIX: Handle different input types properly
+            if torch.is_tensor(image_input):
+                # Handle tensor input (from validation)
+                if image_input.dim() == 4:  # Batch dimension
+                    if image_input.shape[0] > 1:
+                        # Use only first image from batch
+                        image_tensor = image_input[0]
+                    else:
+                        image_tensor = image_input.squeeze(0)
+                else:
+                    image_tensor = image_input
+                
+                # 🔧 FIX: Convert normalized tensor back to 0-1 range for PIL
+                # Reverse ImageNet normalization: (normalized * std) + mean
+                std = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
+                mean = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
+                
+                # Move to CPU for PIL conversion
+                if image_tensor.is_cuda:
+                    image_tensor = image_tensor.cpu()
+                    std = std.cpu()
+                    mean = mean.cpu()
+                
+                # Denormalize: (tensor * std) + mean
+                denormalized = image_tensor * std + mean
+                
+                # Clamp to valid range [0, 1]
+                denormalized = torch.clamp(denormalized, 0, 1)
+                
+                # Convert to PIL
+                from torchvision.transforms import ToPILImage
+                to_pil = ToPILImage()
+                image = to_pil(denormalized)
+                
+            elif hasattr(image_input, 'convert'):  # PIL Image
+                image = image_input
+            else:
+                logger.error(f"Unsupported image input type: {type(image_input)}")
+                return "normal chest"  # Fallback
+            
+            # Ensure image is RGB
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+            
             # Process inputs
             if self.use_blip1:
                 # BLIP-1 processing

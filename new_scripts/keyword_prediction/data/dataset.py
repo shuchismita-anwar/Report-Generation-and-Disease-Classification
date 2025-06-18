@@ -63,7 +63,7 @@ def load_image_text_pair(csv_row: pd.Series, base_path: str = "../../") -> Optio
         # Process transcript to keywords
         keyword_result = process_transcript_to_keywords(transcript_text)
         if not keyword_result['keywords']:
-            logger.warning(f"No keywords extracted from transcript: {full_transcript_path}")
+            logger.debug(f"No keywords extracted from transcript: {full_transcript_path}")
             return None
         
         # Create result dictionary
@@ -316,7 +316,9 @@ class MedicalKeywordDataset(Dataset):
                 text_encoded = tokenizer.encode(
                     pair['keywords'],
                     add_special_tokens=True,  # Add BOS/EOS tokens
-                    return_tensors="pt"
+                    return_tensors="pt",
+                    max_length=64,
+                    truncation=True
                 )
                 input_ids = text_encoded.squeeze(0)
                 
@@ -375,7 +377,8 @@ class MedicalKeywordDataset(Dataset):
                 text=dummy_text,
                 return_tensors="pt",
                 padding=False,  # 🔧 NO AUTOMATIC PADDING - handle manually
-                truncation=True
+                truncation=True,
+                max_length=64
             )
             
             # Manual padding to avoid padding token issues

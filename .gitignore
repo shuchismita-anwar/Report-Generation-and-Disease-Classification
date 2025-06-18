@@ -114,3 +114,9 @@ new_scripts/keyword_prediction/debug_processor.py
 new_scripts/keyword_prediction/debug_tokenization.py
 new_scripts/keyword_prediction/metrics/__pycache__/
 new_scripts/keyword_prediction/test_task_5_4_metrics.py
+new_scripts/keyword_prediction/config/__pycache__/
+new_scripts/keyword_prediction/__pycache__/
+new_scripts/keyword_prediction/task_6_4_summary.md
+new_scripts/keyword_prediction/logs/training.log
+logs/
+new_scripts/keyword_prediction/checkpoints/

@@ -1,0 +1,172 @@
+# Medical Keyword Prediction Configuration using BiomedCLIP
+# Updated to use Microsoft's BiomedCLIP for zero-shot medical keyword extraction
+# Task 6.1: Create configuration system (config.yaml with hyperparameters)
+
+# Model Configuration
+model:
+  model_name: "hf-hub:microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224" # BiomedCLIP model
+  max_length: 64 # Token sequence length for keywords (not used in zero-shot)
+  device: "auto" # "auto", "cuda", or "cpu"
+
+  # BiomedCLIP configuration
+  architecture:
+    zero_shot: true # BiomedCLIP is used for zero-shot inference
+    requires_training: false # No parameter training needed
+
+  # Medical vocabulary for keyword extraction
+  medical_terms:
+    [
+      "pneumonia",
+      "effusion",
+      "consolidation",
+      "pneumothorax",
+      "atelectasis",
+      "cardiomegaly",
+      "fracture",
+      "infiltrate",
+      "mass",
+      "nodule",
+      "opacity",
+      "edema",
+      "normal",
+      "chest",
+      "lung",
+      "heart",
+      "bone",
+      "pleural",
+      "bilateral",
+      "right",
+      "left",
+      "lower",
+      "upper",
+      "lobe",
+      "hilar",
+      "mediastinal",
+      "costophrenic",
+      "angle",
+      "diaphragm",
+      "rib",
+      "spine",
+    ]
+
+# Training Configuration (actually evaluation for BiomedCLIP)
+training:
+  # Note: These settings are used for evaluation pipeline, not actual training
+  learning_rate: 1e-5 # Not used (BiomedCLIP is zero-shot)
+  batch_size: 2 # Batch size for evaluation
+  num_epochs: 5 # Number of evaluation epochs
+
+  # Evaluation settings
+  device: "auto" # Device for evaluation
+  metrics_enabled: true # Enable comprehensive metrics
+  checkpointing_enabled: true # Save evaluation results
+
+# Data Configuration
+data:
+  # Dataset paths (relative to keyword_prediction directory)
+  train_csv: "../../dataset_splits/train.csv"
+  val_csv: "../../dataset_splits/val.csv"
+  test_csv: "../../dataset_splits/test.csv"
+
+  # Data loading settings
+  num_workers: 0 # Disable multiprocessing for stability
+  pin_memory: true # Speed up GPU transfer
+  shuffle_train: false # No need to shuffle for evaluation
+  shuffle_val: false # Don't shuffle validation
+
+  # Data preprocessing
+  image_size: 224 # Standard BiomedCLIP image size
+  normalize: true # Apply ImageNet normalization
+
+# Checkpointing Configuration (for saving evaluation results)
+checkpointing:
+  enabled: true # Enable saving evaluation results
+  checkpoint_dir: "checkpoints" # Directory to save results
+  save_best: true # Save best evaluation results
+  save_latest: true # Always save latest results
+  keep_last_n: 5 # Keep last N result files
+
+  # Best model criteria (based on evaluation metrics)
+  best_metric: "val_overall_quality" # Metric to determine best performance
+  best_mode: "max" # "max" or "min"
+
+# Metrics Configuration (Task 5.4)
+metrics:
+  enabled: true # Enable comprehensive metrics
+
+  # Evaluation metrics
+  evaluation_metrics:
+    - "bleu_4" # BLEU-4 score
+    - "rouge1_f1" # ROUGE-1 F1
+    - "medical_coverage" # Medical term coverage
+    - "overall_quality" # Combined quality score
+
+  # Metrics sampling (to avoid memory issues)
+  max_samples: 100 # Limit samples for metrics computation
+
+# Logging Configuration
+logging:
+  enabled: true # Enable detailed logging
+  level: "INFO" # "DEBUG", "INFO", "WARNING", "ERROR"
+
+  # Log files
+  log_dir: "logs" # Directory for log files
+  log_file: "biomedclip_evaluation.log" # Main evaluation log
+  metrics_file: "metrics.log" # Detailed metrics log
+
+  # Console output
+  console_level: "INFO" # Console logging level
+  progress_bars: true # Show tqdm progress bars
+
+# BiomedCLIP Specific Configuration
+biomedclip:
+  # Keyword extraction settings
+  extraction:
+    top_k: 10 # Number of top keywords to extract
+    threshold: 0.1 # Minimum similarity threshold
+    max_keywords: 15 # Maximum keywords per image
+
+  # Medical domain focus
+  medical_focus: true # Focus on medical terminology
+  context_prompt: "Medical keywords:" # Prompt for keyword extraction
+
+# Hardware Configuration
+hardware:
+  # GPU settings
+  gpu_memory_limit: 24 # GB - Known GPU memory limit
+  memory_monitoring: true # Monitor GPU memory usage
+  memory_cleanup: true # Aggressive memory cleanup
+
+  # CPU settings
+  num_cpu_cores: null # Auto-detect or specify
+
+# Reproducibility
+reproducibility:
+  seed: 42 # Random seed for reproducibility
+  deterministic: false # Enable deterministic algorithms (slower)
+  benchmark: true # Enable cudnn benchmark for speed
+
+# Task 6.3: Short Evaluation Run Settings
+short_training:
+  enabled: false # Enable short evaluation run mode
+  max_epochs: 2 # Limit evaluation epochs
+  max_train_batches: 50 # Limit training batches per epoch
+  max_val_batches: 15 # Limit validation batches
+  quick_metrics: true # Use faster metrics computation
+
+# Task 6.4: Full Evaluation Settings
+full_training:
+  enabled: true # Enable for full evaluation
+  max_epochs: 5 # Full evaluation epochs
+  convergence_patience: 5 # Epochs to wait for convergence
+  target_quality: 0.4 # Target overall quality score (BiomedCLIP should achieve higher)
+
+# Production Settings
+production:
+  # Model serving
+  inference_batch_size: 1 # Batch size for inference
+  max_inference_time: 2.0 # Maximum seconds per image
+
+  # Model export (BiomedCLIP doesn't need custom export)
+  export_format: "pytorch" # "pytorch", "onnx", "tensorrt"
+  export_path: "output/models" # Export directory

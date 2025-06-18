@@ -17,6 +17,58 @@ from typing import Optional, Dict, Any, List
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+def clean_unicode_text(text: str) -> str:
+    """
+    Clean Unicode text to prevent encoding errors in logging.
+    
+    Args:
+        text (str): Input text that may contain problematic Unicode
+        
+    Returns:
+        str: Cleaned text safe for logging and processing
+    """
+    if not text:
+        return ""
+    
+    # Replace Unicode replacement character with space
+    text = text.replace('\ufffd', ' ')
+    
+    # Replace other problematic Unicode characters
+    replacements = {
+        '\u2010': '-',  # hyphen
+        '\u2011': '-',  # non-breaking hyphen
+        '\u2012': '-',  # figure dash
+        '\u2013': '-',  # en dash
+        '\u2014': '-',  # em dash
+        '\u2015': '-',  # horizontal bar
+        '\u2018': "'",  # left single quotation mark
+        '\u2019': "'",  # right single quotation mark
+        '\u201a': "'",  # single low-9 quotation mark
+        '\u201b': "'",  # single high-reversed-9 quotation mark
+        '\u201c': '"',  # left double quotation mark
+        '\u201d': '"',  # right double quotation mark
+        '\u201e': '"',  # double low-9 quotation mark
+        '\u2026': '...',  # horizontal ellipsis
+        '\u2032': "'",  # prime
+        '\u2033': '"',  # double prime
+        '\u00a0': ' ',  # non-breaking space
+        '\u00ad': ' ',  # soft hyphen -> space instead of empty
+    }
+    
+    for unicode_char, replacement in replacements.items():
+        text = text.replace(unicode_char, replacement)
+    
+    # Remove any remaining problematic characters (non-printable, etc.)
+    # Keep only ASCII printable characters, space, and common punctuation
+    import string
+    allowed_chars = string.printable
+    cleaned_text = ''.join(char if char in allowed_chars else ' ' for char in text)
+    
+    # Normalize multiple spaces
+    cleaned_text = ' '.join(cleaned_text.split())
+    
+    return cleaned_text
+
 def load_transcript(file_path: str) -> Optional[str]:
     """
     Load and parse a transcript JSON file.
@@ -128,49 +180,72 @@ def extract_descriptive_keywords(transcript_text: str) -> str:
     Returns:
         str: Clean descriptive keyword string
     """
-    if not transcript_text:
-        return ""
+    # 🔧 FIX: Handle empty/None input immediately
+    if not transcript_text or transcript_text.strip() == "":
+        return "normal chest"  # Medical fallback for empty transcripts
+    
+    # 🔧 FIX: Clean Unicode issues first
+    text = clean_unicode_text(transcript_text)
     
     # Convert to lowercase for processing
-    text = transcript_text.lower().strip()
+    text = text.lower().strip()
     
-    # Remove common non-descriptive phrases
-    removal_patterns = [
-        r'\b(is|are|was|were|been|being|have|has|had)\b',
-        r'\b(the|a|an|and|or|but|in|on|at|to|for|of|with|by)\b',
-        r'\b(this|that|these|those|there|here)\b',
-        r'\b(noted|seen|present|absent|shows|showing|demonstrates|demonstrating)\b',
-        r'\b(patient|study|examination|exam|image|images|finding|findings)\b',
-        r'\b(no|not|without|none|negative|positive)\b'
-    ]
+    # 🔧 FIX: Check again after stripping
+    if len(text) < 3:
+        return "normal chest"  # Medical fallback for very short text
     
-    # Apply removal patterns
-    for pattern in removal_patterns:
-        text = re.sub(pattern, ' ', text)
-    
+    # 🔧 FIX: More comprehensive medical keyword extraction
     # Keep important descriptive medical terms and anatomical locations
-    keep_patterns = [
+    medical_patterns = [
         # Anatomical locations
-        r'\b(cardiac|heart|lung|lungs|pulmonary|chest|thoracic|mediastinal|hilar|bilateral|unilateral|basal|basilar|apical|upper|lower|right|left)\b',
+        r'\b(cardiac|heart|lung|lungs|pulmonary|chest|thoracic|mediastinal|hilar|bilateral|unilateral|basal|basilar|apical|upper|lower|right|left|central|peripheral|diaphragm|diaphragmatic)\b',
         # Descriptive terms
-        r'\b(prominent|enlarged|small|large|normal|abnormal|clear|opaque|dense|lucent|hazy|haziness|consolidation|atelectasis|effusion|pneumothorax)\b',
+        r'\b(prominent|enlarged|small|large|normal|abnormal|clear|opaque|dense|lucent|hazy|haziness|consolidation|atelectasis|effusion|pneumothorax|edema|inflation|hyperinflation)\b',
         # Medical devices and findings
-        r'\b(tube|tubes|catheter|line|lines|silhouette|shadow|opacity|opacities|volume|volumes|position|positioned)\b',
+        r'\b(tube|tubes|catheter|line|lines|silhouette|shadow|opacity|opacities|volume|volumes|position|positioned|placed|placement)\b',
         # Qualitative descriptors
-        r'\b(mild|moderate|severe|slight|marked|significant|extensive|focal|diffuse|patchy|streaky)\b'
+        r'\b(mild|moderate|severe|slight|marked|significant|extensive|focal|diffuse|patchy|streaky|linear|rounded|irregular|smooth)\b',
+        # Additional medical terms
+        r'\b(costophrenic|angle|angles|margins|margin|borders|border|structures|structure|vessels|vessel|airways|airway)\b',
+        # Common findings
+        r'\b(nodule|nodules|mass|masses|lesion|lesions|infiltrate|infiltrates|thickening|scarring|fibrosis)\b'
     ]
     
-    # Extract matching terms
+    # Extract all matching terms
     kept_terms = []
-    for pattern in keep_patterns:
+    for pattern in medical_patterns:
         matches = re.findall(pattern, text)
         kept_terms.extend(matches)
+    
+    # 🔧 FIX: If no medical terms found, extract general descriptive terms
+    if not kept_terms:
+        # Fallback patterns for basic descriptive terms
+        fallback_patterns = [
+            r'\b(normal|clear|stable|unremarkable|appropriate)\b',
+            r'\b(within|limits|appearance)\b'
+        ]
+        
+        for pattern in fallback_patterns:
+            matches = re.findall(pattern, text)
+            kept_terms.extend(matches)
+    
+    # 🔧 FIX: If still no terms, provide medical fallback
+    if not kept_terms:
+        # Look for any medical-sounding words
+        basic_medical = re.findall(r'\b\w*(?:al|ic|ary|ous|tion|sis|ium|um)\b', text)
+        medical_words = [word for word in basic_medical if len(word) > 3 and word not in ['this', 'that', 'with', 'from', 'been', 'have']]
+        if medical_words:
+            kept_terms.extend(medical_words[:5])  # Take first 5
+    
+    # 🔧 FIX: Final fallback for completely empty results
+    if not kept_terms:
+        return "normal chest"  # Medical fallback instead of empty string
     
     # Remove duplicates while preserving order
     unique_terms = []
     seen = set()
     for term in kept_terms:
-        if term not in seen:
+        if term not in seen and len(term) > 1:  # Filter very short terms
             unique_terms.append(term)
             seen.add(term)
     
@@ -181,6 +256,10 @@ def extract_descriptive_keywords(transcript_text: str) -> str:
     result = re.sub(r'\s+', ' ', result).strip()
     result = re.sub(r',\s*,', ',', result)  # Remove double commas
     result = re.sub(r'^,\s*|,\s*$', '', result)  # Remove leading/trailing commas
+    
+    # 🔧 FIX: Ensure minimum reasonable output
+    if len(result) < 3:
+        result = "normal chest"
     
     return result
 

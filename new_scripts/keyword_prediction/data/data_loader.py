@@ -24,8 +24,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def create_data_loaders(
+    config: Dict[str, Any] = None,
+    model: Any = None,
     train_csv: str = "../../dataset_splits/train.csv",
-    val_csv: str = "../../dataset_splits/val.csv",
+    val_csv: str = "../../dataset_splits/val.csv", 
     test_csv: str = "../../dataset_splits/test.csv",
     batch_size: int = 1,
     num_workers: int = 0,
@@ -33,11 +35,13 @@ def create_data_loaders(
     base_path: str = "../../",
     processor: Optional[BlipProcessor] = None,
     max_length: int = 128
-) -> Dict[str, DataLoader]:
+) -> tuple:
     """
-    Create train and validation data loaders.
+    Create train and validation data loaders with configuration support.
     
     Args:
+        config: Configuration dictionary (overrides other parameters)
+        model: Model instance (for BiomedCLIP compatibility)
         train_csv (str): Path to training CSV
         val_csv (str): Path to validation CSV
         test_csv (str): Path to test CSV
@@ -45,14 +49,35 @@ def create_data_loaders(
         num_workers (int): Number of worker processes
         shuffle (bool): Whether to shuffle the data
         base_path (str): Base path to dataset
-        processor: BLIP processor for tokenization
+        processor: Processor for tokenization
         max_length (int): Maximum sequence length
         
     Returns:
-        Dict[str, DataLoader]: Dictionary with 'train', 'val', and 'test' data loaders
+        tuple: (train_loader, val_loader, test_loader)
     """
     try:
         logger.info("Creating datasets...")
+        
+        # Extract parameters from config if provided
+        if config:
+            data_config = config.get('data', {})
+            training_config = config.get('training', {})
+            
+            train_csv = data_config.get('train_csv', train_csv)
+            val_csv = data_config.get('val_csv', val_csv)
+            test_csv = data_config.get('test_csv', test_csv)
+            batch_size = training_config.get('batch_size', batch_size)
+            num_workers = data_config.get('num_workers', num_workers)
+            max_length = config.get('model', {}).get('max_length', max_length)
+            
+            logger.info(f"Using config parameters: batch_size={batch_size}, max_length={max_length}")
+        
+        # Handle processor/model compatibility
+        if model and hasattr(model, 'processor'):
+            processor = model.processor
+            logger.info("Using model's processor for data loading")
+        elif processor is None:
+            logger.info("No processor provided - dataset will use manual format")
         
         # Create datasets
         train_dataset = MedicalKeywordDataset(
@@ -147,18 +172,11 @@ def create_data_loaders(
         logger.info(f"  Test batches: {len(test_loader)}")
         logger.info(f"  Batch size: {batch_size}")
         
-        return {
-            'train': train_loader,
-            'val': val_loader,
-            'test': test_loader,
-            'train_dataset': train_dataset,
-            'val_dataset': val_dataset,
-            'test_dataset': test_dataset
-        }
+        return train_loader, val_loader, test_loader
         
     except Exception as e:
         logger.error(f"Error creating data loaders: {e}")
-        return {}
+        return None, None, None
 
 def test_data_loader_batch(data_loader: DataLoader, loader_name: str, max_batches: int = 3) -> bool:
     """
