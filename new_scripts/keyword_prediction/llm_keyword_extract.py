@@ -9,6 +9,7 @@ from typing import Dict, List, Optional, Tuple
 from datetime import datetime
 import re
 from dotenv import load_dotenv
+from tqdm import tqdm
 
 class GeminiKeywordExtractor:
     """
@@ -47,15 +48,15 @@ class GeminiKeywordExtractor:
         self.config = self._load_config()
         self.required_conditions = self.config["extraction_prompts"]["validation_rules"]["required_conditions"]
         
-        # Initialize API configuration for Gemini 2.5 Pro
+        # Initialize API configuration for Gemini 2.5 Flash
         self.api_config = {
-            "base_url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent",
+            "base_url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
             "headers": {
                 "Content-Type": "application/json",
             },
             "max_retries": 3,
-            "retry_delay": 5,  # Increased for thinking model
-            "timeout": 60  # Increased timeout for thinking models
+            "retry_delay": 2,
+            "timeout": 30
         }
         
         # Processing statistics
@@ -77,11 +78,11 @@ class GeminiKeywordExtractor:
             } for condition in self.required_conditions
         }
         
-        self.logger.info("GeminiKeywordExtractor initialized with Gemini 2.5 Pro")
+        self.logger.info("GeminiKeywordExtractor initialized with Gemini 2.5 Flash")
         self.logger.info(f"Config loaded from: {self.config_path}")
         self.logger.info(f"Dataset path: {self.dataset_path}")
         self.logger.info(f"API key configured: {'Yes' if self.api_key else 'No'}")
-        self.logger.info("Using Gemini 2.5 Pro thinking model for enhanced reasoning")
+        self.logger.info("Using Gemini 2.5 Flash for fast keyword extraction")
 
     def _setup_logging(self):
         """Setup comprehensive logging system"""
@@ -197,14 +198,11 @@ class GeminiKeywordExtractor:
                 }]
             }],
             "generationConfig": {
-                "temperature": 0.1,  # Low temperature for consistency with thinking models
+                "temperature": 0.1,
                 "topK": 1,
                 "topP": 0.8,
-                "maxOutputTokens": 4096,  # Increased for thinking model responses
-                "stopSequences": [],
-                "thinkingConfig": {
-                    "thinkingBudget": -1  # Dynamic thinking - let model decide complexity
-                }
+                "maxOutputTokens": 8192,
+                "stopSequences": []
             },
             "safetySettings": [
                 {
@@ -244,24 +242,35 @@ class GeminiKeywordExtractor:
                 if response.status_code == 200:
                     result = response.json()
                     
-                    # Extract text from Gemini response
+                    # Check if we hit max tokens
                     if 'candidates' in result and len(result['candidates']) > 0:
                         candidate = result['candidates'][0]
-                        if 'content' in candidate and 'parts' in candidate['content']:
-                            text_response = candidate['content']['parts'][0]['text']
+                        finish_reason = candidate.get('finishReason', '')
+                        
+                        if finish_reason == 'MAX_TOKENS':
+                            self.logger.warning("Response was truncated due to MAX_TOKENS limit")
+                            return None
+                        
+                        if 'content' in candidate and 'parts' in candidate['content'] and len(candidate['content']['parts']) > 0:
+                            # Get the last part that contains text (skip thinking parts)
+                            text_response = None
+                            for part in candidate['content']['parts']:
+                                if 'text' in part and part['text'].strip():
+                                    text_response = part['text']
                             
-                            # Log thinking token usage for monitoring
+                            if not text_response:
+                                self.logger.error("No text content found in response")
+                                return None
+                            
+                            # Log token usage for monitoring
                             usage_metadata = result.get('usageMetadata', {})
-                            thinking_tokens = usage_metadata.get('thoughtsTokenCount', 0)
                             output_tokens = usage_metadata.get('candidatesTokenCount', 0)
                             total_tokens = usage_metadata.get('totalTokenCount', 0)
                             
-                            if thinking_tokens > 0:
-                                self.logger.debug(f"Token usage - Thinking: {thinking_tokens}, Output: {output_tokens}, Total: {total_tokens}")
+                            self.logger.debug(f"Token usage - Output: {output_tokens}, Total: {total_tokens}")
                             
                             return {
                                 'text': text_response,
-                                'thinking_tokens': thinking_tokens,
                                 'output_tokens': output_tokens,
                                 'total_tokens': total_tokens
                             }
@@ -292,6 +301,73 @@ class GeminiKeywordExtractor:
         self.stats['api_errors'] += 1
         return None
 
+    def _fix_common_json_issues(self, json_text: str) -> str:
+        """Fix common JSON formatting issues from LLM responses"""
+        # Remove trailing commas before closing braces/brackets
+        json_text = re.sub(r',\s*}', '}', json_text)
+        json_text = re.sub(r',\s*]', ']', json_text)
+        
+        # Fix missing commas between array elements
+        json_text = re.sub(r'"\s*\n\s*"', '",\n"', json_text)
+        
+        # Fix missing commas between object properties
+        json_text = re.sub(r'}\s*\n\s*"', '},\n"', json_text)
+        json_text = re.sub(r']\s*\n\s*"', '],\n"', json_text)
+        
+        return json_text
+
+    def load_existing_progress(self, output_path: str) -> int:
+        """Load existing progress and return number of patients to skip"""
+        try:
+            if not os.path.exists(output_path):
+                self.logger.info("No existing progress file found - starting from beginning")
+                return 0
+            
+            with open(output_path, 'r') as f:
+                existing_data = json.load(f)
+            
+            # Get number of already processed patients
+            patients_processed = existing_data.get("metadata", {}).get("total_patients_analyzed", 0)
+            
+            if patients_processed > 0:
+                self.logger.info(f"Found existing progress: {patients_processed} patients already processed")
+                
+                # Load existing keyword aggregator
+                if "conditions" in existing_data:
+                    for condition in self.required_conditions:
+                        if condition in existing_data["conditions"]:
+                            condition_data = existing_data["conditions"][condition]
+                            
+                            # Convert lists back to sets for aggregation
+                            self.keyword_aggregator[condition]["high_confidence"] = set(
+                                condition_data.get("high_confidence", [])
+                            )
+                            self.keyword_aggregator[condition]["medium_confidence"] = set(
+                                condition_data.get("medium_confidence", [])
+                            )
+                            self.keyword_aggregator[condition]["low_confidence"] = set(
+                                condition_data.get("low_confidence", [])
+                            )
+                
+                # Load existing stats
+                if "processing_stats" in existing_data["metadata"]:
+                    existing_stats = existing_data["metadata"]["processing_stats"]
+                    self.stats["total_processed"] = existing_stats.get("total_processed", 0)
+                    self.stats["successful_extractions"] = existing_stats.get("successful_extractions", 0)
+                    self.stats["failed_extractions"] = existing_stats.get("failed_extractions", 0)
+                    self.stats["invalid_responses"] = existing_stats.get("invalid_responses", 0)
+                    self.stats["api_errors"] = existing_stats.get("api_errors", 0)
+                
+                self.logger.info(f"Loaded existing keywords and stats - resuming from patient {patients_processed + 1}")
+                return patients_processed
+            
+            return 0
+            
+        except Exception as e:
+            self.logger.error(f"Error loading existing progress: {e}")
+            self.logger.info("Starting from beginning due to error")
+            return 0
+
     def _validate_gemini_response(self, response_text: str) -> Optional[Dict]:
         """Validate and parse Gemini response with strict checking"""
         try:
@@ -304,6 +380,9 @@ class GeminiKeywordExtractor:
                 json_text = json_match.group()
             else:
                 json_text = cleaned_text
+            
+            # Try to fix common JSON issues
+            json_text = self._fix_common_json_issues(json_text)
             
             # Parse JSON
             parsed_response = json.loads(json_text)
@@ -377,13 +456,8 @@ class GeminiKeywordExtractor:
                 return None
             
             # Log successful extraction with token usage
-            thinking_tokens = api_response.get('thinking_tokens', 0)
             total_tokens = api_response.get('total_tokens', 0)
-            
-            if thinking_tokens > 0:
-                self.logger.debug(f"Keywords extracted successfully from {text_type} - Thinking tokens: {thinking_tokens}, Total: {total_tokens}")
-            else:
-                self.logger.debug(f"Keywords extracted successfully from {text_type}")
+            self.logger.debug(f"Keywords extracted successfully from {text_type} - Total tokens: {total_tokens}")
             
             return validated_keywords
             
@@ -420,10 +494,13 @@ class GeminiKeywordExtractor:
         
         return report_success, transcript_success
 
-    def process_all_patients(self, max_patients: Optional[int] = None) -> Dict:
-        """Process all patients in the dataset"""
+    def process_all_patients(self, max_patients: Optional[int] = None, output_path: str = "extracted_keywords_result.json") -> Dict:
+        """Process all patients in the dataset with progress tracking and incremental saving"""
         if not self._validate_api_key():
             raise ValueError("Invalid API key")
+        
+        # Load existing progress
+        skip_patients = self.load_existing_progress(output_path)
         
         # Load dataset
         df = self._load_dataset()
@@ -435,40 +512,61 @@ class GeminiKeywordExtractor:
         # Initialize statistics
         self.stats['start_time'] = time.time()
         total_patients = len(df)
+        remaining_patients = total_patients - skip_patients
         
-        self.logger.info(f"Starting keyword extraction for {total_patients} patients")
+        if skip_patients > 0:
+            self.logger.info(f"Resuming from patient {skip_patients + 1}")
+            print(f"🔄 Resuming: {skip_patients} patients already done, {remaining_patients} remaining...")
+        else:
+            self.logger.info(f"Starting keyword extraction for {total_patients} patients")
+            print(f"🔄 Processing {total_patients} patients with incremental saving...")
         
-        # Process each patient
-        for idx, row in df.iterrows():
-            try:
-                report_success, transcript_success = self.process_single_patient(row)
-                
-                # Update statistics
-                self.stats['total_processed'] += 1
-                if report_success or transcript_success:
-                    self.stats['successful_extractions'] += 1
-                else:
+        # Process each patient with progress bar (starting from skip_patients)
+        with tqdm(total=total_patients, initial=skip_patients, desc="Processing patients", unit="patient") as pbar:
+            for idx, row in df.iterrows():
+                try:
+                    # Skip already processed patients
+                    if idx < skip_patients:
+                        continue
+                    
+                    # Update progress bar description
+                    pbar.set_description(f"Patient {idx + 1}/{total_patients}")
+                    
+                    report_success, transcript_success = self.process_single_patient(row)
+                    
+                    # Update statistics
+                    self.stats['total_processed'] += 1
+                    if report_success or transcript_success:
+                        self.stats['successful_extractions'] += 1
+                    else:
+                        self.stats['failed_extractions'] += 1
+                    
+                    # Save after each patient (incremental saving)
+                    try:
+                        self.save_extracted_keywords(output_path)
+                    except Exception as save_error:
+                        self.logger.warning(f"Failed to save after patient {idx + 1}: {save_error}")
+                    
+                    # Update progress bar
+                    pbar.set_postfix({
+                        'Success': self.stats['successful_extractions'],
+                        'Failed': self.stats['failed_extractions'],
+                        'Rate': f"{self.stats['successful_extractions']/self.stats['total_processed']*100:.1f}%"
+                    })
+                    pbar.update(1)
+                    
+                    # Rate limiting for API calls
+                    time.sleep(0.5)
+                    
+                except KeyboardInterrupt:
+                    self.logger.info("Processing interrupted by user")
+                    pbar.close()
+                    break
+                except Exception as e:
+                    self.logger.error(f"Unexpected error processing patient {idx}: {e}")
                     self.stats['failed_extractions'] += 1
-                
-                # Progress logging
-                if (idx + 1) % 50 == 0:
-                    elapsed_time = time.time() - self.stats['start_time']
-                    progress = (idx + 1) / total_patients * 100
-                    self.logger.info(f"Progress: {idx + 1}/{total_patients} ({progress:.1f}%) - "
-                                   f"Success: {self.stats['successful_extractions']}, "
-                                   f"Failed: {self.stats['failed_extractions']}, "
-                                   f"Time: {elapsed_time:.1f}s")
-                
-                # Rate limiting for thinking model (takes more time to process)
-                time.sleep(1.0)  # 1 second delay between requests for thinking model
-                
-            except KeyboardInterrupt:
-                self.logger.info("Processing interrupted by user")
-                break
-            except Exception as e:
-                self.logger.error(f"Unexpected error processing patient {idx}: {e}")
-                self.stats['failed_extractions'] += 1
-                continue
+                    pbar.update(1)
+                    continue
         
         # Final statistics
         total_time = time.time() - self.stats['start_time']
@@ -479,21 +577,23 @@ class GeminiKeywordExtractor:
         self.logger.info(f"API errors: {self.stats['api_errors']}")
         self.logger.info(f"Invalid responses: {self.stats['invalid_responses']}")
         
+        # Print final summary
+        self._print_extraction_summary()
+        
         return self.stats
 
-    def save_extracted_keywords(self, output_path: str = "config/condition_keywords_extracted.json"):
+    def save_extracted_keywords(self, output_path: str = "extracted_keywords_result.json"):
         """Save the aggregated keywords to JSON file"""
         try:
             # Convert sets to sorted lists for JSON serialization
             output_data = {
                 "metadata": {
                     "version": "2.1",
-                    "description": "Medical condition keywords extracted from MIMIC-CXR reports and transcripts using Gemini 2.5 Pro",
-                    "extraction_method": "gemini_2.5_pro_thinking_api",
+                    "description": "Medical condition keywords extracted from MIMIC-CXR reports and transcripts using Gemini 2.5 Flash",
+                    "extraction_method": "gemini_2.5_flash_api",
                     "model_details": {
-                        "model": "gemini-2.5-pro",
-                        "thinking_enabled": True,
-                        "thinking_budget": "dynamic",
+                        "model": "gemini-2.5-flash",
+                        "thinking_enabled": False,
                         "temperature": 0.1
                     },
                     "total_patients_analyzed": self.stats['total_processed'],
@@ -523,15 +623,11 @@ class GeminiKeywordExtractor:
                     }
                 }
             
-            # Save to file
-            os.makedirs(os.path.dirname(output_path), exist_ok=True)
+            # Save to file (no directory creation needed for current dir)
             with open(output_path, 'w') as f:
                 json.dump(output_data, f, indent=2)
             
-            self.logger.info(f"Extracted keywords saved to: {output_path}")
-            
-            # Print summary
-            self._print_extraction_summary()
+            self.logger.debug(f"Extracted keywords saved to: {output_path}")
             
         except Exception as e:
             self.logger.error(f"Error saving extracted keywords: {e}")
@@ -555,10 +651,11 @@ class GeminiKeywordExtractor:
                 examples = list(self.keyword_aggregator[condition]["high_confidence"])[:3]
                 self.logger.info(f"  High confidence examples: {examples}")
 
-def test_ten_prompts():
-    """Test function for 10 prompts with Gemini 2.5 Pro"""
+def process_all_data():
+    """Process all 2877 patients - both reports and transcripts"""
     try:
-        print("🚀 Testing 10 prompts extraction with Gemini 2.5 Pro...")
+        print("🚀 Starting full dataset processing with Gemini 2.5 Flash...")
+        print("📊 Processing 2877 reports and 2877 transcripts...")
         
         # Initialize extractor
         extractor = GeminiKeywordExtractor()
@@ -567,99 +664,22 @@ def test_ten_prompts():
             print("❌ API key validation failed!")
             return
         
-        # Load dataset and get first 10 patients
-        df = extractor._load_dataset()
-        if len(df) == 0:
-            print("❌ No data found in dataset!")
-            return
-        
-        # Test with first 10 patients
-        test_df = df.head(10)
-        print(f"📄 Testing with {len(test_df)} patients...")
-        
-        test_results = []
-        success_count = 0
-        
-        for idx, row in test_df.iterrows():
-            print(f"\n--- Processing Patient {idx + 1}/10 ---")
-            print(f"Report: {row['report_path']}")
-            
-            # Read and test report
-            report_text = extractor._read_medical_text(row['report_path'])
-            if report_text:
-                print(f"📋 Report text preview: {report_text[:100]}...")
-                
-                print(f"🔧 Sending to Gemini 2.5 Pro...")
-                report_keywords = extractor.extract_keywords_from_text(report_text, "report")
-                
-                if report_keywords:
-                    print(f"✅ SUCCESS! Keywords extracted")
-                    success_count += 1
-                    
-                    test_results.append({
-                        "patient_id": idx,
-                        "report_path": row['report_path'],
-                        "extracted_keywords": report_keywords,
-                        "status": "success"
-                    })
-                else:
-                    print(f"❌ Failed to extract keywords")
-                    test_results.append({
-                        "patient_id": idx,
-                        "report_path": row['report_path'],
-                        "status": "failed"
-                    })
-            else:
-                print(f"❌ Failed to read report text")
-                test_results.append({
-                    "patient_id": idx,
-                    "report_path": row['report_path'],
-                    "status": "file_read_failed"
-                })
-        
-        # Save test results
-        final_output = {
-            "test_date": datetime.now().isoformat(),
-            "total_tested": len(test_df),
-            "successful_extractions": success_count,
-            "success_rate": f"{(success_count/len(test_df)*100):.1f}%",
-            "results": test_results
-        }
-        
-        with open("test_10_prompts_result.json", "w") as f:
-            json.dump(final_output, f, indent=2)
+        # Process all patients with incremental saving
+        stats = extractor.process_all_patients(output_path="extracted_keywords_result.json")
         
         print(f"\n🎯 FINAL RESULTS:")
-        print(f"   Total tested: {len(test_df)}")
-        print(f"   Successful: {success_count}")
-        print(f"   Success rate: {(success_count/len(test_df)*100):.1f}%")
-        print(f"💾 Results saved to: test_10_prompts_result.json")
-        print(f"✅ 10 prompts test COMPLETED!")
+        print(f"   Total patients processed: {stats['total_processed']}")
+        print(f"   Successful extractions: {stats['successful_extractions']}")
+        print(f"   Failed extractions: {stats['failed_extractions']}")
+        print(f"   Success rate: {(stats['successful_extractions']/stats['total_processed']*100):.1f}%")
+        print(f"💾 Results saved to: extracted_keywords_result.json")
+        print(f"✅ Full dataset processing COMPLETED!")
         
     except Exception as e:
-        print(f"❌ 10 prompts test failed: {e}")
+        print(f"❌ Full dataset processing failed: {e}")
         import traceback
         traceback.print_exc()
 
-def main():
-    """Main execution function"""
-    try:
-        # Initialize extractor
-        extractor = GeminiKeywordExtractor()
-        
-        # Process all patients (or limit for testing)
-        # extractor.process_all_patients(max_patients=10)  # For testing
-        extractor.process_all_patients()  # For full processing
-        
-        # Save results
-        extractor.save_extracted_keywords()
-        
-        print("✅ Keyword extraction completed successfully!")
-        
-    except Exception as e:
-        print(f"❌ Keyword extraction failed: {e}")
-        raise
-
 if __name__ == "__main__":
-    # Run 10 prompts test
-    test_ten_prompts()
+    # Run full dataset processing
+    process_all_data()

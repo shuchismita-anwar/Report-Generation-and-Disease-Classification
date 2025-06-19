@@ -1,1 +1,0 @@
-# Training package for medical keyword prediction 
