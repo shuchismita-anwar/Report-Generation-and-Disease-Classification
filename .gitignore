@@ -125,3 +125,4 @@ extract_all_keywords.py
 new_scripts/keyword_prediction/reflacx_region.py
 new_scripts/keyword_prediction/debug_costophrenic.py
 new_scripts/keyword_prediction/keyword_extraction_results/
+new_scripts/keyword_prediction/.env

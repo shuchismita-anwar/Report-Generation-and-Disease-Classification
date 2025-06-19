@@ -454,9 +454,6 @@ class AnatomicalRegionAverager:
         # Save ANATOMICAL_REGIONS dictionary as Python code
         python_file = os.path.join(output_dir, "anatomical_regions_dict.py")
         with open(python_file, 'w') as f:
-            f.write("# Generated ANATOMICAL_REGIONS dictionary from averaged bounding box data\n")
-            f.write("# EyeGaze + REFLACX (complete files only)\n")
-            f.write("# Coordinates normalized by actual image dimensions (variable sizes)\n\n")
             f.write("ANATOMICAL_REGIONS = {\n")
             
             for key, data in anatomical_regions.items():

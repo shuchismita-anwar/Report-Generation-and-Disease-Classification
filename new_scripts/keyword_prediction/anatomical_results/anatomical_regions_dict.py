@@ -1,7 +1,3 @@
-# Generated ANATOMICAL_REGIONS dictionary from averaged bounding box data
-# EyeGaze + REFLACX (complete files only)
-# Coordinates normalized by actual image dimensions (variable sizes)
-
 ANATOMICAL_REGIONS = {
     'cardiac_silhouette': {
         'name': 'cardiac silhouette',

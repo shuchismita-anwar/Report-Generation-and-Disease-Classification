@@ -1,0 +1,143 @@
+{
+  "test_date": "2025-06-19T13:05:04.299513",
+  "test_file": "mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0\\mimic-eye\\patient_10002428\\CXR-DICOM\\s59258773.txt",
+  "extracted_keywords": {
+    "Atelectasis": {
+      "high_confidence": [
+        "not mentioned",
+        "no reference",
+        "not addressed"
+      ],
+      "medium_confidence": [
+        "not mentioned",
+        "no reference",
+        "not addressed"
+      ],
+      "low_confidence": [
+        "not mentioned",
+        "no reference",
+        "not addressed"
+      ]
+    },
+    "Cardiomegaly": {
+      "high_confidence": [
+        "not mentioned",
+        "no reference",
+        "not addressed"
+      ],
+      "medium_confidence": [
+        "not mentioned",
+        "no reference",
+        "not addressed"
+      ],
+      "low_confidence": [
+        "not substantially enlarged",
+        "heart is obscured",
+        "not addressed"
+      ]
+    },
+    "Edema": {
+      "high_confidence": [
+        "not mentioned",
+        "no reference",
+        "not addressed"
+      ],
+      "medium_confidence": [
+        "not mentioned",
+        "no reference",
+        "not addressed"
+      ],
+      "low_confidence": [
+        "not mentioned",
+        "no reference",
+        "not addressed"
+      ]
+    },
+    "Lung Opacity": {
+      "high_confidence": [
+        "pleural effusions",
+        "moderate to large",
+        "obscured by the effusions"
+      ],
+      "medium_confidence": [
+        "not mentioned",
+        "no reference",
+        "not addressed"
+      ],
+      "low_confidence": [
+        "upper lungs are clear",
+        "clear",
+        "no free subdiaphragmatic gas"
+      ]
+    },
+    "No Finding": {
+      "high_confidence": [
+        "not mentioned",
+        "no reference",
+        "not addressed"
+      ],
+      "medium_confidence": [
+        "not mentioned",
+        "no reference",
+        "not addressed"
+      ],
+      "low_confidence": [
+        "upper lungs are clear",
+        "not substantially enlarged",
+        "no free subdiaphragmatic gas"
+      ]
+    },
+    "Pleural Effusion": {
+      "high_confidence": [
+        "pleural effusions",
+        "moderate to large right",
+        "moderate left"
+      ],
+      "medium_confidence": [
+        "not mentioned",
+        "no reference",
+        "not addressed"
+      ],
+      "low_confidence": [
+        "not mentioned",
+        "no reference",
+        "not addressed"
+      ]
+    },
+    "Pneumonia": {
+      "high_confidence": [
+        "not mentioned",
+        "no reference",
+        "not addressed"
+      ],
+      "medium_confidence": [
+        "not mentioned",
+        "no reference",
+        "not addressed"
+      ],
+      "low_confidence": [
+        "upper lungs are clear",
+        "clear",
+        "not addressed"
+      ]
+    },
+    "Support Devices": {
+      "high_confidence": [
+        "left pic line",
+        "pic line",
+        "left brachiocephalic vein"
+      ],
+      "medium_confidence": [
+        "not mentioned",
+        "no reference",
+        "not addressed"
+      ],
+      "low_confidence": [
+        "not mentioned",
+        "no reference",
+        "not addressed"
+      ]
+    }
+  },
+  "status": "success"
+}

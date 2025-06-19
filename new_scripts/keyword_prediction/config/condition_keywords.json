@@ -1,0 +1,234 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "description": "Medical condition keywords extracted from MIMIC-CXR reports and transcripts",
+    "extraction_method": "gemini_analysis",
+    "total_patients_analyzed": 0,
+    "last_updated": "2024-01-01T00:00:00Z"
+  },
+  "conditions": {
+    "Atelectasis": {
+      "high_confidence": [
+        "atelectasis detected",
+        "lung collapse present",
+        "volume loss identified"
+      ],
+      "medium_confidence": [
+        "possible atelectasis",
+        "suspected collapse",
+        "potential volume loss"
+      ],
+      "low_confidence": [
+        "no atelectasis",
+        "no collapse",
+        "normal lung expansion"
+      ],
+      "extraction_stats": {
+        "total_occurrences": 0,
+        "unique_phrases": 0,
+        "confidence_distribution": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        }
+      }
+    },
+    "Cardiomegaly": {
+      "high_confidence": [
+        "cardiomegaly detected",
+        "heart enlargement present",
+        "enlarged cardiac silhouette"
+      ],
+      "medium_confidence": [
+        "possible cardiomegaly",
+        "borderline heart size",
+        "cardiac enlargement suspected"
+      ],
+      "low_confidence": [
+        "normal heart size",
+        "no cardiomegaly",
+        "normal cardiac silhouette"
+      ],
+      "extraction_stats": {
+        "total_occurrences": 0,
+        "unique_phrases": 0,
+        "confidence_distribution": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        }
+      }
+    },
+    "Edema": {
+      "high_confidence": [
+        "pulmonary edema detected",
+        "lung fluid present",
+        "edema identified"
+      ],
+      "medium_confidence": [
+        "possible edema",
+        "suspected fluid",
+        "potential pulmonary edema"
+      ],
+      "low_confidence": ["no edema", "no lung fluid", "clear lung fields"],
+      "extraction_stats": {
+        "total_occurrences": 0,
+        "unique_phrases": 0,
+        "confidence_distribution": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        }
+      }
+    },
+    "Lung Opacity": {
+      "high_confidence": [
+        "lung opacity detected",
+        "infiltrate present",
+        "consolidation identified"
+      ],
+      "medium_confidence": [
+        "possible opacity",
+        "suspected infiltrate",
+        "potential consolidation"
+      ],
+      "low_confidence": ["no opacity", "no infiltrates", "clear lungs"],
+      "extraction_stats": {
+        "total_occurrences": 0,
+        "unique_phrases": 0,
+        "confidence_distribution": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        }
+      }
+    },
+    "No Finding": {
+      "high_confidence": [
+        "normal chest X-ray",
+        "no acute findings",
+        "unremarkable study"
+      ],
+      "medium_confidence": [
+        "essentially normal",
+        "largely unremarkable",
+        "no significant abnormalities"
+      ],
+      "low_confidence": [
+        "abnormalities present",
+        "findings detected",
+        "pathology identified"
+      ],
+      "extraction_stats": {
+        "total_occurrences": 0,
+        "unique_phrases": 0,
+        "confidence_distribution": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        }
+      }
+    },
+    "Pleural Effusion": {
+      "high_confidence": [
+        "pleural effusion detected",
+        "pleural fluid present",
+        "effusion identified"
+      ],
+      "medium_confidence": [
+        "possible effusion",
+        "suspected pleural fluid",
+        "potential effusion"
+      ],
+      "low_confidence": [
+        "no effusion",
+        "no pleural fluid",
+        "clear pleural spaces"
+      ],
+      "extraction_stats": {
+        "total_occurrences": 0,
+        "unique_phrases": 0,
+        "confidence_distribution": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        }
+      }
+    },
+    "Pneumonia": {
+      "high_confidence": [
+        "pneumonia detected",
+        "infection present",
+        "pneumonia identified"
+      ],
+      "medium_confidence": [
+        "possible pneumonia",
+        "suspected infection",
+        "potential pneumonia"
+      ],
+      "low_confidence": [
+        "no pneumonia",
+        "no infection",
+        "no inflammatory changes"
+      ],
+      "extraction_stats": {
+        "total_occurrences": 0,
+        "unique_phrases": 0,
+        "confidence_distribution": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        }
+      }
+    },
+    "Support Devices": {
+      "high_confidence": [
+        "support devices present",
+        "medical devices detected",
+        "equipment identified"
+      ],
+      "medium_confidence": [
+        "possible devices",
+        "suspected equipment",
+        "potential support devices"
+      ],
+      "low_confidence": [
+        "no devices",
+        "no support equipment",
+        "no medical devices"
+      ],
+      "extraction_stats": {
+        "total_occurrences": 0,
+        "unique_phrases": 0,
+        "confidence_distribution": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        }
+      }
+    }
+  },
+  "extraction_prompts": {
+    "system_prompt": "You are an expert radiologist with 20+ years of experience in chest X-ray interpretation. Your task is to identify medical keywords from clinical text that radiologists use to describe specific conditions.",
+    "user_prompt_template": "Analyze the following medical text and extract keywords that radiologists use to describe each of the 8 chest X-ray conditions. For each condition, categorize keywords into exactly 3 confidence levels.\n\nMEDICAL TEXT:\n{medical_text}\n\nYou MUST respond in this EXACT JSON format with NO additional text:\n{{\n  \"Atelectasis\": {{\n    \"high_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"],\n    \"medium_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"],\n    \"low_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"]\n  }},\n  \"Cardiomegaly\": {{\n    \"high_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"],\n    \"medium_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"],\n    \"low_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"]\n  }},\n  \"Edema\": {{\n    \"high_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"],\n    \"medium_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"],\n    \"low_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"]\n  }},\n  \"Lung Opacity\": {{\n    \"high_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"],\n    \"medium_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"],\n    \"low_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"]\n  }},\n  \"No Finding\": {{\n    \"high_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"],\n    \"medium_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"],\n    \"low_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"]\n  }},\n  \"Pleural Effusion\": {{\n    \"high_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"],\n    \"medium_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"],\n    \"low_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"]\n  }},\n  \"Pneumonia\": {{\n    \"high_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"],\n    \"medium_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"],\n    \"low_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"]\n  }},\n  \"Support Devices\": {{\n    \"high_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"],\n    \"medium_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"],\n    \"low_confidence\": [\"keyword1\", \"keyword2\", \"keyword3\"]\n  }}\n}}\n\nKEYWORD EXTRACTION RULES:\n- HIGH_CONFIDENCE: Words/phrases indicating definitive presence of condition\n- MEDIUM_CONFIDENCE: Words/phrases indicating possible/suspected condition  \n- LOW_CONFIDENCE: Words/phrases indicating absence/normal findings\n- Extract ONLY words/phrases actually present in the text\n- Use exact medical terminology from the text\n- If condition not mentioned, use generic terms like [\"not mentioned\", \"no reference\", \"not addressed\"]\n- Provide exactly 3 keywords per confidence level\n- Use lowercase for consistency\n- NO explanations, NO additional text, ONLY the JSON response",
+    "validation_rules": {
+      "required_conditions": [
+        "Atelectasis",
+        "Cardiomegaly",
+        "Edema",
+        "Lung Opacity",
+        "No Finding",
+        "Pleural Effusion",
+        "Pneumonia",
+        "Support Devices"
+      ],
+      "required_confidence_levels": [
+        "high_confidence",
+        "medium_confidence",
+        "low_confidence"
+      ],
+      "keywords_per_level": 3,
+      "response_format": "strict_json_only"
+    }
+  }
+}
