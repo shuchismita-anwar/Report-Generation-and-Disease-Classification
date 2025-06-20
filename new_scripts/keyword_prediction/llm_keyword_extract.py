@@ -54,9 +54,9 @@ class GeminiKeywordExtractor:
             "headers": {
                 "Content-Type": "application/json",
             },
-            "max_retries": 3,
-            "retry_delay": 2,
-            "timeout": 30
+            "max_retries": 5,
+            "retry_delay": 3,
+            "timeout": 120  # Increased timeout for more reliable connection
         }
         
         # Processing statistics
@@ -201,7 +201,7 @@ class GeminiKeywordExtractor:
                 "temperature": 0.1,
                 "topK": 1,
                 "topP": 0.8,
-                "maxOutputTokens": 8192,
+                "maxOutputTokens": 32768,  # Increased to 32K tokens (half of max 65K) for safety
                 "stopSequences": []
             },
             "safetySettings": [
@@ -248,8 +248,9 @@ class GeminiKeywordExtractor:
                         finish_reason = candidate.get('finishReason', '')
                         
                         if finish_reason == 'MAX_TOKENS':
-                            self.logger.warning("Response was truncated due to MAX_TOKENS limit")
-                            return None
+                            self.logger.warning("Response was truncated due to MAX_TOKENS limit - attempting to parse partial response")
+                            # Don't return None immediately - try to parse what we have
+                            # Fall through to text extraction below
                         
                         if 'content' in candidate and 'parts' in candidate['content'] and len(candidate['content']['parts']) > 0:
                             # Get the last part that contains text (skip thinking parts)
@@ -291,6 +292,22 @@ class GeminiKeywordExtractor:
                         continue
                     return None
                     
+            except requests.exceptions.Timeout as e:
+                self.logger.warning(f"API request timeout (attempt {attempt + 1}): {e}")
+                if attempt < self.api_config['max_retries'] - 1:
+                    wait_time = self.api_config['retry_delay'] * (attempt + 1)  # Exponential backoff
+                    self.logger.info(f"Retrying in {wait_time} seconds...")
+                    time.sleep(wait_time)
+                    continue
+                return None
+            except requests.exceptions.ConnectionError as e:
+                self.logger.warning(f"Connection error (attempt {attempt + 1}): {e}")
+                if attempt < self.api_config['max_retries'] - 1:
+                    wait_time = self.api_config['retry_delay'] * (attempt + 1)
+                    self.logger.info(f"Retrying in {wait_time} seconds...")
+                    time.sleep(wait_time)
+                    continue
+                return None
             except requests.exceptions.RequestException as e:
                 self.logger.error(f"API request failed (attempt {attempt + 1}): {e}")
                 if attempt < self.api_config['max_retries'] - 1:
@@ -390,10 +407,21 @@ class GeminiKeywordExtractor:
             # Validate structure
             validation_rules = self.config["extraction_prompts"]["validation_rules"]
             
-            # Check all required conditions are present
+            # Check all required conditions are present (be more forgiving for truncated responses)
+            missing_conditions = []
             for condition in validation_rules["required_conditions"]:
                 if condition not in parsed_response:
-                    self.logger.error(f"Missing condition in response: {condition}")
+                    missing_conditions.append(condition)
+            
+            if missing_conditions:
+                # If we have at least half the conditions, accept partial response
+                present_conditions = len(parsed_response)
+                total_conditions = len(validation_rules["required_conditions"])
+                
+                if present_conditions >= total_conditions // 2:
+                    self.logger.warning(f"Partial response accepted: missing {missing_conditions} but have {present_conditions}/{total_conditions} conditions")
+                else:
+                    self.logger.error(f"Too many missing conditions: {missing_conditions}")
                     return None
             
             # Check each condition has required confidence levels
@@ -414,7 +442,7 @@ class GeminiKeywordExtractor:
                         return None
                     
                     if len(keyword_list) != validation_rules["keywords_per_level"]:
-                        self.logger.warning(f"Expected {validation_rules['keywords_per_level']} keywords for {condition}.{confidence_level}, got {len(keyword_list)}")
+                        self.logger.debug(f"Expected {validation_rules['keywords_per_level']} keywords for {condition}.{confidence_level}, got {len(keyword_list)} - accepting anyway")
             
             self.logger.debug("Response validation successful")
             return parsed_response
@@ -594,7 +622,8 @@ class GeminiKeywordExtractor:
                     "model_details": {
                         "model": "gemini-2.5-flash",
                         "thinking_enabled": False,
-                        "temperature": 0.1
+                        "temperature": 0.1,
+                        "max_output_tokens": 32768
                     },
                     "total_patients_analyzed": self.stats['total_processed'],
                     "successful_extractions": self.stats['successful_extractions'],

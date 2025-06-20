@@ -126,3 +126,4 @@ new_scripts/keyword_prediction/reflacx_region.py
 new_scripts/keyword_prediction/debug_costophrenic.py
 new_scripts/keyword_prediction/keyword_extraction_results/
 new_scripts/keyword_prediction/.env
+new_scripts/keyword_prediction/anatomical_results/__pycache__/
