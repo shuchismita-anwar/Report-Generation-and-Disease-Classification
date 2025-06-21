@@ -13,7 +13,7 @@ from tqdm import tqdm
 class GeminiAICleanup:
     """
     AI-powered keyword cleanup using Gemini 2.5 Flash to filter out irrelevant keywords
-    from medical condition keyword lists.
+    from medical condition keyword lists. Preserves confidence levels but tells AI to ignore them.
     """
     
     def __init__(self, api_key: str = None):
@@ -25,13 +25,14 @@ class GeminiAICleanup:
         # Setup logging
         self._setup_logging()
         
-        # API configuration for Gemini 2.5 Flash
+        # API configuration for Gemini 2.5 Flash - improved reliability
         self.api_config = {
             "base_url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
             "headers": {"Content-Type": "application/json"},
-            "max_retries": 3,  # Reduced retries for faster failure detection
-            "retry_delay": 2,   # Reduced delay
-            "timeout": 60       # Reduced timeout from 120 to 60 seconds
+            "max_retries": 5,       # Increased retries
+            "base_retry_delay": 3,  # Base delay for exponential backoff
+            "timeout": 120,         # Increased timeout to 120 seconds
+            "rate_limit_delay": 1.5 # Increased delay between requests
         }
         
         # Processing statistics
@@ -55,8 +56,10 @@ class GeminiAICleanup:
         self.interrupted = False
         signal.signal(signal.SIGINT, self._signal_handler)
         
-        # Iron-clad prompt for keyword filtering
+        # Updated prompt - tells AI to ignore confidence levels
         self.filtering_prompt = """TASK: Medical keyword relevance filtering. Answer ONLY "YES" or "NO" for each keyword-condition pair.
+
+IMPORTANT: You will see confidence levels (high/medium/low) - IGNORE THEM COMPLETELY. Treat all keywords equally regardless of confidence level.
 
 STRICT RULES - Answer "NO" if keyword is:
 1. Generic observations: "are seen", "noted", "present", "demonstrated", "identified", "observed", "apparent", "evident"
@@ -74,16 +77,14 @@ Answer "YES" ONLY if keyword contains SPECIFIC medical information directly rela
 RESPONSE FORMAT: Only output "YES" or "NO" - one per line. NO explanations. NO additional text. NO numbering.
 
 Examples:
-Condition: Atelectasis, Keyword: "collapsed lung" → YES
-Condition: Atelectasis, Keyword: "are seen" → NO
-Condition: Pneumonia, Keyword: "consolidation" → YES
-Condition: Pneumonia, Keyword: "mild" → NO
-Condition: Pleural Effusion, Keyword: "pleural fluid" → YES
-Condition: Pleural Effusion, Keyword: "bilateral" → NO
+Condition: Atelectasis, Confidence: high, Keyword: "collapsed lung" → YES
+Condition: Atelectasis, Confidence: low, Keyword: "are seen" → NO
+Condition: Pneumonia, Confidence: medium, Keyword: "consolidation" → YES
+Condition: Pneumonia, Confidence: high, Keyword: "mild" → NO
 
-Process these keyword-condition pairs:"""
+Process these keyword-condition-confidence triplets (IGNORE CONFIDENCE LEVELS):"""
 
-        self.logger.info("GeminiAICleanup initialized with Gemini 2.5 Flash")
+        self.logger.info("GeminiAICleanup initialized with improved reliability settings")
 
     def _signal_handler(self, signum, frame):
         """Handle graceful shutdown on Ctrl+C"""
@@ -151,25 +152,30 @@ Process these keyword-condition pairs:"""
             self.logger.error(f"Failed to save keywords file: {e}")
             raise
 
-    def flatten_keywords(self, conditions_data: Dict) -> Dict:
-        """Flatten confidence levels and merge all keywords per condition"""
-        flattened = {}
+    def create_keyword_batches_with_confidence(self, conditions_data: Dict, batch_size: int = 30) -> List[List[Tuple[str, str, str]]]:
+        """Create batches of (condition, confidence, keyword) triplets - reduced batch size for reliability"""
+        batches = []
+        current_batch = []
         
         for condition_name, condition_data in conditions_data.items():
-            all_keywords = set()  # Use set to automatically handle duplicates
-            
-            # Merge all confidence levels
             for confidence_level in ['high_confidence', 'medium_confidence', 'low_confidence']:
                 if confidence_level in condition_data:
+                    confidence_label = confidence_level.replace('_confidence', '')  # high, medium, low
+                    
                     for keyword in condition_data[confidence_level]:
                         if keyword and keyword.strip():  # Skip empty keywords
-                            all_keywords.add(keyword.strip())
-            
-            # Convert back to sorted list
-            flattened[condition_name] = sorted(list(all_keywords))
-            
-        self.logger.info(f"Flattened keywords from confidence levels for {len(flattened)} conditions")
-        return flattened
+                            current_batch.append((condition_name, confidence_label, keyword.strip()))
+                            
+                            if len(current_batch) >= batch_size:
+                                batches.append(current_batch)
+                                current_batch = []
+        
+        # Add remaining keywords
+        if current_batch:
+            batches.append(current_batch)
+        
+        self.logger.info(f"Created {len(batches)} batches with {batch_size} keywords each (preserving confidence levels)")
+        return batches
 
     def load_failed_batches(self) -> List:
         """Load any previously failed batches for recovery"""
@@ -211,7 +217,7 @@ Process these keyword-condition pairs:"""
             # Save immediately
             with open(self.failed_batches_file, 'w', encoding='utf-8') as f:
                 json.dump(existing_batches, f, indent=2)
-                
+            
             self.logger.info(f"Immediately saved failed batch to recovery file (total: {len(existing_batches)})")
             
         except Exception as e:
@@ -226,43 +232,48 @@ Process these keyword-condition pairs:"""
         except Exception as e:
             self.logger.error(f"Error clearing failed batches file: {e}")
 
-    def create_keyword_batches(self, flattened_conditions: Dict, batch_size: int = 50) -> List[List[Tuple[str, str]]]:
-        """
-        Create batches of (condition, keyword) tuples for processing.
-        
-        Args:
-            flattened_conditions: The flattened conditions dictionary
-            batch_size: Number of keyword-condition pairs per batch (reduced to 50)
+    def save_progress_immediately(self, cleaned_conditions: Dict, original_conditions: Dict) -> None:
+        """Save current progress immediately after each batch"""
+        try:
+            # Load the original data structure
+            input_file = "extracted_keywords_result_cleaned.json"
+            with open(input_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
             
-        Returns:
-            List of batches, each containing tuples of (condition, keyword)
-        """
-        keyword_pairs = []
-        
-        # Collect all keyword-condition pairs (ignoring confidence levels)
-        for condition_name, keywords in flattened_conditions.items():
-            for keyword in keywords:
-                keyword_pairs.append((condition_name, keyword))
-        
-        # Split into batches
-        batches = []
-        for i in range(0, len(keyword_pairs), batch_size):
-            batch = keyword_pairs[i:i + batch_size]
-            batches.append(batch)
-        
-        self.logger.info(f"Created {len(batches)} batches from {len(keyword_pairs)} keyword-condition pairs")
-        return batches
+            # Update with current progress
+            data['conditions'] = cleaned_conditions
+            
+            # Update metadata with current stats
+            if 'metadata' in data:
+                data['metadata']['ai_cleanup_progress'] = {
+                    'last_updated': datetime.now().isoformat(),
+                    'batches_processed': self.stats['successful_batches'],
+                    'total_batches': self.stats['total_batches'],
+                    'keywords_processed': self.stats['total_keywords_processed'],
+                    'keywords_kept': self.stats['total_keywords_kept'],
+                    'keywords_removed': self.stats['total_keywords_removed']
+                }
+            
+            # Save immediately
+            with open(input_file, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+            
+            self.logger.debug(f"Progress saved after batch {self.stats['successful_batches']}/{self.stats['total_batches']}")
+            
+        except Exception as e:
+            self.logger.error(f"Error saving progress immediately: {e}")
+            # Don't fail the entire process if saving fails
 
-    def create_gemini_payload(self, keyword_batch: List[Tuple[str, str]]) -> Dict:
-        """Create the API payload for Gemini with a batch of keywords"""
+    def create_gemini_payload(self, keyword_batch: List[Tuple[str, str, str]]) -> Dict:
+        """Create API payload for Gemini with confidence-aware format"""
         
-        # Format the keyword pairs for the prompt
-        batch_text = "\n".join([
-            f"Condition: {condition}, Keyword: \"{keyword}\""
-            for condition, keyword in keyword_batch
-        ])
+        # Build the prompt with keyword triplets
+        prompt_lines = [self.filtering_prompt, ""]
         
-        full_prompt = f"{self.filtering_prompt}\n\n{batch_text}"
+        for i, (condition, confidence, keyword) in enumerate(keyword_batch, 1):
+            prompt_lines.append(f"{i}. Condition: {condition}, Confidence: {confidence}, Keyword: \"{keyword}\"")
+        
+        full_prompt = "\n".join(prompt_lines)
         
         payload = {
             "contents": [{
@@ -271,28 +282,28 @@ Process these keyword-condition pairs:"""
                 }]
             }],
             "generationConfig": {
-                "temperature": 0.1,
+                "temperature": 0.1,  # Very low temperature for consistent responses
                 "topK": 1,
-                "topP": 0.8,
-                "maxOutputTokens": 4096,  # Reduced from 8192 for faster responses
-                "stopSequences": []
+                "topP": 0.1,
+                "maxOutputTokens": 8192,  # Increased to account for Gemini's internal thoughts
+                "candidateCount": 1
             },
             "safetySettings": [
                 {
                     "category": "HARM_CATEGORY_HARASSMENT",
-                    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                    "threshold": "BLOCK_NONE"
                 },
                 {
                     "category": "HARM_CATEGORY_HATE_SPEECH", 
-                    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                    "threshold": "BLOCK_NONE"
                 },
                 {
                     "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                    "threshold": "BLOCK_NONE"
                 },
                 {
                     "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-                    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                    "threshold": "BLOCK_NONE"
                 }
             ]
         }
@@ -300,7 +311,7 @@ Process these keyword-condition pairs:"""
         return payload
 
     def call_gemini_api(self, payload: Dict) -> str:
-        """Make API call to Gemini with robust error handling"""
+        """Make API call to Gemini with improved error handling and exponential backoff"""
         url = f"{self.api_config['base_url']}?key={self.api_key}"
         
         for attempt in range(self.api_config['max_retries']):
@@ -324,40 +335,57 @@ Process these keyword-condition pairs:"""
                             text_response = candidate['content']['parts'][0]['text']
                             self.logger.debug("API call successful")
                             return text_response.strip()
+                        elif 'finishReason' in candidate and candidate['finishReason'] == 'MAX_TOKENS':
+                            self.logger.error(f"MAX_TOKENS hit - Gemini used {result.get('usageMetadata', {}).get('thoughtsTokenCount', 'unknown')} tokens for internal thoughts!")
+                            return None
+                        else:
+                            self.logger.warning(f"Unexpected response structure: {result}")
                 
                 elif response.status_code == 429:  # Rate limit
-                    wait_time = (attempt + 1) * 5  # Reduced wait time
-                    self.logger.warning(f"Rate limit hit, waiting {wait_time}s...")
+                    wait_time = self.api_config['base_retry_delay'] * (2 ** attempt)  # Exponential backoff
+                    self.logger.warning(f"Rate limit hit (attempt {attempt + 1}), waiting {wait_time}s...")
+                    time.sleep(wait_time)
+                    continue
+                    
+                elif response.status_code == 503:  # Service unavailable
+                    wait_time = self.api_config['base_retry_delay'] * (2 ** attempt)
+                    self.logger.warning(f"Service unavailable (attempt {attempt + 1}), waiting {wait_time}s...")
                     time.sleep(wait_time)
                     continue
                     
                 else:
                     self.logger.error(f"Gemini API error: {response.status_code} - {response.text}")
                     if attempt < self.api_config['max_retries'] - 1:
-                        time.sleep(self.api_config['retry_delay'])
+                        wait_time = self.api_config['base_retry_delay'] * (2 ** attempt)
+                        self.logger.info(f"Retrying in {wait_time} seconds...")
+                        time.sleep(wait_time)
                         continue
                     return None
                     
             except requests.exceptions.Timeout:
+                wait_time = self.api_config['base_retry_delay'] * (2 ** attempt)
                 self.logger.warning(f"API request timeout (attempt {attempt + 1}) - {self.api_config['timeout']}s")
                 if attempt < self.api_config['max_retries'] - 1:
-                    wait_time = self.api_config['retry_delay'] * (attempt + 1)
                     self.logger.info(f"Retrying in {wait_time} seconds...")
                     time.sleep(wait_time)
                     continue
                 return None
+                
             except requests.exceptions.ConnectionError as e:
+                wait_time = self.api_config['base_retry_delay'] * (2 ** attempt)
                 self.logger.warning(f"Connection error (attempt {attempt + 1}): {e}")
                 if attempt < self.api_config['max_retries'] - 1:
-                    wait_time = self.api_config['retry_delay'] * (attempt + 1)
                     self.logger.info(f"Retrying in {wait_time} seconds...")
                     time.sleep(wait_time)
                     continue
                 return None
+                
             except Exception as e:
+                wait_time = self.api_config['base_retry_delay'] * (2 ** attempt)
                 self.logger.error(f"API request failed (attempt {attempt + 1}): {e}")
                 if attempt < self.api_config['max_retries'] - 1:
-                    time.sleep(self.api_config['retry_delay'])
+                    self.logger.info(f"Retrying in {wait_time} seconds...")
+                    time.sleep(wait_time)
                     continue
                 return None
         
@@ -377,10 +405,15 @@ Process these keyword-condition pairs:"""
                 elif line == 'NO':
                     decisions.append(False)
                 else:
-                    # Handle unexpected responses
-                    self.logger.warning(f"Unexpected response line: {line}")
-                    # Default to keeping the keyword if response is unclear
-                    decisions.append(True)
+                    # Handle unexpected responses - be more flexible
+                    if 'YES' in line:
+                        decisions.append(True)
+                    elif 'NO' in line:
+                        decisions.append(False)
+                    else:
+                        self.logger.warning(f"Unexpected response line: {line}")
+                        # Default to keeping the keyword if response is unclear
+                        decisions.append(True)
             
             # Ensure we have the right number of responses
             if len(decisions) != batch_size:
@@ -398,12 +431,12 @@ Process these keyword-condition pairs:"""
             # Return all True to keep keywords if parsing fails
             return [True] * batch_size
 
-    def process_batch(self, keyword_batch: List[Tuple[str, str]]) -> List[Tuple[str, str, bool]]:
-        """Process a batch of keywords through Gemini AI"""
+    def process_batch(self, keyword_batch: List[Tuple[str, str, str]]) -> List[Tuple[str, str, str, bool]]:
+        """Process a batch of (condition, confidence, keyword) triplets through Gemini AI"""
         try:
             # Check for interruption
             if self.interrupted:
-                return [(condition, keyword, True) for condition, keyword in keyword_batch]
+                return [(condition, confidence, keyword, True) for condition, confidence, keyword in keyword_batch]
             
             # Create API payload
             payload = self.create_gemini_payload(keyword_batch)
@@ -415,16 +448,16 @@ Process these keyword-condition pairs:"""
                 # Save failed batch immediately
                 self.save_failed_batch_immediately(keyword_batch)
                 # Return with all keywords kept for now
-                return [(condition, keyword, True) for condition, keyword in keyword_batch]
+                return [(condition, confidence, keyword, True) for condition, confidence, keyword in keyword_batch]
             
             # Parse responses
             decisions = self.parse_gemini_responses(response_text, len(keyword_batch))
             
             # Combine with original data
             results = []
-            for i, (condition, keyword) in enumerate(keyword_batch):
+            for i, (condition, confidence, keyword) in enumerate(keyword_batch):
                 keep_keyword = decisions[i] if i < len(decisions) else True
-                results.append((condition, keyword, keep_keyword))
+                results.append((condition, confidence, keyword, keep_keyword))
             
             self.stats['successful_batches'] += 1
             return results
@@ -435,18 +468,25 @@ Process these keyword-condition pairs:"""
             # Save failed batch immediately
             self.save_failed_batch_immediately(keyword_batch)
             # Return with all keywords kept for now
-            return [(condition, keyword, True) for condition, keyword in keyword_batch]
+            return [(condition, confidence, keyword, True) for condition, confidence, keyword in keyword_batch]
 
-    def filter_keywords_with_ai(self, flattened_conditions: Dict, batch_size: int = 50) -> Dict:
-        """Filter keywords using AI with batch processing"""
+    def filter_keywords_with_ai(self, conditions_data: Dict, batch_size: int = 30) -> Dict:
+        """Filter keywords using AI with batch processing - preserves confidence levels"""
         
-        # Create batches
-        batches = self.create_keyword_batches(flattened_conditions, batch_size)
+        # Create batches with confidence information
+        batches = self.create_keyword_batches_with_confidence(conditions_data, batch_size)
         
-        # Initialize cleaned data structure
+        # Initialize cleaned data structure - preserve original structure
         cleaned_conditions = {}
-        for condition_name in flattened_conditions.keys():
-            cleaned_conditions[condition_name] = []
+        for condition_name, condition_data in conditions_data.items():
+            cleaned_conditions[condition_name] = {
+                'high_confidence': [],
+                'medium_confidence': [],
+                'low_confidence': []
+            }
+            # Preserve extraction stats if they exist
+            if 'extraction_stats' in condition_data:
+                cleaned_conditions[condition_name]['extraction_stats'] = condition_data['extraction_stats']
         
         self.stats['total_batches'] = len(batches)
         self.stats['start_time'] = time.time()
@@ -467,17 +507,22 @@ Process these keyword-condition pairs:"""
                     batch_kept = 0
                     batch_removed = 0
                     
-                    # Apply filtering results
-                    for condition, keyword, keep in results:
+                    # Apply filtering results - preserve confidence levels
+                    for condition, confidence, keyword, keep in results:
                         self.stats['total_keywords_processed'] += 1
                         
+                        confidence_key = f"{confidence}_confidence"
+                        
                         if keep:
-                            cleaned_conditions[condition].append(keyword)
+                            cleaned_conditions[condition][confidence_key].append(keyword)
                             batch_kept += 1
                             self.stats['total_keywords_kept'] += 1
                         else:
                             batch_removed += 1
                             self.stats['total_keywords_removed'] += 1
+                    
+                    # Save progress after every batch
+                    self.save_progress_immediately(cleaned_conditions, conditions_data)
                     
                     # Update progress bar
                     pbar.set_postfix({
@@ -487,8 +532,8 @@ Process these keyword-condition pairs:"""
                     })
                     pbar.update(1)
                     
-                    # Rate limiting - reduced to 0.5 seconds
-                    time.sleep(0.5)
+                    # Rate limiting - improved delay
+                    time.sleep(self.api_config['rate_limit_delay'])
                     
                 except KeyboardInterrupt:
                     self.logger.info("Processing interrupted by user")
@@ -502,12 +547,7 @@ Process these keyword-condition pairs:"""
         return cleaned_conditions
 
     def process_recovery_batches(self, recovery_batches: List) -> Dict:
-        """Process previously failed batches for recovery"""
-        if not recovery_batches:
-            return {}
-        
-        self.logger.info(f"Processing {len(recovery_batches)} recovery batches...")
-        
+        """Process any failed batches from previous runs"""
         recovery_results = {}
         
         with tqdm(total=len(recovery_batches), desc="Processing recovery batches", unit="batch") as pbar:
@@ -520,13 +560,19 @@ Process these keyword-condition pairs:"""
                     # Process recovery batch
                     results = self.process_batch(batch)
                     
-                    # Apply filtering results
-                    for condition, keyword, keep in results:
+                    # Apply filtering results - preserve confidence structure
+                    for condition, confidence, keyword, keep in results:
                         if condition not in recovery_results:
-                            recovery_results[condition] = []
+                            recovery_results[condition] = {
+                                'high_confidence': [],
+                                'medium_confidence': [],
+                                'low_confidence': []
+                            }
+                        
+                        confidence_key = f"{confidence}_confidence"
                         
                         if keep:
-                            recovery_results[condition].append(keyword)
+                            recovery_results[condition][confidence_key].append(keyword)
                             self.stats['total_keywords_kept'] += 1
                         else:
                             self.stats['total_keywords_removed'] += 1
@@ -535,7 +581,7 @@ Process these keyword-condition pairs:"""
                     pbar.update(1)
                     
                     # Rate limiting
-                    time.sleep(0.5)
+                    time.sleep(self.api_config['rate_limit_delay'])
                     
                 except KeyboardInterrupt:
                     self.interrupted = True
@@ -547,30 +593,25 @@ Process these keyword-condition pairs:"""
         
         return recovery_results
 
-    def restructure_to_original_format(self, flattened_cleaned: Dict, original_structure: Dict) -> Dict:
-        """Restructure cleaned keywords back to original confidence level format"""
-        restructured = {}
+    def merge_recovery_results(self, cleaned_conditions: Dict, recovery_results: Dict) -> Dict:
+        """Merge recovery results with main results"""
+        for condition_name, recovery_data in recovery_results.items():
+            if condition_name not in cleaned_conditions:
+                cleaned_conditions[condition_name] = {
+                    'high_confidence': [],
+                    'medium_confidence': [],
+                    'low_confidence': []
+                }
+            
+            # Merge each confidence level
+            for confidence_level in ['high_confidence', 'medium_confidence', 'low_confidence']:
+                if confidence_level in recovery_data:
+                    existing_keywords = set(cleaned_conditions[condition_name][confidence_level])
+                    recovery_keywords = set(recovery_data[confidence_level])
+                    merged_keywords = existing_keywords.union(recovery_keywords)
+                    cleaned_conditions[condition_name][confidence_level] = sorted(list(merged_keywords))
         
-        for condition_name in original_structure.keys():
-            restructured[condition_name] = {
-                'high_confidence': [],
-                'medium_confidence': [],
-                'low_confidence': []
-            }
-            
-            # Get cleaned keywords for this condition
-            cleaned_keywords = flattened_cleaned.get(condition_name, [])
-            
-            # Distribute cleaned keywords across confidence levels
-            # For simplicity, we'll put all cleaned keywords in high_confidence
-            # You could implement more sophisticated distribution logic here
-            restructured[condition_name]['high_confidence'] = cleaned_keywords
-            
-            # Preserve extraction stats if they exist
-            if 'extraction_stats' in original_structure[condition_name]:
-                restructured[condition_name]['extraction_stats'] = original_structure[condition_name]['extraction_stats']
-        
-        return restructured
+        return cleaned_conditions
 
     def print_cleanup_stats(self, original_data: Dict, cleaned_data: Dict):
         """Print detailed cleanup statistics"""
@@ -611,7 +652,7 @@ Process these keyword-condition pairs:"""
             print(f"  Removed: {removed} keywords ({removal_rate:.1f}%)")
 
     def main(self, input_file: str = "extracted_keywords_result_cleaned.json", 
-             batch_size: int = 50):  # Reduced default batch size
+             batch_size: int = 30):  # Reduced default batch size for better reliability
         """Main function to perform AI cleanup - saves to same input file"""
         
         if not self._validate_api_key():
@@ -619,7 +660,9 @@ Process these keyword-condition pairs:"""
         
         print("🤖 Starting AI-powered keyword cleanup with Gemini 2.5 Flash...")
         print(f"📂 Processing file: {input_file}")
-        print(f"📦 Batch size: {batch_size} keywords per batch")
+        print(f"📦 Batch size: {batch_size} keywords per batch (reduced for reliability)")
+        print(f"🎯 Strategy: Send confidence levels but instruct AI to ignore them")
+        print(f"💾 Progress is saved after EVERY batch - no progress will be lost!")
         print(f"⚠️  Press Ctrl+C to gracefully interrupt and save progress")
         
         # Load keywords
@@ -647,13 +690,9 @@ Process these keyword-condition pairs:"""
             print("🛑 Interrupted during recovery - exiting...")
             return None
         
-        # Flatten confidence levels - ignore confidence, merge all keywords
-        print("🔧 Flattening confidence levels...")
-        flattened_conditions = self.flatten_keywords(original_conditions)
-        
-        # Filter keywords with AI
-        print("🧠 Filtering keywords with AI...")
-        cleaned_flattened = self.filter_keywords_with_ai(flattened_conditions, batch_size)
+        # Filter keywords with AI - preserving confidence levels
+        print("🧠 Filtering keywords with AI (preserving confidence levels)...")
+        cleaned_conditions = self.filter_keywords_with_ai(original_conditions, batch_size)
         
         # Check if interrupted during main processing
         if self.interrupted:
@@ -662,32 +701,12 @@ Process these keyword-condition pairs:"""
         
         # Merge recovery results if any
         if recovery_results:
-            for condition, keywords in recovery_results.items():
-                if condition in cleaned_flattened:
-                    # Merge and deduplicate
-                    all_keywords = set(cleaned_flattened[condition] + keywords)
-                    cleaned_flattened[condition] = sorted(list(all_keywords))
-                else:
-                    cleaned_flattened[condition] = keywords
-        
-        # Restructure back to original format
-        print("🔧 Restructuring to original format...")
-        cleaned_conditions = self.restructure_to_original_format(cleaned_flattened, original_conditions)
+            print("🔄 Merging recovery results...")
+            cleaned_conditions = self.merge_recovery_results(cleaned_conditions, recovery_results)
         
         # Update data structure
         cleaned_data = data.copy()
         cleaned_data['conditions'] = cleaned_conditions
-        
-        # Update metadata
-        if 'metadata' in cleaned_data:
-            cleaned_data['metadata']['ai_cleanup'] = {
-                'cleanup_date': datetime.now().isoformat(),
-                'model_used': 'gemini-2.5-flash',
-                'total_keywords_processed': self.stats['total_keywords_processed'],
-                'total_keywords_kept': self.stats['total_keywords_kept'],
-                'total_keywords_removed': self.stats['total_keywords_removed'],
-                'removal_rate': f"{(self.stats['total_keywords_removed']/self.stats['total_keywords_processed']*100):.1f}%" if self.stats['total_keywords_processed'] > 0 else "0.0%"
-            }
         
         # Print statistics
         self.print_cleanup_stats(original_conditions, cleaned_conditions)
@@ -697,11 +716,21 @@ Process these keyword-condition pairs:"""
             print(f"⚠️  Saving {len(self.failed_batches)} failed batches for next run...")
             self.save_failed_batches(self.failed_batches)
         
-        # Save cleaned data to same file
-        print(f"💾 Saving cleaned keywords back to {input_file}...")
+        # Final save with complete metadata (progress was saved after each batch)
+        print(f"💾 Finalizing cleaned keywords in {input_file}...")
+        cleaned_data['metadata']['ai_cleanup'] = {
+            'cleanup_date': datetime.now().isoformat(),
+            'model_used': 'gemini-2.5-flash',
+            'strategy': 'confidence_aware_but_ignored',
+            'total_keywords_processed': self.stats['total_keywords_processed'],
+            'total_keywords_kept': self.stats['total_keywords_kept'],
+            'total_keywords_removed': self.stats['total_keywords_removed'],
+            'removal_rate': f"{(self.stats['total_keywords_removed']/self.stats['total_keywords_processed']*100):.1f}%" if self.stats['total_keywords_processed'] > 0 else "0.0%",
+            'completed': True
+        }
         self.save_keywords_file(cleaned_data, input_file)
         
-        print("✅ AI cleanup completed!")
+        print("✅ AI cleanup completed! Progress was saved after every batch.")
         return cleaned_data
 
 if __name__ == "__main__":

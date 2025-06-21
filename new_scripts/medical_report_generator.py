@@ -26,6 +26,20 @@ import textwrap
 from datetime import datetime
 import random
 
+# Import real anatomical regions
+try:
+    from .keyword_prediction.anatomical_results.anatomical_regions_dict import ANATOMICAL_REGIONS
+except ImportError:
+    # Fallback for direct execution
+    try:
+        import sys
+        import os
+        sys.path.append(os.path.join(os.path.dirname(__file__), 'keyword_prediction', 'anatomical_results'))
+        from anatomical_regions_dict import ANATOMICAL_REGIONS
+    except ImportError:
+        # Final fallback - define empty regions
+        ANATOMICAL_REGIONS = {}
+
 # Constants from training script
 CONDITIONS = [
     'Atelectasis', 'Cardiomegaly', 'Edema',
@@ -102,53 +116,48 @@ CONDITION_KEYWORDS = {
     }
 }
 
-# Anatomical region mapping for spatial attention analysis
-ANATOMICAL_REGIONS = {
-    'upper_left': {
-        'name': 'left upper lung field',
-        'keywords': ['left upper lobe', 'left apical region', 'left clavicular area'],
-        'bounds': (0, 0, 0.5, 0.4)  # (x_min, y_min, x_max, y_max) as fractions
-    },
-    'upper_right': {
-        'name': 'right upper lung field', 
-        'keywords': ['right upper lobe', 'right apical region', 'right clavicular area'],
-        'bounds': (0.5, 0, 1.0, 0.4)
-    },
-    'middle_left': {
-        'name': 'left middle lung field',
-        'keywords': ['left middle lobe', 'left perihilar region', 'left cardiac border'],
-        'bounds': (0, 0.4, 0.5, 0.7)
-    },
-    'middle_right': {
-        'name': 'right middle lung field',
-        'keywords': ['right middle lobe', 'right perihilar region', 'right cardiac border'],
-        'bounds': (0.5, 0.4, 1.0, 0.7)
-    },
-    'lower_left': {
-        'name': 'left lower lung field',
-        'keywords': ['left lower lobe', 'left costophrenic angle', 'left diaphragmatic region'],
-        'bounds': (0, 0.7, 0.5, 1.0)
-    },
-    'lower_right': {
-        'name': 'right lower lung field',
-        'keywords': ['right lower lobe', 'right costophrenic angle', 'right diaphragmatic region'],
-        'bounds': (0.5, 0.7, 1.0, 1.0)
-    },
-    'central_cardiac': {
-        'name': 'cardiac silhouette',
-        'keywords': ['heart border', 'mediastinum', 'cardiac shadow', 'central region'],
-        'bounds': (0.3, 0.3, 0.7, 0.8)
-    },
-    'hilum_left': {
-        'name': 'left hilum',
-        'keywords': ['left hilar region', 'left pulmonary vessels', 'left bronchial tree'],
-        'bounds': (0.15, 0.35, 0.45, 0.65)
-    },
-    'hilum_right': {
-        'name': 'right hilum', 
-        'keywords': ['right hilar region', 'right pulmonary vessels', 'right bronchial tree'],
-        'bounds': (0.55, 0.35, 0.85, 0.65)
-    }
+# Static condition-to-region mapping based on medical knowledge
+CONDITION_TO_REGIONS = {
+    'Atelectasis': [
+        'left_lung', 'right_lung', 
+        'left_lower_lung_zone', 'right_lower_lung_zone',
+        'left_upper_lung_zone', 'right_upper_lung_zone'
+    ],
+    'Cardiomegaly': [
+        'cardiac_silhouette'
+    ],
+    'Edema': [
+        'left_lung', 'right_lung',
+        'left_lower_lung_zone', 'right_lower_lung_zone',
+        'left_hilar_structures', 'right_hilar_structures'
+    ],
+    'Lung Opacity': [
+        'left_lung', 'right_lung',
+        'left_lower_lung_zone', 'right_lower_lung_zone',
+        'left_upper_lung_zone', 'right_upper_lung_zone',
+        'left_mid_lung_zone', 'right_mid_lung_zone'
+    ],
+    'No Finding': [
+        # All regions are relevant for "normal" findings
+        'cardiac_silhouette', 'left_lung', 'right_lung',
+        'left_upper_lung_zone', 'right_upper_lung_zone',
+        'left_mid_lung_zone', 'right_mid_lung_zone',
+        'left_lower_lung_zone', 'right_lower_lung_zone'
+    ],
+    'Pleural Effusion': [
+        'left_costophrenic_angle', 'right_costophrenic_angle',
+        'left_lower_lung_zone', 'right_lower_lung_zone'
+    ],
+    'Pneumonia': [
+        'left_lung', 'right_lung',
+        'left_lower_lung_zone', 'right_lower_lung_zone',
+        'left_upper_lung_zone', 'right_upper_lung_zone',
+        'left_mid_lung_zone', 'right_mid_lung_zone'
+    ],
+    'Support Devices': [
+        'upper_mediastinum', 'cardiac_silhouette', 'trachea',
+        'left_hilar_structures', 'right_hilar_structures'
+    ]
 }
 
 # LLM Integration Configuration
@@ -510,7 +519,12 @@ class MedicalReportGenerator:
         }
         
         # Initialize attention visualization system (Phase 3)
-        self.anatomical_regions = ANATOMICAL_REGIONS
+        try:
+            self.anatomical_regions = ANATOMICAL_REGIONS
+        except NameError:
+            # Fallback if import failed
+            self.logger.warning("ANATOMICAL_REGIONS not available, using empty regions")
+            self.anatomical_regions = {}
         self.attention_threshold = 0.6  # Minimum attention intensity to consider
         self.grad_cam_enabled = True
         self.attention_cache = {}  # Cache attention maps for efficiency
@@ -1524,6 +1538,52 @@ class MedicalReportGenerator:
             self.logger.error(f"Error generating enhanced attention: {e}")
             return torch.zeros(224, 224)
     
+    def get_relevant_anatomical_regions(self, condition_predictions: Dict) -> Dict:
+        """
+        Get relevant anatomical regions based on predicted conditions using static mapping.
+        
+        Args:
+            condition_predictions: Dictionary with condition names and prediction info
+            
+        Returns:
+            Dictionary with relevant regions and their info
+        """
+        try:
+            relevant_regions = {}
+            
+            # Get conditions with significant predictions
+            for condition, pred_info in condition_predictions.items():
+                probability = pred_info.get('probability', 0.0)
+                
+                # Include regions for conditions with reasonable probability
+                if probability > 0.3 and condition in CONDITION_TO_REGIONS:
+                    condition_regions = CONDITION_TO_REGIONS[condition]
+                    
+                    for region_key in condition_regions:
+                        if region_key in ANATOMICAL_REGIONS:
+                            region_info = ANATOMICAL_REGIONS[region_key]
+                            
+                            if region_key not in relevant_regions:
+                                relevant_regions[region_key] = {
+                                    'name': region_info['name'],
+                                    'keywords': region_info['keywords'][:3],  # Limit to top 3 keywords
+                                    'bounds': region_info['bounds'],
+                                    'related_conditions': []
+                                }
+                            
+                            # Track which conditions are related to this region
+                            relevant_regions[region_key]['related_conditions'].append({
+                                'condition': condition,
+                                'probability': probability
+                            })
+            
+            self.logger.debug(f"Identified {len(relevant_regions)} relevant anatomical regions")
+            return relevant_regions
+            
+        except Exception as e:
+            self.logger.error(f"Error getting relevant anatomical regions: {e}")
+            return {}
+
     def analyze_attention_regions(self, attention_map: torch.Tensor, 
                                  threshold: float = None) -> Dict:
         """
@@ -1884,6 +1944,7 @@ class MedicalReportGenerator:
                                    prediction_keywords: Dict,
                                    spatial_keywords: List[str],
                                    attention_analysis: Dict,
+                                   relevant_anatomical_regions: Dict = None,  # NEW
                                    template: str = 'standard',
                                    patient_info: Dict = None,
                                    include_image: bool = False) -> str:
@@ -1906,9 +1967,8 @@ class MedicalReportGenerator:
         try:
             template_config = self.report_templates.get(template, self.report_templates['standard'])
             
-            # Determine primary finding and confidence level
-            primary_finding, primary_confidence = self._get_primary_finding(condition_predictions)
-            reporting_style = self._determine_reporting_style(primary_finding, primary_confidence)
+            # Determine reporting approach based on all significant findings
+            reporting_style = self._determine_reporting_style_multi_condition(condition_predictions)
             
             # System instruction with critical clinical guidelines
             image_note = "\n\nNOTE: You also have access to the actual chest X-ray image for visual correlation." if include_image else ""
@@ -1943,6 +2003,9 @@ REPORTING STYLE: {reporting_style}
 
 📋 CLINICAL KEYWORDS (Condition-Based):
 {self._format_clinical_keywords(prediction_keywords, condition_predictions)}
+
+🗺️ RELEVANT ANATOMICAL REGIONS (Condition-Based):
+{self._format_relevant_anatomical_regions(relevant_anatomical_regions, condition_predictions)}
 """
 
             # Patient context if available
@@ -1957,7 +2020,7 @@ REPORTING STYLE: {reporting_style}
 Generate a {template_config['style']} with sections: {', '.join(template_config['sections']).upper()}
 
 🎯 SPECIFIC INSTRUCTIONS FOR THIS CASE:
-{self._get_case_specific_instructions(primary_finding, primary_confidence, template)}
+{self._get_case_specific_instructions(condition_predictions, template)}
 
 ⚠️ REMEMBER: Ignore all attention/spatial analysis data. Report only what the medical predictions indicate.
 
@@ -1988,16 +2051,43 @@ CHEST X-RAY REPORT:
                 
         return primary_condition, max_prob
 
-    def _determine_reporting_style(self, primary_finding: str, confidence: float) -> str:
-        """Determine appropriate reporting style based on findings and confidence."""
-        if primary_finding == "No Finding" and confidence > 0.70:
+    def _determine_reporting_style_multi_condition(self, condition_predictions: Dict) -> str:
+        """Determine appropriate reporting style based on all significant findings."""
+        
+        # Get significant findings (≥60% confidence)
+        significant_findings = [
+            (condition, pred_info['probability']) 
+            for condition, pred_info in condition_predictions.items()
+            if pred_info.get('probability', 0) >= 0.55
+        ]
+        
+        # Sort by confidence
+        significant_findings = sorted(significant_findings, key=lambda x: x[1], reverse=True)[:3]
+        
+        # Check for normal study
+        no_finding_prob = condition_predictions.get('No Finding', {}).get('probability', 0)
+        if no_finding_prob > 0.70 and len([f for f in significant_findings if f[0] != 'No Finding']) == 0:
             return "SIMPLE & DIRECT (Normal Study - Radiologist-style brevity required)"
-        elif confidence > 0.70:
-            return "FOCUSED PATHOLOGY (High-confidence finding - focus on medical significance)"
-        elif confidence > 0.50:
-            return "BALANCED ANALYSIS (Moderate confidence - appropriate clinical uncertainty)"
+        
+        # Multi-condition assessment
+        if len(significant_findings) >= 2:
+            high_conf_count = sum(1 for _, prob in significant_findings if prob > 0.70)
+            if high_conf_count >= 2:
+                return "MULTI-PATHOLOGY HIGH CONFIDENCE (Multiple significant findings - comprehensive analysis required)"
+            else:
+                return "MULTI-PATHOLOGY MIXED CONFIDENCE (Multiple findings with varying confidence levels)"
+        
+        # Single condition
+        elif len(significant_findings) == 1:
+            _, confidence = significant_findings[0]
+            if confidence > 0.70:
+                return "FOCUSED PATHOLOGY (High-confidence single finding - focus on medical significance)"
+            else:
+                return "MODERATE PATHOLOGY (Single moderate-confidence finding - appropriate uncertainty)"
+        
+        # Low confidence across all conditions
         else:
-            return "CONSERVATIVE ASSESSMENT (Low confidence - emphasize limitations)"
+            return "CONSERVATIVE ASSESSMENT (Low confidence across all findings - emphasize limitations)"
 
     def _format_clinical_predictions(self, condition_predictions: Dict) -> str:
         """Format only clinically significant predictions."""
@@ -2021,35 +2111,89 @@ CHEST X-RAY REPORT:
                 
         return formatted.strip() if formatted else "- Based on model predictions only"
 
-    def _get_case_specific_instructions(self, primary_finding: str, confidence: float, template: str) -> str:
-        """Provide specific instructions based on the case characteristics."""
-        if primary_finding == "No Finding" and confidence > 0.70:
+    def _format_relevant_anatomical_regions(self, relevant_regions: Dict, condition_predictions: Dict) -> str:
+        """Format relevant anatomical regions based on predicted conditions with 60% threshold."""
+        if not relevant_regions:
+            return "- Anatomical regions determined by static condition-to-region mapping"
+        
+        # Get significant conditions (≥60% confidence)
+        significant_conditions = {
+            condition: pred_info['probability'] 
+            for condition, pred_info in condition_predictions.items()
+            if pred_info.get('probability', 0) >= 0.60
+        }
+        
+        if not significant_conditions:
+            return "- No significant findings above 60% confidence for anatomical localization"
+        
+        formatted = ""
+        
+        # Group by condition for better clinical presentation
+        for condition, probability in sorted(significant_conditions.items(), key=lambda x: x[1], reverse=True):
+            relevant_anatomical_regions = []
+            for region_key, region_info in relevant_regions.items():
+                related_conditions = region_info.get('related_conditions', [])
+                for rc in related_conditions:
+                    if rc['condition'] == condition and rc['probability'] >= 0.60:
+                        relevant_anatomical_regions.append(region_info['name'])
+                        break
+            
+            if relevant_anatomical_regions:
+                confidence_level = "HIGH" if probability > 0.70 else "MODERATE"
+                formatted += f"- {condition} ({probability:.1%}, {confidence_level}): {', '.join(relevant_anatomical_regions)}\n"
+        
+        return formatted.strip() if formatted else "- No specific anatomical regions identified for significant findings"
+
+    def _get_case_specific_instructions(self, condition_predictions: Dict, template: str) -> str:
+        """Provide specific instructions based on the case characteristics and all significant findings."""
+        
+        # Get all significant findings (≥60% confidence)
+        significant_findings = [
+            (condition, pred_info['probability']) 
+            for condition, pred_info in condition_predictions.items()
+            if pred_info.get('probability', 0) >= 0.60
+        ]
+        
+        # Sort by confidence and take top 3
+        significant_findings = sorted(significant_findings, key=lambda x: x[1], reverse=True)[:3]
+        
+        # Check for No Finding dominance
+        no_finding_prob = condition_predictions.get('No Finding', {}).get('probability', 0)
+        is_normal_study = (no_finding_prob > 0.70 and 
+                          len([f for f in significant_findings if f[0] != 'No Finding']) == 0)
+        
+        if is_normal_study:
             return """- This is a NORMAL study with high confidence
 - Use simple, direct language: "Normal chest radiograph" or similar
 - Keep findings section to 1-2 sentences maximum
 - Impression should be brief and definitive
 - No need for extensive descriptions or follow-up recommendations"""
-            
-        elif confidence > 0.70 and primary_finding != "No Finding":
-            return f"""- This shows {primary_finding} with HIGH confidence
-- Focus specifically on this pathological finding
-- Describe the medical significance clearly
-- Provide appropriate clinical recommendations
-- Do not mention normal areas unless clinically relevant"""
-            
-        elif confidence > 0.50:
-            return f"""- Moderate confidence for {primary_finding}
-- Express appropriate clinical uncertainty
-- Suggest correlation with clinical findings
-- Consider differential diagnoses if appropriate
-- Recommend follow-up if clinically indicated"""
-            
-        else:
-            return """- Low confidence findings
+        
+        elif len(significant_findings) == 0:
+            return """- Low confidence findings across all conditions
 - Emphasize limitations of the analysis
 - Suggest clinical correlation
 - Consider additional imaging if warranted
 - Use conservative language throughout"""
+        
+        elif len(significant_findings) == 1:
+            condition, confidence = significant_findings[0]
+            confidence_level = "HIGH" if confidence > 0.70 else "MODERATE"
+            return f"""- This shows {condition} with {confidence_level} confidence ({confidence:.1%})
+- Focus specifically on this pathological finding
+- Use relevant anatomical regions to describe location
+- Describe the medical significance clearly
+- Provide appropriate clinical recommendations"""
+        
+        else:  # Multiple significant findings
+            conditions_text = ', '.join([f"{cond} ({prob:.1%})" for cond, prob in significant_findings])
+            return f"""- This case shows MULTIPLE significant findings: {conditions_text}
+- Report ALL significant findings above 60% confidence
+- Use relevant anatomical regions to specify locations for each finding
+- Describe the medical significance of each finding
+- Consider relationships between findings (e.g., atelectasis with pleural effusion)
+- Provide comprehensive clinical recommendations for all findings
+- Structure as: FINDINGS (describe each), IMPRESSION (synthesize), RECOMMENDATIONS (comprehensive)"""
     
     def call_llm_for_report(self, prompt: str, include_image: bool = False, 
                            image_tensor: torch.Tensor = None) -> Dict:
@@ -2288,8 +2432,10 @@ Please ensure proper clinical review of all automated findings.
             # Step 3: Extract prediction keywords
             prediction_keywords = self.extract_keywords_from_predictions(inference_results["condition_predictions"])
             
-            # Step 4: Generate attention analysis
-            # Use the top predicted condition for attention
+            # Step 4: Get relevant anatomical regions (NEW - static mapping)
+            relevant_regions = self.get_relevant_anatomical_regions(inference_results["condition_predictions"])
+            
+            # Step 5: Generate attention analysis (existing - but now focused on relevant regions)
             top_condition = max(
                 inference_results["condition_predictions"].items(),
                 key=lambda x: x[1]['probability']
@@ -2299,24 +2445,25 @@ Please ensure proper clinical review of all automated findings.
             attention_analysis = self.analyze_attention_regions(attention_map)
             spatial_keywords = self.extract_spatial_keywords(attention_analysis)
             
-            # Step 5: Create LLM prompt
+            # Step 6: Create LLM prompt (UPDATED - include relevant regions)
             prompt = self.create_medical_report_prompt(
                 condition_predictions=inference_results["condition_predictions"],
                 prediction_keywords=prediction_keywords,
                 spatial_keywords=spatial_keywords,
                 attention_analysis=attention_analysis,
+                relevant_anatomical_regions=relevant_regions,  # NEW
                 template=template,
                 patient_info=patient_info
             )
             
-            # Step 6: Generate report via LLM
+            # Step 7: Generate report via LLM
             llm_response = self.call_llm_for_report(
                 prompt=prompt,
                 include_image=include_image,
                 image_tensor=img_tensor if include_image else None
             )
             
-            # Step 7: Format final report
+            # Step 8: Format final report
             formatted_report = self.format_medical_report(
                 raw_report=llm_response['report'],
                 metadata={
@@ -2326,22 +2473,24 @@ Please ensure proper clinical review of all automated findings.
                     'used_fallback': llm_response.get('used_fallback', False),
                     'top_predicted_condition': top_condition,
                     'total_keywords': len(prediction_keywords) + len(spatial_keywords),
-                    'attention_regions': len(attention_analysis.get('significant_regions', []))
+                    'attention_regions': len(attention_analysis.get('significant_regions', [])),
+                    'relevant_anatomical_regions': len(relevant_regions)  # NEW
                 }
             )
             
-            # Step 8: Compile complete analysis
+            # Step 9: Compile complete analysis
             complete_analysis = {
                 'success': True,
                 'image_path': str(image_path),
                 'model_predictions': inference_results["condition_predictions"],
                 'prediction_keywords': prediction_keywords,
+                'relevant_anatomical_regions': relevant_regions,  # NEW
                 'spatial_keywords': spatial_keywords,
                 'attention_analysis': attention_analysis,
                 'llm_response': llm_response,
                 'medical_report': formatted_report,
                 'processing_metadata': {
-                    'phases_completed': ['inference', 'keywords', 'attention', 'llm_generation'],
+                    'phases_completed': ['inference', 'keywords', 'anatomical_regions', 'attention', 'llm_generation'],  # UPDATED
                     'template_used': template,
                     'total_processing_time': None  # Could add timing if needed
                 }
@@ -2526,8 +2675,29 @@ Please ensure proper clinical review of all automated findings.
                 analysis_result['prediction_keywords'] = {}
                 analysis_result['keyword_summary'] = {'total_keywords': 0}
             
-            # Step 4: Attention Analysis (65%)
-            update_progress("Attention Analysis", 65, "Generating attention visualization")
+            # Step 4: Anatomical Region Mapping (55%)
+            update_progress("Anatomical Region Mapping", 55, "Identifying relevant anatomical regions")
+            step_start = time.time()
+            
+            try:
+                relevant_regions = self.get_relevant_anatomical_regions(analysis_result['model_predictions'])
+                
+                analysis_result['relevant_anatomical_regions'] = relevant_regions
+                analysis_result['processing_steps']['anatomical_region_mapping'] = {
+                    'success': True,
+                    'relevant_regions_count': len(relevant_regions),
+                    'processing_time': time.time() - step_start
+                }
+                update_progress("Anatomical Region Mapping", 65, f"Identified {len(relevant_regions)} relevant regions")
+            except Exception as e:
+                error_msg = f"Anatomical region mapping failed: {str(e)}"
+                analysis_result['error_log'].append(error_msg)
+                self.logger.error(error_msg)
+                # Continue with empty regions
+                analysis_result['relevant_anatomical_regions'] = {}
+
+            # Step 5: Attention Analysis (75%)
+            update_progress("Attention Analysis", 75, "Generating attention visualization")
             step_start = time.time()
             
             try:
@@ -2558,7 +2728,7 @@ Please ensure proper clinical review of all automated findings.
                     'target_condition': top_condition,
                     'processing_time': time.time() - step_start
                 }
-                update_progress("Attention Analysis", 75, f"Analyzed {len(attention_analysis['significant_regions'])} regions")
+                update_progress("Attention Analysis", 85, f"Analyzed {len(attention_analysis['significant_regions'])} regions")
             except Exception as e:
                 error_msg = f"Attention analysis failed: {str(e)}"
                 analysis_result['error_log'].append(error_msg)
@@ -2567,8 +2737,8 @@ Please ensure proper clinical review of all automated findings.
                 analysis_result['attention_analysis'] = {'significant_regions': []}
                 analysis_result['spatial_keywords'] = []
             
-            # Step 5: LLM Report Generation (85%)
-            update_progress("Report Generation", 85, "Generating medical report")
+            # Step 6: LLM Report Generation (90%)
+            update_progress("Report Generation", 90, "Generating medical report")
             step_start = time.time()
                         
             try:
@@ -2578,6 +2748,7 @@ Please ensure proper clinical review of all automated findings.
                     prediction_keywords=analysis_result['prediction_keywords'],
                     spatial_keywords=analysis_result['spatial_keywords'],
                     attention_analysis=analysis_result['attention_analysis'],
+                    relevant_anatomical_regions=analysis_result['relevant_anatomical_regions'],  # NEW
                     template=template,
                     patient_info=patient_info,
                     include_image=include_image_in_llm
@@ -2597,11 +2768,12 @@ Please ensure proper clinical review of all automated findings.
                         'image_path': str(image_path),
                         'template_used': template,
                         'llm_success': llm_response['success'],
-                        'used_fallback': llm_response.get('used_fallback', False),
-                        'total_keywords': analysis_result['keyword_summary']['total_keywords'],
-                        'attention_regions': len(analysis_result['attention_analysis']['significant_regions']),
-                        'patient_info_included': patient_info is not None
-                    }
+                                            'used_fallback': llm_response.get('used_fallback', False),
+                    'total_keywords': analysis_result['keyword_summary']['total_keywords'],
+                    'attention_regions': len(analysis_result['attention_analysis']['significant_regions']),
+                    'relevant_anatomical_regions': len(analysis_result['relevant_anatomical_regions']),  # NEW
+                    'patient_info_included': patient_info is not None
+                }
                 )
                 
                 analysis_result['llm_response'] = llm_response
@@ -2613,7 +2785,7 @@ Please ensure proper clinical review of all automated findings.
                     'sections_found': len(formatted_report['sections']),
                     'processing_time': time.time() - step_start
                 }
-                update_progress("Report Generation", 95, "Medical report generated")
+                update_progress("Report Generation", 98, "Medical report generated")
             except Exception as e:
                 error_msg = f"Report generation failed: {str(e)}"
                 analysis_result['error_log'].append(error_msg)
@@ -2627,14 +2799,14 @@ Please ensure proper clinical review of all automated findings.
                     'error': str(e)
                 }
             
-            # Step 6: Finalization (100%)
+            # Step 7: Finalization (100%)
             total_time = time.time() - start_time
             
             # Calculate performance metrics
             analysis_result['performance_metrics'] = {
                 'total_processing_time': total_time,
                 'steps_completed': len([s for s in analysis_result['processing_steps'].values() if s.get('success', False)]),
-                'total_steps': 5,
+                'total_steps': 6,  # UPDATED: now 6 steps
                 'errors_encountered': len(analysis_result['error_log']),
                 'memory_efficient': self.low_memory,
                 'device_used': str(self.device)
@@ -2711,9 +2883,13 @@ Please ensure proper clinical review of all automated findings.
                 keywords = analysis_result['keyword_summary']['total_keywords']
                 self.logger.info(f"Keywords extracted: {keywords}")
             
+            if 'relevant_anatomical_regions' in analysis_result:
+                relevant_regions = len(analysis_result['relevant_anatomical_regions'])
+                self.logger.info(f"Relevant anatomical regions: {relevant_regions}")
+
             if 'attention_analysis' in analysis_result:
-                regions = len(analysis_result['attention_analysis']['significant_regions'])
-                self.logger.info(f"Attention regions: {regions}")
+                attention_regions = len(analysis_result['attention_analysis']['significant_regions'])
+                self.logger.info(f"Attention regions: {attention_regions}")
             
             if 'medical_report' in analysis_result:
                 report_len = len(analysis_result['medical_report']['report_text'])
