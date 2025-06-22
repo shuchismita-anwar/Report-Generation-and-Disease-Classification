@@ -56,7 +56,7 @@ class GeminiAICleanup:
         self.interrupted = False
         signal.signal(signal.SIGINT, self._signal_handler)
         
-        # Updated prompt - tells AI to ignore confidence levels
+        # Updated prompt - tells AI to ignore confidence levels and remove location-specific keywords
         self.filtering_prompt = """TASK: Medical keyword relevance filtering. Answer ONLY "YES" or "NO" for each keyword-condition pair.
 
 IMPORTANT: You will see confidence levels (high/medium/low) - IGNORE THEM COMPLETELY. Treat all keywords equally regardless of confidence level.
@@ -64,23 +64,26 @@ IMPORTANT: You will see confidence levels (high/medium/low) - IGNORE THEM COMPLE
 STRICT RULES - Answer "NO" if keyword is:
 1. Generic observations: "are seen", "noted", "present", "demonstrated", "identified", "observed", "apparent", "evident"
 2. Anatomical locations alone: "left lower lobe", "right upper lobe", "bilateral", "bases", "left", "right", "upper", "lower"
-3. Intensity modifiers alone: "mild", "severe", "moderate", "chronic", "acute", "minimal", "extensive", "marked", "significant"
-4. Temporal descriptors: "again", "previously", "currently", "new", "old", "prior", "recent", "unchanged", "stable", "improving"
-5. Procedural terms alone: "post-surgical", "post-operative", "status post", "following", "after", "procedure"
-6. Vague descriptors: "changes", "findings", "abnormality", "opacity", "process", "condition", "appearance", "pattern"
-7. Non-medical words: "the", "and", "of", "in", "with", "associated", "compatible", "consistent", "likely", "possible"
-8. Pure directional/positional: "above", "below", "adjacent", "near", "close", "distant", "surrounding"
-9. Generic verbs/actions: "shows", "reveals", "suggests", "indicates", "represents", "reflects", "appears"
+3. LOCATION-SPECIFIC CONDITIONS: "atelectasis in the left midlung", "pneumonia at the right base", "consolidation in the left lower lobe", "opacity in the right upper lobe" - ANY condition combined with anatomical location
+4. Intensity modifiers alone: "mild", "severe", "moderate", "chronic", "acute", "minimal", "extensive", "marked", "significant"
+5. Temporal descriptors: "again", "previously", "currently", "new", "old", "prior", "recent", "unchanged", "stable", "improving"
+6. Procedural terms alone: "post-surgical", "post-operative", "status post", "following", "after", "procedure"
+7. Vague descriptors: "changes", "findings", "abnormality", "opacity", "process", "condition", "appearance", "pattern"
+8. Non-medical words: "the", "and", "of", "in", "with", "associated", "compatible", "consistent", "likely", "possible"
+9. Pure directional/positional: "above", "below", "adjacent", "near", "close", "distant", "surrounding"
+10. Generic verbs/actions: "shows", "reveals", "suggests", "indicates", "represents", "reflects", "appears"
 
-Answer "YES" ONLY if keyword contains SPECIFIC medical information directly related to the condition.
+Answer "YES" ONLY if keyword contains SPECIFIC medical information directly related to the condition WITHOUT location references.
 
 RESPONSE FORMAT: Only output "YES" or "NO" - one per line. NO explanations. NO additional text. NO numbering.
 
 Examples:
-Condition: Atelectasis, Confidence: high, Keyword: "collapsed lung" → YES
-Condition: Atelectasis, Confidence: low, Keyword: "are seen" → NO
-Condition: Pneumonia, Confidence: medium, Keyword: "consolidation" → YES
-Condition: Pneumonia, Confidence: high, Keyword: "mild" → NO
+Condition: Atelectasis, Keyword: "collapsed lung" → YES
+Condition: Atelectasis, Keyword: "atelectasis in the left midlung" → NO (location-specific)
+Condition: Atelectasis, Keyword: "are seen" → NO (generic)
+Condition: Pneumonia, Keyword: "consolidation" → YES
+Condition: Pneumonia, Keyword: "pneumonia at the right base" → NO (location-specific)
+Condition: Pneumonia, Keyword: "mild" → NO (modifier only)
 
 Process these keyword-condition-confidence triplets (IGNORE CONFIDENCE LEVELS):"""
 
@@ -285,7 +288,7 @@ Process these keyword-condition-confidence triplets (IGNORE CONFIDENCE LEVELS):"
                 "temperature": 0.1,  # Very low temperature for consistent responses
                 "topK": 1,
                 "topP": 0.1,
-                "maxOutputTokens": 8192,  # Increased to account for Gemini's internal thoughts
+                "maxOutputTokens": 65535,  # 65k tokens to handle extensive internal thoughts
                 "candidateCount": 1
             },
             "safetySettings": [
