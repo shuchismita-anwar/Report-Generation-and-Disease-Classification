@@ -1,0 +1,50 @@
+{
+  "Atelectasis": {
+    "high_confidence": 170,
+    "medium_confidence": 198,
+    "low_confidence": 49,
+    "total": 417
+  },
+  "Cardiomegaly": {
+    "high_confidence": 211,
+    "medium_confidence": 155,
+    "low_confidence": 89,
+    "total": 455
+  },
+  "Edema": {
+    "high_confidence": 269,
+    "medium_confidence": 474,
+    "low_confidence": 116,
+    "total": 859
+  },
+  "Lung Opacity": {
+    "high_confidence": 712,
+    "medium_confidence": 624,
+    "low_confidence": 167,
+    "total": 1503
+  },
+  "No Finding": {
+    "high_confidence": 540,
+    "medium_confidence": 524,
+    "low_confidence": 607,
+    "total": 1671
+  },
+  "Pleural Effusion": {
+    "high_confidence": 100,
+    "medium_confidence": 174,
+    "low_confidence": 86,
+    "total": 360
+  },
+  "Pneumonia": {
+    "high_confidence": 159,
+    "medium_confidence": 554,
+    "low_confidence": 147,
+    "total": 860
+  },
+  "Support Devices": {
+    "high_confidence": 749,
+    "medium_confidence": 340,
+    "low_confidence": 108,
+    "total": 1197
+  }
+}
