@@ -4,8 +4,8 @@ import requests
 import time
 from dotenv import load_dotenv
 
-def test_gemini_2_5_flash():
-    """Test Gemini 2.5 Flash API connection"""
+def test_gemini_2_5_pro():
+    """Test Gemini 2.5 Pro API connection"""
     load_dotenv('.env')
     api_key = os.getenv("GEMINI_API_KEY")
     
@@ -13,10 +13,10 @@ def test_gemini_2_5_flash():
         print("❌ No API key found. Set GEMINI_API_KEY environment variable.")
         return False
     
-    print("🔄 Testing Gemini 2.5 Flash API connection...")
+    print("🔄 Testing Gemini 2.5 Pro API connection...")
     
     # API configuration
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
     
     # Simple test payload
@@ -30,7 +30,7 @@ def test_gemini_2_5_flash():
             "temperature": 0.1,
             "topK": 1,
             "topP": 0.8,
-            "maxOutputTokens": 100
+            "maxOutputTokens": 1000
         }
     }
     
@@ -50,7 +50,7 @@ def test_gemini_2_5_flash():
                 
                 if 'content' in candidate and 'parts' in candidate['content']:
                     response_text = candidate['content']['parts'][0]['text']
-                    print(f"✅ Gemini 2.5 Flash is working!")
+                    print(f"✅ Gemini 2.5 Pro is working!")
                     print(f"📝 Response: {response_text}")
                     
                     # Check token usage
@@ -81,4 +81,4 @@ def test_gemini_2_5_flash():
         return False
 
 if __name__ == "__main__":
-    test_gemini_2_5_flash() 
+    test_gemini_2_5_pro() 

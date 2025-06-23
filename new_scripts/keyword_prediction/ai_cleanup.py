@@ -25,14 +25,14 @@ class GeminiAICleanup:
         # Setup logging
         self._setup_logging()
         
-        # API configuration for Gemini 2.5 Flash - improved reliability
+        # API configuration for Gemini 2.5 Pro with thinking mode
         self.api_config = {
-            "base_url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+            "base_url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent",
             "headers": {"Content-Type": "application/json"},
             "max_retries": 5,       # Increased retries
             "base_retry_delay": 3,  # Base delay for exponential backoff
             "timeout": 120,         # Increased timeout to 120 seconds
-            "rate_limit_delay": 1.5 # Increased delay between requests
+            "rate_limit_delay": 2.0 # Increased delay for Pro model
         }
         
         # Processing statistics
@@ -56,38 +56,53 @@ class GeminiAICleanup:
         self.interrupted = False
         signal.signal(signal.SIGINT, self._signal_handler)
         
-        # Updated prompt - tells AI to ignore confidence levels and remove location-specific keywords
+        # Dialed back prompt - less aggressive but still targets real issues
         self.filtering_prompt = """TASK: Medical keyword relevance filtering. Answer ONLY "YES" or "NO" for each keyword-condition pair.
 
 IMPORTANT: You will see confidence levels (high/medium/low) - IGNORE THEM COMPLETELY. Treat all keywords equally regardless of confidence level.
 
-STRICT RULES - Answer "NO" if keyword is:
-1. Generic observations: "are seen", "noted", "present", "demonstrated", "identified", "observed", "apparent", "evident"
-2. Anatomical locations alone: "left lower lobe", "right upper lobe", "bilateral", "bases", "left", "right", "upper", "lower"
-3. LOCATION-SPECIFIC CONDITIONS: "atelectasis in the left midlung", "pneumonia at the right base", "consolidation in the left lower lobe", "opacity in the right upper lobe" - ANY condition combined with anatomical location
-4. Intensity modifiers alone: "mild", "severe", "moderate", "chronic", "acute", "minimal", "extensive", "marked", "significant"
-5. Temporal descriptors: "again", "previously", "currently", "new", "old", "prior", "recent", "unchanged", "stable", "improving"
-6. Procedural terms alone: "post-surgical", "post-operative", "status post", "following", "after", "procedure"
-7. Vague descriptors: "changes", "findings", "abnormality", "opacity", "process", "condition", "appearance", "pattern"
-8. Non-medical words: "the", "and", "of", "in", "with", "associated", "compatible", "consistent", "likely", "possible"
-9. Pure directional/positional: "above", "below", "adjacent", "near", "close", "distant", "surrounding"
-10. Generic verbs/actions: "shows", "reveals", "suggests", "indicates", "represents", "reflects", "appears"
+RULES - Answer "NO" if keyword is:
 
-Answer "YES" ONLY if keyword contains SPECIFIC medical information directly related to the condition WITHOUT location references.
+1. CLEARLY VAGUE/UNINFORMATIVE:
+   - "evaluate", "eval", "assess", "check for", "r/o"
+   - "no evidence of", "cannot be excluded", "rule out"
+   - Pure symptoms without diagnostic value: "fever", "chills" (unless condition-specific)
+   - "normal", "clear", "unchanged", "stable" (when alone, not condition-specific)
+
+2. UNCERTAINTY PHRASES:
+   - Contains "?", "possibly", "may be", "concerning for", "suspicious for"
+   - "cannot exclude", "cannot be ruled out", "difficult to exclude"
+
+3. OBVIOUS DUPLICATES/VARIANTS of same concept:
+   - Multiple variations of same phrase (e.g. "lung volumes are low", "lung volumes remain low", "lung volumes somewhat low")
+   - Keep the most common/standard medical term
+   - Minor formatting differences: punctuation, spacing, plurals, casing
+
+4. CLEAR CONDITION MISMATCH:
+   - Device terms in disease conditions (e.g. "pacemaker" in Pneumonia)
+   - Disease terms in device conditions (e.g. "pneumonia" in Support Devices)
+   - Anatomical regions that don't relate to the condition
+
+5. NON-MEDICAL WORDS:
+   - "the", "and", "of", "in", "with", "are", "is", "was"
+   - Pure procedural language: "demonstrated", "noted", "seen", "identified"
+
+BE LIBERAL with keeping medical terms. When in doubt, KEEP the keyword. Only remove if it clearly falls into above categories.
 
 RESPONSE FORMAT: Only output "YES" or "NO" - one per line. NO explanations. NO additional text. NO numbering.
 
 Examples:
-Condition: Atelectasis, Keyword: "collapsed lung" → YES
-Condition: Atelectasis, Keyword: "atelectasis in the left midlung" → NO (location-specific)
-Condition: Atelectasis, Keyword: "are seen" → NO (generic)
 Condition: Pneumonia, Keyword: "consolidation" → YES
-Condition: Pneumonia, Keyword: "pneumonia at the right base" → NO (location-specific)
-Condition: Pneumonia, Keyword: "mild" → NO (modifier only)
+Condition: Pneumonia, Keyword: "pneumonia" → YES (keep condition name itself)
+Condition: Cardiomegaly, Keyword: "cardiomegaly" → YES (keep condition name)
+Condition: Pneumonia, Keyword: "lung volumes are low" → YES (medical finding)
+Condition: Pneumonia, Keyword: "lung volumes remain low" → NO (duplicate variant)
+Condition: Pneumonia, Keyword: "pacemaker" → NO (irrelevant to condition)
+Condition: Support Devices, Keyword: "catheter" → YES
 
 Process these keyword-condition-confidence triplets (IGNORE CONFIDENCE LEVELS):"""
 
-        self.logger.info("GeminiAICleanup initialized with improved reliability settings")
+        self.logger.info("GeminiAICleanup initialized with Gemini 2.5 Pro")
 
     def _signal_handler(self, signum, frame):
         """Handle graceful shutdown on Ctrl+C"""
@@ -288,7 +303,7 @@ Process these keyword-condition-confidence triplets (IGNORE CONFIDENCE LEVELS):"
                 "temperature": 0.1,  # Very low temperature for consistent responses
                 "topK": 1,
                 "topP": 0.1,
-                "maxOutputTokens": 65535,  # 65k tokens to handle extensive internal thoughts
+                "maxOutputTokens": 65535,  # Max tokens for response
                 "candidateCount": 1
             },
             "safetySettings": [
@@ -723,7 +738,7 @@ Process these keyword-condition-confidence triplets (IGNORE CONFIDENCE LEVELS):"
         print(f"💾 Finalizing cleaned keywords in {input_file}...")
         cleaned_data['metadata']['ai_cleanup'] = {
             'cleanup_date': datetime.now().isoformat(),
-            'model_used': 'gemini-2.5-flash',
+            'model_used': 'gemini-2.5-pro',
             'strategy': 'confidence_aware_but_ignored',
             'total_keywords_processed': self.stats['total_keywords_processed'],
             'total_keywords_kept': self.stats['total_keywords_kept'],
