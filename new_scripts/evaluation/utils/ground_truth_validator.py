@@ -48,8 +48,7 @@ class GroundTruthValidator:
         
         # Required fields for different data sources
         self.required_fields = {
-            "eyegaze": ["full_text"],
-            "reflacx": ["full_text"],
+            "radiology": ["full_text"],
             "general": ["full_text"]
         }
         
@@ -158,17 +157,17 @@ class GroundTruthValidator:
     
     def _validate_content_structure(self, content: Dict, file_path: str) -> Dict:
         """
-        Validate the structure of transcript content.
+        Validate the structure of report content.
         
         Args:
-            content (Dict): Loaded JSON content
+            content (Dict): Loaded content
             file_path (str): Path to the file (for source type detection)
             
         Returns:
             Dict: Content validation results
         """
         # Determine source type
-        source_type = "eyegaze" if "EyeGaze" in file_path else "reflacx"
+        source_type = "radiology" if "CXR-DICOM" in file_path else "radiology"
         
         validation_info = {
             "source_type": source_type,
@@ -197,14 +196,9 @@ class GroundTruthValidator:
             else:
                 validation_info["missing_fields"].append("invalid_full_text_type")
         
-        # Check for timestamps
-        if "time_stamped_text" in content:
-            timestamp_data = content["time_stamped_text"]
-            if isinstance(timestamp_data, list):
-                validation_info["has_timestamps"] = True
-                validation_info["timestamp_count"] = len(timestamp_data)
-            else:
-                validation_info["missing_fields"].append("invalid_timestamp_format")
+        # Check for timestamps (radiology reports typically don't have timestamps)
+        validation_info["has_timestamps"] = False
+        validation_info["timestamp_count"] = 0
         
         return validation_info
     

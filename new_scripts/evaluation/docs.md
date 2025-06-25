@@ -6,11 +6,11 @@
 
 ## 🎯 Overview
 
-This is a **comprehensive automated evaluation system** for comparing LLM-generated medical reports against ground truth radiologist reports from the MIMIC-Eye dataset. The system provides detailed metrics, visualizations, insights, and recommendations for improving medical report generation models.
+This is a **comprehensive automated evaluation system** for comparing LLM-generated medical reports against ground truth radiology reports (official radiologist reports) from the MIMIC-Eye dataset. The system provides detailed metrics, visualizations, insights, and recommendations for improving medical report generation models.
 
 ### ✅ What This System Does
 
-- **Discovers & matches** LLM reports with ground truth transcripts automatically
+- **Discovers & matches** LLM reports with ground truth radiology reports automatically
 - **Evaluates quality** using 6 different metrics (BLEU, ROUGE, METEOR, CIDEr, BERTScore, Medical)
 - **Generates comprehensive reports** in human-readable format
 - **Creates visualizations** and dashboards for easy analysis

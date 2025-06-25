@@ -1,13 +1,7 @@
-🔍 CLINICAL FINDINGS:
---------------------------------------------------
-   **FINDINGS:**
-   Lung Opacity is present bilaterally, involving the left and right lungs with prominence in the lower lung zones of both sides, as well as the upper and mid lung zones. This opacity could represent consolidation or infiltrate.
-   Edema is suspected within the lungs bilaterally, including involvement of the hilar structures on both sides. The findings suggest potential pulmonary edema.
-   **IMPRESSION:**
-   The chest X-ray demonstrates bilateral Lung Opacity with associated Edema. While definitive diagnosis requires further evaluation, these findings are concerning for possible pneumonia and/or acute respiratory distress syndrome (ARDS).
-   **RECOMMENDATIONS:**
-   1.  Correlation with clinical presentation is recommended to assess for signs of infection (fever, cough, sputum production) or hypoxemia.
-   2.  Consider obtaining a CT chest without contrast for further characterization of the lung opacities and assessment for underlying etiology (e.g., pneumonia, pulmonary embolism, ARDS).
-   3.  Monitor oxygen saturation levels closely.
-   4.  Obtain blood work including complete blood count (CBC) with differential and inflammatory markers (CRP, ESR) to evaluate for infection.
-   5.  Consider sputum cultures if clinically indicated.
+FINAL REPORT
+HISTORY:  Basilar artery occlusion with worsening pulmonary status.
+
+FINDINGS:  In comparison with the study of ___, Support devices are noted in expected positions. Bibasilar opacities
+are again identified, compatible with atelectasis and pleural effusions. Mild
+blunting of the costophrenic angles is present. No significant change is seen
+compared to prior imaging.

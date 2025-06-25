@@ -2,16 +2,15 @@
 """
 Ground Truth Data Loader
 ========================
-Loads and parses radiologist reports from MIMIC dataset sources.
+Loads and parses radiology reports from MIMIC dataset sources.
 
 This module handles:
-- EyeGaze transcript files (audio_segmentation_transcripts)
-- REFLACX transcript files (main_data)
-- Different JSON structures and formats
+- Radiology report files (CXR-DICOM/*.txt)
+- Text cleaning and extraction from report files
 - Error handling for missing/malformed data
 
 Author: Medical Report Evaluation System
-Version: 1.0
+Version: 2.0 - Updated for Radiology Reports
 """
 
 import json
@@ -23,13 +22,67 @@ from typing import Dict, List, Optional, Tuple, Union
 import re
 
 
+def _clean_radiology_report(content: str) -> str:
+    """Clean radiology report text by extracting final report section."""
+    if not content.strip():
+        return ""
+    
+    # Split by lines and find final report section
+    lines = content.split('\n')
+    
+    # Look for "FINAL REPORT" section
+    final_report_start = -1
+    for i, line in enumerate(lines):
+        if re.search(r'FINAL\s+REPORT', line, re.IGNORECASE):
+            final_report_start = i
+            break
+    
+    # If no "FINAL REPORT" found, look for "IMPRESSION" or main content
+    if final_report_start == -1:
+        for i, line in enumerate(lines):
+            if re.search(r'(IMPRESSION|FINDINGS):', line, re.IGNORECASE):
+                final_report_start = max(0, i - 2)  # Include some context
+                break
+    
+    # If still not found, skip WET READ and take the rest
+    if final_report_start == -1:
+        for i, line in enumerate(lines):
+            if not re.search(r'WET\s+READ', line, re.IGNORECASE) and line.strip():
+                final_report_start = i
+                break
+    
+    # Extract content from final report section
+    if final_report_start >= 0:
+        report_lines = lines[final_report_start:]
+    else:
+        report_lines = lines
+    
+    # Clean up the content
+    cleaned_lines = []
+    for line in report_lines:
+        line = line.strip()
+        # Skip empty lines and obvious artifacts
+        if line and not re.match(r'^[_\-=]+$', line):
+            # Remove timestamps and other artifacts
+            line = re.sub(r'\d{1,2}:\d{2}(?::\d{2})?\s*[AP]M', '', line)
+            line = re.sub(r'WET\s+READ:', '', line, flags=re.IGNORECASE)
+            line = line.strip()
+            if line:
+                cleaned_lines.append(line)
+    
+    # Join lines and clean up extra whitespace
+    cleaned_text = ' '.join(cleaned_lines)
+    cleaned_text = re.sub(r'\s+', ' ', cleaned_text)
+    
+    return cleaned_text.strip()
+
+
 class GroundTruthLoader:
     """
-    Loads ground truth radiologist reports from MIMIC dataset.
+    Loads ground truth radiology reports from MIMIC dataset.
     
-    Supports multiple transcript sources:
-    - EyeGaze: patient_*/EyeGaze/audio_segmentation_transcripts/*/transcript.json
-    - REFLACX: patient_*/REFLACX/main_data/*/transcript.json
+    Handles loading official radiology reports from CXR-DICOM folders:
+    - patient_*/CXR-DICOM/*.txt
     """
     
     def __init__(self, mimic_base_path: str, logger: Optional[logging.Logger] = None):
@@ -42,7 +95,7 @@ class GroundTruthLoader:
         """
         self.mimic_base_path = Path(mimic_base_path)
         self.logger = logger or logging.getLogger(__name__)
-        self.transcript_cache = {}
+        self.report_cache = {}
         
         # Validate base path
         if not self.mimic_base_path.exists():
@@ -50,136 +103,129 @@ class GroundTruthLoader:
         
         self.logger.info(f"Initialized Ground Truth Loader with base path: {mimic_base_path}")
     
-    def find_transcript_files(self, source_type: str = "both") -> Dict[str, List[str]]:
+    def find_report_files(self, source_type: str = "radiology") -> Dict[str, List[str]]:
         """
-        Find all transcript files in the MIMIC dataset.
+        Find all radiology report files in the MIMIC dataset.
         
         Args:
-            source_type (str): Type of transcripts to find ("eyegaze", "reflacx", "both")
+            source_type (str): Type of reports to find ("radiology")
             
         Returns:
             Dict[str, List[str]]: Dictionary with source types as keys and file paths as values
-            
-        Raises:
-            ValueError: If invalid source_type specified
         """
-        valid_sources = {"eyegaze", "reflacx", "both"}
-        if source_type not in valid_sources:
-            raise ValueError(f"Invalid source_type '{source_type}'. Must be one of: {valid_sources}")
+        report_files = {}
         
-        transcript_files = {}
+        # Find radiology reports
+        if source_type == "radiology":
+            report_pattern = str(self.mimic_base_path / "patient_*" / "CXR-DICOM" / "*.txt")
+            report_file_list = glob.glob(report_pattern)
+            report_files["radiology"] = sorted(report_file_list)
+            self.logger.info(f"Found {len(report_file_list)} radiology report files")
         
-        # Find EyeGaze transcripts
-        if source_type in ("eyegaze", "both"):
-            eyegaze_pattern = str(self.mimic_base_path / "patient_*" / "EyeGaze" / "audio_segmentation_transcripts" / "*" / "transcript.json")
-            eyegaze_files = glob.glob(eyegaze_pattern)
-            transcript_files["eyegaze"] = sorted(eyegaze_files)
-            self.logger.info(f"Found {len(eyegaze_files)} EyeGaze transcript files")
-        
-        # Find REFLACX transcripts
-        if source_type in ("reflacx", "both"):
-            reflacx_pattern = str(self.mimic_base_path / "patient_*" / "REFLACX" / "main_data" / "*" / "transcript.json")
-            reflacx_files = glob.glob(reflacx_pattern)
-            transcript_files["reflacx"] = sorted(reflacx_files)
-            self.logger.info(f"Found {len(reflacx_files)} REFLACX transcript files")
-        
-        return transcript_files
+        return report_files
     
-    def extract_image_id_from_path(self, transcript_path: str) -> Optional[str]:
+    def extract_image_id_from_path(self, report_path: str) -> Optional[str]:
         """
-        Extract image ID from transcript file path.
+        Extract image ID from radiology report file path.
         
         Args:
-            transcript_path (str): Path to transcript file
+            report_path (str): Path to report file
             
         Returns:
             Optional[str]: Image ID if found, None otherwise
         """
-        # Pattern to match image IDs (format: xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx)
-        image_id_pattern = r'([a-f0-9]{8}-[a-f0-9]{8}-[a-f0-9]{8}-[a-f0-9]{8}-[a-f0-9]{8})'
+        # Extract filename without extension (e.g., s56466802.txt -> s56466802)
+        filename = Path(report_path).stem
         
-        match = re.search(image_id_pattern, transcript_path)
+        # Pattern to match study IDs (format: sxxxxxxxx)
+        study_id_pattern = r's(\d{8})'
+        
+        match = re.search(study_id_pattern, filename)
+        if match:
+            return filename  # Return the full filename as ID
+        
+        # Also try to match longer image IDs if present in path
+        image_id_pattern = r'([a-f0-9]{8}-[a-f0-9]{8}-[a-f0-9]{8}-[a-f0-9]{8}-[a-f0-9]{8})'
+        match = re.search(image_id_pattern, report_path)
         if match:
             return match.group(1)
         
-        self.logger.warning(f"Could not extract image ID from path: {transcript_path}")
-        return None
+        self.logger.warning(f"Could not extract image ID from path: {report_path}")
+        return filename  # Fallback to filename
     
-    def load_single_transcript(self, transcript_path: str) -> Optional[Dict]:
+    def load_single_report(self, report_path: str) -> Optional[Dict]:
         """
-        Load a single transcript file.
+        Load a single radiology report file.
         
         Args:
-            transcript_path (str): Path to the transcript JSON file
+            report_path (str): Path to the report .txt file
             
         Returns:
-            Optional[Dict]: Parsed transcript data or None if failed
+            Optional[Dict]: Parsed report data or None if failed
         """
         try:
-            with open(transcript_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
+            with open(report_path, 'r', encoding='utf-8') as f:
+                raw_content = f.read()
             
             # Extract image ID from path
-            image_id = self.extract_image_id_from_path(transcript_path)
+            image_id = self.extract_image_id_from_path(report_path)
             
-            # Determine source type
-            source_type = "eyegaze" if "EyeGaze" in transcript_path else "reflacx"
+            # Clean the report text
+            cleaned_text = _clean_radiology_report(raw_content)
             
             # Create structured output
-            transcript_data = {
+            report_data = {
                 "image_id": image_id,
-                "source_type": source_type,
-                "file_path": transcript_path,
-                "raw_data": data,
-                "full_text": data.get("full_text", ""),
-                "has_timestamps": "time_stamped_text" in data,
-                "timestamp_count": len(data.get("time_stamped_text", [])),
-                "text_length": len(data.get("full_text", "")),
-                "loaded_at": Path(transcript_path).stat().st_mtime
+                "source_type": "radiology",
+                "file_path": report_path,
+                "raw_content": raw_content,
+                "full_text": cleaned_text,
+                "has_timestamps": False,  # Reports don't have timestamps like transcripts
+                "timestamp_count": 0,
+                "text_length": len(cleaned_text),
+                "raw_text_length": len(raw_content),
+                "loaded_at": Path(report_path).stat().st_mtime
             }
             
-            self.logger.debug(f"Loaded transcript: {image_id} ({source_type}) - {transcript_data['text_length']} chars")
-            return transcript_data
+            self.logger.debug(f"Loaded report: {image_id} - {report_data['text_length']} chars (cleaned)")
+            return report_data
             
-        except json.JSONDecodeError as e:
-            self.logger.error(f"JSON decode error in {transcript_path}: {e}")
-            return None
         except FileNotFoundError:
-            self.logger.error(f"Transcript file not found: {transcript_path}")
+            self.logger.error(f"Report file not found: {report_path}")
             return None
         except Exception as e:
-            self.logger.error(f"Unexpected error loading {transcript_path}: {e}")
+            self.logger.error(f"Unexpected error loading {report_path}: {e}")
             return None
     
-    def load_transcripts_batch(self, transcript_paths: List[str], 
-                              max_errors: int = 10) -> Tuple[Dict[str, Dict], List[str]]:
+    def load_reports_batch(self, report_paths: List[str], 
+                          max_errors: int = 10) -> Tuple[Dict[str, Dict], List[str]]:
         """
-        Load multiple transcript files in batch.
+        Load multiple radiology report files in batch.
         
         Args:
-            transcript_paths (List[str]): List of transcript file paths
+            report_paths (List[str]): List of report file paths
             max_errors (int): Maximum number of errors before stopping
             
         Returns:
-            Tuple[Dict[str, Dict], List[str]]: (loaded_transcripts, failed_paths)
+            Tuple[Dict[str, Dict], List[str]]: (loaded_reports, failed_paths)
         """
-        loaded_transcripts = {}
+        loaded_reports = {}
         failed_paths = []
         error_count = 0
         
-        self.logger.info(f"Loading {len(transcript_paths)} transcript files...")
+        self.logger.info(f"Loading {len(report_paths)} radiology report files...")
         
-        for i, path in enumerate(transcript_paths):
+        for i, path in enumerate(report_paths):
             if error_count >= max_errors:
                 self.logger.error(f"Stopping batch load: too many errors ({error_count})")
                 break
             
-            transcript_data = self.load_single_transcript(path)
+            report_data = self.load_single_report(path)
             
-            if transcript_data:
-                image_id = transcript_data["image_id"]
+            if report_data:
+                image_id = report_data["image_id"]
                 if image_id:
-                    loaded_transcripts[image_id] = transcript_data
+                    loaded_reports[image_id] = report_data
                 else:
                     failed_paths.append(path)
                     error_count += 1
@@ -189,104 +235,108 @@ class GroundTruthLoader:
             
             # Progress logging
             if (i + 1) % 100 == 0:
-                self.logger.info(f"Processed {i + 1}/{len(transcript_paths)} files...")
+                self.logger.info(f"Processed {i + 1}/{len(report_paths)} files...")
         
-        success_rate = len(loaded_transcripts) / len(transcript_paths) * 100
-        self.logger.info(f"Batch load complete: {len(loaded_transcripts)} successful, "
+        success_rate = len(loaded_reports) / len(report_paths) * 100 if report_paths else 0
+        self.logger.info(f"Batch load complete: {len(loaded_reports)} successful, "
                         f"{len(failed_paths)} failed ({success_rate:.1f}% success rate)")
         
-        return loaded_transcripts, failed_paths
+        return loaded_reports, failed_paths
     
-    def get_transcript_statistics(self, transcripts: Dict[str, Dict]) -> Dict:
+    def get_report_statistics(self, reports: Dict[str, Dict]) -> Dict:
         """
-        Generate statistics about loaded transcripts.
+        Generate statistics about loaded reports.
         
         Args:
-            transcripts (Dict[str, Dict]): Dictionary of loaded transcripts
+            reports (Dict[str, Dict]): Dictionary of loaded reports
             
         Returns:
-            Dict: Statistics about the transcripts
+            Dict: Statistics about the reports
         """
-        if not transcripts:
+        if not reports:
             return {"total": 0, "sources": {}, "text_lengths": {}}
         
         stats = {
-            "total": len(transcripts),
-            "sources": {"eyegaze": 0, "reflacx": 0},
+            "total": len(reports),
+            "sources": {"radiology": len(reports)},
             "text_lengths": {"min": float('inf'), "max": 0, "mean": 0, "total_chars": 0},
-            "has_timestamps": 0,
-            "empty_texts": 0
+            "empty_texts": 0,
+            "cleaning_efficiency": {"total_raw_chars": 0, "total_cleaned_chars": 0}
         }
         
         text_lengths = []
+        raw_lengths = []
         
-        for transcript in transcripts.values():
-            # Count by source
-            source = transcript["source_type"]
-            stats["sources"][source] += 1
-            
+        for report in reports.values():
             # Text length analysis
-            text_len = transcript["text_length"]
+            text_len = report["text_length"]
+            raw_len = report["raw_text_length"]
+            
             text_lengths.append(text_len)
+            raw_lengths.append(raw_len)
+            
             stats["text_lengths"]["total_chars"] += text_len
+            stats["cleaning_efficiency"]["total_raw_chars"] += raw_len
+            stats["cleaning_efficiency"]["total_cleaned_chars"] += text_len
             
             if text_len == 0:
                 stats["empty_texts"] += 1
-            
-            # Timestamp analysis
-            if transcript["has_timestamps"]:
-                stats["has_timestamps"] += 1
         
         if text_lengths:
             stats["text_lengths"]["min"] = min(text_lengths)
             stats["text_lengths"]["max"] = max(text_lengths)
             stats["text_lengths"]["mean"] = sum(text_lengths) / len(text_lengths)
         
+        # Calculate cleaning efficiency
+        if stats["cleaning_efficiency"]["total_raw_chars"] > 0:
+            efficiency = stats["cleaning_efficiency"]["total_cleaned_chars"] / stats["cleaning_efficiency"]["total_raw_chars"]
+            stats["cleaning_efficiency"]["ratio"] = efficiency
+        
         return stats
     
-    def load_all_transcripts(self, source_type: str = "both", 
-                           cache_results: bool = True) -> Dict[str, Dict]:
+    def load_all_reports(self, source_type: str = "radiology", 
+                        cache_results: bool = True) -> Dict[str, Dict]:
         """
-        Load all available transcripts from the dataset.
+        Load all available radiology reports from the dataset.
         
         Args:
-            source_type (str): Type of transcripts to load ("eyegaze", "reflacx", "both")
+            source_type (str): Type of reports to load ("radiology")
             cache_results (bool): Whether to cache results for future use
             
         Returns:
-            Dict[str, Dict]: Dictionary mapping image IDs to transcript data
+            Dict[str, Dict]: Dictionary mapping image IDs to report data
         """
         cache_key = f"{source_type}_{self.mimic_base_path}"
         
         # Check cache first
-        if cache_results and cache_key in self.transcript_cache:
-            self.logger.info("Using cached transcript data")
-            return self.transcript_cache[cache_key]
+        if cache_results and cache_key in self.report_cache:
+            self.logger.info("Using cached report data")
+            return self.report_cache[cache_key]
         
-        # Find all transcript files
-        transcript_files = self.find_transcript_files(source_type)
+        # Find all report files
+        report_files = self.find_report_files(source_type)
         
-        # Combine all files
+        # Get all files
         all_files = []
-        for source, files in transcript_files.items():
+        for source, files in report_files.items():
             all_files.extend(files)
         
         if not all_files:
-            self.logger.warning("No transcript files found")
+            self.logger.warning("No radiology report files found")
             return {}
         
-        # Load transcripts
-        transcripts, failed = self.load_transcripts_batch(all_files)
+        # Load reports
+        reports, failed = self.load_reports_batch(all_files)
         
         # Generate and log statistics
-        stats = self.get_transcript_statistics(transcripts)
-        self.logger.info(f"Transcript loading statistics: {stats}")
+        stats = self.get_report_statistics(reports)
+        self.logger.info(f"Report loading statistics: {stats}")
         
         # Cache results
         if cache_results:
-            self.transcript_cache[cache_key] = transcripts
+            self.report_cache[cache_key] = reports
         
-        return transcripts
+        return reports
 
 
 def test_ground_truth_loader():
@@ -304,9 +354,9 @@ def test_ground_truth_loader():
         # Initialize loader
         loader = GroundTruthLoader(mimic_path, logger)
         
-        # Find transcript files
-        files = loader.find_transcript_files("both")
-        print(f"✅ Found transcript files: {sum(len(f) for f in files.values())} total")
+        # Find report files
+        files = loader.find_report_files("radiology")
+        print(f"✅ Found report files: {sum(len(f) for f in files.values())} total")
         
         # Test loading a single file if available
         all_files = []
@@ -315,13 +365,14 @@ def test_ground_truth_loader():
         
         if all_files:
             # Test single file load
-            single_transcript = loader.load_single_transcript(all_files[0])
-            if single_transcript:
-                print(f"✅ Single transcript loaded: {single_transcript['image_id']}")
-                print(f"   Text length: {single_transcript['text_length']} characters")
-                print(f"   Source: {single_transcript['source_type']}")
+            single_report = loader.load_single_report(all_files[0])
+            if single_report:
+                print(f"✅ Single report loaded: {single_report['image_id']}")
+                print(f"   Text length: {single_report['text_length']} characters")
+                print(f"   Raw length: {single_report['raw_text_length']} characters")
+                print(f"   Source: {single_report['source_type']}")
             else:
-                print("❌ Failed to load single transcript")
+                print("❌ Failed to load single report")
         
         return True
         

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Fixed Random X-ray Analysis Script
-==================================
+Specific Patient X-ray Analysis Script
+======================================
 
-This script randomly selects a chest X-ray image from the MIMIC dataset
+This script analyzes a specific chest X-ray image from the MIMIC dataset
 and generates a comprehensive medical report using the AI pipeline.
 FIXED: Excludes image data from LLM request to avoid oversized prompts.
 
@@ -55,45 +55,44 @@ def format_medical_report(analysis_result):
     return formatted_report
 
 
-def get_random_xray_image():
+def get_specific_xray_image():
     """
-    Randomly select a chest X-ray image from the MIMIC dataset.
+    Get a specific chest X-ray image from the MIMIC dataset.
     
     Returns:
-        str: Path to the randomly selected image
+        str: Path to the specific patient image
     """
+    # Specific patient ID that we know has interesting findings
+    specific_patient_id = "a5bf1678-df56650d-3d94165c-71ef2d00-509ad013"
+    
     # Path to the image directory
     img_dir = project_root / "data_dump" / "output" / "img_png"
     
     if not img_dir.exists():
         raise FileNotFoundError(f"Image directory not found: {img_dir}")
     
-    # Get all PNG files
-    png_files = list(img_dir.glob("*.png"))
+    # Construct the specific image path
+    specific_image = img_dir / f"{specific_patient_id}.png"
     
-    if not png_files:
-        raise FileNotFoundError(f"No PNG files found in: {img_dir}")
+    if not specific_image.exists():
+        raise FileNotFoundError(f"Specific patient image not found: {specific_image}")
     
-    # Randomly select one
-    selected_image = random.choice(png_files)
+    print(f"🎯 Analyzing specific patient: {specific_patient_id}")
+    print(f"📁 Full path: {specific_image}")
     
-    print(f"🎲 Randomly selected image: {selected_image.name}")
-    print(f"📁 Full path: {selected_image}")
-    print(f"📊 Total available images: {len(png_files)}")
-    
-    return str(selected_image)
+    return str(specific_image)
 
 
 def main():
     """Main execution function."""
     
-    print("🚀 Starting Fixed Random X-ray Analysis...")
+    print("🚀 Starting Specific Patient X-ray Analysis...")
     print("=" * 80)
     
     try:
-        # Step 1: Select random image
-        print("\n🎯 Step 1: Selecting random X-ray image...")
-        image_path = get_random_xray_image()
+        # Step 1: Get specific patient image
+        print("\n🎯 Step 1: Loading specific patient X-ray image...")
+        image_path = get_specific_xray_image()
         
         # Step 2: Initialize the generator
         print("\n🔧 Step 2: Initializing Medical Report Generator...")

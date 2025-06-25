@@ -93,17 +93,12 @@
 
   "ground_truth": {
     "sources": {
-      "eyegaze_transcripts": {
+      "radiology_reports": {
         "enabled": true,
-        "path_pattern": "patient_*/EyeGaze/audio_segmentation_transcripts/*/transcript.json",
-        "text_field": "full_text",
-        "priority": 1
-      },
-      "reflacx_transcripts": {
-        "enabled": true,
-        "path_pattern": "patient_*/REFLACX/main_data/*/transcript.json",
-        "text_field": "full_text",
-        "priority": 2
+        "path_pattern": "patient_*/CXR-DICOM/*.txt",
+        "text_field": "raw_text",
+        "priority": 1,
+        "description": "Official radiology reports as ground truth"
       }
     },
     "text_preprocessing": {

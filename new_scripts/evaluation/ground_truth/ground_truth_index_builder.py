@@ -59,7 +59,7 @@ class GroundTruthIndexBuilder:
         self.index_data = {}
         self.index_metadata = {}
     
-    def build_comprehensive_index(self, source_types: List[str] = ["eyegaze", "reflacx"]) -> Dict:
+    def build_comprehensive_index(self, source_types: List[str] = ["radiology"]) -> Dict:
         """
         Build a comprehensive index of all available ground truth reports.
         
@@ -93,22 +93,22 @@ class GroundTruthIndexBuilder:
         for source_type in source_types:
             self.logger.info(f"Processing {source_type} reports...")
             
-            # Find transcript files for this source
-            transcript_files = self.loader.find_transcript_files(source_type)
-            source_files = transcript_files.get(source_type, [])
+            # Find report files for this source
+            report_files = self.loader.find_report_files(source_type)
+            source_files = report_files.get(source_type, [])
             
             self.logger.info(f"Found {len(source_files)} {source_type} files")
             
-            # Load transcripts
+            # Load reports
             source_reports = {}
             for file_path in source_files:
-                transcript_data = self.loader.load_single_transcript(file_path)
-                if transcript_data and transcript_data.get("image_id"):
-                    image_id = transcript_data["image_id"]
-                    source_reports[image_id] = transcript_data
+                report_data = self.loader.load_single_report(file_path)
+                if report_data and report_data.get("image_id"):
+                    image_id = report_data["image_id"]
+                    source_reports[image_id] = report_data
             
             # Update index with source data
-            index["sources"][source_type] = {
+            index["metadata"]["sources"][source_type] = {
                 "file_count": len(source_files),
                 "loaded_count": len(source_reports),
                 "success_rate": len(source_reports) / len(source_files) * 100 if source_files else 0
@@ -416,7 +416,7 @@ def test_ground_truth_index_builder():
         
         # Test index building (limit to small subset for testing)
         print("Building test index...")
-        index = builder.build_comprehensive_index(["eyegaze"])
+        index = builder.build_comprehensive_index(["radiology"])
         
         if index:
             print(f"✅ Index built successfully:")

@@ -72,49 +72,80 @@ def get_chest_xray_directory():
 
 CHEST_XRAY_DIR = get_chest_xray_directory()
 
-# Add medical terminology mapping for keyword extraction
-CONDITION_KEYWORDS = {
-    'Atelectasis': {
-        'high_confidence': ['atelectasis detected', 'lung collapse present', 'volume loss identified'],
-        'medium_confidence': ['possible atelectasis', 'suspected collapse', 'potential volume loss'],
-        'low_confidence': ['no atelectasis', 'no collapse', 'normal lung expansion']
-    },
-    'Cardiomegaly': {
-        'high_confidence': ['cardiomegaly detected', 'heart enlargement present', 'enlarged cardiac silhouette'],
-        'medium_confidence': ['possible cardiomegaly', 'borderline heart size', 'cardiac enlargement suspected'],
-        'low_confidence': ['normal heart size', 'no cardiomegaly', 'normal cardiac silhouette']
-    },
-    'Edema': {
-        'high_confidence': ['pulmonary edema detected', 'lung fluid present', 'edema identified'],
-        'medium_confidence': ['possible edema', 'suspected fluid', 'potential pulmonary edema'],
-        'low_confidence': ['no edema', 'no lung fluid', 'clear lung fields']
-    },
-    'Lung Opacity': {
-        'high_confidence': ['lung opacity detected', 'infiltrate present', 'consolidation identified'],
-        'medium_confidence': ['possible opacity', 'suspected infiltrate', 'potential consolidation'],
-        'low_confidence': ['no opacity', 'no infiltrates', 'clear lungs']
-    },
-    'No Finding': {
-        'high_confidence': ['normal chest X-ray', 'no acute findings', 'unremarkable study'],
-        'medium_confidence': ['essentially normal', 'largely unremarkable', 'no significant abnormalities'],
-        'low_confidence': ['abnormalities present', 'findings detected', 'pathology identified']
-    },
-    'Pleural Effusion': {
-        'high_confidence': ['pleural effusion detected', 'pleural fluid present', 'effusion identified'],
-        'medium_confidence': ['possible effusion', 'suspected pleural fluid', 'potential effusion'],
-        'low_confidence': ['no effusion', 'no pleural fluid', 'clear pleural spaces']
-    },
-    'Pneumonia': {
-        'high_confidence': ['pneumonia detected', 'infection present', 'pneumonia identified'],
-        'medium_confidence': ['possible pneumonia', 'suspected infection', 'potential pneumonia'],
-        'low_confidence': ['no pneumonia', 'no infection', 'no inflammatory changes']
-    },
-    'Support Devices': {
-        'high_confidence': ['support devices present', 'medical devices detected', 'equipment identified'],
-        'medium_confidence': ['possible devices', 'suspected equipment', 'potential support devices'],
-        'low_confidence': ['no devices', 'no support equipment', 'no medical devices']
+# Load dynamic medical terminology mapping for keyword extraction
+def load_condition_keywords():
+    """Load condition keywords from the deduplicated JSON file"""
+    try:
+        # Define the path relative to the current file
+        keywords_file_path = os.path.join(os.path.dirname(__file__), 'keyword_prediction', 'extracted_keywords_result_deduplicated.json')
+        
+        with open(keywords_file_path, 'r', encoding='utf-8') as f:
+            keywords_data = json.load(f)
+        
+        # Extract the conditions section
+        condition_keywords = keywords_data.get('conditions', {})
+        
+        logging.info(f"Successfully loaded keywords for {len(condition_keywords)} conditions from {keywords_file_path}")
+        return condition_keywords
+        
+    except FileNotFoundError:
+        logging.error(f"Keywords file not found: {keywords_file_path}")
+        # Return fallback static keywords
+        return _get_fallback_keywords()
+    except json.JSONDecodeError as e:
+        logging.error(f"Error parsing keywords JSON file: {e}")
+        return _get_fallback_keywords()
+    except Exception as e:
+        logging.error(f"Unexpected error loading keywords: {e}")
+        return _get_fallback_keywords()
+
+def _get_fallback_keywords():
+    """Fallback static keywords in case dynamic loading fails"""
+    return {
+        'Atelectasis': {
+            'high_confidence': ['atelectasis detected', 'lung collapse present', 'volume loss identified'],
+            'medium_confidence': ['possible atelectasis', 'suspected collapse', 'potential volume loss'],
+            'low_confidence': ['no atelectasis', 'no collapse', 'normal lung expansion']
+        },
+        'Cardiomegaly': {
+            'high_confidence': ['cardiomegaly detected', 'heart enlargement present', 'enlarged cardiac silhouette'],
+            'medium_confidence': ['possible cardiomegaly', 'borderline heart size', 'cardiac enlargement suspected'],
+            'low_confidence': ['normal heart size', 'no cardiomegaly', 'normal cardiac silhouette']
+        },
+        'Edema': {
+            'high_confidence': ['pulmonary edema detected', 'lung fluid present', 'edema identified'],
+            'medium_confidence': ['possible edema', 'suspected fluid', 'potential pulmonary edema'],
+            'low_confidence': ['no edema', 'no lung fluid', 'clear lung fields']
+        },
+        'Lung Opacity': {
+            'high_confidence': ['lung opacity detected', 'infiltrate present', 'consolidation identified'],
+            'medium_confidence': ['possible opacity', 'suspected infiltrate', 'potential consolidation'],
+            'low_confidence': ['no opacity', 'no infiltrates', 'clear lungs']
+        },
+        'No Finding': {
+            'high_confidence': ['normal chest X-ray', 'no acute findings', 'unremarkable study'],
+            'medium_confidence': ['essentially normal', 'largely unremarkable', 'no significant abnormalities'],
+            'low_confidence': ['abnormalities present', 'findings detected', 'pathology identified']
+        },
+        'Pleural Effusion': {
+            'high_confidence': ['pleural effusion detected', 'pleural fluid present', 'effusion identified'],
+            'medium_confidence': ['possible effusion', 'suspected pleural fluid', 'potential effusion'],
+            'low_confidence': ['no effusion', 'no pleural fluid', 'clear pleural spaces']
+        },
+        'Pneumonia': {
+            'high_confidence': ['pneumonia detected', 'infection present', 'pneumonia identified'],
+            'medium_confidence': ['possible pneumonia', 'suspected infection', 'potential pneumonia'],
+            'low_confidence': ['no pneumonia', 'no infection', 'no inflammatory changes']
+        },
+        'Support Devices': {
+            'high_confidence': ['support devices present', 'medical devices detected', 'equipment identified'],
+            'medium_confidence': ['possible devices', 'suspected equipment', 'potential support devices'],
+            'low_confidence': ['no devices', 'no support equipment', 'no medical devices']
+        }
     }
-}
+
+# Load the condition keywords at module level
+CONDITION_KEYWORDS = load_condition_keywords()
 
 # Static condition-to-region mapping based on medical knowledge
 CONDITION_TO_REGIONS = {
@@ -518,6 +549,9 @@ class MedicalReportGenerator:
             'low': 0.3      # Weak indication (below this = no keywords)
         }
         
+        # Log keyword loading statistics
+        self._log_keyword_statistics()
+        
         # Initialize attention visualization system (Phase 3)
         try:
             self.anatomical_regions = ANATOMICAL_REGIONS
@@ -573,6 +607,43 @@ class MedicalReportGenerator:
             file_handler.setLevel(logging.DEBUG)
             file_handler.setFormatter(formatter)
             self.logger.addHandler(file_handler)
+
+    def _log_keyword_statistics(self):
+        """Log statistics about the loaded keywords"""
+        try:
+            total_keywords = 0
+            keyword_stats = {}
+            
+            for condition, keywords_dict in self.condition_keywords.items():
+                condition_total = 0
+                condition_stats = {}
+                
+                for confidence_level in ['high_confidence', 'medium_confidence', 'low_confidence']:
+                    if confidence_level in keywords_dict:
+                        count = len(keywords_dict[confidence_level])
+                        condition_stats[confidence_level] = count
+                        condition_total += count
+                
+                keyword_stats[condition] = {
+                    'total': condition_total,
+                    **condition_stats
+                }
+                total_keywords += condition_total
+            
+            self.logger.info(f"=== KEYWORD STATISTICS ===")
+            self.logger.info(f"Total keywords loaded: {total_keywords}")
+            self.logger.info(f"Conditions with keywords: {len(self.condition_keywords)}")
+            
+            for condition, stats in keyword_stats.items():
+                self.logger.info(f"{condition}: {stats['total']} total keywords "
+                               f"(High: {stats.get('high_confidence', 0)}, "
+                               f"Medium: {stats.get('medium_confidence', 0)}, "
+                               f"Low: {stats.get('low_confidence', 0)})")
+            
+            self.logger.info("=" * 30)
+            
+        except Exception as e:
+            self.logger.error(f"Error logging keyword statistics: {e}")
 
     def _setup_preprocessing(self):
         # Match training transforms exactly
