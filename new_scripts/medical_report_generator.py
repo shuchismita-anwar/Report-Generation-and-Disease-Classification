@@ -25,6 +25,7 @@ from io import BytesIO
 import textwrap
 from datetime import datetime
 import random
+from dotenv import load_dotenv
 
 # Import real anatomical regions
 try:
@@ -191,16 +192,16 @@ CONDITION_TO_REGIONS = {
     ]
 }
 
-# LLM Integration Configuration
+# LLM Integration Configuration - Gemini 2.5 Pro
 LLM_CONFIG = {
-    'base_url': 'http://127.0.0.1:1234',
-    'chat_endpoint': '/v1/chat/completions',
-    'model_name': 'gemma-3-27b-it-qat',
-    'max_tokens': 1024,
+    'api_type': 'gemini',
+    'base_url': 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent',
+    'model_name': 'gemini-2.5-pro',
+    'max_tokens': 65535,
     'temperature': 0.3,  # Conservative for medical reports
-    'timeout': 60,  # 60 seconds timeout
+    'timeout': 120,  # 120 seconds timeout
     'max_retries': 3,
-    'retry_delay': 2  # seconds
+    'retry_delay': 3  # seconds
 }
 
 # Medical Report Templates - Optimized for Clinical Accuracy
@@ -507,6 +508,10 @@ class MultiModalMIMICModel(nn.Module):
 
 class MedicalReportGenerator:
     def __init__(self, model_path: str = None, log_level: int = logging.INFO):
+        # Load environment variables for Gemini API
+        load_dotenv('.env')
+        self.gemini_api_key = os.getenv("GEMINI_API_KEY")
+        
         self.device = detect_device()
         self.low_memory = check_system_memory()
         self.model = None
@@ -580,7 +585,7 @@ class MedicalReportGenerator:
         self.logger.info(f"Test data directory: {self.test_data_dir}")
         self.logger.info(f"Keyword extraction system loaded with {len(self.condition_keywords)} conditions")
         self.logger.info(f"Attention visualization system loaded with {len(self.anatomical_regions)} anatomical regions")
-        self.logger.info(f"LLM integration configured for {self.llm_config['model_name']} at {self.llm_config['base_url']}")
+        self.logger.info(f"LLM integration configured for {self.llm_config['model_name']} via Gemini API")
 
     def _setup_logging(self, log_level: int):
         """Enhanced logging configuration"""
@@ -1935,49 +1940,64 @@ class MedicalReportGenerator:
     
     def test_llm_connection(self) -> bool:
         """
-        Test connection to the LLM server.
+        Test connection to Gemini 2.5 Pro API.
         
         Returns:
             True if connection successful, False otherwise
         """
         try:
-            self.logger.info("Testing LLM connection...")
+            self.logger.info("Testing Gemini 2.5 Pro connection...")
             
-            # Simple test request
+            if not self.gemini_api_key:
+                self.logger.error("Gemini API key not found. Set GEMINI_API_KEY environment variable.")
+                return False
+            
+            # Simple test request for Gemini
             test_payload = {
-                "model": self.llm_config['model_name'],
-                "messages": [
-                    {"role": "user", "content": "Hello, are you working?"}
-                ],
-                "max_tokens": 50,
-                "temperature": 0.1
+                "contents": [{
+                    "parts": [{
+                        "text": "Hello! Please respond with just 'Working' to confirm connection."
+                    }]
+                }],
+                "generationConfig": {
+                    "temperature": 0.1,
+                    "topK": 1,
+                    "topP": 0.8,
+                    "maxOutputTokens": 50
+                }
             }
             
-            url = f"{self.llm_config['base_url']}{self.llm_config['chat_endpoint']}"
+            url = f"{self.llm_config['base_url']}?key={self.gemini_api_key}"
+            headers = {"Content-Type": "application/json"}
             
             response = requests.post(
                 url,
+                headers=headers,
                 json=test_payload,
                 timeout=self.llm_config['timeout']
             )
             
             if response.status_code == 200:
                 result = response.json()
-                if 'choices' in result and len(result['choices']) > 0:
-                    self.llm_available = True
-                    self.llm_connection_tested = True
-                    self.logger.info("LLM connection test successful")
-                    return True
+                if 'candidates' in result and len(result['candidates']) > 0:
+                    candidate = result['candidates'][0]
+                    # Check if we have content (even if parts is missing due to MAX_TOKENS)
+                    if 'content' in candidate:
+                        # If we got a response (even truncated), connection is working
+                        self.llm_available = True
+                        self.llm_connection_tested = True
+                        self.logger.info("Gemini 2.5 Pro connection test successful")
+                        return True
             
-            self.logger.error(f"LLM connection test failed: {response.status_code} - {response.text}")
+            self.logger.error(f"Gemini connection test failed: {response.status_code} - {response.text}")
             return False
             
         except requests.exceptions.RequestException as e:
-            self.logger.error(f"LLM connection error: {e}")
+            self.logger.error(f"Gemini connection error: {e}")
             self.llm_available = False
             return False
         except Exception as e:
-            self.logger.error(f"Unexpected error testing LLM connection: {e}")
+            self.logger.error(f"Unexpected error testing Gemini connection: {e}")
             return False
     
     def encode_image_for_llm(self, image_tensor: torch.Tensor) -> str:
@@ -2092,6 +2112,35 @@ Generate a {template_config['style']} with sections: {', '.join(template_config[
 
 🎯 SPECIFIC INSTRUCTIONS FOR THIS CASE:
 {self._get_case_specific_instructions(condition_predictions, template)}
+
+📏 CRITICAL FORMATTING REQUIREMENTS:
+- Write 60-70 words total (count carefully)
+- Use 7-8 sentences total
+- NO line breaks within section content (each section should be continuous text)
+- Structure format:
+  FINDINGS:
+  [newline]
+  [continuous content without line breaks]
+  [double newline]
+  IMPRESSION:
+  [newline]
+  [continuous content without line breaks]
+
+📋 EXAMPLE REPORT FORMATS:
+
+Example 1:
+FINDINGS: 
+PA and lateral views of the chest demonstrate well-expanded lungs. In comparison to the prior study, there is interval obscuration of the right heart border and the medial right hemidiaphragm. Correlation with the lateral view suggests that this is likely due to interval development of small bilateral pleural effusions. Underlying consolidation is not excluded. No pneumothorax. Cardiomediastinal silhouette is otherwise stable. Of note, an air fluid level in a tubular structure posterior to the trachea on the lateral view is consistent with a dilated fluid-filled esophagus.
+
+IMPRESSION: 
+1. Interval development of small bilateral pleural effusions. Underlying consolidation not excluded. 2. Dilated fluid-filled esophagus.
+
+Example 2:
+FINDINGS: 
+Right-sided Port-A-Cath tip terminates in the proximal right atrium. Moderate enlargement of the cardiac silhouette is unchanged. The mediastinal and hilar contours are similar. Pulmonary vasculature is normal. The lungs are clear. No focal consolidation, pleural effusion or pneumothorax is demonstrated. Partially imaged is a pigtail catheter overlying the right upper quadrant of the abdomen. No acute osseous abnormalities are detected.
+
+IMPRESSION: 
+No acute cardiopulmonary abnormality.
 
 ⚠️ REMEMBER: Ignore all attention/spatial analysis data. Report only what the medical predictions indicate.
 
@@ -2269,11 +2318,11 @@ CHEST X-RAY REPORT:
     def call_llm_for_report(self, prompt: str, include_image: bool = False, 
                            image_tensor: torch.Tensor = None) -> Dict:
         """
-        Call the LLM to generate a medical report.
+        Call Gemini 2.5 Pro to generate a medical report.
         
         Args:
             prompt: Formatted prompt for report generation
-            include_image: Whether to include the image in the request
+            include_image: Whether to include the image in the request (not supported by Gemini yet)
             image_tensor: Image tensor if including image
             
         Returns:
@@ -2284,34 +2333,60 @@ CHEST X-RAY REPORT:
                 if not self.test_llm_connection():
                     return {
                         'success': False,
-                        'error': 'LLM connection not available',
+                        'error': 'Gemini connection not available',
                         'report': self._generate_fallback_report(),
                         'used_fallback': True
                     }
             
-            # Prepare message content
+            if not self.gemini_api_key:
+                return {
+                    'success': False,
+                    'error': 'Gemini API key not available',
+                    'report': self._generate_fallback_report(),
+                    'used_fallback': True
+                }
+            
+            # Prepare message content (ignore image for now as Gemini text-only)
             message_content = prompt
+            if include_image:
+                self.logger.warning("Image inclusion not supported with Gemini 2.5 Pro text model")
             
-            # Add image if requested and available
-            if include_image and image_tensor is not None:
-                try:
-                    image_b64 = self.encode_image_for_llm(image_tensor)
-                    if image_b64:
-                        message_content += f"\n\n=== CHEST X-RAY IMAGE ===\nThe following is the actual chest X-ray image being analyzed (base64 encoded):\n[IMAGE_DATA_START]\ndata:image/png;base64,{image_b64}\n[IMAGE_DATA_END]\n\nPlease review this image along with the analysis data provided above."
-                except Exception as e:
-                    self.logger.warning(f"Failed to include image in LLM request: {e}")
-            
-            # Prepare request payload
+            # Prepare request payload for Gemini
             payload = {
-                "model": self.llm_config['model_name'],
-                "messages": [
-                    {"role": "user", "content": message_content}
-                ],
-                "max_tokens": self.llm_config['max_tokens'],
-                "temperature": self.llm_config['temperature']
+                "contents": [{
+                    "parts": [{
+                        "text": message_content
+                    }]
+                }],
+                "generationConfig": {
+                    "temperature": self.llm_config['temperature'],
+                    "topK": 40,
+                    "topP": 0.95,
+                    "maxOutputTokens": self.llm_config['max_tokens'],
+                    "candidateCount": 1
+                },
+                "safetySettings": [
+                    {
+                        "category": "HARM_CATEGORY_HARASSMENT",
+                        "threshold": "BLOCK_NONE"
+                    },
+                    {
+                        "category": "HARM_CATEGORY_HATE_SPEECH", 
+                        "threshold": "BLOCK_NONE"
+                    },
+                    {
+                        "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                        "threshold": "BLOCK_NONE"
+                    },
+                    {
+                        "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                        "threshold": "BLOCK_NONE"
+                    }
+                ]
             }
             
-            url = f"{self.llm_config['base_url']}{self.llm_config['chat_endpoint']}"
+            url = f"{self.llm_config['base_url']}?key={self.gemini_api_key}"
+            headers = {"Content-Type": "application/json"}
             
             # Debug: Log the prompt being sent
             self.logger.info(f"DEBUG: Prompt length: {len(message_content)} chars")
@@ -2320,10 +2395,11 @@ CHEST X-RAY REPORT:
             # Make request with retries
             for attempt in range(self.llm_config['max_retries']):
                 try:
-                    self.logger.debug(f"LLM request attempt {attempt + 1}/{self.llm_config['max_retries']}")
+                    self.logger.debug(f"Gemini request attempt {attempt + 1}/{self.llm_config['max_retries']}")
                     
                     response = requests.post(
                         url,
+                        headers=headers,
                         json=payload,
                         timeout=self.llm_config['timeout']
                     )
@@ -2331,37 +2407,65 @@ CHEST X-RAY REPORT:
                     if response.status_code == 200:
                         result = response.json()
                         
-                        if 'choices' in result and len(result['choices']) > 0:
-                            report_text = result['choices'][0]['message']['content']
+                        if 'candidates' in result and len(result['candidates']) > 0:
+                            candidate = result['candidates'][0]
                             
-                            return {
-                                'success': True,
-                                'report': report_text,
-                                'raw_response': result,
-                                'used_fallback': False,
-                                'attempt': attempt + 1
-                            }
+                            if 'content' in candidate:
+                                # Check if we have parts with content
+                                if 'parts' in candidate['content'] and len(candidate['content']['parts']) > 0:
+                                    report_text = candidate['content']['parts'][0]['text']
+                                    
+                                    return {
+                                        'success': True,
+                                        'report': report_text,
+                                        'raw_response': result,
+                                        'used_fallback': False,
+                                        'attempt': attempt + 1
+                                    }
+                                else:
+                                    # Content exists but no parts - likely MAX_TOKENS hit
+                                    self.logger.error(f"Gemini response has no content parts. Finish reason: {candidate.get('finishReason', 'unknown')}")
+                                    return {
+                                        'success': False,
+                                        'error': f"Response has no content parts. Finish reason: {candidate.get('finishReason', 'unknown')}",
+                                        'report': self._generate_fallback_report(),
+                                        'used_fallback': True
+                                    }
+                            elif 'finishReason' in candidate and candidate['finishReason'] == 'MAX_TOKENS':
+                                self.logger.error("MAX_TOKENS hit - response was too long")
+                                return {
+                                    'success': False,
+                                    'error': 'Response exceeded maximum tokens',
+                                    'report': self._generate_fallback_report(),
+                                    'used_fallback': True
+                                }
                     
-                    self.logger.warning(f"LLM request failed (attempt {attempt + 1}): {response.status_code}")
+                    elif response.status_code == 429:  # Rate limit
+                        wait_time = self.llm_config['retry_delay'] * (2 ** attempt)
+                        self.logger.warning(f"Rate limit hit (attempt {attempt + 1}), waiting {wait_time}s...")
+                        time.sleep(wait_time)
+                        continue
+                    
+                    self.logger.warning(f"Gemini request failed (attempt {attempt + 1}): {response.status_code} - {response.text}")
                     
                 except requests.exceptions.RequestException as e:
-                    self.logger.warning(f"LLM request error (attempt {attempt + 1}): {e}")
+                    self.logger.warning(f"Gemini request error (attempt {attempt + 1}): {e}")
                 
                 # Wait before retry
                 if attempt < self.llm_config['max_retries'] - 1:
                     time.sleep(self.llm_config['retry_delay'])
             
             # All attempts failed
-            self.logger.error("All LLM request attempts failed")
+            self.logger.error("All Gemini request attempts failed")
             return {
                 'success': False,
-                'error': 'All LLM request attempts failed',
+                'error': 'All Gemini request attempts failed',
                 'report': self._generate_fallback_report(),
                 'used_fallback': True
             }
             
         except Exception as e:
-            self.logger.error(f"Error calling LLM for report: {e}")
+            self.logger.error(f"Error calling Gemini for report: {e}")
             return {
                 'success': False,
                 'error': str(e),

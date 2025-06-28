@@ -115,6 +115,53 @@ def main():
             include_image_in_llm=False  # 🔧 This is the key fix!
         )
         
+        # 🔍 DEBUG: Save the prompt that was sent to AI for inspection
+        try:
+            # Extract the prompt from the comprehensive analysis steps
+            if 'llm_response' in result and 'raw_response' in result['llm_response']:
+                # Get the prompt that was actually used (we need to recreate it)
+                print("   🔍 Extracting and saving AI prompt for debugging...")
+                
+                # Recreate the prompt using the same data that was used
+                debug_prompt = generator.create_medical_report_prompt(
+                    condition_predictions=result.get('model_predictions', {}),
+                    prediction_keywords=result.get('prediction_keywords', {}),
+                    spatial_keywords=result.get('spatial_keywords', []),
+                    attention_analysis=result.get('attention_analysis', {}),
+                    relevant_anatomical_regions=result.get('relevant_anatomical_regions', {}),
+                    template="standard",
+                    patient_info=None,
+                    include_image=False
+                )
+                
+                # Save to file with timestamp
+                prompt_file = project_root / "new_scripts" / "debug_ai_prompt.txt"
+                with open(prompt_file, 'w', encoding='utf-8') as f:
+                    f.write("=" * 80 + "\n")
+                    f.write("AI PROMPT DEBUG OUTPUT\n")
+                    f.write(f"Generated at: {datetime.now()}\n")
+                    f.write(f"Patient ID: {Path(image_path).stem}\n")
+                    f.write("=" * 80 + "\n\n")
+                    
+                    f.write(f"PROMPT STATISTICS:\n")
+                    f.write(f"- Total Characters: {len(debug_prompt):,}\n")
+                    f.write(f"- Total Words: {len(debug_prompt.split()):,}\n")
+                    f.write(f"- Estimated Tokens: ~{len(debug_prompt.split()) * 1.3:.0f}\n")
+                    f.write(f"- Size in KB: {len(debug_prompt.encode('utf-8')) / 1024:.2f} KB\n")
+                    f.write("\n" + "=" * 80 + "\n\n")
+                    
+                    f.write("FULL PROMPT CONTENT:\n")
+                    f.write("-" * 40 + "\n")
+                    f.write(debug_prompt)
+                
+                print(f"   📄 AI prompt saved to: {prompt_file}")
+                print(f"   📊 Prompt size: {len(debug_prompt):,} characters ({len(debug_prompt.encode('utf-8')) / 1024:.2f} KB)")
+                print(f"   🔢 Estimated tokens: ~{len(debug_prompt.split()) * 1.3:.0f}")
+                
+        except Exception as e:
+            print(f"   ⚠️ Could not save debug prompt: {e}")
+            # Continue anyway, this is just debugging
+        
         # Step 4: Format and display results
         print("\n✅ Step 4: Analysis complete! Formatting results...")
         print("\n")

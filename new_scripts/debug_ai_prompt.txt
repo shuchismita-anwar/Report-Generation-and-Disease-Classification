@@ -1,0 +1,107 @@
+================================================================================
+AI PROMPT DEBUG OUTPUT
+Generated at: 2025-06-29 00:53:55.171861
+Patient ID: a5bf1678-df56650d-3d94165c-71ef2d00-509ad013
+================================================================================
+
+PROMPT STATISTICS:
+- Total Characters: 5,527
+- Total Words: 730
+- Estimated Tokens: ~949
+- Size in KB: 5.42 KB
+
+================================================================================
+
+FULL PROMPT CONTENT:
+----------------------------------------
+You are an expert radiologist with 20+ years of experience generating professional medical reports. Generate a clinically accurate chest X-ray report.
+
+CRITICAL CLINICAL GUIDELINES:
+1. ATTENTION DATA PROHIBITION: Do NOT interpret "attention analysis", "spatial keywords", "attention intensity", or "focus areas" as clinical findings. These are AI computational artifacts, NOT pathological findings.
+
+2. CONFIDENCE-BASED REPORTING:
+   - No Finding >70%: Use simple, direct language like practicing radiologists
+   - Pathology >70%: Focus on the specific medical condition only  
+   - Mixed confidence 50-70%: Provide appropriate clinical uncertainty
+
+3. ANATOMICAL PRECISION: Only describe anatomical locations if directly supported by high-confidence predictions, not attention maps.
+
+4. CLINICAL SIMPLICITY: Match the complexity level to the findings - normal studies need 1-2 sentences, not paragraphs.
+
+5. MEDICAL ACCURACY: Base conclusions exclusively on the condition prediction probabilities, ignore all attention/spatial data.
+
+6. REPORT FORMAT: Do NOT include patient name fields, exam date fields, or radiologist signature lines. Focus only on the clinical content (FINDINGS, IMPRESSION, RECOMMENDATIONS).
+
+REPORTING STYLE: MULTI-PATHOLOGY MIXED CONFIDENCE (Multiple findings with varying confidence levels)
+
+=== CLINICAL ANALYSIS DATA ===
+
+🔬 MODEL PREDICTIONS (Clinical Decision Basis):
+- Atelectasis: 64.9% probability (MODERATE confidence)
+- Cardiomegaly: 48.7% probability (LOW confidence)
+- Edema: 34.0% probability (LOW confidence)
+- Lung Opacity: 50.8% probability (MODERATE confidence)
+- No Finding: 32.6% probability (LOW confidence)
+- Pleural Effusion: 61.4% probability (MODERATE confidence)
+- Pneumonia: 37.8% probability (LOW confidence)
+- Support Devices: 80.0% probability (HIGH confidence)
+
+📋 CLINICAL KEYWORDS (Condition-Based):
+- Atelectasis: atelectasis/scarring, atelectatic, atelectatic and / or consolidated
+- Cardiomegaly: cardiac contour looks larger due to low lung volume, cardiomyopathy, no definite signs of chf
+- Edema: cardiac silhouette is enlarged, cardiac silhouette is obscured, interval improvement in interstitial edema
+- Lung Opacity: 7 mm nodular opacity, accentuate bronchovascular markings, acute airways inflammation
+- No Finding: azygos fissure, cardiac silhouette size is normal, cardiac silhouettes are unremarkable
+- Pleural Effusion: air and fluid, air- fluid collection, air-fluid levels
+- Pneumonia: acute cardiopulmonary disease, acute consolidation, acute infiltrates
+- Support Devices: 2 leads, 2l nc, a catheter
+
+🗺️ RELEVANT ANATOMICAL REGIONS (Condition-Based):
+- Support Devices (80.0%, HIGH): cardiac silhouette, left hilar structures, right hilar structures, upper mediastinum, trachea
+- Atelectasis (64.9%, MODERATE): left lung, right lung, left lower lung zone, right lower lung zone, left upper lung zone, right upper lung zone
+- Pleural Effusion (61.4%, MODERATE): left lower lung zone, right lower lung zone, left costophrenic angle, right costophrenic angle
+
+=== REPORTING TASK ===
+Generate a professional radiological report with sections: FINDINGS, IMPRESSION, RECOMMENDATIONS
+
+🎯 SPECIFIC INSTRUCTIONS FOR THIS CASE:
+- This case shows MULTIPLE significant findings: Support Devices (80.0%), Atelectasis (64.9%), Pleural Effusion (61.4%)
+- Report ALL significant findings above 60% confidence
+- Use relevant anatomical regions to specify locations for each finding
+- Describe the medical significance of each finding
+- Consider relationships between findings (e.g., atelectasis with pleural effusion)
+- Provide comprehensive clinical recommendations for all findings
+- Structure as: FINDINGS (describe each), IMPRESSION (synthesize), RECOMMENDATIONS (comprehensive)
+
+📏 CRITICAL FORMATTING REQUIREMENTS:
+- Write 60-70 words total (count carefully)
+- Use 7-8 sentences total
+- NO line breaks within section content (each section should be continuous text)
+- Structure format:
+  FINDINGS:
+  [newline]
+  [continuous content without line breaks]
+  [double newline]
+  IMPRESSION:
+  [newline]
+  [continuous content without line breaks]
+
+📋 EXAMPLE REPORT FORMATS:
+
+Example 1:
+FINDINGS: 
+PA and lateral views of the chest demonstrate well-expanded lungs. In comparison to the prior study, there is interval obscuration of the right heart border and the medial right hemidiaphragm. Correlation with the lateral view suggests that this is likely due to interval development of small bilateral pleural effusions. Underlying consolidation is not excluded. No pneumothorax. Cardiomediastinal silhouette is otherwise stable. Of note, an air fluid level in a tubular structure posterior to the trachea on the lateral view is consistent with a dilated fluid-filled esophagus.
+
+IMPRESSION: 
+1. Interval development of small bilateral pleural effusions. Underlying consolidation not excluded. 2. Dilated fluid-filled esophagus.
+
+Example 2:
+FINDINGS: 
+Right-sided Port-A-Cath tip terminates in the proximal right atrium. Moderate enlargement of the cardiac silhouette is unchanged. The mediastinal and hilar contours are similar. Pulmonary vasculature is normal. The lungs are clear. No focal consolidation, pleural effusion or pneumothorax is demonstrated. Partially imaged is a pigtail catheter overlying the right upper quadrant of the abdomen. No acute osseous abnormalities are detected.
+
+IMPRESSION: 
+No acute cardiopulmonary abnormality.
+
+⚠️ REMEMBER: Ignore all attention/spatial analysis data. Report only what the medical predictions indicate.
+
+CHEST X-RAY REPORT:

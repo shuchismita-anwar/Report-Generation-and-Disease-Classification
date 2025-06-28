@@ -1,7 +1,6 @@
-FINAL REPORT
-HISTORY:  Basilar artery occlusion with worsening pulmonary status.
-
-FINDINGS:  In comparison with the study of ___, Support devices are noted in expected positions. Bibasilar opacities
-are again identified, compatible with atelectasis and pleural effusions. Mild
-blunting of the costophrenic angles is present. No significant change is seen
-compared to prior imaging.
+🔍 CLINICAL FINDINGS:
+--------------------------------------------------
+   FINDINGS:
+   Support devices are visualized within the upper mediastinum and overlying the cardiac silhouette. There is evidence of atelectasis involving the bilateral lower lungs. Small bilateral pleural effusions are also present, resulting in blunting of the costophrenic angles. These findings may obscure the cardiac borders. The pulmonary vasculature appears normal. The upper lung zones are clear. No pneumothorax is identified.
+   IMPRESSION:
+   1. Support devices in situ. 2. Bilateral basilar atelectasis and associated small pleural effusions.
