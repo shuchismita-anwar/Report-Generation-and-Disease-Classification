@@ -1,0 +1,1699 @@
+{
+  "metadata": {
+    "title": "Medical Reports Matching Criteria (60-70 words, 7-8 sentences)",
+    "total_matching_reports": 168,
+    "analysis_date": "2025-06-29T03:02:13.147221",
+    "criteria": {
+      "word_count_range": [
+        60,
+        70
+      ],
+      "sentence_count_range": [
+        7,
+        8
+      ]
+    }
+  },
+  "matching_reports": [
+    {
+      "index": 1,
+      "path": "patient_10058974/CXR-DICOM/s54456726.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10058974\\CXR-DICOM\\s54456726.txt",
+      "patient_id": "10058974",
+      "study_id": "54456726",
+      "word_count": 63,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest are compared to previous exam\n from .  The lungs remain clear of consolidation.  Note is\n made of bilateral nipple shadows at the lung bases.  There is no e..."
+    },
+    {
+      "index": 2,
+      "path": "patient_10064049/CXR-DICOM/s54392870.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10064049\\CXR-DICOM\\s54392870.txt",
+      "patient_id": "10064049",
+      "study_id": "54392870",
+      "word_count": 65,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nHeart size is mild to moderately enlarged.  Mild atherosclerotic\n calcifications are seen at the aortic knob. Perihilar haziness with vascular\n indistinctness is compatible moderate pulmonar..."
+    },
+    {
+      "index": 3,
+      "path": "patient_10216097/CXR-DICOM/s54394310.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10216097\\CXR-DICOM\\s54394310.txt",
+      "patient_id": "10216097",
+      "study_id": "54394310",
+      "word_count": 65,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest provided.  Opacity involving the right mid\n through lower lung is concerning for pneumonia with associated small effusion.\n Left lung appears grossly clear...."
+    },
+    {
+      "index": 4,
+      "path": "patient_10224335/CXR-DICOM/s52091068.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10224335\\CXR-DICOM\\s52091068.txt",
+      "patient_id": "10224335",
+      "study_id": "52091068",
+      "word_count": 62,
+      "sentence_count": 7,
+      "content_preview": "                                 FINAL REPORT\n SINGLE FRONTAL VIEW OF THE CHEST\n \n REASON FOR EXAM:  Status post Whipple.\n \n Comparison is made with prior study .\n \n Cardiomediastinal contours are unc..."
+    },
+    {
+      "index": 5,
+      "path": "patient_10297948/CXR-DICOM/s54437316.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10297948\\CXR-DICOM\\s54437316.txt",
+      "patient_id": "10297948",
+      "study_id": "54437316",
+      "word_count": 68,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nComparison is made to previous study from .\n \n There is a right IJ central line with distal lead tip in the right atrium. \n This could be pulled back 3 cm for more optimal placement.  Heart ..."
+    },
+    {
+      "index": 6,
+      "path": "patient_10314359/CXR-DICOM/s59926025.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10314359\\CXR-DICOM\\s59926025.txt",
+      "patient_id": "10314359",
+      "study_id": "59926025",
+      "word_count": 68,
+      "sentence_count": 7,
+      "content_preview": "IMPRESSION:\nCompared to chest radiographs .\n \n Lung volumes have improved, though still relatively low.  There is still\n substantial bibasilar consolidation, atelectasis and/or consolidation at.\n \n Pr..."
+    },
+    {
+      "index": 7,
+      "path": "patient_10504635/CXR-DICOM/s57854196.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10504635\\CXR-DICOM\\s57854196.txt",
+      "patient_id": "10504635",
+      "study_id": "57854196",
+      "word_count": 65,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nMildly enlarged cardiac silhouette is again noted.  The mediastinal and hilar\n contours are unremarkable. There is no pleural effusion or pneumothorax.  The\n lungs are well-expanded and clea..."
+    },
+    {
+      "index": 8,
+      "path": "patient_10536742/CXR-DICOM/s58365579.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10536742\\CXR-DICOM\\s58365579.txt",
+      "patient_id": "10536742",
+      "study_id": "58365579",
+      "word_count": 61,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThe cardiomediastinal and hilar contours are within normal limits. \n The lungs are well expanded and clear.  There is no definite pleural effusion\n or pneumothorax.  No focal consolidations ..."
+    },
+    {
+      "index": 9,
+      "path": "patient_10538657/CXR-DICOM/s52299932.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10538657\\CXR-DICOM\\s52299932.txt",
+      "patient_id": "10538657",
+      "study_id": "52299932",
+      "word_count": 62,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nThe patient is status post median sternotomy and CABG. Left-sided AICD device\n is noted with leads terminating in the right ventricle and region of the\n coronary sinus, unchanged. Heart rema..."
+    },
+    {
+      "index": 10,
+      "path": "patient_10540652/CXR-DICOM/s57651859.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10540652\\CXR-DICOM\\s57651859.txt",
+      "patient_id": "10540652",
+      "study_id": "57651859",
+      "word_count": 64,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest are compared to previous exam\n from .  Again seen are post-operative changes of left\n mastectomy.  The lungs are clear of focal consolidation, effusion or\n ..."
+    },
+    {
+      "index": 11,
+      "path": "patient_10576074/CXR-DICOM/s52239065.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10576074\\CXR-DICOM\\s52239065.txt",
+      "patient_id": "10576074",
+      "study_id": "52239065",
+      "word_count": 66,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest.  There is new right midlung opacity\n localizing to both the upper and lower lobes on the lateral view.  Elsewhere\n the lungs are clear.  The cardiomediasti..."
+    },
+    {
+      "index": 12,
+      "path": "patient_10598395/CXR-DICOM/s53598444.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10598395\\CXR-DICOM\\s53598444.txt",
+      "patient_id": "10598395",
+      "study_id": "53598444",
+      "word_count": 61,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nThe lungs are well inflated and clear.  Marked prominence of the aortic knob\n is concerning for underlying aneurysm versus dissection.  Heart is normal in\n size.  There is no pneumothorax or..."
+    },
+    {
+      "index": 13,
+      "path": "patient_10676001/CXR-DICOM/s51921167.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10676001\\CXR-DICOM\\s51921167.txt",
+      "patient_id": "10676001",
+      "study_id": "51921167",
+      "word_count": 69,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest provided.  Dual-lead pacer is\n unchanged with lead tips extending to the expected location of the right\n atrium and right ventricle.  Lungs are clear.  Card..."
+    },
+    {
+      "index": 14,
+      "path": "patient_10699336/CXR-DICOM/s53811413.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10699336\\CXR-DICOM\\s53811413.txt",
+      "patient_id": "10699336",
+      "study_id": "53811413",
+      "word_count": 68,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nA right-sided PICC is in-situ, this terminates in the mid SVC.  A tracheostomy\n tube is unchanged in position compared to the prior study.  Lung volumes are\n unchanged with persistent right ..."
+    },
+    {
+      "index": 15,
+      "path": "patient_10778867/CXR-DICOM/s54701104.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10778867\\CXR-DICOM\\s54701104.txt",
+      "patient_id": "10778867",
+      "study_id": "54701104",
+      "word_count": 69,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nCardiac, mediastinal and hilar contours are normal. Lungs are clear without\n focal consolidation. No pleural effusion or pneumothorax is present. Clips are\n seen projecting over the left mid..."
+    },
+    {
+      "index": 16,
+      "path": "patient_10843678/CXR-DICOM/s57146887.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10843678\\CXR-DICOM\\s57146887.txt",
+      "patient_id": "10843678",
+      "study_id": "57146887",
+      "word_count": 65,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThere is a focus of heterogeneous opacity in the right upper lobe, which may\n represent acute infectious process.  The lungs are otherwise clear.  There is\n no pneumothorax or pleural effusi..."
+    },
+    {
+      "index": 17,
+      "path": "patient_10865278/CXR-DICOM/s56139927.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10865278\\CXR-DICOM\\s56139927.txt",
+      "patient_id": "10865278",
+      "study_id": "56139927",
+      "word_count": 62,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest are compared to previous exam\n from .  Compared with prior, there has been interval\n resolution of small bilateral pleural effusions.  The lungs are clear o..."
+    },
+    {
+      "index": 18,
+      "path": "patient_10884708/CXR-DICOM/s56636538.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10884708\\CXR-DICOM\\s56636538.txt",
+      "patient_id": "10884708",
+      "study_id": "56636538",
+      "word_count": 66,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nFrontal and lateral radiographs of the chest show appropriate\n inspiratory lung volumes.  The lungs are clear without focal consolidation,\n pleural effusion or pneumothorax.  The pulmonary v..."
+    },
+    {
+      "index": 19,
+      "path": "patient_10885680/CXR-DICOM/s53945637.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10885680\\CXR-DICOM\\s53945637.txt",
+      "patient_id": "10885680",
+      "study_id": "53945637",
+      "word_count": 67,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThe heart size is normal.  The mediastinal and hilar contours are\n unremarkable.  The pulmonary vascularity is normal.  There is minimal patchy\n opacification in the right lower lobe which i..."
+    },
+    {
+      "index": 20,
+      "path": "patient_10891332/CXR-DICOM/s53691817.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10891332\\CXR-DICOM\\s53691817.txt",
+      "patient_id": "10891332",
+      "study_id": "53691817",
+      "word_count": 67,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nThe lungs are well-expanded and clear of consolidation but notable for\n pulmonary vascular congestion.  The cardiac silhouette remains enlarged.  The\n patient is status post median sternotom..."
+    },
+    {
+      "index": 21,
+      "path": "patient_10933609/CXR-DICOM/s51002383.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10933609\\CXR-DICOM\\s51002383.txt",
+      "patient_id": "10933609",
+      "study_id": "51002383",
+      "word_count": 67,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest.  Bilateral upper lobe scarring is seen with\n superior retraction of the hila.   The lung volumes are relatively low.  There\n is no evidence of superimposed..."
+    },
+    {
+      "index": 22,
+      "path": "patient_10933609/CXR-DICOM/s55438657.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10933609\\CXR-DICOM\\s55438657.txt",
+      "patient_id": "10933609",
+      "study_id": "55438657",
+      "word_count": 64,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nPersistent largely unchanged left upper lobe, right upper lobe and\n left lower lobe peribronchial consolidation.  There are stable low lung\n volumes.  No pleural effusion or pneumothorax.  T..."
+    },
+    {
+      "index": 23,
+      "path": "patient_10990952/CXR-DICOM/s56684926.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_10990952\\CXR-DICOM\\s56684926.txt",
+      "patient_id": "10990952",
+      "study_id": "56684926",
+      "word_count": 69,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nThe lungs are well expanded.  There is well-defined consolidative opacity at\n the left lung base with obscuration of the left diaphragm.  The right lung is\n otherwise clear.  There is no ple..."
+    },
+    {
+      "index": 24,
+      "path": "patient_11018892/CXR-DICOM/s50635288.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_11018892\\CXR-DICOM\\s50635288.txt",
+      "patient_id": "11018892",
+      "study_id": "50635288",
+      "word_count": 60,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThere is linear scarring of the right midlung, and subsegmental atelectasis of\n the bilateral lung bases.  There is no consolidation or pulmonary edema. The\n cardiomediastinal and hilar silh..."
+    },
+    {
+      "index": 25,
+      "path": "patient_11056953/CXR-DICOM/s53524008.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_11056953\\CXR-DICOM\\s53524008.txt",
+      "patient_id": "11056953",
+      "study_id": "53524008",
+      "word_count": 63,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nCardiac silhouette size is normal.  The mediastinal hilar contours are\n unchanged.  There are increased interstitial opacities bilaterally with \n B-lines compatible with mild interstitial pu..."
+    },
+    {
+      "index": 26,
+      "path": "patient_11117085/CXR-DICOM/s57087907.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_11117085\\CXR-DICOM\\s57087907.txt",
+      "patient_id": "11117085",
+      "study_id": "57087907",
+      "word_count": 60,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nPA and lateral views the chest provided.  There is left perihilar opacity\n corresponding to a posterior consolidation on the lateral view which is\n concerning for pneumonia in the superior s..."
+    },
+    {
+      "index": 27,
+      "path": "patient_11208426/CXR-DICOM/s54684056.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_11208426\\CXR-DICOM\\s54684056.txt",
+      "patient_id": "11208426",
+      "study_id": "54684056",
+      "word_count": 70,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest.  The opacity within the left mid\n lung field compatible with known chest wall mass as seen on prior CT is again\n seen.  Emphysematous changes and right upp..."
+    },
+    {
+      "index": 28,
+      "path": "patient_11214611/CXR-DICOM/s50455422.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_11214611\\CXR-DICOM\\s50455422.txt",
+      "patient_id": "11214611",
+      "study_id": "50455422",
+      "word_count": 65,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nAs compared to chest radiograph dated , frontal and lateral\n chest radiographs demonstrate interval removal of enteric tube.  The right\n Port-A-Cath is seen in unchanged position with its ti..."
+    },
+    {
+      "index": 29,
+      "path": "patient_11443554/CXR-DICOM/s57808761.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_11443554\\CXR-DICOM\\s57808761.txt",
+      "patient_id": "11443554",
+      "study_id": "57808761",
+      "word_count": 64,
+      "sentence_count": 8,
+      "content_preview": "                                 FINAL REPORT\n HISTORY:  Dyspnea, cough x3 days, question pneumonia.\n \n CHEST, TWO VIEWS.\n \n COMPARISON:  Chest x-ray dated .\n \n There is equivocal opacity in the lower..."
+    },
+    {
+      "index": 30,
+      "path": "patient_11474065/CXR-DICOM/s50955371.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_11474065\\CXR-DICOM\\s50955371.txt",
+      "patient_id": "11474065",
+      "study_id": "50955371",
+      "word_count": 61,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nPersistence of right middle lobe opacities obscuring the right heart border\n since  is concerning for pneumonia.  The rest of the lungs appear\n unchanged since .  Moderate bibasilar atelecta..."
+    },
+    {
+      "index": 31,
+      "path": "patient_11495809/CXR-DICOM/s52705409.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_11495809\\CXR-DICOM\\s52705409.txt",
+      "patient_id": "11495809",
+      "study_id": "52705409",
+      "word_count": 70,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nWhen compared to prior, there has been interval enlargement of the bilateral\n pleural effusions, small on the right, moderate on the left. There is no\n visualized pneumothorax. Superiorly th..."
+    },
+    {
+      "index": 32,
+      "path": "patient_11501481/CXR-DICOM/s50286546.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_11501481\\CXR-DICOM\\s50286546.txt",
+      "patient_id": "11501481",
+      "study_id": "50286546",
+      "word_count": 62,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nCompared to prior CT there is likely worsening pleural effusion at the left\n base. The remaining lung fields are clear. Heart size is normal. There is no\n pneumothorax. Right Port-A-Cath is ..."
+    },
+    {
+      "index": 33,
+      "path": "patient_11607177/CXR-DICOM/s56566779.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_11607177\\CXR-DICOM\\s56566779.txt",
+      "patient_id": "11607177",
+      "study_id": "56566779",
+      "word_count": 68,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nAs compared to the previous radiograph, the patient has received a\n new Swan-Ganz catheter inserted over the right internal jugular vein.  The\n course of the catheter is unremarkable, the ti..."
+    },
+    {
+      "index": 34,
+      "path": "patient_11614040/CXR-DICOM/s52884720.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_11614040\\CXR-DICOM\\s52884720.txt",
+      "patient_id": "11614040",
+      "study_id": "52884720",
+      "word_count": 69,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nAP portable view of the chest was obtained.  A right-sided\n Port-A-Cath is seen, distal aspect not well seen but likely terminates at the\n cavoatrial junction/right atrium.  There is a large..."
+    },
+    {
+      "index": 35,
+      "path": "patient_11615169/CXR-DICOM/s55227980.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_11615169\\CXR-DICOM\\s55227980.txt",
+      "patient_id": "11615169",
+      "study_id": "55227980",
+      "word_count": 69,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest were provided.  Midline\n sternotomy wires are again noted.  There are bilateral pleural effusions,\n small, with associated mild pulmonary interstitial edema..."
+    },
+    {
+      "index": 36,
+      "path": "patient_11635649/CXR-DICOM/s57179687.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_11635649\\CXR-DICOM\\s57179687.txt",
+      "patient_id": "11635649",
+      "study_id": "57179687",
+      "word_count": 61,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nFrontal and lateral views of the chest were obtained.  The lungs are clear\n without focal consolidation.  Previously seen pulmonary nodules on chest CT\n were better evaluated on CT, which is..."
+    },
+    {
+      "index": 37,
+      "path": "patient_11756467/CXR-DICOM/s58081889.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_11756467\\CXR-DICOM\\s58081889.txt",
+      "patient_id": "11756467",
+      "study_id": "58081889",
+      "word_count": 61,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThe heart is normal in size.  The mediastinal and hilar contours\n appear within normal limits aside from mild unfolding along the descending\n thoracic aorta and patchy calcification along th..."
+    },
+    {
+      "index": 38,
+      "path": "patient_11798500/CXR-DICOM/s56391457.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_11798500\\CXR-DICOM\\s56391457.txt",
+      "patient_id": "11798500",
+      "study_id": "56391457",
+      "word_count": 64,
+      "sentence_count": 7,
+      "content_preview": "IMPRESSION:\nAs compared to the previous radiograph, no relevant change is seen. The\n monitoring and support devices are constant. Unchanged distribution and\n severity of the pre-existing parenchymal o..."
+    },
+    {
+      "index": 39,
+      "path": "patient_11849484/CXR-DICOM/s51091271.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_11849484\\CXR-DICOM\\s51091271.txt",
+      "patient_id": "11849484",
+      "study_id": "51091271",
+      "word_count": 65,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nBilateral perihilar patchy opacities may relate to pulmonary edema although\n multifocal infectious process is not excluded in the appropriate clinical\n setting. There is no pleural effusion ..."
+    },
+    {
+      "index": 40,
+      "path": "patient_11893091/CXR-DICOM/s57134673.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_11893091\\CXR-DICOM\\s57134673.txt",
+      "patient_id": "11893091",
+      "study_id": "57134673",
+      "word_count": 60,
+      "sentence_count": 7,
+      "content_preview": "                                 FINAL REPORT\n CHEST ON \n \n HISTORY:  CHF, question interval change.\n \n REFERENCE EXAM:  .\n \n Compared to the study from the prior day, the dual-lead pacemaker is\n unch..."
+    },
+    {
+      "index": 41,
+      "path": "patient_12097647/CXR-DICOM/s51310335.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_12097647\\CXR-DICOM\\s51310335.txt",
+      "patient_id": "12097647",
+      "study_id": "51310335",
+      "word_count": 63,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nThere are low lung volumes, which results in bronchovascular crowding.  There\n is no focal consolidation, pleural effusion, or pneumothorax. There is\n bibasilar atelectasis.  Heart remains e..."
+    },
+    {
+      "index": 42,
+      "path": "patient_12185775/CXR-DICOM/s54211038.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_12185775\\CXR-DICOM\\s54211038.txt",
+      "patient_id": "12185775",
+      "study_id": "54211038",
+      "word_count": 65,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nNew endotracheal tube is seen appropriately positioned terminating\n no less than 2.5 cm above the carina.  There are low lung volumes bilaterally\n with moderate pulmonary edema .  Small quan..."
+    },
+    {
+      "index": 43,
+      "path": "patient_12185775/CXR-DICOM/s55391561.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_12185775\\CXR-DICOM\\s55391561.txt",
+      "patient_id": "12185775",
+      "study_id": "55391561",
+      "word_count": 67,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nAs compared to the previous radiograph, the lung volumes have\n increased.  The right internal jugular vein introduction sheath has been\n removed.  The pre-existing right pleural effusion has..."
+    },
+    {
+      "index": 44,
+      "path": "patient_12208824/CXR-DICOM/s55766505.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_12208824\\CXR-DICOM\\s55766505.txt",
+      "patient_id": "12208824",
+      "study_id": "55766505",
+      "word_count": 67,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest were obtained.  Lungs appear\n clear bilaterally aside from mild basilar plate-like atelectasis.  Lungs are\n hyperinflated with upper lobe lucency and splayi..."
+    },
+    {
+      "index": 45,
+      "path": "patient_12221629/CXR-DICOM/s56707998.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_12221629\\CXR-DICOM\\s56707998.txt",
+      "patient_id": "12221629",
+      "study_id": "56707998",
+      "word_count": 70,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nImproved lung volumes bilaterally.  Interval increase in left pleural effusion\n and persistent small right pleural effusion.  Bibasilar opacities left greater\n than right is unchanged.  No p..."
+    },
+    {
+      "index": 46,
+      "path": "patient_12221879/CXR-DICOM/s58943794.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_12221879\\CXR-DICOM\\s58943794.txt",
+      "patient_id": "12221879",
+      "study_id": "58943794",
+      "word_count": 70,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nFrontal and lateral chest radiographs demonstrate a normal cardiomediastinal\n silhouette.  Again seen are numerous pulmonary nodules, which appear similar\n to prior radiographs.  The right p..."
+    },
+    {
+      "index": 47,
+      "path": "patient_12324075/CXR-DICOM/s51462941.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_12324075\\CXR-DICOM\\s51462941.txt",
+      "patient_id": "12324075",
+      "study_id": "51462941",
+      "word_count": 63,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nAs compared to the previous radiograph, the vertebral stabilization\n devices are in unchanged position.  In the interval, the nasogastric tube has\n been removed.  The right PICC line is in u..."
+    },
+    {
+      "index": 48,
+      "path": "patient_12412492/CXR-DICOM/s56070645.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_12412492\\CXR-DICOM\\s56070645.txt",
+      "patient_id": "12412492",
+      "study_id": "56070645",
+      "word_count": 68,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nThere is significant rightward rotation on the current radiograph.  Allowing\n for changes due to this, the cardiomediastinal silhouettes are stable from\n prior exam.  There is a mildly tortu..."
+    },
+    {
+      "index": 49,
+      "path": "patient_12600024/CXR-DICOM/s58898778.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_12600024\\CXR-DICOM\\s58898778.txt",
+      "patient_id": "12600024",
+      "study_id": "58898778",
+      "word_count": 64,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nPost-operative changes are seen at the right lung base, including\n pleural thickening and surgical clips.  There is minimal left lower lung\n atelectasis.  Streaky opacities in the lateral ri..."
+    },
+    {
+      "index": 50,
+      "path": "patient_12821949/CXR-DICOM/s55643271.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_12821949\\CXR-DICOM\\s55643271.txt",
+      "patient_id": "12821949",
+      "study_id": "55643271",
+      "word_count": 64,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nTwo frontal images of the chest demonstrate ET tube in position\n with the tip 1.3 cm above the carina.  There is no pneumothorax or\n complications seen.  The lungs are well expanded.  Again ..."
+    },
+    {
+      "index": 51,
+      "path": "patient_12843938/CXR-DICOM/s50253911.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_12843938\\CXR-DICOM\\s50253911.txt",
+      "patient_id": "12843938",
+      "study_id": "50253911",
+      "word_count": 66,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nFrontal and lateral views of the chest demonstrate low lung\n volumes, accentuating prominent cardiac silhouette.  There is bilateral\n perihilar peribronchial cuffing and wide spread increase..."
+    },
+    {
+      "index": 52,
+      "path": "patient_12876914/CXR-DICOM/s54805494.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_12876914\\CXR-DICOM\\s54805494.txt",
+      "patient_id": "12876914",
+      "study_id": "54805494",
+      "word_count": 70,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nAP upright and lateral views of the chest provided.\n \n There is subtle asymmetric opacity in the left mid lung best seen on the\n frontal projection which is new from prior exam and concernin..."
+    },
+    {
+      "index": 53,
+      "path": "patient_12963531/CXR-DICOM/s53443143.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_12963531\\CXR-DICOM\\s53443143.txt",
+      "patient_id": "12963531",
+      "study_id": "53443143",
+      "word_count": 63,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nThe lung volumes have decreased.  Signs of chronic interstitial\n fluid overload.  Marked increase of the cardiac silhouette that is now\n moderately to severely increased.  A central venous a..."
+    },
+    {
+      "index": 54,
+      "path": "patient_13011941/CXR-DICOM/s59136181.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13011941\\CXR-DICOM\\s59136181.txt",
+      "patient_id": "13011941",
+      "study_id": "59136181",
+      "word_count": 69,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest provided.\n \n Right pneumothorax has decreased in size. The right chest tube positions are\n unchanged. Chest subcutaneous emphysema is again seen, extending ..."
+    },
+    {
+      "index": 55,
+      "path": "patient_13031876/CXR-DICOM/s53831546.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13031876\\CXR-DICOM\\s53831546.txt",
+      "patient_id": "13031876",
+      "study_id": "53831546",
+      "word_count": 62,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nThe tip of an endotracheal tube is 4.7 cm from the carina.  There\n is stable moderate enlargement of the cardiac silhouette.  The mediastinum is\n normal.  A small left pleural effusion is un..."
+    },
+    {
+      "index": 56,
+      "path": "patient_13071954/CXR-DICOM/s53491735.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13071954\\CXR-DICOM\\s53491735.txt",
+      "patient_id": "13071954",
+      "study_id": "53491735",
+      "word_count": 63,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nHeart size is normal.  Mediastinal and hilar contours are unremarkable.  The\n pulmonary vasculature is normal.  Consolidation in the right middle lobe is\n concerning for pneumonia.  Patchy o..."
+    },
+    {
+      "index": 57,
+      "path": "patient_13080673/CXR-DICOM/s56155503.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13080673\\CXR-DICOM\\s56155503.txt",
+      "patient_id": "13080673",
+      "study_id": "56155503",
+      "word_count": 64,
+      "sentence_count": 7,
+      "content_preview": "IMPRESSION:\n1.  Asymmetric nodular opacification of the right upper lobe raises concern\n for a disseminated infectious process, given the patient's history of sepsis. \n If there is such a clinical con..."
+    },
+    {
+      "index": 58,
+      "path": "patient_13114891/CXR-DICOM/s56289050.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13114891\\CXR-DICOM\\s56289050.txt",
+      "patient_id": "13114891",
+      "study_id": "56289050",
+      "word_count": 63,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nCardiac silhouette size is normal.  Mediastinal and hilar contours are\n unremarkable.  Pulmonary vasculature is not engorged.  Ill-defined patchy\n opacity is seen within the right upper lobe..."
+    },
+    {
+      "index": 59,
+      "path": "patient_13120246/CXR-DICOM/s53601144.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13120246\\CXR-DICOM\\s53601144.txt",
+      "patient_id": "13120246",
+      "study_id": "53601144",
+      "word_count": 63,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nModerate cardiomegaly is re- demonstrated.  The aortic knob is calcified.  The\n hila are enlarged bilaterally compatible with history of pulmonary arterial\n hypertension.  There is mild pulm..."
+    },
+    {
+      "index": 60,
+      "path": "patient_13213685/CXR-DICOM/s56142649.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13213685\\CXR-DICOM\\s56142649.txt",
+      "patient_id": "13213685",
+      "study_id": "56142649",
+      "word_count": 61,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nFrontal and lateral views of the chest were obtained.  Lung volumes\n are slightly low resulting in bronchovascular crowding.  There is no focal\n consolidation, pleural effusion or pneumothor..."
+    },
+    {
+      "index": 61,
+      "path": "patient_13272956/CXR-DICOM/s54416529.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13272956\\CXR-DICOM\\s54416529.txt",
+      "patient_id": "13272956",
+      "study_id": "54416529",
+      "word_count": 65,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nLow lung volumes are noted along with obscuration of the left\n costophrenic angle, likely representing a pleural effusion.  There is mild\n pulmonary vascular congestion.  The right IJ cathet..."
+    },
+    {
+      "index": 62,
+      "path": "patient_13299285/CXR-DICOM/s57868966.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13299285\\CXR-DICOM\\s57868966.txt",
+      "patient_id": "13299285",
+      "study_id": "57868966",
+      "word_count": 66,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nSince , a focal area of consolidation in the right lower lobe\n has developed consistent with right lower lobe pneumonia.  Small right pleural\n effusion is stable.  Mild cardiomegaly is stabl..."
+    },
+    {
+      "index": 63,
+      "path": "patient_13367998/CXR-DICOM/s52108606.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13367998\\CXR-DICOM\\s52108606.txt",
+      "patient_id": "13367998",
+      "study_id": "52108606",
+      "word_count": 65,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nA right subclavian catheter tip terminates in the mid SVC unchanged since the\n prior exam.  There is no focal consolidation, pleural effusion or\n pneumothorax.  Again seen is enlargement of ..."
+    },
+    {
+      "index": 64,
+      "path": "patient_13398212/CXR-DICOM/s52787790.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13398212\\CXR-DICOM\\s52787790.txt",
+      "patient_id": "13398212",
+      "study_id": "52787790",
+      "word_count": 62,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nFrontal and lateral views of the chest were obtained.  There are\n increased interstitial markings bilaterally, suggesting mild interstitial\n edema.  There is blunting of the bilateral costop..."
+    },
+    {
+      "index": 65,
+      "path": "patient_13475033/CXR-DICOM/s59862902.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13475033\\CXR-DICOM\\s59862902.txt",
+      "patient_id": "13475033",
+      "study_id": "59862902",
+      "word_count": 65,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nBilateral interstitial opacities likely represent interstitial edema.  There\n is no new focal consolidation, pleural effusion, or pneumothorax. \n Cardiomegaly persists.  The mediastinal and ..."
+    },
+    {
+      "index": 66,
+      "path": "patient_13511876/CXR-DICOM/s58550681.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13511876\\CXR-DICOM\\s58550681.txt",
+      "patient_id": "13511876",
+      "study_id": "58550681",
+      "word_count": 63,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest are compared to previous exam\n from .  There is mild pulmonary vascular congestion without\n evidence of frank pulmonary edema.  There is no pleural effusion..."
+    },
+    {
+      "index": 67,
+      "path": "patient_13590165/CXR-DICOM/s58797003.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13590165\\CXR-DICOM\\s58797003.txt",
+      "patient_id": "13590165",
+      "study_id": "58797003",
+      "word_count": 69,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest provided.   Port-A-Cath resides over the\n right chest wall with catheter tip extending into the right atrium.  There is\n increased opacity in the left lower..."
+    },
+    {
+      "index": 68,
+      "path": "patient_13606683/CXR-DICOM/s58039737.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13606683\\CXR-DICOM\\s58039737.txt",
+      "patient_id": "13606683",
+      "study_id": "58039737",
+      "word_count": 62,
+      "sentence_count": 7,
+      "content_preview": "IMPRESSION:\n1.  Interval appearance of bilateral layering pleural effusions and associated\n airspace opacity which most likely reflects compressive atelectasis, although\n a pneumonia or aspiration sho..."
+    },
+    {
+      "index": 69,
+      "path": "patient_13621755/CXR-DICOM/s55572085.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13621755\\CXR-DICOM\\s55572085.txt",
+      "patient_id": "13621755",
+      "study_id": "55572085",
+      "word_count": 65,
+      "sentence_count": 7,
+      "content_preview": "                                 FINAL REPORT\n HISTORY:  Dobbhoff tube placement.\n \n CHEST, SINGLE AP PORTABLE VIEW.\n \n A Dobbhoff tube is present.  The tube is looped over the fundus and the\n radiopa..."
+    },
+    {
+      "index": 70,
+      "path": "patient_13871299/CXR-DICOM/s53230429.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13871299\\CXR-DICOM\\s53230429.txt",
+      "patient_id": "13871299",
+      "study_id": "53230429",
+      "word_count": 60,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThe lungs are clear without focal consolidation. The cardiac silhouette is\n moderately enlarged. There may be trace pleural effusions. The patient's arm\n overlies the chest on the lateral vi..."
+    },
+    {
+      "index": 71,
+      "path": "patient_13871390/CXR-DICOM/s54956630.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13871390\\CXR-DICOM\\s54956630.txt",
+      "patient_id": "13871390",
+      "study_id": "54956630",
+      "word_count": 60,
+      "sentence_count": 7,
+      "content_preview": "IMPRESSION:\nPatient is status post endobronchial coronal placement on the right.  There is\n new atelectasis in the right upper lobe.  There is a persistent pneumothorax\n on the right.  The right chest..."
+    },
+    {
+      "index": 72,
+      "path": "patient_13872997/CXR-DICOM/s55257263.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13872997\\CXR-DICOM\\s55257263.txt",
+      "patient_id": "13872997",
+      "study_id": "55257263",
+      "word_count": 65,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nMild cardiomegaly is unchanged.  Low lung volumes are seen with vascular\n crowding and stable bibasilar atelectasis.  There has been interval removal of\n the ETT.  A small to moderate layeri..."
+    },
+    {
+      "index": 73,
+      "path": "patient_13881772/CXR-DICOM/s56217980.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13881772\\CXR-DICOM\\s56217980.txt",
+      "patient_id": "13881772",
+      "study_id": "56217980",
+      "word_count": 66,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nFrontal and lateral views of the chest were obtained.  There are\n small-to-moderate bilateral pleural effusions with overlying atelectasis. \n Mild-to-moderate interstitial edema is also seen..."
+    },
+    {
+      "index": 74,
+      "path": "patient_13945090/CXR-DICOM/s51590645.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13945090\\CXR-DICOM\\s51590645.txt",
+      "patient_id": "13945090",
+      "study_id": "51590645",
+      "word_count": 68,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest provided.   The heart appears mildly\n enlarged.  The mediastinal contour is normal.  The lungs appear relatively\n clear without convincing evidence for pneu..."
+    },
+    {
+      "index": 75,
+      "path": "patient_13964474/CXR-DICOM/s50909414.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13964474\\CXR-DICOM\\s50909414.txt",
+      "patient_id": "13964474",
+      "study_id": "50909414",
+      "word_count": 67,
+      "sentence_count": 7,
+      "content_preview": "                                 FINAL REPORT\n REASON FOR EXAMINATION:  Evaluation of the patient with esophagopleural\n fistula and right necrotizing pneumonia.\n \n AP radiograph of the chest was revie..."
+    },
+    {
+      "index": 76,
+      "path": "patient_13985594/CXR-DICOM/s51851322.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_13985594\\CXR-DICOM\\s51851322.txt",
+      "patient_id": "13985594",
+      "study_id": "51851322",
+      "word_count": 62,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThere is increased opacity at the left infrahilar region concerning\n for infection versus aspiration.  The lungs are slightly hyperinflated.  There\n is no evidence of pneumothorax or pleural..."
+    },
+    {
+      "index": 77,
+      "path": "patient_14001478/CXR-DICOM/s50052026.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_14001478\\CXR-DICOM\\s50052026.txt",
+      "patient_id": "14001478",
+      "study_id": "50052026",
+      "word_count": 68,
+      "sentence_count": 8,
+      "content_preview": "                                 FINAL REPORT\n SINGLE FRONTAL VIEW OF THE CHEST\n \n REASON FOR EXAM:  CCB overdose.\n \n Comparison is made with prior study .\n \n Patient has been extubated.  Right IJ cat..."
+    },
+    {
+      "index": 78,
+      "path": "patient_14108608/CXR-DICOM/s55378455.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_14108608\\CXR-DICOM\\s55378455.txt",
+      "patient_id": "14108608",
+      "study_id": "55378455",
+      "word_count": 60,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThe heart is mildly enlarged but unchanged.  The mediastinal contours are\n stable.  Increased streaky opacities in the lung bases are new compared to the\n prior study.  Small bilateral pleur..."
+    },
+    {
+      "index": 79,
+      "path": "patient_14150037/CXR-DICOM/s50922041.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_14150037\\CXR-DICOM\\s50922041.txt",
+      "patient_id": "14150037",
+      "study_id": "50922041",
+      "word_count": 66,
+      "sentence_count": 7,
+      "content_preview": "IMPRESSION:\nET tube tip is 5 cm above the carinal.  Swan-Ganz catheter tip is at the right\n ventricle outflow tract.  Right internal jugular line tip is at the level of\n superior SVC.  LVED appears to..."
+    },
+    {
+      "index": 80,
+      "path": "patient_14150037/CXR-DICOM/s53453723.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_14150037\\CXR-DICOM\\s53453723.txt",
+      "patient_id": "14150037",
+      "study_id": "53453723",
+      "word_count": 65,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThe cardiac silhouette is markedly enlarged with a globular morphology,\n raising the possibility of a pericardial effusion.  There is prominence of the\n perihilar vessels with vascular conge..."
+    },
+    {
+      "index": 81,
+      "path": "patient_14199690/CXR-DICOM/s50468997.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_14199690\\CXR-DICOM\\s50468997.txt",
+      "patient_id": "14199690",
+      "study_id": "50468997",
+      "word_count": 69,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nAs compared to the previous radiograph, all monitoring and support\n devices have been removed.  The patient shows cardiomegaly after CABG.  The\n sternal wires are in correct position.  Bette..."
+    },
+    {
+      "index": 82,
+      "path": "patient_14250712/CXR-DICOM/s53406939.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_14250712\\CXR-DICOM\\s53406939.txt",
+      "patient_id": "14250712",
+      "study_id": "53406939",
+      "word_count": 62,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nAs compared to prior chest radiograph from , there is\n persistent improvement of heterogeneous opacities along the right lower lung.\n The left lung remains clear. There are no new focal cons..."
+    },
+    {
+      "index": 83,
+      "path": "patient_14335490/CXR-DICOM/s55920416.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_14335490\\CXR-DICOM\\s55920416.txt",
+      "patient_id": "14335490",
+      "study_id": "55920416",
+      "word_count": 64,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nAP upright portable chest radiograph obtained.  Lateral inferior\n aspect of the right CP angle is excluded.  Low lung volumes limits evaluation,\n though allowing for this, the lungs appear c..."
+    },
+    {
+      "index": 84,
+      "path": "patient_14361828/CXR-DICOM/s55612557.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_14361828\\CXR-DICOM\\s55612557.txt",
+      "patient_id": "14361828",
+      "study_id": "55612557",
+      "word_count": 60,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nHeart size remains unchanged and within normal limits.  Mediastinal and hilar\n contours are unremarkable.  Pulmonary vasculature is normal.  Chronic\n interstitial opacity in the left lung ba..."
+    },
+    {
+      "index": 85,
+      "path": "patient_14558067/CXR-DICOM/s58538027.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_14558067\\CXR-DICOM\\s58538027.txt",
+      "patient_id": "14558067",
+      "study_id": "58538027",
+      "word_count": 69,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nSingle supine AP portable view of the chest was obtained.  No focal\n consolidation, pleural effusions, or evidence of pneumothorax is seen.  The\n cardiac silhouette is top normal to mildly e..."
+    },
+    {
+      "index": 86,
+      "path": "patient_14591152/CXR-DICOM/s53504951.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_14591152\\CXR-DICOM\\s53504951.txt",
+      "patient_id": "14591152",
+      "study_id": "53504951",
+      "word_count": 60,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nThe inspiratory lung volumes are slightly decreased.  The lungs are\n clear without focal consolidation concerning for pneumonia, pleural effusion\n or pneumothorax.  The pulmonary vasculature..."
+    },
+    {
+      "index": 87,
+      "path": "patient_14677614/CXR-DICOM/s55703813.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_14677614\\CXR-DICOM\\s55703813.txt",
+      "patient_id": "14677614",
+      "study_id": "55703813",
+      "word_count": 65,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nCardiac silhouette size is likely within normal limits.  The mediastinal and\n hilar contours are unremarkable, and no pulmonary edema is present.  A large\n left pleural effusion is present a..."
+    },
+    {
+      "index": 88,
+      "path": "patient_14732131/CXR-DICOM/s57515735.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_14732131\\CXR-DICOM\\s57515735.txt",
+      "patient_id": "14732131",
+      "study_id": "57515735",
+      "word_count": 69,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nThe heart size is normal.  The mediastinal contours are unremarkable.  Diffuse\n hazy ill-defined opacities are noted within both lungs.  Small bilateral\n pleural effusions are also noted.  N..."
+    },
+    {
+      "index": 89,
+      "path": "patient_14744884/CXR-DICOM/s52630162.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_14744884\\CXR-DICOM\\s52630162.txt",
+      "patient_id": "14744884",
+      "study_id": "52630162",
+      "word_count": 68,
+      "sentence_count": 7,
+      "content_preview": "IMPRESSION:\nTip tip of the endotracheal tube is at least 7 cm above the carina an should\n be advanced at least 3 cm. House staff paged.\n \n \n \n Esophageal drainage tube passes into the stomach and out ..."
+    },
+    {
+      "index": 90,
+      "path": "patient_14841168/CXR-DICOM/s59481059.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_14841168\\CXR-DICOM\\s59481059.txt",
+      "patient_id": "14841168",
+      "study_id": "59481059",
+      "word_count": 62,
+      "sentence_count": 7,
+      "content_preview": "IMPRESSION:\nCompared to prior chest radiographs  through .\n \n Consolidation in the left lower lobe has been present for more than a week,\n improved slightly.  This could be pneumonia, but atelectasis ..."
+    },
+    {
+      "index": 91,
+      "path": "patient_14875942/CXR-DICOM/s59396136.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_14875942\\CXR-DICOM\\s59396136.txt",
+      "patient_id": "14875942",
+      "study_id": "59396136",
+      "word_count": 69,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nLungs are low lung volumes with vascular engorgement and thickened\n septal lines compatible with acute congestive failure.  In this context,\n assessment for focal consolidation is limited.  ..."
+    },
+    {
+      "index": 92,
+      "path": "patient_14939850/CXR-DICOM/s51892605.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_14939850\\CXR-DICOM\\s51892605.txt",
+      "patient_id": "14939850",
+      "study_id": "51892605",
+      "word_count": 67,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThe lungs are well expanded.  The right lung is clear.  There is an\n opacity blunting the left costophrenic angle which is confirmed in the lateral\n view without clear fluid meniscus.  The r..."
+    },
+    {
+      "index": 93,
+      "path": "patient_15131736/CXR-DICOM/s56028927.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_15131736\\CXR-DICOM\\s56028927.txt",
+      "patient_id": "15131736",
+      "study_id": "56028927",
+      "word_count": 67,
+      "sentence_count": 7,
+      "content_preview": "                                 FINAL REPORT\n REASON FOR EXAMINATION:  Evaluation of the patient with COPD exacerbation.\n \n Portable AP radiograph of the chest was reviewed in comparison to .\n \n The ..."
+    },
+    {
+      "index": 94,
+      "path": "patient_15185305/CXR-DICOM/s58478940.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_15185305\\CXR-DICOM\\s58478940.txt",
+      "patient_id": "15185305",
+      "study_id": "58478940",
+      "word_count": 67,
+      "sentence_count": 8,
+      "content_preview": "                                 FINAL REPORT\n REASON FOR EXAMINATION:  Evaluation of the patient after MVC with bilateral\n lower extremity edema.\n \n AP radiograph of the chest was compared to .\n \n Th..."
+    },
+    {
+      "index": 95,
+      "path": "patient_15195362/CXR-DICOM/s59446236.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_15195362\\CXR-DICOM\\s59446236.txt",
+      "patient_id": "15195362",
+      "study_id": "59446236",
+      "word_count": 66,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nComparison is made to prior study from .  \n \n There is cardiomegaly.  Tracheostomy is again seen.  There is elevation of the\n right hemidiaphragmatic contour.  There is prominence of the pul..."
+    },
+    {
+      "index": 96,
+      "path": "patient_15225006/CXR-DICOM/s52705280.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_15225006\\CXR-DICOM\\s52705280.txt",
+      "patient_id": "15225006",
+      "study_id": "52705280",
+      "word_count": 64,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nFrontal and lateral views of the chest.  Slightly lower lung\n volumes are seen on the current exam.  Increased interstitial markings have\n progressed since prior.  There are small bilateral ..."
+    },
+    {
+      "index": 97,
+      "path": "patient_15245907/CXR-DICOM/s54604346.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_15245907\\CXR-DICOM\\s54604346.txt",
+      "patient_id": "15245907",
+      "study_id": "54604346",
+      "word_count": 69,
+      "sentence_count": 7,
+      "content_preview": "IMPRESSION:\nModerate right pleural effusion is larger, moderate left pleural effusion\n stable or slightly smaller compared to .  Heart is normal size.\n \n Multi focal pulmonary consolidation is more pr..."
+    },
+    {
+      "index": 98,
+      "path": "patient_15467022/CXR-DICOM/s55971724.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_15467022\\CXR-DICOM\\s55971724.txt",
+      "patient_id": "15467022",
+      "study_id": "55971724",
+      "word_count": 69,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThin left-sided dual-chamber pacemaker device is again noted with leads\n terminating in the right atrium and ventricle. The aorta is mildly tortuous,\n otherwise the hilar and mediastinal con..."
+    },
+    {
+      "index": 99,
+      "path": "patient_15508006/CXR-DICOM/s56802578.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_15508006\\CXR-DICOM\\s56802578.txt",
+      "patient_id": "15508006",
+      "study_id": "56802578",
+      "word_count": 63,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThere are small bilateral pleural effusions, similar to prior.  Streaky left\n basilar opacity is most suggestive of atelectasis.  The lungs are otherwise\n clear without consolidation worriso..."
+    },
+    {
+      "index": 100,
+      "path": "patient_15558165/CXR-DICOM/s54589824.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_15558165\\CXR-DICOM\\s54589824.txt",
+      "patient_id": "15558165",
+      "study_id": "54589824",
+      "word_count": 60,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nSince the prior chest x-ray, the right-sided pneumothorax appears to have\n resolved.  The right chest tube is unchanged in position.  Again noted is a\n left subclavian approach catheter that..."
+    },
+    {
+      "index": 101,
+      "path": "patient_15633489/CXR-DICOM/s51081532.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_15633489\\CXR-DICOM\\s51081532.txt",
+      "patient_id": "15633489",
+      "study_id": "51081532",
+      "word_count": 70,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThe lung volumes are low.  The cardiac, mediastinal and hilar contours appear\n stable including prominence of central mediastinal pulmonary arteries.  There\n is no definite pleural effusion ..."
+    },
+    {
+      "index": 102,
+      "path": "patient_15713148/CXR-DICOM/s53253561.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_15713148\\CXR-DICOM\\s53253561.txt",
+      "patient_id": "15713148",
+      "study_id": "53253561",
+      "word_count": 69,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nFrontal and lateral views of the chest were obtained.  Lung volumes\n are low, exaggerating heart size and bronchovascular markings.  Cardiomegaly\n is moderate and the left atrium is enlarged..."
+    },
+    {
+      "index": 103,
+      "path": "patient_15773840/CXR-DICOM/s54963146.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_15773840\\CXR-DICOM\\s54963146.txt",
+      "patient_id": "15773840",
+      "study_id": "54963146",
+      "word_count": 64,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nAs compared to the previous radiograph, there is minimal\n improvement in aeration at the bases of the left lung.  The right lung\n continues to be unremarkable.  The nasogastric tube has been..."
+    },
+    {
+      "index": 104,
+      "path": "patient_15870527/CXR-DICOM/s53218038.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_15870527\\CXR-DICOM\\s53218038.txt",
+      "patient_id": "15870527",
+      "study_id": "53218038",
+      "word_count": 61,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest were provided.  A tripolar AICD\n is again noted with leads extending into the region of right atrium, coronary\n sinus and right ventricle.  The lungs are cl..."
+    },
+    {
+      "index": 105,
+      "path": "patient_15974908/CXR-DICOM/s57921801.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_15974908\\CXR-DICOM\\s57921801.txt",
+      "patient_id": "15974908",
+      "study_id": "57921801",
+      "word_count": 64,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThere is increased opacification of the lingula and right lower lung.  There\n is likely a background of interstitial lung disease P The hilar and\n cardiomediastinal contours are normal. Ther..."
+    },
+    {
+      "index": 106,
+      "path": "patient_16167420/CXR-DICOM/s53385099.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_16167420\\CXR-DICOM\\s53385099.txt",
+      "patient_id": "16167420",
+      "study_id": "53385099",
+      "word_count": 60,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nSmall left pleural effusion is unchanged.  No lung opacities of\n concern.  Top normal heart size.  Mediastinal and hilar contours are\n unchanged.  Moderate atherosclerotic calcification in a..."
+    },
+    {
+      "index": 107,
+      "path": "patient_16245512/CXR-DICOM/s50731169.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_16245512\\CXR-DICOM\\s50731169.txt",
+      "patient_id": "16245512",
+      "study_id": "50731169",
+      "word_count": 64,
+      "sentence_count": 7,
+      "content_preview": "IMPRESSION:\nThe patient has a history of multifocal pneumonia.  In the interval, the\n extent and severity of the right upper lobe parenchymal opacities has markedly\n increased.  Slightly increased  le..."
+    },
+    {
+      "index": 108,
+      "path": "patient_16334516/CXR-DICOM/s52628998.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_16334516\\CXR-DICOM\\s52628998.txt",
+      "patient_id": "16334516",
+      "study_id": "52628998",
+      "word_count": 67,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nAs compared to the previous radiograph, there is known scarring at\n the bases of the right upper lobe, associated with a minor degree of volume\n loss as well as scarring in the left lung, th..."
+    },
+    {
+      "index": 109,
+      "path": "patient_16360107/CXR-DICOM/s52598379.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_16360107\\CXR-DICOM\\s52598379.txt",
+      "patient_id": "16360107",
+      "study_id": "52598379",
+      "word_count": 62,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nSingle AP upright portable view of the chest was obtained.  Chronic\n bilateral pleural effusions are again seen, decreased on the left.  There is\n bibasilar atelectasis.  The cardiac silhoue..."
+    },
+    {
+      "index": 110,
+      "path": "patient_16486158/CXR-DICOM/s50537653.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_16486158\\CXR-DICOM\\s50537653.txt",
+      "patient_id": "16486158",
+      "study_id": "50537653",
+      "word_count": 66,
+      "sentence_count": 7,
+      "content_preview": "IMPRESSION:\nCompared to prior chest radiographs, most recently , 19:34.\n \n New opacification at the left lung base and leftward mediastinal shift are\n explained by new atelectasis, accompanied by new ..."
+    },
+    {
+      "index": 111,
+      "path": "patient_16508811/CXR-DICOM/s52933806.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_16508811\\CXR-DICOM\\s52933806.txt",
+      "patient_id": "16508811",
+      "study_id": "52933806",
+      "word_count": 61,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nRight lower lung opacities are increased since , concerning for\n worsening or new pneumonia.  The left lung is essentially clear.  Mild\n bibasilar atelectasis is noted. The heart size is sta..."
+    },
+    {
+      "index": 112,
+      "path": "patient_16518959/CXR-DICOM/s54844727.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_16518959\\CXR-DICOM\\s54844727.txt",
+      "patient_id": "16518959",
+      "study_id": "54844727",
+      "word_count": 68,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nThe lungs are hypoinflated with crowding of vasculature.  The right lung is\n clear. There is a new heterogeneous left lower lobe opacity.  No pleural\n effusion or pneumothorax.  Heart size a..."
+    },
+    {
+      "index": 113,
+      "path": "patient_16607751/CXR-DICOM/s50117678.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_16607751\\CXR-DICOM\\s50117678.txt",
+      "patient_id": "16607751",
+      "study_id": "50117678",
+      "word_count": 68,
+      "sentence_count": 7,
+      "content_preview": "IMPRESSION:\nComparison to , 22:04.  The lung volumes have slightly\n decreased.  Mild atelectasis at the left lung bases.  Of the chest tube\n removal on the right there is no radiographic evidence for ..."
+    },
+    {
+      "index": 114,
+      "path": "patient_16672854/CXR-DICOM/s54046805.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_16672854\\CXR-DICOM\\s54046805.txt",
+      "patient_id": "16672854",
+      "study_id": "54046805",
+      "word_count": 61,
+      "sentence_count": 8,
+      "content_preview": "                                 FINAL REPORT\n INDICATION:  -year-old man with epistaxis, now with bandemia.  Evaluate for\n pneumonitis versus pneumonia.\n \n COMPARISON:  PA and lateral chest radiograp..."
+    },
+    {
+      "index": 115,
+      "path": "patient_16690146/CXR-DICOM/s56314674.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_16690146\\CXR-DICOM\\s56314674.txt",
+      "patient_id": "16690146",
+      "study_id": "56314674",
+      "word_count": 68,
+      "sentence_count": 8,
+      "content_preview": "                                 FINAL REPORT\n SINGLE FRONTAL VIEW OF THE CHEST\n \n REASON FOR EXAM:  Recent volume resuscitation, has sudden onset of shortness\n of breath.\n \n Comparison is made with p..."
+    },
+    {
+      "index": 116,
+      "path": "patient_16735911/CXR-DICOM/s50138272.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_16735911\\CXR-DICOM\\s50138272.txt",
+      "patient_id": "16735911",
+      "study_id": "50138272",
+      "word_count": 62,
+      "sentence_count": 7,
+      "content_preview": "IMPRESSION:\nAP chest compared to :\n \n Still intubated, lung volumes have increased.  Heterogeneous opacification\n throughout both lungs suggests widespread pneumonia, possibly cavitary. No\n doubt chro..."
+    },
+    {
+      "index": 117,
+      "path": "patient_16737973/CXR-DICOM/s51469193.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_16737973\\CXR-DICOM\\s51469193.txt",
+      "patient_id": "16737973",
+      "study_id": "51469193",
+      "word_count": 70,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThere is hazy right basilar opacity new since prior exam. Elsewhere, the lungs\n are clear. There is no effusion or pulmonary vascular congestion. Cardiac\n silhouette is enlarged similar in c..."
+    },
+    {
+      "index": 118,
+      "path": "patient_16855430/CXR-DICOM/s55801123.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_16855430\\CXR-DICOM\\s55801123.txt",
+      "patient_id": "16855430",
+      "study_id": "55801123",
+      "word_count": 65,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nPortable AP chest radiograph demonstrates stable positioning of the\n left PICC. Pulmonary edema has cleared significantly since . \n However, there still is a moderate pleural effusion and op..."
+    },
+    {
+      "index": 119,
+      "path": "patient_16957952/CXR-DICOM/s59610928.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_16957952\\CXR-DICOM\\s59610928.txt",
+      "patient_id": "16957952",
+      "study_id": "59610928",
+      "word_count": 63,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThere are increased interstitial markings bilaterally not\n significantly changed from , but no focal opacities.  Heart size is\n top normal.  The aorta is tortuous.  There is no pleural effus..."
+    },
+    {
+      "index": 120,
+      "path": "patient_16976729/CXR-DICOM/s52300992.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_16976729\\CXR-DICOM\\s52300992.txt",
+      "patient_id": "16976729",
+      "study_id": "52300992",
+      "word_count": 61,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest provided.   The lungs are hyperlucent\n suggesting emphysema.  Right super hilar opacity is incompletely assessed.  No\n large effusion or pneumothorax.  Card..."
+    },
+    {
+      "index": 121,
+      "path": "patient_16994918/CXR-DICOM/s53702715.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_16994918\\CXR-DICOM\\s53702715.txt",
+      "patient_id": "16994918",
+      "study_id": "53702715",
+      "word_count": 67,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nThere small to moderate bilateral pleural effusions with overlying\n atelectasis.  There is moderate pulmonary edema.  Underlying infection is\n difficult to exclude.  The cardiac silhouette i..."
+    },
+    {
+      "index": 122,
+      "path": "patient_17030962/CXR-DICOM/s58129414.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17030962\\CXR-DICOM\\s58129414.txt",
+      "patient_id": "17030962",
+      "study_id": "58129414",
+      "word_count": 67,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nAn endotracheal tube is approximately 2.5 cm from the carina.  A\n right internal jugular central line ends in the low SVC.  A feeding tube is in\n the stomach with the tip out of view.  Left ..."
+    },
+    {
+      "index": 123,
+      "path": "patient_17087909/CXR-DICOM/s55007351.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17087909\\CXR-DICOM\\s55007351.txt",
+      "patient_id": "17087909",
+      "study_id": "55007351",
+      "word_count": 68,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nAgain seen are perihilar regions of consolidation, right greater than left\n which have slightly progressed since yesterday's exam.  Cardiomediastinal\n silhouette is stable noting  lying card..."
+    },
+    {
+      "index": 124,
+      "path": "patient_17112109/CXR-DICOM/s55858471.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17112109\\CXR-DICOM\\s55858471.txt",
+      "patient_id": "17112109",
+      "study_id": "55858471",
+      "word_count": 63,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThe lungs remain mildly hyperinflated.  Left basal airspace opacity has\n improved slightly when compared to the prior study.  There are small residual\n bilateral pleural effusions.  No other..."
+    },
+    {
+      "index": 125,
+      "path": "patient_17112205/CXR-DICOM/s58790361.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17112205\\CXR-DICOM\\s58790361.txt",
+      "patient_id": "17112205",
+      "study_id": "58790361",
+      "word_count": 68,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nThe cardiac silhouette size is normal.  The mediastinal and hilar contours are\n unremarkable.  The lungs are clear and the pulmonary vascularity is normal. \n No focal consolidation or pneumo..."
+    },
+    {
+      "index": 126,
+      "path": "patient_17114146/CXR-DICOM/s55670691.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17114146\\CXR-DICOM\\s55670691.txt",
+      "patient_id": "17114146",
+      "study_id": "55670691",
+      "word_count": 69,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nAs compared to previous radiograph, the previously placed right\n Port-A-Cath has been removed.  The patient has a right chest tube after right\n upper lobectomy.  Postoperative predominantly ..."
+    },
+    {
+      "index": 127,
+      "path": "patient_17137767/CXR-DICOM/s52035533.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17137767\\CXR-DICOM\\s52035533.txt",
+      "patient_id": "17137767",
+      "study_id": "52035533",
+      "word_count": 64,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nLung bases are relatively underpenetrated due to patient body habitus.  Given\n this, no definite focal consolidation is seen.  There is no large pleural\n effusion or pneumothorax.  The cardi..."
+    },
+    {
+      "index": 128,
+      "path": "patient_17139582/CXR-DICOM/s53630228.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17139582\\CXR-DICOM\\s53630228.txt",
+      "patient_id": "17139582",
+      "study_id": "53630228",
+      "word_count": 60,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nInterval increase in right infrahilar opacity as well as retrocardiac opacity\n may reflect right lower lobe bronchopneumonia.  Bilateral lower lobe\n atelectasis is moderate.  No pleural effu..."
+    },
+    {
+      "index": 129,
+      "path": "patient_17189198/CXR-DICOM/s55198163.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17189198\\CXR-DICOM\\s55198163.txt",
+      "patient_id": "17189198",
+      "study_id": "55198163",
+      "word_count": 62,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nFrontal and lateral chest radiographs demonstrate moderate\n interstitial pulmonary edema.  The heart size is moderately enlarged, there\n are moderate bilateral pleural effusion.  There is no..."
+    },
+    {
+      "index": 130,
+      "path": "patient_17216263/CXR-DICOM/s53839210.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17216263\\CXR-DICOM\\s53839210.txt",
+      "patient_id": "17216263",
+      "study_id": "53839210",
+      "word_count": 61,
+      "sentence_count": 7,
+      "content_preview": "IMPRESSION:\nCompared to prior chest radiographs  through .\n \n Mild pulmonary edema has developed since , worsened since . \n Opacification at the lung bases could be combination of dependent edema and\n..."
+    },
+    {
+      "index": 131,
+      "path": "patient_17340686/CXR-DICOM/s54477721.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17340686\\CXR-DICOM\\s54477721.txt",
+      "patient_id": "17340686",
+      "study_id": "54477721",
+      "word_count": 68,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nLeft sided dual lumen catheter tip terminates within the proximal right\n atrium, unchanged.  Mild to moderate cardiomegaly is similar.  The aorta\n remains tortuous and diffusely calcified.  ..."
+    },
+    {
+      "index": 132,
+      "path": "patient_17448106/CXR-DICOM/s50445442.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17448106\\CXR-DICOM\\s50445442.txt",
+      "patient_id": "17448106",
+      "study_id": "50445442",
+      "word_count": 64,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nMild to moderate enlargement of the cardiac silhouette is unchanged.  The\n mediastinal and hilar contours are within normal limits.  Pulmonary\n vasculature is not engorged.  Small bilateral ..."
+    },
+    {
+      "index": 133,
+      "path": "patient_17467341/CXR-DICOM/s52718685.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17467341\\CXR-DICOM\\s52718685.txt",
+      "patient_id": "17467341",
+      "study_id": "52718685",
+      "word_count": 63,
+      "sentence_count": 7,
+      "content_preview": "IMPRESSION:\nAP chest compared to  through :\n \n Mild pulmonary edema has improved in the left lung, but not in the right,\n raising concern for developing right lower lobe pneumonia.  Moderate\n cardiome..."
+    },
+    {
+      "index": 134,
+      "path": "patient_17473722/CXR-DICOM/s58792606.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17473722\\CXR-DICOM\\s58792606.txt",
+      "patient_id": "17473722",
+      "study_id": "58792606",
+      "word_count": 69,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nBilateral lower lobe consolidations are worrisome for multifocal pneumonia.\n There is also subtle right apical opacity, new since the prior study which may\n be due additional site of infecti..."
+    },
+    {
+      "index": 135,
+      "path": "patient_17581899/CXR-DICOM/s59781062.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17581899\\CXR-DICOM\\s59781062.txt",
+      "patient_id": "17581899",
+      "study_id": "59781062",
+      "word_count": 70,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest were provided.  On the lateral\n view, there is subtle opacity obscuring the lower T-spine, which could\n represent a lower lobe pneumonia in the correct clin..."
+    },
+    {
+      "index": 136,
+      "path": "patient_17643026/CXR-DICOM/s51790826.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17643026\\CXR-DICOM\\s51790826.txt",
+      "patient_id": "17643026",
+      "study_id": "51790826",
+      "word_count": 60,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nFrontal and lateral chest radiographs demonstrate intact sternal wires.  There\n has been interval placement of a left chest wall pacer device with leads\n overlying the bilateral atria and th..."
+    },
+    {
+      "index": 137,
+      "path": "patient_17648869/CXR-DICOM/s56602441.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17648869\\CXR-DICOM\\s56602441.txt",
+      "patient_id": "17648869",
+      "study_id": "56602441",
+      "word_count": 66,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThe patient is status post median sternotomy and CABG. There is mild to\n moderate pulmonary edema and prominence of the central pulmonary vasculature.\n There are trace bilateral pleural effu..."
+    },
+    {
+      "index": 138,
+      "path": "patient_17651172/CXR-DICOM/s55579027.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17651172\\CXR-DICOM\\s55579027.txt",
+      "patient_id": "17651172",
+      "study_id": "55579027",
+      "word_count": 67,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nAt the right base, there is a linear patchy opacity most consistent\n with atelectasis.  This is not significantly changed from the prior exam. \n There is no new consolidation, pulmonary edem..."
+    },
+    {
+      "index": 139,
+      "path": "patient_17781570/CXR-DICOM/s51131817.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17781570\\CXR-DICOM\\s51131817.txt",
+      "patient_id": "17781570",
+      "study_id": "51131817",
+      "word_count": 65,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nA left-sided dual-chamber pacemaker device is noted with leads terminating in\n the right atrium and right ventricle.  The cardiac, mediastinal and hilar\n contours are normal.  The pulmonary ..."
+    },
+    {
+      "index": 140,
+      "path": "patient_17898039/CXR-DICOM/s58958670.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17898039\\CXR-DICOM\\s58958670.txt",
+      "patient_id": "17898039",
+      "study_id": "58958670",
+      "word_count": 65,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nModerate enlargement of the cardiac silhouette is present.  The mediastinal\n and hilar contours are within normal limits.  Pulmonary vasculature is not\n engorged.  Patchy opacities are noted..."
+    },
+    {
+      "index": 141,
+      "path": "patient_17943298/CXR-DICOM/s59552146.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17943298\\CXR-DICOM\\s59552146.txt",
+      "patient_id": "17943298",
+      "study_id": "59552146",
+      "word_count": 64,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nFrontal and lateral views of the chest were obtained.  Per the\n radiology technologist, patient was unable to completely listen to commands\n and co-operate.  Given this, there is bibasilar a..."
+    },
+    {
+      "index": 142,
+      "path": "patient_17948002/CXR-DICOM/s54022929.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_17948002\\CXR-DICOM\\s54022929.txt",
+      "patient_id": "17948002",
+      "study_id": "54022929",
+      "word_count": 64,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest were examined.  The heart size is\n normal. An AICD is seen with leads terminating in the right atrium and right\n ventricle. The mediastinal and hilar contou..."
+    },
+    {
+      "index": 143,
+      "path": "patient_18009858/CXR-DICOM/s52128684.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_18009858\\CXR-DICOM\\s52128684.txt",
+      "patient_id": "18009858",
+      "study_id": "52128684",
+      "word_count": 67,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest provided demonstrate no focal\n consolidation, effusion, or pneumothorax.  Additional history provided\n includes locally advanced esophageal cancer with prio..."
+    },
+    {
+      "index": 144,
+      "path": "patient_18043576/CXR-DICOM/s59470333.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_18043576\\CXR-DICOM\\s59470333.txt",
+      "patient_id": "18043576",
+      "study_id": "59470333",
+      "word_count": 60,
+      "sentence_count": 7,
+      "content_preview": "IMPRESSION:\nThe nasogastric tube is now Foley included on the image. The tip of the tube\n projects over the pre-pyloric region of the stomach.  No evidence of\n complication, notably no pneumothorax. I..."
+    },
+    {
+      "index": 145,
+      "path": "patient_18096934/CXR-DICOM/s57896500.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_18096934\\CXR-DICOM\\s57896500.txt",
+      "patient_id": "18096934",
+      "study_id": "57896500",
+      "word_count": 70,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nAgain seen are multifocal patchy airspace opacities in a similar distribution\n to the prior study, predominately in the left base.  The appearances are\n consistent with a multifocal pneumoni..."
+    },
+    {
+      "index": 146,
+      "path": "patient_18309149/CXR-DICOM/s50035498.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_18309149\\CXR-DICOM\\s50035498.txt",
+      "patient_id": "18309149",
+      "study_id": "50035498",
+      "word_count": 69,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nPA and lateral chest views were obtained with patient in upright\n position.  Analysis is performed in direct comparison with the next preceding\n similar study of .  During the examination in..."
+    },
+    {
+      "index": 147,
+      "path": "patient_18520455/CXR-DICOM/s57965087.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_18520455\\CXR-DICOM\\s57965087.txt",
+      "patient_id": "18520455",
+      "study_id": "57965087",
+      "word_count": 61,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThere has been interval decreased left pleural effusion following\n thoracentesis.  There is a small left apical pneumothorax.  There is no\n significant interval change in pulmonary vasculatu..."
+    },
+    {
+      "index": 148,
+      "path": "patient_18654891/CXR-DICOM/s50678086.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_18654891\\CXR-DICOM\\s50678086.txt",
+      "patient_id": "18654891",
+      "study_id": "50678086",
+      "word_count": 66,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nCardiac, mediastinal and hilar contours are normal.  The pulmonary vasculature\n is normal.  Patchy opacity is noted within the lower lobe, possibly on the\n left, concerning for pneumonia.  N..."
+    },
+    {
+      "index": 149,
+      "path": "patient_18855495/CXR-DICOM/s59335033.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_18855495\\CXR-DICOM\\s59335033.txt",
+      "patient_id": "18855495",
+      "study_id": "59335033",
+      "word_count": 63,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nSince prior in there has been near complete resolution of the opacity in the\n right lung.  Minimal right basilar opacity seen on the frontal view may be due\n to atelectasis.  The left lung r..."
+    },
+    {
+      "index": 150,
+      "path": "patient_18896755/CXR-DICOM/s55884151.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_18896755\\CXR-DICOM\\s55884151.txt",
+      "patient_id": "18896755",
+      "study_id": "55884151",
+      "word_count": 66,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nThere is background hyperinflation, with flattening of the diaphragms.  Heart\n size is at the upper limits of normal.  Aorta is minimally unfolded.  Within\n the limits of plain film radiogra..."
+    },
+    {
+      "index": 151,
+      "path": "patient_18978682/CXR-DICOM/s54392033.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_18978682\\CXR-DICOM\\s54392033.txt",
+      "patient_id": "18978682",
+      "study_id": "54392033",
+      "word_count": 61,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nComparison is made to prior study from .\n \n There is a right-sided PICC line with distal lead tip at the cavoatrial\n junction.  There are low lung volumes with atelectasis at the lung bases ..."
+    },
+    {
+      "index": 152,
+      "path": "patient_19005970/CXR-DICOM/s50435149.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_19005970\\CXR-DICOM\\s50435149.txt",
+      "patient_id": "19005970",
+      "study_id": "50435149",
+      "word_count": 70,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThe lungs are clear.  Cardiac silhouette is normal.  No pleural effusion or\n pneumothorax. There is no free air.\n \n Previously, the left hilar region was thought to be slightly rounded in it..."
+    },
+    {
+      "index": 153,
+      "path": "patient_19061282/CXR-DICOM/s59509358.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_19061282\\CXR-DICOM\\s59509358.txt",
+      "patient_id": "19061282",
+      "study_id": "59509358",
+      "word_count": 60,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThere bilateral regions of consolidation, at the right lung and left mid to\n lower lung.  Findings are most concerning for bilateral infection. Moderate\n enlargement of the cardiac silhouett..."
+    },
+    {
+      "index": 154,
+      "path": "patient_19064289/CXR-DICOM/s58122805.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_19064289\\CXR-DICOM\\s58122805.txt",
+      "patient_id": "19064289",
+      "study_id": "58122805",
+      "word_count": 62,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nFrontal and lateral views of the chest demonstrate low lung\n volumes, accentuating enlarged cardiac silhouette.  The mediastinal and hilar\n contours are within normal limits.  The lungs are ..."
+    },
+    {
+      "index": 155,
+      "path": "patient_19073526/CXR-DICOM/s57782651.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_19073526\\CXR-DICOM\\s57782651.txt",
+      "patient_id": "19073526",
+      "study_id": "57782651",
+      "word_count": 69,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThere is moderate cardiomegaly.  The small left pleural effusion is\n unchanged compared to the prior exam.  There appears to be mild interstitial\n edema. No new focal consolidations are iden..."
+    },
+    {
+      "index": 156,
+      "path": "patient_19100978/CXR-DICOM/s52344768.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_19100978\\CXR-DICOM\\s52344768.txt",
+      "patient_id": "19100978",
+      "study_id": "52344768",
+      "word_count": 60,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nA Port-A-Cath terminates in the superior vena cava.  The cardiac, mediastinal\n and hilar contours appear stable.  There is vague persistent opacity in the\n left lower lobe which is apparentl..."
+    },
+    {
+      "index": 157,
+      "path": "patient_19346228/CXR-DICOM/s54100364.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_19346228\\CXR-DICOM\\s54100364.txt",
+      "patient_id": "19346228",
+      "study_id": "54100364",
+      "word_count": 67,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest are obtained.  There is subtle\n opacity in the expected region of the inferior lingula, which could represent\n an early or resolving pneumonia.  The remaind..."
+    },
+    {
+      "index": 158,
+      "path": "patient_19362609/CXR-DICOM/s56750552.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_19362609\\CXR-DICOM\\s56750552.txt",
+      "patient_id": "19362609",
+      "study_id": "56750552",
+      "word_count": 68,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nFrontal and lateral views of the chest.  Postoperative changes of right upper\n lobectomy are seen with volume loss in the right hemithorax. \n Hydropneumothorax is again seen with fluid level..."
+    },
+    {
+      "index": 159,
+      "path": "patient_19365016/CXR-DICOM/s58124714.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_19365016\\CXR-DICOM\\s58124714.txt",
+      "patient_id": "19365016",
+      "study_id": "58124714",
+      "word_count": 60,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nRight chest wall Port-A-Cath is seen with catheter tip extending to the mid\n SVC region. Hyperinflated lungs are noted with flattened diaphragms compatible\n with COPD. No focal consolidation..."
+    },
+    {
+      "index": 160,
+      "path": "patient_19454512/CXR-DICOM/s56957077.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_19454512\\CXR-DICOM\\s56957077.txt",
+      "patient_id": "19454512",
+      "study_id": "56957077",
+      "word_count": 63,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nPersistent markedly elevation the right hemidiaphragm is demonstrated. No\n focal consolidation is identified. When compared to prior chest radiograph\n dated , the cardiomediastinal silhouett..."
+    },
+    {
+      "index": 161,
+      "path": "patient_19552401/CXR-DICOM/s50264712.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_19552401\\CXR-DICOM\\s50264712.txt",
+      "patient_id": "19552401",
+      "study_id": "50264712",
+      "word_count": 62,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nPA and lateral chest radiographs were obtained.  \n \n The patient is status post median sternotomy and CABG.  There are prominent\n interstitial markings as well as bronchovascular crowding ac..."
+    },
+    {
+      "index": 162,
+      "path": "patient_19584206/CXR-DICOM/s50066801.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_19584206\\CXR-DICOM\\s50066801.txt",
+      "patient_id": "19584206",
+      "study_id": "50066801",
+      "word_count": 68,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nCompared to the prior film, the cardiomediastinal silhouette is unchanged.\n Sternotomy wires and 2 prosthetic valves again noted. The degree of\n retrocardiac density is not significantly cha..."
+    },
+    {
+      "index": 163,
+      "path": "patient_19623993/CXR-DICOM/s54350292.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_19623993\\CXR-DICOM\\s54350292.txt",
+      "patient_id": "19623993",
+      "study_id": "54350292",
+      "word_count": 63,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nA single portable chest radiograph was obtained.  A Dobbhoff tube\n projects over the stomach.  The tip is folded back on itself and points\n towards the body of the stomach.  Lung volumes are..."
+    },
+    {
+      "index": 164,
+      "path": "patient_19623993/CXR-DICOM/s57448721.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_19623993\\CXR-DICOM\\s57448721.txt",
+      "patient_id": "19623993",
+      "study_id": "57448721",
+      "word_count": 60,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nThe cardiac, mediastinal and hilar contours appear unchanged.  The\n heart appears mildly enlarged.  There is slight unfolding of the thoracic\n aorta.  The lungs appear clear.  There are no p..."
+    },
+    {
+      "index": 165,
+      "path": "patient_19837618/CXR-DICOM/s58815353.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_19837618\\CXR-DICOM\\s58815353.txt",
+      "patient_id": "19837618",
+      "study_id": "58815353",
+      "word_count": 67,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThere is elevated left hemidiaphragm with a left pleural effusion. \n In addition, there is abnormal opacity at the left pulmonary hilum with\n perihilar reticulation raising strong clinical c..."
+    },
+    {
+      "index": 166,
+      "path": "patient_19884194/CXR-DICOM/s57912042.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_19884194\\CXR-DICOM\\s57912042.txt",
+      "patient_id": "19884194",
+      "study_id": "57912042",
+      "word_count": 62,
+      "sentence_count": 7,
+      "content_preview": "FINDINGS:\nThe cardiomediastinal and hilar contours are within normal limits.  There is\n trace atelectasis at the base of the left lung.  The lungs are otherwise clear\n without focal consolidation, ple..."
+    },
+    {
+      "index": 167,
+      "path": "patient_19907884/CXR-DICOM/s59325966.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_19907884\\CXR-DICOM\\s59325966.txt",
+      "patient_id": "19907884",
+      "study_id": "59325966",
+      "word_count": 69,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nPA and lateral views of the chest.  Again, low lung volumes are\n seen with relative elevation of the right hemidiaphragm which is unchanged. \n The lungs are clear without effusion, pulmonary..."
+    },
+    {
+      "index": 168,
+      "path": "patient_19957626/CXR-DICOM/s57835828.txt",
+      "full_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\cleaned_reports\\patient_19957626\\CXR-DICOM\\s57835828.txt",
+      "patient_id": "19957626",
+      "study_id": "57835828",
+      "word_count": 60,
+      "sentence_count": 8,
+      "content_preview": "FINDINGS:\nHeart size is normal.  Mediastinal and hilar contours are normal.  Lungs are\n clear.  Pulmonary vasculature is normal.  No pleural effusion or pneumothorax\n is present.  Cervical spinal fusi..."
+    }
+  ]
+}
