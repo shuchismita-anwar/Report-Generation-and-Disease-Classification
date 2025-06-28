@@ -278,9 +278,13 @@ class MedicalReportCleaner:
                     # Clean the report
                     cleaned_content, reduction_percent = self.clean_report(original_content)
                     
-                    # Generate output filename
-                    report_filename = os.path.basename(report_path)
-                    output_path = os.path.join(output_dir, report_filename)
+                    # Generate output path maintaining directory structure
+                    # Extract patient folder and maintain structure: patient_XXXXXXXX/CXR-DICOM/sXXXXXXXX.txt
+                    relative_path = os.path.relpath(report_path, os.path.join(input_base_path, "mimic-eye"))
+                    output_path = os.path.join(output_dir, relative_path)
+                    
+                    # Create output directory structure if it doesn't exist
+                    os.makedirs(os.path.dirname(output_path), exist_ok=True)
                     
                     # Save cleaned report
                     with open(output_path, 'w', encoding='utf-8') as f:
