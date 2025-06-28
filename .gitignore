@@ -128,3 +128,4 @@ new_scripts/keyword_prediction/keyword_extraction_results/
 new_scripts/keyword_prediction/.env
 new_scripts/keyword_prediction/anatomical_results/__pycache__/
 new_scripts/2308.01317v2.pdf
+cleaned_reports/
