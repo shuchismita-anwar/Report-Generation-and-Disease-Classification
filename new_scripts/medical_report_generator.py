@@ -519,9 +519,8 @@ class MedicalReportGenerator:
         # Fix model path - try multiple possible locations
         if model_path is None:
             possible_paths = [
-                os.path.join("new_scripts", "output", "training_mimic_on_chexpert_optimized", "model_training_mimic_on_chexpert_optimized", "model.safetensors"),
+                os.path.join("output", "0.(full+enhanced_gaze)_training_mimic_on_chexpert_optimized", "model_0.(full+enhanced_gaze)_training_mimic_on_chexpert_optimized", "model.safetensors"),
                 os.path.join("output", "training_mimic_on_chexpert_optimized", "model_training_mimic_on_chexpert_optimized", "model.safetensors"),
-                os.path.join("new_scripts", "output", "training_mimic_on_chexpert_optimized", "model.safetensors"),
                 os.path.join("results", "final_model", "model.safetensors"),
                 "model.safetensors"  # Current directory fallback
             ]
@@ -2895,6 +2894,7 @@ Please ensure proper clinical review of all automated findings.
                     attention_analysis['visualization_saved'] = vis_path
                 
                 analysis_result['attention_analysis'] = attention_analysis
+                analysis_result['attention_analysis']['attention_map'] = attention_map.detach().cpu().numpy()  # Add raw attention map
                 analysis_result['spatial_keywords'] = spatial_keywords
                 analysis_result['processing_steps']['attention_analysis'] = {
                     'success': True,

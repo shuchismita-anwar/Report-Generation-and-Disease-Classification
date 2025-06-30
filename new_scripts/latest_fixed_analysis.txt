@@ -1,6 +1,19 @@
 🔍 CLINICAL FINDINGS:
 --------------------------------------------------
    FINDINGS:
-   Support devices are visualized within the upper mediastinum and overlying the cardiac silhouette. There is evidence of atelectasis involving the bilateral lower lungs. Small bilateral pleural effusions are also present, resulting in blunting of the costophrenic angles. These findings may obscure the cardiac borders. The pulmonary vasculature appears normal. The upper lung zones are clear. No pneumothorax is identified.
+   Support devices are visualized overlying the upper mediastinum and cardiac silhouette. There are bilateral pleural effusions causing blunting of the costophrenic angles, with associated atelectasis in the lower lungs. The cardiac silhouette is borderline enlarged. Lung opacities appear related to atelectasis rather than definite pneumonia. No acute osseous abnormalities are detected.
    IMPRESSION:
-   1. Support devices in situ. 2. Bilateral basilar atelectasis and associated small pleural effusions.
+   1. Support devices in place.
+   2. Bilateral pleural effusions with associated basilar atelectasis.
+   3. Borderline cardiomegaly.
+
+
+============================================================
+GAZE-ATTENTION VALIDATION RESULTS (Priority 1)
+============================================================
+Pearson Correlation: 0.1327
+P-value: 0.0000
+Jensen-Shannon Divergence: 0.4516
+Mean Squared Error: 0.0485
+Normalized Scanpath Saliency: 0.1325
+Visualization: E:\MIMIC Research\Code\Report-Generation-and-Disease-Classification\new_scripts\gaze_attention_analysis\gaze_attention_comparison_a5bf1678-df56650d-3d94165c-71ef2d00-509ad013_20250630_115539.png
