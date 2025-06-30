@@ -1,14 +1,14 @@
 ================================================================================
 AI PROMPT DEBUG OUTPUT
-Generated at: 2025-06-30 11:55:40.876512
+Generated at: 2025-06-30 13:33:07.341497
 Patient ID: a5bf1678-df56650d-3d94165c-71ef2d00-509ad013
 ================================================================================
 
 PROMPT STATISTICS:
-- Total Characters: 5,497
-- Total Words: 724
-- Estimated Tokens: ~941
-- Size in KB: 5.39 KB
+- Total Characters: 5,346
+- Total Words: 703
+- Estimated Tokens: ~914
+- Size in KB: 5.24 KB
 
 ================================================================================
 
@@ -37,35 +37,33 @@ REPORTING STYLE: MULTI-PATHOLOGY MIXED CONFIDENCE (Multiple findings with varyin
 === CLINICAL ANALYSIS DATA ===
 
 🔬 MODEL PREDICTIONS (Clinical Decision Basis):
-- Atelectasis: 64.4% probability (MODERATE confidence)
-- Cardiomegaly: 50.6% probability (MODERATE confidence)
-- Edema: 38.4% probability (LOW confidence)
+- Atelectasis: 64.7% probability (MODERATE confidence)
+- Cardiomegaly: 54.0% probability (MODERATE confidence)
+- Edema: 40.9% probability (LOW confidence)
 - Lung Opacity: 51.0% probability (MODERATE confidence)
-- No Finding: 32.0% probability (LOW confidence)
-- Pleural Effusion: 61.9% probability (MODERATE confidence)
-- Pneumonia: 38.3% probability (LOW confidence)
-- Support Devices: 79.9% probability (HIGH confidence)
+- Pleural Effusion: 66.0% probability (MODERATE confidence)
+- Pneumonia: 37.4% probability (LOW confidence)
+- Support Devices: 75.6% probability (HIGH confidence)
 
 📋 CLINICAL KEYWORDS (Condition-Based):
 - Atelectasis: atelectasis/scarring, atelectatic, atelectatic and / or consolidated
 - Cardiomegaly: acute congestive heart failure, acute on chronic chf, afib
 - Edema: cardiac silhouette is enlarged, cardiac silhouette is obscured, interval improvement in interstitial edema
 - Lung Opacity: 7 mm nodular opacity, accentuate bronchovascular markings, acute airways inflammation
-- No Finding: azygos fissure, cardiac silhouette size is normal, cardiac silhouettes are unremarkable
 - Pleural Effusion: air and fluid, air- fluid collection, air-fluid levels
 - Pneumonia: acute cardiopulmonary disease, acute consolidation, acute infiltrates
 - Support Devices: 2 leads, 2l nc, a catheter
 
 🗺️ RELEVANT ANATOMICAL REGIONS (Condition-Based):
-- Support Devices (79.9%, HIGH): cardiac silhouette, left hilar structures, right hilar structures, upper mediastinum, trachea
-- Atelectasis (64.4%, MODERATE): left lung, right lung, left lower lung zone, right lower lung zone, left upper lung zone, right upper lung zone
-- Pleural Effusion (61.9%, MODERATE): left lower lung zone, right lower lung zone, left costophrenic angle, right costophrenic angle
+- Support Devices (75.6%, HIGH): cardiac silhouette, left hilar structures, right hilar structures, upper mediastinum, trachea
+- Pleural Effusion (66.0%, MODERATE): left lower lung zone, right lower lung zone, left costophrenic angle, right costophrenic angle
+- Atelectasis (64.7%, MODERATE): left lung, right lung, left lower lung zone, right lower lung zone, left upper lung zone, right upper lung zone
 
 === REPORTING TASK ===
 Generate a professional radiological report with sections: FINDINGS, IMPRESSION, RECOMMENDATIONS
 
 🎯 SPECIFIC INSTRUCTIONS FOR THIS CASE:
-- This case shows MULTIPLE significant findings: Support Devices (79.9%), Atelectasis (64.4%), Pleural Effusion (61.9%)
+- This case shows MULTIPLE significant findings: Support Devices (75.6%), Pleural Effusion (66.0%), Atelectasis (64.7%)
 - Report ALL significant findings above 60% confidence
 - Use relevant anatomical regions to specify locations for each finding
 - Describe the medical significance of each finding

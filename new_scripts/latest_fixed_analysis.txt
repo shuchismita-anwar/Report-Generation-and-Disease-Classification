@@ -1,19 +1,19 @@
 🔍 CLINICAL FINDINGS:
 --------------------------------------------------
    FINDINGS:
-   Support devices are visualized overlying the upper mediastinum and cardiac silhouette. There are bilateral pleural effusions causing blunting of the costophrenic angles, with associated atelectasis in the lower lungs. The cardiac silhouette is borderline enlarged. Lung opacities appear related to atelectasis rather than definite pneumonia. No acute osseous abnormalities are detected.
+   Support devices are visualized within the upper mediastinum and overlying the cardiac silhouette. There are bilateral pleural effusions causing blunting of the costophrenic angles. Associated bibasilar atelectasis is present. The cardiac silhouette appears borderline enlarged. There is uncertainty regarding underlying lung opacities. No definite evidence of acute pneumonia is seen.
    IMPRESSION:
-   1. Support devices in place.
-   2. Bilateral pleural effusions with associated basilar atelectasis.
-   3. Borderline cardiomegaly.
+   Support devices are present. Findings suggest bilateral pleural effusions with associated bibasilar atelectasis and possible cardiomegaly.
+   RECOMMENDATIONS:
+   Clinical correlation is recommended to assess for volume overload. Comparison with prior imaging, if available, would be useful.
 
 
 ============================================================
 GAZE-ATTENTION VALIDATION RESULTS (Priority 1)
 ============================================================
-Pearson Correlation: 0.1327
+Pearson Correlation: 0.2429
 P-value: 0.0000
-Jensen-Shannon Divergence: 0.4516
-Mean Squared Error: 0.0485
-Normalized Scanpath Saliency: 0.1325
-Visualization: E:\MIMIC Research\Code\Report-Generation-and-Disease-Classification\new_scripts\gaze_attention_analysis\gaze_attention_comparison_a5bf1678-df56650d-3d94165c-71ef2d00-509ad013_20250630_115539.png
+Jensen-Shannon Divergence: 0.4238
+Mean Squared Error: 0.0443
+Normalized Scanpath Saliency: 0.1057
+Visualization: E:\MIMIC Research\Code\Report-Generation-and-Disease-Classification\new_scripts\gaze_attention_analysis\gaze_attention_comparison_a5bf1678-df56650d-3d94165c-71ef2d00-509ad013_20250630_133306.png
