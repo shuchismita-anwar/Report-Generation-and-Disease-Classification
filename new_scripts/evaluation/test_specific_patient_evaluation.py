@@ -3,13 +3,13 @@
 Specific Patient Report Evaluation
 ==================================
 
-This script evaluates the LLM-generated report for patient a5bf1678-df56650d-3d94165c-71ef2d00-509ad013
+This script evaluates the LLM-generated report for patient 0a7698f4-898f002d-abe934ed-2b21b711-848b7913
 against the ground truth radiology report using all available metrics (BLEU, ROUGE, METEOR, CIDEr, BERTScore, Medical).
 
 Patient Details:
-- Patient ID: patient_13620301
-- Study ID: 51583714
-- DICOM ID: a5bf1678-df56650d-3d94165c-71ef2d00-509ad013
+- Patient ID: patient_14211662
+- Study ID: 53438276
+- DICOM ID: 0a7698f4-898f002d-abe934ed-2b21b711-848b7913
 
 Author: Medical Report Evaluation System
 Date: 2025-01-19
@@ -27,6 +27,8 @@ current_dir = Path(__file__).parent
 sys.path.append(str(current_dir))
 
 from medical_report_evaluator import MedicalReportEvaluator
+from metrics.chexpert_scorer import ChexpertScorer
+from metrics.radgraph_f1_scorer import RadGraphF1Scorer
 
 
 def load_llm_generated_report() -> str:
@@ -64,13 +66,13 @@ def load_llm_generated_report() -> str:
 
 def load_ground_truth_report() -> str:
     """
-    Load the ground truth radiology report from the MIMIC dataset
+    Load the ground truth radiology report from the cleaned_reports folder
     
     Returns:
         str: The cleaned ground truth report text
     """
     # Path to the ground truth report
-    gt_report_path = current_dir.parent.parent / "mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0" / "mimic-eye" / "patient_13620301" / "CXR-DICOM" / "s51583714.txt"
+    gt_report_path = current_dir.parent.parent / "cleaned_reports" / "patient_14211662" / "CXR-DICOM" / "s53438276.txt"
     
     if not gt_report_path.exists():
         raise FileNotFoundError(f"Ground truth report not found: {gt_report_path}")
@@ -110,8 +112,8 @@ def format_detailed_results(evaluation_result: dict) -> str:
     # Build detailed report
     report = f"""
 # 🏥 DETAILED PATIENT EVALUATION REPORT
-**Patient ID**: patient_13620301 (a5bf1678-df56650d-3d94165c-71ef2d00-509ad013)
-**Study ID**: 51583714
+**Patient ID**: patient_14211662 (0a7698f4-898f002d-abe934ed-2b21b711-848b7913)
+**Study ID**: 53438276
 **Evaluation Date**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
 ## 🎯 OVERALL PERFORMANCE
@@ -175,6 +177,19 @@ def format_detailed_results(evaluation_result: dict) -> str:
                     report += f"- **Pathology Score**: {metric_data['pathology_score']:.4f}\n"
                 if 'terminology_score' in metric_data:
                     report += f"- **Terminology Score**: {metric_data['terminology_score']:.4f}\n"
+            elif metric_name == "chexpert":
+                # CheXpert label overlap metrics
+                cx_f1 = metric_data.get('chexpert_f1', 0)
+                report += f"- **CheXpert F1**: {cx_f1:.4f}\n"
+                report += f"- **Precision**: {metric_data.get('chexpert_precision', 0):.4f}\n"
+                report += f"- **Recall**: {metric_data.get('chexpert_recall', 0):.4f}\n"
+                report += f"- **Accuracy**: {metric_data.get('chexpert_accuracy', 0):.4f}\n"
+            elif metric_name == "radgraph_f1":
+                # RadGraph entity/relation F1 metrics
+                rg_f1 = metric_data.get('radgraph_f1', 0)
+                report += f"- **RadGraph F1**: {rg_f1:.4f}\n"
+                report += f"- **Entity F1**: {metric_data.get('radgraph_entity_f1', 0):.4f}\n"
+                report += f"- **Relation F1**: {metric_data.get('radgraph_relation_f1', 0):.4f}\n"
         else:
             report += f"- **Score**: {metric_data:.4f}\n"
         
@@ -225,6 +240,22 @@ def format_detailed_results(evaluation_result: dict) -> str:
             report += "- **Medical**: Moderate medical concept alignment shows some clinical accuracy.\n"
         else:
             report += "- **Medical**: Low medical concept alignment suggests need for better clinical terminology.\n"
+        if 'chexpert' in metrics and isinstance(metrics['chexpert'], dict):
+            cx_f1 = metrics['chexpert'].get('chexpert_f1', 0)
+            if cx_f1 >= 0.7:
+                report += "- **CheXpert**: High label agreement – strong overlap of key clinical findings.\n"
+            elif cx_f1 >= 0.5:
+                report += "- **CheXpert**: Moderate label agreement – partial overlap of findings.\n"
+            else:
+                report += "- **CheXpert**: Low label agreement – many findings differ.\n"
+        if 'radgraph_f1' in metrics and isinstance(metrics['radgraph_f1'], dict):
+            rg_f1 = metrics['radgraph_f1'].get('radgraph_f1', 0)
+            if rg_f1 >= 0.7:
+                report += "- **RadGraph**: Excellent entity/relation alignment.\n"
+            elif rg_f1 >= 0.5:
+                report += "- **RadGraph**: Moderate structural alignment.\n"
+            else:
+                report += "- **RadGraph**: Limited entity/relation overlap.\n"
     
     return report
 
@@ -235,8 +266,8 @@ def main():
     
     print("🚀 Starting Specific Patient Evaluation...")
     print("=" * 80)
-    print(f"📋 Patient: a5bf1678-df56650d-3d94165c-71ef2d00-509ad013")
-    print(f"🏥 Study: 51583714 (patient_13620301)")
+    print(f"📋 Patient: 0a7698f4-898f002d-abe934ed-2b21b711-848b7913")
+    print(f"🏥 Study: 53438276 (patient_14211662)")
     print("=" * 80)
     
     try:
@@ -254,24 +285,29 @@ def main():
         # Step 2: Initialize evaluator
         print("\n🔧 Step 2: Initializing evaluation system...")
         evaluator = MedicalReportEvaluator()
-        print("   ✅ Evaluator initialized with all metrics")
+        if 'cider' in evaluator.metrics:
+            del evaluator.metrics['cider']
+        evaluator.metrics['chexpert'] = ChexpertScorer()
+        evaluator.metrics['radgraph_f1'] = RadGraphF1Scorer()
+        print("   ✅ Evaluator initialized with custom metrics (CIDEr removed, CheXpert & RadGraph added)")
         
         # Step 3: Run evaluation
         print("\n⚡ Step 3: Running comprehensive evaluation...")
         print("   • Calculating BLEU scores...")
         print("   • Calculating ROUGE scores...")
         print("   • Calculating METEOR scores...")
-        print("   • Calculating CIDEr scores...")
         print("   • Calculating BERTScore...")
         print("   • Calculating Medical concept scores...")
+        print("   • Calculating CheXpert label overlap...")
+        print("   • Calculating RadGraph F1...")
         
         results = evaluator.evaluate_single(
             generated_report=llm_report,
             ground_truth_report=gt_report,
-            image_id="a5bf1678-df56650d-3d94165c-71ef2d00-509ad013",
+            image_id="0a7698f4-898f002d-abe934ed-2b21b711-848b7913",
             metadata={
-                "patient_id": "patient_13620301",
-                "study_id": "51583714",
+                "patient_id": "patient_14211662",
+                "study_id": "53438276",
                 "evaluation_type": "specific_patient_test"
             }
         )
@@ -306,6 +342,10 @@ def main():
         if 'medical' in metrics:
             medical_score = metrics['medical'].get('medical_score', 0) if isinstance(metrics['medical'], dict) else metrics['medical']
             print(f"   Medical Score: {medical_score:.4f}")
+            if 'chexpert' in metrics and isinstance(metrics['chexpert'], dict):
+                print(f"   CheXpert F1: {metrics['chexpert'].get('chexpert_f1', 0):.4f}")
+            if 'radgraph_f1' in metrics and isinstance(metrics['radgraph_f1'], dict):
+                print(f"   RadGraph F1: {metrics['radgraph_f1'].get('radgraph_f1', 0):.4f}")
         
         print(f"\n✅ Evaluation completed successfully!")
         

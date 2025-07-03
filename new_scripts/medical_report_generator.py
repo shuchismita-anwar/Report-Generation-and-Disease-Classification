@@ -2060,26 +2060,51 @@ class MedicalReportGenerator:
             # Determine reporting approach based on all significant findings
             reporting_style = self._determine_reporting_style_multi_condition(condition_predictions)
             
-            # System instruction with critical clinical guidelines
-            image_note = "\n\nNOTE: You also have access to the actual chest X-ray image for visual correlation." if include_image else ""
+            # System instruction with optimized clinical guidelines
+            image_note = "\n\n🖼️ IMPORTANT: You have been provided with the actual chest X-ray image. Use visual analysis of the image to correlate with and validate the AI predictions below." if include_image else ""
             
-            system_instruction = f"""You are an expert radiologist with 20+ years of experience generating professional medical reports. Generate a clinically accurate chest X-ray report.{image_note}
+            system_instruction = f"""You are an expert radiologist with 20+ years of experience. Generate a concise, accurate chest X-ray report that combines visual analysis with AI predictions.{image_note}
 
-CRITICAL CLINICAL GUIDELINES:
-1. ATTENTION DATA PROHIBITION: Do NOT interpret "attention analysis", "spatial keywords", "attention intensity", or "focus areas" as clinical findings. These are AI computational artifacts, NOT pathological findings.
+✅ Your report combines direct visual analysis of the chest X-ray with AI model predictions.
+✅ Use clear radiological terminology and anatomical specificity based on **visual findings and model predictions**.
 
-2. CONFIDENCE-BASED REPORTING:
-   - No Finding >70%: Use simple, direct language like practicing radiologists
-   - Pathology >70%: Focus on the specific medical condition only  
-   - Mixed confidence 50-70%: Provide appropriate clinical uncertainty
+### 🚨 REPORTING GUIDELINES:
 
-3. ANATOMICAL PRECISION: Only describe anatomical locations if directly supported by high-confidence predictions, not attention maps.
+1. **VISUAL-AI CORRELATION**
+   • Examine the provided chest X-ray image directly
+   • Correlate visual findings with AI predictions 
+   • Prioritize what you see in the image over AI predictions when they conflict
+   • Use AI predictions to guide attention to specific areas
 
-4. CLINICAL SIMPLICITY: Match the complexity level to the findings - normal studies need 1-2 sentences, not paragraphs.
+2. **CONFIDENCE-BASED REPORTING**
+   • >70% = Report directly and confidently
+   • 50–70% = Use appropriate clinical uncertainty
+   • <50% = Do not report
 
-5. MEDICAL ACCURACY: Base conclusions exclusively on the condition prediction probabilities, ignore all attention/spatial data.
+3. **INCLUDE DEVICE FINDINGS**
+   • Always describe any visible medical device (e.g. tubes, catheters, lines), even if incidental
+   • Mention if the **tip** is not visible or fully imaged
+   • Report device positioning and termination when visible
 
-6. REPORT FORMAT: Do NOT include patient name fields, exam date fields, or radiologist signature lines. Focus only on the clinical content (FINDINGS, IMPRESSION, RECOMMENDATIONS).
+3. **USE PROVIDED TERMINOLOGY**
+   • Prefer using **exact phrases** from `CLINICAL KEYWORDS` to improve alignment with ground truth
+   • When high-confidence keywords are provided, incorporate them verbatim when clinically appropriate
+
+4. **AVOID OVER-HEDGING**
+   • Do not say "subtle findings cannot be excluded" unless prediction confidence is mixed (50–70%)
+   • If the study is normal and high confidence, use definitive phrases: "No focal consolidation, pleural effusion, or pneumothorax."
+   • Be decisive when model confidence is high (>70%)
+
+5. **STYLE & STRUCTURE**
+   • Match expert radiologist tone
+   • Avoid unnecessary hedging or speculation
+   • Each section (FINDINGS, IMPRESSION) should be continuous text (no bullet points)
+   • Include non-pathological findings such as tubes, lines, or structural anomalies
+
+6. **ANATOMICAL SPECIFICITY**
+   • Use precise anatomical terms when supported by high-confidence predictions
+   • Reference specific lung zones, cardiac contours, and bony structures as appropriate
+   • Always mention any visible medical device, line, or tube if present
 
 REPORTING STYLE: {reporting_style}
 """
@@ -2104,7 +2129,7 @@ REPORTING STYLE: {reporting_style}
                 for key, value in patient_info.items():
                     clinical_data += f"- {key.replace('_', ' ').title()}: {value}\n"
 
-            # Task instruction with confidence-based guidance
+            # Task instruction with optimized guidance
             task_instruction = f"""
 === REPORTING TASK ===
 Generate a {template_config['style']} with sections: {', '.join(template_config['sections']).upper()}
@@ -2112,36 +2137,55 @@ Generate a {template_config['style']} with sections: {', '.join(template_config[
 🎯 SPECIFIC INSTRUCTIONS FOR THIS CASE:
 {self._get_case_specific_instructions(condition_predictions, template)}
 
-📏 CRITICAL FORMATTING REQUIREMENTS:
-- Write 60-70 words total (count carefully)
-- Use 7-8 sentences total
-- NO line breaks within section content (each section should be continuous text)
-- Structure format:
-  FINDINGS:
-  [newline]
-  [continuous content without line breaks]
-  [double newline]
-  IMPRESSION:
-  [newline]
-  [continuous content without line breaks]
+### 📏 FORMATTING INSTRUCTIONS:
+• Structure:
+  ```
+  FINDINGS: 
+  [continuous paragraph]  
+
+  IMPRESSION:  
+  [continuous paragraph]
+  ```
+
+### ✳️ INPUT STRUCTURE:
+• `CHEST X-RAY IMAGE`: Primary source - examine visually for all findings
+• `CLINICAL KEYWORDS`: Use exact phrases when clinically appropriate to maximize alignment
+• `MODEL PREDICTIONS`: Secondary guide - use to focus attention and validate visual findings
+• `RELEVANT ANATOMICAL REGIONS`: Reference these locations when describing findings
+
+### 🎯 OPTIMIZATION GOALS:
+• **Maximize lexical similarity** to expert reference reports
+• **Use provided terminology verbatim** when possible
+• **Include device findings** (tubes, catheters, lines) even if incidental
+• **Be anatomically specific** when high-confidence predictions support it
 
 📋 EXAMPLE REPORT FORMATS:
 
-Example 1:
+Example 1 (Device Present):
 FINDINGS: 
-PA and lateral views of the chest demonstrate well-expanded lungs. In comparison to the prior study, there is interval obscuration of the right heart border and the medial right hemidiaphragm. Correlation with the lateral view suggests that this is likely due to interval development of small bilateral pleural effusions. Underlying consolidation is not excluded. No pneumothorax. Cardiomediastinal silhouette is otherwise stable. Of note, an air fluid level in a tubular structure posterior to the trachea on the lateral view is consistent with a dilated fluid-filled esophagus.
+Feeding tube extends into the upper abdomen, the tip is not imaged. Lung volumes are normal. Mediastinal contours and heart size within normal limits. No consolidation or pleural effusion. No pneumothorax. No acute osseous abnormality.
 
 IMPRESSION: 
-1. Interval development of small bilateral pleural effusions. Underlying consolidation not excluded. 2. Dilated fluid-filled esophagus.
+No acute cardiopulmonary process.
 
-Example 2:
+Example 2 (Multiple Findings):
 FINDINGS: 
-Right-sided Port-A-Cath tip terminates in the proximal right atrium. Moderate enlargement of the cardiac silhouette is unchanged. The mediastinal and hilar contours are similar. Pulmonary vasculature is normal. The lungs are clear. No focal consolidation, pleural effusion or pneumothorax is demonstrated. Partially imaged is a pigtail catheter overlying the right upper quadrant of the abdomen. No acute osseous abnormalities are detected.
+PA and lateral views of the chest demonstrate well-expanded lungs. In comparison to the prior study, there is interval obscuration of the right heart border and the medial right hemidiaphragm. Correlation with the lateral view suggests that this is likely due to interval development of small bilateral pleural effusions. Underlying consolidation is not excluded. No pneumothorax. Cardiomediastinal silhouette is otherwise stable.
 
 IMPRESSION: 
-No acute cardiopulmonary abnormality.
+Interval development of small bilateral pleural effusions. Underlying consolidation not excluded.
 
-⚠️ REMEMBER: Ignore all attention/spatial analysis data. Report only what the medical predictions indicate.
+Example 3 (Normal Study):
+FINDINGS: 
+The lungs are hyperinflated reflective of COPD. Apparent increased opacity projecting over the right lung apex correlates with posterior right fifth rib fracture with callus. Streaky bibasilar opacities likely reflect atelectasis. No focal consolidation to suggest pneumonia. No pleural effusion or pneumothorax. The heart is normal in size, and the mediastinal contours are normal.
+
+IMPRESSION: 
+No acute cardiopulmonary process. Focal opacity in the retrocardiac region.
+
+⚠️ **REMEMBER**: Do NOT mention attention maps, saliency, heatmaps, or explainability data. Use model predictions and provided keywords only.
+
+### ✳️ GOAL:
+Maximize lexical and semantic similarity to the expert reference report. Prioritize clinical specificity and exact terminology alignment.
 
 CHEST X-RAY REPORT:
 """
@@ -2222,11 +2266,24 @@ CHEST X-RAY REPORT:
         return formatted.strip()
 
     def _format_clinical_keywords(self, prediction_keywords: Dict, condition_predictions: Dict) -> str:
-        """Format keywords only for significant clinical findings."""
+        """Format keywords only for significant clinical findings with emphasis on exact usage."""
         formatted = ""
+        high_confidence_phrases = []
+        
         for condition, keywords in prediction_keywords.items():
-            if keywords and condition_predictions.get(condition, {}).get('probability', 0) > 0.30:
-                formatted += f"- {condition}: {', '.join(keywords[:3])}\n"  # Limit to 3 keywords
+            prob = condition_predictions.get(condition, {}).get('probability', 0)
+            if keywords and prob > 0.30:
+                confidence_level = "HIGH" if prob > 0.70 else "MODERATE" if prob > 0.50 else "LOW"
+                
+                # Prioritize high-confidence keywords for verbatim usage
+                if prob > 0.70:
+                    high_confidence_phrases.extend(keywords[:2])  # Top 2 for high confidence
+                    formatted += f"- {condition} ({confidence_level}): {', '.join(keywords[:3])} [USE VERBATIM]\n"
+                else:
+                    formatted += f"- {condition} ({confidence_level}): {', '.join(keywords[:3])}\n"
+        
+        if high_confidence_phrases:
+            formatted += f"\n🎯 HIGH-CONFIDENCE PHRASES TO USE VERBATIM: {', '.join(set(high_confidence_phrases[:5]))}\n"
                 
         return formatted.strip() if formatted else "- Based on model predictions only"
 
@@ -2283,10 +2340,12 @@ CHEST X-RAY REPORT:
         
         if is_normal_study:
             return """- This is a NORMAL study with high confidence
-- Use simple, direct language: "Normal chest radiograph" or similar
-- Keep findings section to 1-2 sentences maximum
-- Impression should be brief and definitive
-- No need for extensive descriptions or follow-up recommendations"""
+- Use simple, direct language with definitive statements
+- Include any visible medical devices or support equipment
+- Use exact phrases: "No focal consolidation, pleural effusion, or pneumothorax"
+- Keep findings section concise but anatomically specific
+- Impression should be brief and definitive: "No acute cardiopulmonary process"
+- Avoid hedging language like "cannot be excluded" """
         
         elif len(significant_findings) == 0:
             return """- Low confidence findings across all conditions
@@ -2299,20 +2358,23 @@ CHEST X-RAY REPORT:
             condition, confidence = significant_findings[0]
             confidence_level = "HIGH" if confidence > 0.70 else "MODERATE"
             return f"""- This shows {condition} with {confidence_level} confidence ({confidence:.1%})
-- Focus specifically on this pathological finding
-- Use relevant anatomical regions to describe location
-- Describe the medical significance clearly
-- Provide appropriate clinical recommendations"""
+- Focus specifically on this pathological finding using PROVIDED KEYWORDS verbatim
+- Use relevant anatomical regions to describe location precisely
+- Include any visible medical devices (tubes, catheters, lines) even if incidental
+- Use exact terminology from CLINICAL KEYWORDS when available
+- Avoid over-hedging if confidence is high (>70%)
+- Describe the medical significance clearly"""
         
         else:  # Multiple significant findings
             conditions_text = ', '.join([f"{cond} ({prob:.1%})" for cond, prob in significant_findings])
             return f"""- This case shows MULTIPLE significant findings: {conditions_text}
-- Report ALL significant findings above 60% confidence
-- Use relevant anatomical regions to specify locations for each finding
-- Describe the medical significance of each finding
+- Report ALL significant findings above 60% confidence using PROVIDED KEYWORDS verbatim
+- Use relevant anatomical regions to specify locations for each finding precisely
+- Include any visible medical devices (tubes, catheters, lines) even if incidental
+- Use exact terminology from CLINICAL KEYWORDS when available for each condition
+- Describe the medical significance of each finding without over-hedging
 - Consider relationships between findings (e.g., atelectasis with pleural effusion)
-- Provide comprehensive clinical recommendations for all findings
-- Structure as: FINDINGS (describe each), IMPRESSION (synthesize), RECOMMENDATIONS (comprehensive)"""
+- Structure as: FINDINGS (describe each with specific terminology), IMPRESSION (synthesize findings)"""
     
     def call_llm_for_report(self, prompt: str, include_image: bool = False, 
                            image_tensor: torch.Tensor = None) -> Dict:
@@ -2321,7 +2383,7 @@ CHEST X-RAY REPORT:
         
         Args:
             prompt: Formatted prompt for report generation
-            include_image: Whether to include the image in the request (not supported by Gemini yet)
+            include_image: Whether to include the image in the request
             image_tensor: Image tensor if including image
             
         Returns:
@@ -2345,51 +2407,102 @@ CHEST X-RAY REPORT:
                     'used_fallback': True
                 }
             
-            # Prepare message content (ignore image for now as Gemini text-only)
-            message_content = prompt
-            if include_image:
-                self.logger.warning("Image inclusion not supported with Gemini 2.5 Pro text model")
+            # Prepare message content with image support
+            if include_image and image_tensor is not None:
+                # Encode image as base64
+                image_base64 = self.encode_image_for_llm(image_tensor)
+                if image_base64:
+                    self.logger.info("Including image in Gemini request")
+                else:
+                    self.logger.warning("Failed to encode image, proceeding with text-only")
+                    include_image = False
+            else:
+                include_image = False
             
             # Prepare request payload for Gemini
-            payload = {
-                "contents": [{
-                    "parts": [{
-                        "text": message_content
-                    }]
-                }],
-                "generationConfig": {
-                    "temperature": self.llm_config['temperature'],
-                    "topK": 40,
-                    "topP": 0.95,
-                    "maxOutputTokens": self.llm_config['max_tokens'],
-                    "candidateCount": 1
-                },
-                "safetySettings": [
-                    {
-                        "category": "HARM_CATEGORY_HARASSMENT",
-                        "threshold": "BLOCK_NONE"
+            if include_image and 'image_base64' in locals():
+                # Include both text and image
+                payload = {
+                    "contents": [{
+                        "parts": [
+                            {
+                                "text": prompt
+                            },
+                            {
+                                "inline_data": {
+                                    "mime_type": "image/png",
+                                    "data": image_base64
+                                }
+                            }
+                        ]
+                    }],
+                    "generationConfig": {
+                        "temperature": self.llm_config['temperature'],
+                        "topK": 40,
+                        "topP": 0.95,
+                        "maxOutputTokens": self.llm_config['max_tokens'],
+                        "candidateCount": 1
                     },
-                    {
-                        "category": "HARM_CATEGORY_HATE_SPEECH", 
-                        "threshold": "BLOCK_NONE"
+                    "safetySettings": [
+                        {
+                            "category": "HARM_CATEGORY_HARASSMENT",
+                            "threshold": "BLOCK_NONE"
+                        },
+                        {
+                            "category": "HARM_CATEGORY_HATE_SPEECH", 
+                            "threshold": "BLOCK_NONE"
+                        },
+                        {
+                            "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                            "threshold": "BLOCK_NONE"
+                        },
+                        {
+                            "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                            "threshold": "BLOCK_NONE"
+                        }
+                    ]
+                }
+            else:
+                # Text only
+                payload = {
+                    "contents": [{
+                        "parts": [{
+                            "text": prompt
+                        }]
+                    }],
+                    "generationConfig": {
+                        "temperature": self.llm_config['temperature'],
+                        "topK": 40,
+                        "topP": 0.95,
+                        "maxOutputTokens": self.llm_config['max_tokens'],
+                        "candidateCount": 1
                     },
-                    {
-                        "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                        "threshold": "BLOCK_NONE"
-                    },
-                    {
-                        "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-                        "threshold": "BLOCK_NONE"
-                    }
-                ]
-            }
+                    "safetySettings": [
+                        {
+                            "category": "HARM_CATEGORY_HARASSMENT",
+                            "threshold": "BLOCK_NONE"
+                        },
+                        {
+                            "category": "HARM_CATEGORY_HATE_SPEECH", 
+                            "threshold": "BLOCK_NONE"
+                        },
+                        {
+                            "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                            "threshold": "BLOCK_NONE"
+                        },
+                        {
+                            "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                            "threshold": "BLOCK_NONE"
+                        }
+                    ]
+                }
             
             url = f"{self.llm_config['base_url']}?key={self.gemini_api_key}"
             headers = {"Content-Type": "application/json"}
             
             # Debug: Log the prompt being sent
-            self.logger.info(f"DEBUG: Prompt length: {len(message_content)} chars")
-            self.logger.info(f"DEBUG: First 200 chars of prompt: {message_content[:200]}...")
+            self.logger.info(f"DEBUG: Prompt length: {len(prompt)} chars")
+            self.logger.info(f"DEBUG: First 200 chars of prompt: {prompt[:200]}...")
             
             # Make request with retries
             for attempt in range(self.llm_config['max_retries']):

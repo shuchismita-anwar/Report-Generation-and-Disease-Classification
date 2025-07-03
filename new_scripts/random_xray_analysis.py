@@ -390,13 +390,13 @@ def main():
         print("   • Extracting clinical keywords...")
         print("   • Generating attention analysis...")
         print("   • Creating medical report with LLM...")
-        print("   🔧 FIX: Excluding image from LLM request to avoid oversized prompts")
+        print("   🔧 UPDATED: Including image in LLM request for enhanced analysis")
         
-        # FIXED: Set include_image_in_llm=False to avoid oversized prompts
+        # UPDATED: Set include_image_in_llm=True to send image to AI
         result = generator.generate_comprehensive_analysis(
             image_path=image_path,
             template="standard",
-            include_image_in_llm=False  # 🔧 This is the key fix!
+            include_image_in_llm=True  # 🔧 Send image to AI for better analysis
         )
         
         # Step 3.5: Extract model attention and perform gaze comparison (NEW - Priority 1)
@@ -538,24 +538,12 @@ def main():
             
             print(f"\n💾 Visualization saved: {result['gaze_attention_validation']['comparison_plot_path']}")
         
-        # Optional: Save to file
+        # Optional: Save to file (exclude gaze-attention results - only show in terminal and PNG)
         output_file = project_root / "new_scripts" / "latest_fixed_analysis.txt"
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(formatted_report)
-            
-            # Add gaze-attention results to file
-            if 'gaze_attention_validation' in result:
-                f.write("\n\n" + "=" * 60 + "\n")
-                f.write("GAZE-ATTENTION VALIDATION RESULTS (Priority 1)\n")
-                f.write("=" * 60 + "\n")
-                
-                metrics = result['gaze_attention_validation']['correlation_metrics']
-                f.write(f"Pearson Correlation: {metrics['pearson_correlation']:.4f}\n")
-                f.write(f"P-value: {metrics['pearson_p_value']:.4f}\n")
-                f.write(f"Jensen-Shannon Divergence: {metrics['jensen_shannon_divergence']:.4f}\n")
-                f.write(f"Mean Squared Error: {metrics['mean_squared_error']:.4f}\n")
-                f.write(f"Normalized Scanpath Saliency: {metrics['normalized_scanpath_saliency']:.4f}\n")
-                f.write(f"Visualization: {result['gaze_attention_validation']['comparison_plot_path']}\n")
+            # Note: Gaze-attention validation results intentionally excluded from file
+            # They are shown in terminal output and saved as PNG visualization only
         
         print(f"💾 Report also saved to: {output_file}")
         

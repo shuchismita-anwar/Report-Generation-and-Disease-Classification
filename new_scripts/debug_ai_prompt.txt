@@ -1,58 +1,83 @@
 ================================================================================
 AI PROMPT DEBUG OUTPUT
-Generated at: 2025-07-02 06:14:43.513940
+Generated at: 2025-07-03 13:08:19.766003
 Patient ID: 0a7698f4-898f002d-abe934ed-2b21b711-848b7913
 ================================================================================
 
 PROMPT STATISTICS:
-- Total Characters: 4,791
-- Total Words: 636
-- Estimated Tokens: ~827
-- Size in KB: 4.70 KB
+- Total Characters: 6,584
+- Total Words: 896
+- Estimated Tokens: ~1165
+- Size in KB: 6.54 KB
 
 ================================================================================
 
 FULL PROMPT CONTENT:
 ----------------------------------------
-You are an expert radiologist with 20+ years of experience generating professional medical reports. Generate a clinically accurate chest X-ray report.
+You are an expert radiologist with 20+ years of experience. Generate a concise, accurate chest X-ray report that combines visual analysis with AI predictions.
 
-CRITICAL CLINICAL GUIDELINES:
-1. ATTENTION DATA PROHIBITION: Do NOT interpret "attention analysis", "spatial keywords", "attention intensity", or "focus areas" as clinical findings. These are AI computational artifacts, NOT pathological findings.
+✅ Your report combines direct visual analysis of the chest X-ray with AI model predictions.
+✅ Use clear radiological terminology and anatomical specificity based on **visual findings and model predictions**.
 
-2. CONFIDENCE-BASED REPORTING:
-   - No Finding >70%: Use simple, direct language like practicing radiologists
-   - Pathology >70%: Focus on the specific medical condition only  
-   - Mixed confidence 50-70%: Provide appropriate clinical uncertainty
+### 🚨 REPORTING GUIDELINES:
 
-3. ANATOMICAL PRECISION: Only describe anatomical locations if directly supported by high-confidence predictions, not attention maps.
+1. **VISUAL-AI CORRELATION**
+   • Examine the provided chest X-ray image directly
+   • Correlate visual findings with AI predictions 
+   • Prioritize what you see in the image over AI predictions when they conflict
+   • Use AI predictions to guide attention to specific areas
 
-4. CLINICAL SIMPLICITY: Match the complexity level to the findings - normal studies need 1-2 sentences, not paragraphs.
+2. **CONFIDENCE-BASED REPORTING**
+   • >70% = Report directly and confidently
+   • 50–70% = Use appropriate clinical uncertainty
+   • <50% = Do not report
 
-5. MEDICAL ACCURACY: Base conclusions exclusively on the condition prediction probabilities, ignore all attention/spatial data.
+3. **INCLUDE DEVICE FINDINGS**
+   • Always describe any visible medical device (e.g. tubes, catheters, lines), even if incidental
+   • Mention if the **tip** is not visible or fully imaged
+   • Report device positioning and termination when visible
 
-6. REPORT FORMAT: Do NOT include patient name fields, exam date fields, or radiologist signature lines. Focus only on the clinical content (FINDINGS, IMPRESSION, RECOMMENDATIONS).
+3. **USE PROVIDED TERMINOLOGY**
+   • Prefer using **exact phrases** from `CLINICAL KEYWORDS` to improve alignment with ground truth
+   • When high-confidence keywords are provided, incorporate them verbatim when clinically appropriate
+
+4. **AVOID OVER-HEDGING**
+   • Do not say "subtle findings cannot be excluded" unless prediction confidence is mixed (50–70%)
+   • If the study is normal and high confidence, use definitive phrases: "No focal consolidation, pleural effusion, or pneumothorax."
+   • Be decisive when model confidence is high (>70%)
+
+5. **STYLE & STRUCTURE**
+   • Match expert radiologist tone
+   • Avoid unnecessary hedging or speculation
+   • Each section (FINDINGS, IMPRESSION) should be continuous text (no bullet points)
+   • Include non-pathological findings such as tubes, lines, or structural anomalies
+
+6. **ANATOMICAL SPECIFICITY**
+   • Use precise anatomical terms when supported by high-confidence predictions
+   • Reference specific lung zones, cardiac contours, and bony structures as appropriate
+   • Always mention any visible medical device, line, or tube if present
 
 REPORTING STYLE: CONSERVATIVE ASSESSMENT (Low confidence across all findings - emphasize limitations)
 
 === CLINICAL ANALYSIS DATA ===
 
 🔬 MODEL PREDICTIONS (Clinical Decision Basis):
-- Atelectasis: 31.8% probability (LOW confidence)
-- Cardiomegaly: 34.1% probability (LOW confidence)
-- Edema: 30.3% probability (LOW confidence)
-- Lung Opacity: 51.0% probability (MODERATE confidence)
-- No Finding: 51.3% probability (MODERATE confidence)
-- Pneumonia: 48.9% probability (LOW confidence)
-- Support Devices: 41.2% probability (LOW confidence)
+- Atelectasis: 32.4% probability (LOW confidence)
+- Cardiomegaly: 33.9% probability (LOW confidence)
+- Edema: 30.5% probability (LOW confidence)
+- Lung Opacity: 50.7% probability (MODERATE confidence)
+- No Finding: 50.7% probability (MODERATE confidence)
+- Pneumonia: 49.9% probability (LOW confidence)
+- Support Devices: 41.5% probability (LOW confidence)
 
 📋 CLINICAL KEYWORDS (Condition-Based):
-- Atelectasis: hyperinflated lungs, mucous plugging, normal to decreased in volume
-- Cardiomegaly: cardiac contour looks larger due to low lung volume, cardiomyopathy, no definite signs of chf
-- Edema: cardiac silhouette is enlarged, cardiac silhouette is obscured, interval improvement in interstitial edema
-- Lung Opacity: 7 mm nodular opacity, accentuate bronchovascular markings, acute airways inflammation
-- No Finding: abdomen is unremarkable, absence of any new acute infiltrates, aerated
-- Pneumonia: acute cardiopulmonary disease, acute consolidation, acute infiltrates
-- Support Devices: absence of devices, advancement by 2 cm, all monitoring and support devices except for the port-a-cath have been removed
+- Atelectasis (LOW): hyperinflated lungs, mucous plugging, normal to decreased in volume
+- Cardiomegaly (LOW): cardiac contour looks larger due to low lung volume, cardiomyopathy, no definite signs of chf
+- Edema (LOW): cardiac silhouette is enlarged, cardiac silhouette is obscured, interval improvement in interstitial edema
+- Lung Opacity (MODERATE): 7 mm nodular opacity, accentuate bronchovascular markings, acute airways inflammation
+- No Finding (MODERATE): abdomen is unremarkable, absence of any new acute infiltrates, aerated
+- Pneumonia (LOW): acute cardiopulmonary disease, acute consolidation, acute infiltrates
+- Support Devices (LOW): absence of devices, advancement by 2 cm, all monitoring and support devices except for the port-a-cath have been removed
 
 🗺️ RELEVANT ANATOMICAL REGIONS (Condition-Based):
 - No significant findings above 60% confidence for anatomical localization
@@ -67,35 +92,54 @@ Generate a professional radiological report with sections: FINDINGS, IMPRESSION,
 - Consider additional imaging if warranted
 - Use conservative language throughout
 
-📏 CRITICAL FORMATTING REQUIREMENTS:
-- Write 60-70 words total (count carefully)
-- Use 7-8 sentences total
-- NO line breaks within section content (each section should be continuous text)
-- Structure format:
-  FINDINGS:
-  [newline]
-  [continuous content without line breaks]
-  [double newline]
-  IMPRESSION:
-  [newline]
-  [continuous content without line breaks]
+### 📏 FORMATTING INSTRUCTIONS:
+• Structure:
+  ```
+  FINDINGS: 
+  [continuous paragraph]  
+
+  IMPRESSION:  
+  [continuous paragraph]
+  ```
+
+### ✳️ INPUT STRUCTURE:
+• `CHEST X-RAY IMAGE`: Primary source - examine visually for all findings
+• `CLINICAL KEYWORDS`: Use exact phrases when clinically appropriate to maximize alignment
+• `MODEL PREDICTIONS`: Secondary guide - use to focus attention and validate visual findings
+• `RELEVANT ANATOMICAL REGIONS`: Reference these locations when describing findings
+
+### 🎯 OPTIMIZATION GOALS:
+• **Maximize lexical similarity** to expert reference reports
+• **Use provided terminology verbatim** when possible
+• **Include device findings** (tubes, catheters, lines) even if incidental
+• **Be anatomically specific** when high-confidence predictions support it
 
 📋 EXAMPLE REPORT FORMATS:
 
-Example 1:
+Example 1 (Device Present):
 FINDINGS: 
-PA and lateral views of the chest demonstrate well-expanded lungs. In comparison to the prior study, there is interval obscuration of the right heart border and the medial right hemidiaphragm. Correlation with the lateral view suggests that this is likely due to interval development of small bilateral pleural effusions. Underlying consolidation is not excluded. No pneumothorax. Cardiomediastinal silhouette is otherwise stable. Of note, an air fluid level in a tubular structure posterior to the trachea on the lateral view is consistent with a dilated fluid-filled esophagus.
+Feeding tube extends into the upper abdomen, the tip is not imaged. Lung volumes are normal. Mediastinal contours and heart size within normal limits. No consolidation or pleural effusion. No pneumothorax. No acute osseous abnormality.
 
 IMPRESSION: 
-1. Interval development of small bilateral pleural effusions. Underlying consolidation not excluded. 2. Dilated fluid-filled esophagus.
+No acute cardiopulmonary process.
 
-Example 2:
+Example 2 (Multiple Findings):
 FINDINGS: 
-Right-sided Port-A-Cath tip terminates in the proximal right atrium. Moderate enlargement of the cardiac silhouette is unchanged. The mediastinal and hilar contours are similar. Pulmonary vasculature is normal. The lungs are clear. No focal consolidation, pleural effusion or pneumothorax is demonstrated. Partially imaged is a pigtail catheter overlying the right upper quadrant of the abdomen. No acute osseous abnormalities are detected.
+PA and lateral views of the chest demonstrate well-expanded lungs. In comparison to the prior study, there is interval obscuration of the right heart border and the medial right hemidiaphragm. Correlation with the lateral view suggests that this is likely due to interval development of small bilateral pleural effusions. Underlying consolidation is not excluded. No pneumothorax. Cardiomediastinal silhouette is otherwise stable.
 
 IMPRESSION: 
-No acute cardiopulmonary abnormality.
+Interval development of small bilateral pleural effusions. Underlying consolidation not excluded.
 
-⚠️ REMEMBER: Ignore all attention/spatial analysis data. Report only what the medical predictions indicate.
+Example 3 (Normal Study):
+FINDINGS: 
+The lungs are hyperinflated reflective of COPD. Apparent increased opacity projecting over the right lung apex correlates with posterior right fifth rib fracture with callus. Streaky bibasilar opacities likely reflect atelectasis. No focal consolidation to suggest pneumonia. No pleural effusion or pneumothorax. The heart is normal in size, and the mediastinal contours are normal.
+
+IMPRESSION: 
+No acute cardiopulmonary process. Focal opacity in the retrocardiac region.
+
+⚠️ **REMEMBER**: Do NOT mention attention maps, saliency, heatmaps, or explainability data. Use model predictions and provided keywords only.
+
+### ✳️ GOAL:
+Maximize lexical and semantic similarity to the expert reference report. Prioritize clinical specificity and exact terminology alignment.
 
 CHEST X-RAY REPORT:

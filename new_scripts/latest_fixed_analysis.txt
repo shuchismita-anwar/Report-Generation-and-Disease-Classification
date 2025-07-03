@@ -1,17 +1,6 @@
 🔍 CLINICAL FINDINGS:
 --------------------------------------------------
    FINDINGS:
-   The lungs are reasonably well-aerated, though the evaluation is limited. A subtle, nonspecific opacity may be present, but this finding is highly uncertain. The cardiac and mediastinal contours appear unremarkable. No definite pleural effusion or pneumothorax is seen. No acute osseous abnormalities are identified.
+   The lungs are reasonably well-aerated. There are faint, ill-defined opacities in the lower lungs bilaterally, which may represent accentuate bronchovascular markings. There is no focal consolidation, significant pleural effusion, or pneumothorax. The cardiac silhouette is at the upper limits of normal, potentially exaggerated by the AP projection. A port-a-cath is visualized in the left upper chest. The visualized osseous structures are unremarkable.
    IMPRESSION:
-   Highly indeterminate study with no definitive acute process. The possibility of a subtle underlying opacity is uncertain. Clinical correlation is essential to guide further management.
-
-
-============================================================
-GAZE-ATTENTION VALIDATION RESULTS (Priority 1)
-============================================================
-Pearson Correlation: 0.3459
-P-value: 0.0000
-Jensen-Shannon Divergence: 0.4343
-Mean Squared Error: 0.0339
-Normalized Scanpath Saliency: 0.1541
-Visualization: E:\MIMIC Research\Code\Report-Generation-and-Disease-Classification\new_scripts\gaze_attention_analysis\gaze_attention_comparison_0a7698f4-898f002d-abe934ed-2b21b711-848b7913_20250702_061442.png
+   Nonspecific, faint bilateral basilar opacities. These findings are indeterminate but could represent early airspace disease or atelectasis. There is an absence of any new acute infiltrates. Clinical correlation is recommended to assess for signs of acute airways inflammation.
