@@ -76,7 +76,7 @@ def get_specific_xray_image():
         str: Path to the specific patient image
     """
     # Specific patient ID that we know has interesting findings
-    specific_patient_id = "0a7698f4-898f002d-abe934ed-2b21b711-848b7913"
+    specific_patient_id = "efa5f70a-148764b5-a1137b9b-0e30e4c3-38c465a6"
     
     # Path to the image directory
     img_dir = project_root / "data_dump" / "output" / "img_png"

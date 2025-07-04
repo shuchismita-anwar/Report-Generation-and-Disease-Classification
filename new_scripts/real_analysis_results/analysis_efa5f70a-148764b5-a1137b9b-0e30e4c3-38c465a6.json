@@ -1,0 +1,1810 @@
+{
+  "success": true,
+  "image_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\data_dump\\output\\img_png\\efa5f70a-148764b5-a1137b9b-0e30e4c3-38c465a6.png",
+  "template_used": "standard",
+  "processing_steps": {
+    "image_processing": {
+      "success": true,
+      "shape": [
+        1,
+        3,
+        224,
+        224
+      ],
+      "device": "cuda:0",
+      "processing_time": 0.0438075065612793
+    },
+    "model_inference": {
+      "success": true,
+      "num_conditions": 8,
+      "processing_time": 0.13297772407531738
+    },
+    "keyword_extraction": {
+      "success": true,
+      "total_keywords": 412,
+      "conditions_with_keywords": 7,
+      "processing_time": 0.0010006427764892578
+    },
+    "anatomical_region_mapping": {
+      "success": true,
+      "relevant_regions_count": 15,
+      "processing_time": 0.0009996891021728516
+    },
+    "attention_analysis": {
+      "success": true,
+      "significant_regions": 3,
+      "spatial_keywords": 34,
+      "target_condition": "Support Devices",
+      "processing_time": 0.17639803886413574
+    },
+    "report_generation": {
+      "success": true,
+      "used_fallback": false,
+      "report_length": 766,
+      "sections_found": 2,
+      "processing_time": 25.02097511291504
+    }
+  },
+  "performance_metrics": {
+    "total_processing_time": 25.376158714294434,
+    "steps_completed": 6,
+    "total_steps": 6,
+    "errors_encountered": 0,
+    "memory_efficient": false,
+    "device_used": "cuda"
+  },
+  "error_log": [],
+  "model_predictions": {
+    "Atelectasis": {
+      "probability": 0.60584956407547,
+      "predicted": true,
+      "logit": 0.42989903688430786
+    },
+    "Cardiomegaly": {
+      "probability": 0.5757978558540344,
+      "predicted": true,
+      "logit": 0.3055465817451477
+    },
+    "Edema": {
+      "probability": 0.3875502049922943,
+      "predicted": false,
+      "logit": -0.45762157440185547
+    },
+    "Lung Opacity": {
+      "probability": 0.47445106506347656,
+      "predicted": false,
+      "logit": -0.1022849977016449
+    },
+    "No Finding": {
+      "probability": 0.2796495854854584,
+      "predicted": false,
+      "logit": -0.9462004899978638
+    },
+    "Pleural Effusion": {
+      "probability": 0.5950056314468384,
+      "predicted": true,
+      "logit": 0.3846975862979889
+    },
+    "Pneumonia": {
+      "probability": 0.3368586003780365,
+      "predicted": false,
+      "logit": -0.6773250102996826
+    },
+    "Support Devices": {
+      "probability": 0.6368457078933716,
+      "predicted": true,
+      "logit": 0.561699628829956
+    }
+  },
+  "prediction_keywords": {
+    "Atelectasis": [
+      "atelectasis/scarring",
+      "atelectatic",
+      "atelectatic and / or consolidated",
+      "better aerated",
+      "bronchial wall thickening",
+      "bronchiectasis",
+      "compressive atelectasis",
+      "curvilinear opacity",
+      "decortication of lung",
+      "decrease in lung volumes",
+      "decreased air entry",
+      "effusion",
+      "endobronchial impaction",
+      "fibrosis",
+      "fluid trapped within the fissure",
+      "focal aspiration",
+      "heart is slightly shifted to the left",
+      "hemidiaphragm is elevated",
+      "hila are elevated",
+      "increase in ventilated lung volume",
+      "linear opacity",
+      "linear scarring",
+      "lungs are low in volume",
+      "mediastinal shift",
+      "mild bronchovascular crowding",
+      "mild scarring or atelectasis",
+      "mildly hypoinflated lungs",
+      "mildly low lung volumes",
+      "mucus plugging",
+      "obstruction",
+      "occluded by secretions",
+      "opacification",
+      "parenchymal consolidative opacities",
+      "parenchymal scarring",
+      "partial lobar collapse",
+      "partial obscuration of the diaphragm",
+      "patchy consolidation",
+      "patchy mucus plugging",
+      "peribronchial thickening",
+      "platelike atelectaisis",
+      "pleural effusion",
+      "pleural thickening",
+      "poor aeration",
+      "relatively low lung volumes",
+      "resultant bronchovascular crowding",
+      "resulting volume loss",
+      "scarring",
+      "secretions",
+      "small amount of atelectasis",
+      "superior retraction",
+      "underlying collapse and/or consolidation",
+      "underlying consolidation",
+      "underlying scarring",
+      "vascular congestion and atelectasis",
+      "vascular crowding"
+    ],
+    "Cardiomegaly": [
+      "acute congestive heart failure",
+      "acute on chronic chf",
+      "afib",
+      "aortic stenosis",
+      "atrial fibrillation",
+      "biventricular heart failure",
+      "borderline cardiac enlargement",
+      "cardiac chamber enlargement",
+      "cardiac contour looks larger",
+      "cardiac silhouette in the upper limits of normal",
+      "cardiac silhouette is accentuated",
+      "cardiac silhouette is exaggerated by low lung volumes",
+      "cardiac silhouette is markedly enlarged",
+      "cardiac silhouette is top normal",
+      "cardiac silhouette size appears mildly enlarged",
+      "cardiac size is top-normal",
+      "cardiomediastinal silhouette is at the upper limits of normal",
+      "cardiomegaly is mild",
+      "central venous congestion",
+      "cephalization pulmonary vasculature",
+      "chf",
+      "chf exacerbation",
+      "congestion",
+      "decompensated heart failure",
+      "decompensation",
+      "decreased ejection fraction",
+      "dilatation",
+      "dilated cardiomyopathy",
+      "displaced the cardiomediastinal contours",
+      "enlarged cardiac",
+      "fluid overload",
+      "heart failure",
+      "heart is enlarged",
+      "heart is top normal",
+      "heart is upper limits of normal",
+      "heart size appears enlarged",
+      "heart size borderline enlarged",
+      "increase in cardiac size",
+      "large left atrium",
+      "pleural fluid",
+      "poor aeration",
+      "predominantly right ventricular",
+      "pulmonary congestion",
+      "pulmonary edema",
+      "pulmonary engorgement",
+      "pulmonary vascular congestion",
+      "pulmonary vascular engorgement",
+      "pulmonary vascular redistribution",
+      "pulmonary vasculature is prominent",
+      "silhouette is enlarged",
+      "top normal size",
+      "top-normal cardiac silhouette",
+      "top-normal to mildly enlarged",
+      "transverse diameter of the heart",
+      "upper zone redistribution",
+      "vascular congestion",
+      "vascular engorgement",
+      "vascular plethora",
+      "venous engorgement",
+      "volume overload",
+      "width of vascular pedicle",
+      "worsening right ventricular function"
+    ],
+    "Edema": [
+      "cardiac silhouette is enlarged",
+      "cardiac silhouette is obscured",
+      "interval improvement in interstitial edema",
+      "interval improvement in pulmonary vascular congestion",
+      "interval increase in interstitial markings",
+      "large effusion",
+      "less engorged",
+      "linear consolidation",
+      "mild cardiomegaly",
+      "mild diffuse airway wall thickening",
+      "moderate cardiomegaly",
+      "no congestive heart failure",
+      "no consolidation",
+      "no effusion or edema",
+      "no focal ... edema",
+      "no frank edema",
+      "no frank pulmonary edema",
+      "no interstitial edema",
+      "no new edema",
+      "no new pulmonary edema",
+      "no overt chf",
+      "no overt edema",
+      "no overt interstitial edema",
+      "no overt pulmonary edema",
+      "overt edema",
+      "pulmonary congestive pattern",
+      "vasculature is mildly engorged",
+      "very mild interstitial pulmonary edema has improved",
+      "volume overload has nearly resolved"
+    ],
+    "Lung Opacity": [
+      "acute cardiopulmonary disease",
+      "acute infiltrates",
+      "aerated",
+      "calcified granulomas",
+      "consolidative opacities",
+      "consolidative parenchymal opacities",
+      "contusion",
+      "decreased lung volumes",
+      "dense consolidation",
+      "discrete focal consolidation",
+      "ground-glass opacities",
+      "infiltrates",
+      "lungs not clear",
+      "no chf",
+      "no congestion",
+      "no consolidation",
+      "no discrete local pulmonary parenchymal infiltrates",
+      "no discrete mass",
+      "no edema",
+      "no effusion",
+      "opacity is skin fold",
+      "parenchymal edema",
+      "parenchymal opacity",
+      "pleural calcifications",
+      "pleural fluid",
+      "pulmonary parenchymal infiltrates",
+      "severe emphysematous disease",
+      "splaying of bronchovasculature",
+      "superimposed infection",
+      "well expanded",
+      "widespread opacities and pleural effusions have resolved",
+      "without a focal consolidation",
+      "without a focal opacity",
+      "without acute focal pneumonia",
+      "without confluent consolidation",
+      "without definite acute consolidation",
+      "without definite focal consolidation",
+      "without definite signs of pneumonia",
+      "without discrete focal consolidation"
+    ],
+    "Pleural Effusion": [
+      "air and fluid",
+      "air- fluid collection",
+      "air-fluid levels",
+      "amount of pleural fluid",
+      "blunted",
+      "blunting",
+      "cardiac silhouette is obscured",
+      "chest tube",
+      "chf",
+      "chf exacerbation",
+      "chronic pleural effusion",
+      "consistent with pleural fluid",
+      "drainage tube",
+      "dyspnea",
+      "dyspnea on exertion",
+      "elevated hemidiaphragm",
+      "elevated lung base",
+      "fluid-filled",
+      "free effusions",
+      "heart is obscured by the effusions",
+      "intrafissural",
+      "large effusion",
+      "loculation of the effusion",
+      "meniscoid effect",
+      "mild amount of pleural effusions",
+      "minimal blunting",
+      "minimal fluid markings of the fissures",
+      "minimal layering component",
+      "moderate pleural effusions",
+      "partially layering",
+      "persistent blunting",
+      "previously seen pleural effusions",
+      "previously seen pleural effusions have resolved",
+      "pulmonary edema/effusion",
+      "reaccumulation of pleural fluid",
+      "residual fluid",
+      "resolution of... pleural effusion",
+      "resolved",
+      "significant pleural effusion",
+      "small amounts of pleural or extrapleural fluid",
+      "small effusion",
+      "small layering",
+      "small new pleural effusion",
+      "small pleural effusions versus pleural thickening",
+      "some loculated fluid",
+      "the effusion",
+      "tiny effusion",
+      "trace blunting of the costophrenic angle",
+      "trace effusion",
+      "very slight blunting",
+      "with intrafissural extension",
+      "worsening pleural effusion"
+    ],
+    "Pneumonia": [
+      "acute cardiopulmonary disease",
+      "acute consolidation",
+      "acute infiltrates",
+      "bilateral effusions",
+      "calcified granuloma",
+      "central vascular congestion",
+      "chf",
+      "consolidative",
+      "consolidative parenchymal opacities",
+      "diffuse pneumonia",
+      "discrete focal consolidation",
+      "focal pulmonary consolidation",
+      "hazy ground-glass opacities",
+      "increased interstitial markings",
+      "interstitial edema",
+      "interstitial opacities",
+      "linear consolidation",
+      "lymphadenopathy",
+      "no air bronchogram",
+      "non-cardiogenic edema",
+      "partial obscuration of the diaphragm",
+      "peribronchial thickening",
+      "pleural effusions",
+      "pleural scarring",
+      "pulmonary parenchymal infiltrates",
+      "pulmonary vascular redistribution",
+      "respiratory failure",
+      "retained secretions",
+      "reticular opacities",
+      "shortness of breath",
+      "vascular congestion",
+      "volume loss"
+    ],
+    "Support Devices": [
+      "a gastric tube",
+      "a laparoscopic gastric band",
+      "additional lead",
+      "adult sternotomy wires",
+      "anchors",
+      "annuloplasty devices",
+      "annuloplasty ring",
+      "artificial mitral valve",
+      "balloon inflated",
+      "bent and pointing to reverse direction",
+      "bipolar",
+      "bone anchors",
+      "broken picc line",
+      "catheter placement",
+      "central line",
+      "cervical fusion device",
+      "chest tube on waterseal",
+      "clavicular fixation",
+      "clips",
+      "coiled catheter",
+      "coiling of feeding tube",
+      "corevalve",
+      "costochondral fixation",
+      "crt-p",
+      "ct to suction",
+      "defibrillator leads",
+      "dobbhoff placement",
+      "dobbhoff tube",
+      "dobbhoff tube tip",
+      "drain tubes have been removed",
+      "dual leads",
+      "ekg electrodes",
+      "ekg leads",
+      "endotracheal tube and nasogastric tubes have been removed",
+      "enteric feeding tube",
+      "ett cuff appears overinflated",
+      "ett placement",
+      "evd placement",
+      "extubated",
+      "extubation",
+      "filter",
+      "fixation",
+      "fourth and fifth sternotomy wires",
+      "grafts",
+      "hardware",
+      "hardware loosening or failure",
+      "hemostats",
+      "history of stents",
+      "humeral bone anchors",
+      "iabp placement",
+      "icd placement",
+      "ij sheath",
+      "implants",
+      "inferior approach catheter",
+      "infusion port",
+      "intact leads",
+      "intact spine fixation rods",
+      "intact sternotomy wires",
+      "introducer",
+      "j-tube",
+      "lead position",
+      "lead projecting",
+      "lead terminates",
+      "lead tip in satisfactory position",
+      "lead tip not completely included",
+      "leads appear intact",
+      "leads are not well visualized",
+      "leads in appropriate positions",
+      "left clavicular fixation",
+      "left ij catheter",
+      "left pacemaker",
+      "left pectoral dual-chamber",
+      "left picc",
+      "left pleural space drainage tube",
+      "left sided cardiac pacemaker defibrillator",
+      "left thoracostomy tube",
+      "left ventricle epicardial leads",
+      "left-sided cardiac pacer",
+      "left-sided dual lead pacer",
+      "lue picc",
+      "lumbar fixation",
+      "malfunctioning shunt",
+      "metallic forceps",
+      "mitral annular ring",
+      "new dobhoff",
+      "new endotracheal tube",
+      "new nasogastric tube",
+      "new picc placement",
+      "ng tube position",
+      "ng tube replacement",
+      "ngt advancement",
+      "no devices",
+      "no line in place",
+      "no other device",
+      "no tubes",
+      "no wires",
+      "other lead",
+      "pacemaker lead",
+      "pacemaker with lead tips",
+      "pacer defibrillator lead",
+      "pacer pack",
+      "pacing leads",
+      "pectoral cardiac pacemaker",
+      "pediatric sternotomy wires",
+      "perihepatic drain",
+      "picc",
+      "plate and screws",
+      "port tip",
+      "prosthetic",
+      "prosthetic tricuspid valve",
+      "screws",
+      "sidehole",
+      "sidehole marker",
+      "single lead icd",
+      "single lead pacemaker",
+      "staples",
+      "sternotomy wire is fractured",
+      "stimulator",
+      "surgical chain sutures",
+      "surgical clips",
+      "surgical drain",
+      "suture anchors",
+      "suture material",
+      "temperature monitoring probe",
+      "terminates with leads",
+      "thin catheter",
+      "thoracic spine fixation hardware",
+      "tip is folded back on itself",
+      "to water seal",
+      "trach placement",
+      "tracheobronchial stents",
+      "tricuspid and mitral valve annuloplasty rings",
+      "tunneled dual lumen",
+      "upper thoracic spinal fixation hardware",
+      "urinary and biliary stents",
+      "valve replacement",
+      "vascular catheter",
+      "venous catheter",
+      "ventriculoperitoneal shunt",
+      "well-positioned enteric tube",
+      "wire again seen to be fractured",
+      "wires external to the patient",
+      "with leads"
+    ]
+  },
+  "keyword_summary": {
+    "primary_findings": [],
+    "anatomical_locations": [],
+    "severity_indicators": [],
+    "descriptive_terms": [],
+    "total_keywords": 412,
+    "conditions_detected": [
+      "Atelectasis",
+      "Cardiomegaly",
+      "Edema",
+      "Lung Opacity",
+      "Pleural Effusion",
+      "Pneumonia",
+      "Support Devices"
+    ],
+    "high_confidence_findings": [],
+    "medium_confidence_findings": [
+      "temperature monitoring probe",
+      "small effusion",
+      "surgical chain sutures",
+      "elevated lung base",
+      "endotracheal tube and nasogastric tubes have been removed",
+      "mildly low lung volumes",
+      "new nasogastric tube",
+      "blunting",
+      "venous catheter",
+      "intact spine fixation rods",
+      "patchy mucus plugging",
+      "heart size appears enlarged",
+      "leads in appropriate positions",
+      "icd placement",
+      "minimal fluid markings of the fissures",
+      "port tip",
+      "cardiac chamber enlargement",
+      "fourth and fifth sternotomy wires",
+      "pacer defibrillator lead",
+      "poor aeration",
+      "fluid overload",
+      "dual leads",
+      "resultant bronchovascular crowding",
+      "very slight blunting",
+      "left ventricle epicardial leads",
+      "heart is obscured by the effusions",
+      "stimulator",
+      "partially layering",
+      "bone anchors",
+      "left-sided dual lead pacer",
+      "large left atrium",
+      "elevated hemidiaphragm",
+      "terminates with leads",
+      "small pleural effusions versus pleural thickening",
+      "platelike atelectaisis",
+      "patchy consolidation",
+      "ekg leads",
+      "plate and screws",
+      "bent and pointing to reverse direction",
+      "lead tip not completely included",
+      "dobbhoff tube tip",
+      "clavicular fixation",
+      "intact sternotomy wires",
+      "afib",
+      "tricuspid and mitral valve annuloplasty rings",
+      "mild scarring or atelectasis",
+      "evd placement",
+      "single lead icd",
+      "atrial fibrillation",
+      "mild amount of pleural effusions",
+      "cardiac silhouette is obscured",
+      "annuloplasty devices",
+      "opacification",
+      "heart failure",
+      "tiny effusion",
+      "pediatric sternotomy wires",
+      "peribronchial thickening",
+      "heart is upper limits of normal",
+      "prosthetic",
+      "tip is folded back on itself",
+      "chest tube on waterseal",
+      "thin catheter",
+      "central line",
+      "implants",
+      "pectoral cardiac pacemaker",
+      "cephalization pulmonary vasculature",
+      "additional lead",
+      "ett cuff appears overinflated",
+      "to water seal",
+      "atelectasis/scarring",
+      "left-sided cardiac pacer",
+      "introducer",
+      "underlying collapse and/or consolidation",
+      "fluid-filled",
+      "broken picc line",
+      "left pacemaker",
+      "ng tube position",
+      "grafts",
+      "lead projecting",
+      "corevalve",
+      "pacemaker with lead tips",
+      "underlying scarring",
+      "cardiomegaly is mild",
+      "lead tip in satisfactory position",
+      "with intrafissural extension",
+      "wires external to the patient",
+      "large effusion",
+      "fixation",
+      "pacemaker lead",
+      "better aerated",
+      "lead position",
+      "worsening right ventricular function",
+      "moderate pleural effusions",
+      "vascular plethora",
+      "surgical clips",
+      "underlying consolidation",
+      "left clavicular fixation",
+      "no line in place",
+      "chf",
+      "mediastinal shift",
+      "resolution of... pleural effusion",
+      "heart is enlarged",
+      "decortication of lung",
+      "wire again seen to be fractured",
+      "hemostats",
+      "reaccumulation of pleural fluid",
+      "drainage tube",
+      "acute congestive heart failure",
+      "j-tube",
+      "tunneled dual lumen",
+      "top-normal to mildly enlarged",
+      "defibrillator leads",
+      "silhouette is enlarged",
+      "other lead",
+      "upper thoracic spinal fixation hardware",
+      "top normal size",
+      "no other device",
+      "cardiac silhouette is top normal",
+      "cardiac silhouette is markedly enlarged",
+      "mild bronchovascular crowding",
+      "hardware",
+      "ngt advancement",
+      "leads appear intact",
+      "significant pleural effusion",
+      "thoracic spine fixation hardware",
+      "chest tube",
+      "intact leads",
+      "iabp placement",
+      "increase in cardiac size",
+      "linear opacity",
+      "leads are not well visualized",
+      "decreased ejection fraction",
+      "annuloplasty ring",
+      "surgical drain",
+      "lue picc",
+      "curvilinear opacity",
+      "amount of pleural fluid",
+      "ventriculoperitoneal shunt",
+      "lungs are low in volume",
+      "previously seen pleural effusions",
+      "superior retraction",
+      "balloon inflated",
+      "adult sternotomy wires",
+      "small new pleural effusion",
+      "bipolar",
+      "drain tubes have been removed",
+      "tracheobronchial stents",
+      "congestion",
+      "pulmonary vascular engorgement",
+      "loculation of the effusion",
+      "ekg electrodes",
+      "left ij catheter",
+      "new picc placement",
+      "cardiomediastinal silhouette is at the upper limits of normal",
+      "lead terminates",
+      "sidehole marker",
+      "atelectatic and / or consolidated",
+      "persistent blunting",
+      "acute on chronic chf",
+      "obstruction",
+      "hila are elevated",
+      "cardiac size is top-normal",
+      "new dobhoff",
+      "pacer pack",
+      "extubated",
+      "decompensation",
+      "screws",
+      "volume overload",
+      "biventricular heart failure",
+      "pulmonary congestion",
+      "lumbar fixation",
+      "no tubes",
+      "relatively low lung volumes",
+      "pulmonary vascular redistribution",
+      "cardiac silhouette is exaggerated by low lung volumes",
+      "parenchymal scarring",
+      "small amounts of pleural or extrapleural fluid",
+      "a laparoscopic gastric band",
+      "dilatation",
+      "left picc",
+      "pulmonary vascular congestion",
+      "top-normal cardiac silhouette",
+      "catheter placement",
+      "single lead pacemaker",
+      "bronchiectasis",
+      "transverse diameter of the heart",
+      "intrafissural",
+      "linear scarring",
+      "dyspnea on exertion",
+      "mitral annular ring",
+      "consistent with pleural fluid",
+      "trace effusion",
+      "pacing leads",
+      "blunted",
+      "mildly hypoinflated lungs",
+      "left pleural space drainage tube",
+      "air and fluid",
+      "with leads",
+      "minimal blunting",
+      "heart is slightly shifted to the left",
+      "ij sheath",
+      "heart is top normal",
+      "costochondral fixation",
+      "heart size borderline enlarged",
+      "fluid trapped within the fissure",
+      "staples",
+      "displaced the cardiomediastinal contours",
+      "some loculated fluid",
+      "fibrosis",
+      "partial obscuration of the diaphragm",
+      "no devices",
+      "trace blunting of the costophrenic angle",
+      "inferior approach catheter",
+      "increase in ventilated lung volume",
+      "urinary and biliary stents",
+      "bronchial wall thickening",
+      "minimal layering component",
+      "enteric feeding tube",
+      "decreased air entry",
+      "residual fluid",
+      "small amount of atelectasis",
+      "the effusion",
+      "meniscoid effect",
+      "small layering",
+      "occluded by secretions",
+      "air-fluid levels",
+      "hemidiaphragm is elevated",
+      "left sided cardiac pacemaker defibrillator",
+      "prosthetic tricuspid valve",
+      "width of vascular pedicle",
+      "chf exacerbation",
+      "artificial mitral valve",
+      "trach placement",
+      "focal aspiration",
+      "vascular congestion and atelectasis",
+      "partial lobar collapse",
+      "free effusions",
+      "endobronchial impaction",
+      "resulting volume loss",
+      "vascular engorgement",
+      "valve replacement",
+      "left thoracostomy tube",
+      "pleural thickening",
+      "clips",
+      "dilated cardiomyopathy",
+      "hardware loosening or failure",
+      "ng tube replacement",
+      "sternotomy wire is fractured",
+      "resolved",
+      "a gastric tube",
+      "dobbhoff placement",
+      "new endotracheal tube",
+      "dyspnea",
+      "compressive atelectasis",
+      "aortic stenosis",
+      "effusion",
+      "predominantly right ventricular",
+      "malfunctioning shunt",
+      "cardiac silhouette size appears mildly enlarged",
+      "pleural fluid",
+      "scarring",
+      "anchors",
+      "decompensated heart failure",
+      "pulmonary edema",
+      "crt-p",
+      "previously seen pleural effusions have resolved",
+      "left pectoral dual-chamber",
+      "ett placement",
+      "coiling of feeding tube",
+      "upper zone redistribution",
+      "vascular congestion",
+      "extubation",
+      "infusion port",
+      "chronic pleural effusion",
+      "air- fluid collection",
+      "humeral bone anchors",
+      "vascular catheter",
+      "enlarged cardiac",
+      "coiled catheter",
+      "well-positioned enteric tube",
+      "metallic forceps",
+      "pleural effusion",
+      "suture material",
+      "pulmonary vasculature is prominent",
+      "picc",
+      "secretions",
+      "borderline cardiac enlargement",
+      "perihepatic drain",
+      "cardiac silhouette is accentuated",
+      "sidehole",
+      "cervical fusion device",
+      "cardiac silhouette in the upper limits of normal",
+      "pulmonary engorgement",
+      "cardiac contour looks larger",
+      "ct to suction",
+      "no wires",
+      "pulmonary edema/effusion",
+      "central venous congestion",
+      "filter",
+      "venous engorgement",
+      "worsening pleural effusion",
+      "dobbhoff tube",
+      "atelectatic",
+      "suture anchors",
+      "decrease in lung volumes",
+      "history of stents",
+      "mucus plugging",
+      "vascular crowding",
+      "parenchymal consolidative opacities"
+    ],
+    "low_confidence_findings": [
+      "interstitial edema",
+      "bilateral effusions",
+      "no discrete local pulmonary parenchymal infiltrates",
+      "consolidative parenchymal opacities",
+      "increased interstitial markings",
+      "less engorged",
+      "opacity is skin fold",
+      "diffuse pneumonia",
+      "pulmonary parenchymal infiltrates",
+      "consolidative opacities",
+      "cardiac silhouette is enlarged",
+      "without discrete focal consolidation",
+      "no overt chf",
+      "consolidative",
+      "no effusion or edema",
+      "without definite focal consolidation",
+      "no overt edema",
+      "large effusion",
+      "calcified granulomas",
+      "dense consolidation",
+      "well expanded",
+      "no congestive heart failure",
+      "contusion",
+      "no new edema",
+      "decreased lung volumes",
+      "chf",
+      "focal pulmonary consolidation",
+      "non-cardiogenic edema",
+      "aerated",
+      "pulmonary vascular redistribution",
+      "interstitial opacities",
+      "no chf",
+      "no congestion",
+      "severe emphysematous disease",
+      "hazy ground-glass opacities",
+      "acute cardiopulmonary disease",
+      "lungs not clear",
+      "without confluent consolidation",
+      "pleural fluid",
+      "parenchymal opacity",
+      "no consolidation",
+      "no interstitial edema",
+      "vascular congestion",
+      "no new pulmonary edema",
+      "no edema",
+      "moderate cardiomegaly",
+      "splaying of bronchovasculature",
+      "no overt interstitial edema",
+      "vasculature is mildly engorged",
+      "very mild interstitial pulmonary edema has improved",
+      "reticular opacities",
+      "interval increase in interstitial markings",
+      "pulmonary congestive pattern",
+      "volume overload has nearly resolved",
+      "parenchymal edema",
+      "without acute focal pneumonia",
+      "infiltrates",
+      "without a focal consolidation",
+      "no frank pulmonary edema",
+      "central vascular congestion",
+      "no effusion",
+      "volume loss",
+      "no discrete mass",
+      "pleural calcifications",
+      "cardiac silhouette is obscured",
+      "pleural scarring",
+      "overt edema",
+      "without a focal opacity",
+      "lymphadenopathy",
+      "partial obscuration of the diaphragm",
+      "peribronchial thickening",
+      "retained secretions",
+      "acute infiltrates",
+      "mild cardiomegaly",
+      "without definite signs of pneumonia",
+      "mild diffuse airway wall thickening",
+      "shortness of breath",
+      "respiratory failure",
+      "no focal ... edema",
+      "without definite acute consolidation",
+      "acute consolidation",
+      "interval improvement in interstitial edema",
+      "no frank edema",
+      "calcified granuloma",
+      "linear consolidation",
+      "no air bronchogram",
+      "widespread opacities and pleural effusions have resolved",
+      "superimposed infection",
+      "pleural effusions",
+      "interval improvement in pulmonary vascular congestion",
+      "ground-glass opacities",
+      "discrete focal consolidation",
+      "no overt pulmonary edema"
+    ]
+  },
+  "relevant_anatomical_regions": {
+    "left_lung": {
+      "name": "left lung",
+      "keywords": [
+        "left lung",
+        "left pulmonary field",
+        "left lung field"
+      ],
+      "bounds": [
+        0.5259046105190097,
+        0.12478328308312486,
+        0.8980233455747089,
+        0.8024001120456901
+      ],
+      "related_conditions": [
+        {
+          "condition": "Atelectasis",
+          "probability": 0.60584956407547
+        },
+        {
+          "condition": "Edema",
+          "probability": 0.3875502049922943
+        },
+        {
+          "condition": "Lung Opacity",
+          "probability": 0.47445106506347656
+        },
+        {
+          "condition": "Pneumonia",
+          "probability": 0.3368586003780365
+        }
+      ]
+    },
+    "right_lung": {
+      "name": "right lung",
+      "keywords": [
+        "right lung",
+        "right pulmonary field",
+        "right lung field"
+      ],
+      "bounds": [
+        0.09562001138363245,
+        0.125,
+        0.4706829179696034,
+        0.7906659323645568
+      ],
+      "related_conditions": [
+        {
+          "condition": "Atelectasis",
+          "probability": 0.60584956407547
+        },
+        {
+          "condition": "Edema",
+          "probability": 0.3875502049922943
+        },
+        {
+          "condition": "Lung Opacity",
+          "probability": 0.47445106506347656
+        },
+        {
+          "condition": "Pneumonia",
+          "probability": 0.3368586003780365
+        }
+      ]
+    },
+    "left_lower_lung_zone": {
+      "name": "left lower lung zone",
+      "keywords": [
+        "left lower lung zone",
+        "left lower lung field",
+        "left lower pulmonary zone"
+      ],
+      "bounds": [
+        0.5365964561733096,
+        0.5356675392670157,
+        0.8978004952454568,
+        0.8021890555254403
+      ],
+      "related_conditions": [
+        {
+          "condition": "Atelectasis",
+          "probability": 0.60584956407547
+        },
+        {
+          "condition": "Edema",
+          "probability": 0.3875502049922943
+        },
+        {
+          "condition": "Lung Opacity",
+          "probability": 0.47445106506347656
+        },
+        {
+          "condition": "Pleural Effusion",
+          "probability": 0.5950056314468384
+        },
+        {
+          "condition": "Pneumonia",
+          "probability": 0.3368586003780365
+        }
+      ]
+    },
+    "right_lower_lung_zone": {
+      "name": "right lower lung zone",
+      "keywords": [
+        "right lower lung zone",
+        "right lower lung field",
+        "right lower pulmonary zone"
+      ],
+      "bounds": [
+        0.09630503144654089,
+        0.5313971408250037,
+        0.44175392670157065,
+        0.7899214659685864
+      ],
+      "related_conditions": [
+        {
+          "condition": "Atelectasis",
+          "probability": 0.60584956407547
+        },
+        {
+          "condition": "Edema",
+          "probability": 0.3875502049922943
+        },
+        {
+          "condition": "Lung Opacity",
+          "probability": 0.47445106506347656
+        },
+        {
+          "condition": "Pleural Effusion",
+          "probability": 0.5950056314468384
+        },
+        {
+          "condition": "Pneumonia",
+          "probability": 0.3368586003780365
+        }
+      ]
+    },
+    "left_upper_lung_zone": {
+      "name": "left upper lung zone",
+      "keywords": [
+        "left upper lung zone",
+        "left upper lung field",
+        "left apical lung zone"
+      ],
+      "bounds": [
+        0.5312062408550223,
+        0.14465408805031446,
+        0.8372934968385697,
+        0.3868026013644237
+      ],
+      "related_conditions": [
+        {
+          "condition": "Atelectasis",
+          "probability": 0.60584956407547
+        },
+        {
+          "condition": "Lung Opacity",
+          "probability": 0.47445106506347656
+        },
+        {
+          "condition": "Pneumonia",
+          "probability": 0.3368586003780365
+        }
+      ]
+    },
+    "right_upper_lung_zone": {
+      "name": "right upper lung zone",
+      "keywords": [
+        "right upper lung zone",
+        "right upper lung field",
+        "right apical lung zone"
+      ],
+      "bounds": [
+        0.1608359707201128,
+        0.14606603744330576,
+        0.468688186789311,
+        0.3868989338077552
+      ],
+      "related_conditions": [
+        {
+          "condition": "Atelectasis",
+          "probability": 0.60584956407547
+        },
+        {
+          "condition": "Lung Opacity",
+          "probability": 0.47445106506347656
+        },
+        {
+          "condition": "Pneumonia",
+          "probability": 0.3368586003780365
+        }
+      ]
+    },
+    "cardiac_silhouette": {
+      "name": "cardiac silhouette",
+      "keywords": [
+        "cardiac silhouette",
+        "heart shadow",
+        "cardiac shadow"
+      ],
+      "bounds": [
+        0.37321170951463667,
+        0.47769894973347626,
+        0.7700050224868392,
+        0.7546451428797857
+      ],
+      "related_conditions": [
+        {
+          "condition": "Cardiomegaly",
+          "probability": 0.5757978558540344
+        },
+        {
+          "condition": "Support Devices",
+          "probability": 0.6368457078933716
+        }
+      ]
+    },
+    "left_hilar_structures": {
+      "name": "left hilar structures",
+      "keywords": [
+        "left hilar structures",
+        "left pulmonary hilum",
+        "left lung hilum"
+      ],
+      "bounds": [
+        0.5300927893048408,
+        0.35379003634527917,
+        0.6969339622641509,
+        0.5667539267015707
+      ],
+      "related_conditions": [
+        {
+          "condition": "Edema",
+          "probability": 0.3875502049922943
+        },
+        {
+          "condition": "Support Devices",
+          "probability": 0.6368457078933716
+        }
+      ]
+    },
+    "right_hilar_structures": {
+      "name": "right hilar structures",
+      "keywords": [
+        "right hilar structures",
+        "right pulmonary hilum",
+        "right lung hilum"
+      ],
+      "bounds": [
+        0.29450261780104714,
+        0.3547833202154841,
+        0.46156007958189293,
+        0.5625
+      ],
+      "related_conditions": [
+        {
+          "condition": "Edema",
+          "probability": 0.3875502049922943
+        },
+        {
+          "condition": "Support Devices",
+          "probability": 0.6368457078933716
+        }
+      ]
+    },
+    "left_mid_lung_zone": {
+      "name": "left mid lung zone",
+      "keywords": [
+        "left mid lung zone",
+        "left middle lung zone",
+        "left middle lung field"
+      ],
+      "bounds": [
+        0.5349430477518289,
+        0.38631738792539266,
+        0.8632075471698113,
+        0.5384190468634817
+      ],
+      "related_conditions": [
+        {
+          "condition": "Lung Opacity",
+          "probability": 0.47445106506347656
+        },
+        {
+          "condition": "Pneumonia",
+          "probability": 0.3368586003780365
+        }
+      ]
+    },
+    "right_mid_lung_zone": {
+      "name": "right mid lung zone",
+      "keywords": [
+        "right mid lung zone",
+        "right middle lung zone",
+        "right middle lung field"
+      ],
+      "bounds": [
+        0.13551193485070873,
+        0.38691391098177536,
+        0.45558176100628933,
+        0.5350437345322385
+      ],
+      "related_conditions": [
+        {
+          "condition": "Lung Opacity",
+          "probability": 0.47445106506347656
+        },
+        {
+          "condition": "Pneumonia",
+          "probability": 0.3368586003780365
+        }
+      ]
+    },
+    "left_costophrenic_angle": {
+      "name": "left costophrenic angle",
+      "keywords": [
+        "left costophrenic angle",
+        "left costodiaphragmatic recess",
+        "left phrenicocostal sinus"
+      ],
+      "bounds": [
+        0.8394839261483314,
+        0.7251755651215535,
+        0.9399232169009046,
+        0.8168640451570541
+      ],
+      "related_conditions": [
+        {
+          "condition": "Pleural Effusion",
+          "probability": 0.5950056314468384
+        }
+      ]
+    },
+    "right_costophrenic_angle": {
+      "name": "right costophrenic angle",
+      "keywords": [
+        "right costophrenic angle",
+        "right costodiaphragmatic recess",
+        "right phrenicocostal sinus"
+      ],
+      "bounds": [
+        0.0479559748427673,
+        0.7185534591194969,
+        0.14595459470742939,
+        0.8091084345473045
+      ],
+      "related_conditions": [
+        {
+          "condition": "Pleural Effusion",
+          "probability": 0.5950056314468384
+        }
+      ]
+    },
+    "upper_mediastinum": {
+      "name": "upper mediastinum",
+      "keywords": [
+        "upper mediastinum",
+        "superior mediastinum",
+        "mediastinal region"
+      ],
+      "bounds": [
+        0.4086405080948316,
+        0.2153872544852851,
+        0.6273584905660378,
+        0.4739447883883056
+      ],
+      "related_conditions": [
+        {
+          "condition": "Support Devices",
+          "probability": 0.6368457078933716
+        }
+      ]
+    },
+    "trachea": {
+      "name": "trachea",
+      "keywords": [
+        "trachea",
+        "windpipe",
+        "airway"
+      ],
+      "bounds": [
+        0.4021023414508872,
+        0.05791884816753927,
+        0.5579188481675392,
+        0.4904635681013669
+      ],
+      "related_conditions": [
+        {
+          "condition": "Support Devices",
+          "probability": 0.6368457078933716
+        }
+      ]
+    }
+  },
+  "attention_analysis": {
+    "regions": {
+      "cardiac_silhouette": {
+        "name": "cardiac silhouette",
+        "max_attention": 1.0,
+        "mean_attention": 0.21716587245464325,
+        "attention_coverage": 0.028633562885103298,
+        "is_significant": true,
+        "keywords": [
+          "cardiac silhouette",
+          "heart shadow",
+          "cardiac shadow",
+          "cardiac border",
+          "cardiac contour",
+          "cardiac outline",
+          "heart silhouette",
+          "cardiovascular silhouette",
+          "cardiac margin",
+          "cardiac profile"
+        ]
+      },
+      "left_clavicle": {
+        "name": "left clavicle",
+        "max_attention": 0.28816863894462585,
+        "mean_attention": 0.08891803026199341,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "left clavicle",
+          "left collarbone",
+          "left collar bone",
+          "left clavicula",
+          "left clavicular bone",
+          "left shoulder girdle",
+          "left clavicular structure",
+          "left keybone",
+          "left scapular attachment",
+          "left thoracic inlet bone"
+        ]
+      },
+      "left_costophrenic_angle": {
+        "name": "left costophrenic angle",
+        "max_attention": 0.4903045892715454,
+        "mean_attention": 0.27718663215637207,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "left costophrenic angle",
+          "left costodiaphragmatic recess",
+          "left phrenicocostal sinus",
+          "left costophrenic recess",
+          "left costodiaphragmatic angle",
+          "left pleural recess",
+          "left diaphragmatic angle",
+          "left costophrenic sulcus",
+          "left lateral costophrenic angle",
+          "left pleural sinus"
+        ]
+      },
+      "left_hilar_structures": {
+        "name": "left hilar structures",
+        "max_attention": 0.33844056725502014,
+        "mean_attention": 0.13679058849811554,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "left hilar structures",
+          "left pulmonary hilum",
+          "left lung hilum",
+          "left hilar region",
+          "left pulmonary hila",
+          "left lung root",
+          "left hilar vessels",
+          "left bronchial structures",
+          "left pulmonary vessels",
+          "left hilar anatomy"
+        ]
+      },
+      "left_lower_lung_zone": {
+        "name": "left lower lung zone",
+        "max_attention": 1.0,
+        "mean_attention": 0.24841147661209106,
+        "attention_coverage": 0.03251028806584362,
+        "is_significant": true,
+        "keywords": [
+          "left lower lung zone",
+          "left lower lung field",
+          "left lower pulmonary zone",
+          "left basal lung zone",
+          "left inferior lung zone",
+          "left lower lobe region",
+          "left basal lung field",
+          "left lower pulmonary field",
+          "left dependent lung zone",
+          "left caudal lung field"
+        ]
+      },
+      "left_lung": {
+        "name": "left lung",
+        "max_attention": 1.0,
+        "mean_attention": 0.1653614342212677,
+        "attention_coverage": 0.01237468671679198,
+        "is_significant": true,
+        "keywords": [
+          "left lung",
+          "left pulmonary field",
+          "left lung field",
+          "left pulmonary zone",
+          "left hemithorax",
+          "left thoracic cavity",
+          "left pulmonary parenchyma",
+          "left lung tissue",
+          "left pulmonary lobe",
+          "left respiratory field"
+        ]
+      },
+      "left_mid_lung_zone": {
+        "name": "left mid lung zone",
+        "max_attention": 0.3228720426559448,
+        "mean_attention": 0.124210886657238,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "left mid lung zone",
+          "left middle lung zone",
+          "left middle lung field",
+          "left central lung zone",
+          "left midlung field",
+          "left middle pulmonary zone",
+          "left intermediate lung zone",
+          "left central pulmonary field",
+          "left middle lobe region",
+          "left perihilar zone"
+        ]
+      },
+      "left_upper_lung_zone": {
+        "name": "left upper lung zone",
+        "max_attention": 0.30120688676834106,
+        "mean_attention": 0.10534747689962387,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "left upper lung zone",
+          "left upper lung field",
+          "left apical lung zone",
+          "left superior lung zone",
+          "left upper pulmonary zone",
+          "left cranial lung field",
+          "left upper lobe region",
+          "left apical pulmonary field",
+          "left superior pulmonary field",
+          "left upper thoracic zone"
+        ]
+      },
+      "right_clavicle": {
+        "name": "right clavicle",
+        "max_attention": 0.34390971064567566,
+        "mean_attention": 0.09134896099567413,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "right clavicle",
+          "right collarbone",
+          "right collar bone",
+          "right clavicula",
+          "right clavicular bone",
+          "right shoulder girdle",
+          "right clavicular structure",
+          "right keybone",
+          "right scapular attachment",
+          "right thoracic inlet bone"
+        ]
+      },
+      "right_costophrenic_angle": {
+        "name": "right costophrenic angle",
+        "max_attention": 0.2339240461587906,
+        "mean_attention": 0.128514364361763,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "right costophrenic angle",
+          "right costodiaphragmatic recess",
+          "right phrenicocostal sinus",
+          "right costophrenic recess",
+          "right costodiaphragmatic angle",
+          "right pleural recess",
+          "right diaphragmatic angle",
+          "right costophrenic sulcus",
+          "right lateral costophrenic angle",
+          "right pleural sinus"
+        ]
+      },
+      "right_hilar_structures": {
+        "name": "right hilar structures",
+        "max_attention": 0.244605153799057,
+        "mean_attention": 0.12477853149175644,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "right hilar structures",
+          "right pulmonary hilum",
+          "right lung hilum",
+          "right hilar region",
+          "right pulmonary hila",
+          "right lung root",
+          "right hilar vessels",
+          "right bronchial structures",
+          "right pulmonary vessels",
+          "right hilar anatomy"
+        ]
+      },
+      "right_lower_lung_zone": {
+        "name": "right lower lung zone",
+        "max_attention": 0.37408125400543213,
+        "mean_attention": 0.1485624462366104,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "right lower lung zone",
+          "right lower lung field",
+          "right lower pulmonary zone",
+          "right basal lung zone",
+          "right inferior lung zone",
+          "right lower lobe region",
+          "right basal lung field",
+          "right lower pulmonary field",
+          "right dependent lung zone",
+          "right caudal lung field"
+        ]
+      },
+      "right_lung": {
+        "name": "right lung",
+        "max_attention": 0.5589753985404968,
+        "mean_attention": 0.13473640382289886,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "right lung",
+          "right pulmonary field",
+          "right lung field",
+          "right pulmonary zone",
+          "right hemithorax",
+          "right thoracic cavity",
+          "right pulmonary parenchyma",
+          "right lung tissue",
+          "right pulmonary lobe",
+          "right respiratory field"
+        ]
+      },
+      "right_mid_lung_zone": {
+        "name": "right mid lung zone",
+        "max_attention": 0.4040379226207733,
+        "mean_attention": 0.12360754609107971,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "right mid lung zone",
+          "right middle lung zone",
+          "right middle lung field",
+          "right central lung zone",
+          "right midlung field",
+          "right middle pulmonary zone",
+          "right intermediate lung zone",
+          "right central pulmonary field",
+          "right middle lobe region",
+          "right perihilar zone"
+        ]
+      },
+      "right_upper_lung_zone": {
+        "name": "right upper lung zone",
+        "max_attention": 0.36283695697784424,
+        "mean_attention": 0.11642340570688248,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "right upper lung zone",
+          "right upper lung field",
+          "right apical lung zone",
+          "right superior lung zone",
+          "right upper pulmonary zone",
+          "right cranial lung field",
+          "right upper lobe region",
+          "right apical pulmonary field",
+          "right superior pulmonary field",
+          "right upper thoracic zone"
+        ]
+      },
+      "trachea": {
+        "name": "trachea",
+        "max_attention": 0.45779672265052795,
+        "mean_attention": 0.12149566411972046,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "trachea",
+          "windpipe",
+          "airway",
+          "tracheal tube",
+          "main airway",
+          "central airway",
+          "primary airway",
+          "respiratory tract",
+          "bronchial tree",
+          "tracheobronchial tree"
+        ]
+      },
+      "upper_mediastinum": {
+        "name": "upper mediastinum",
+        "max_attention": 0.3319305181503296,
+        "mean_attention": 0.11984218657016754,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "upper mediastinum",
+          "superior mediastinum",
+          "mediastinal region",
+          "superior mediastinal compartment",
+          "upper mediastinal space",
+          "cranial mediastinum",
+          "thoracic inlet region",
+          "superior thoracic compartment",
+          "mediastinum superius",
+          "upper central chest"
+        ]
+      }
+    },
+    "top_regions": [
+      "cardiac_silhouette",
+      "left_lower_lung_zone",
+      "left_lung"
+    ],
+    "significant_regions": [
+      "cardiac_silhouette",
+      "left_lower_lung_zone",
+      "left_lung"
+    ],
+    "overall_attention_intensity": 0.13334190845489502,
+    "max_attention_location": {
+      "y": 150,
+      "x": 150
+    },
+    "visualization_saved": "test_data\\attention_visualizations\\attention_efa5f70a-148764b5-a1137b9b-0e30e4c3-38c465a6.png",
+    "attention_map": "[[0.11920907 0.11226065 0.10273735 ... 0.06821314 0.05624038 0.04548821]\n [0.10897512 0.10567865 0.10056248 ... 0.06530222 0.05573835 0.04700834]\n [0.0948076  0.09586851 0.09649079 ... 0.06063091 0.05417863 0.04816217]\n ...\n [0.08230338 0.07924197 0.07455    ... 0.13116427 0.13350503 0.1369285 ]\n [0.08818541 0.08458663 0.07856908 ... 0.1333296  0.13394222 0.13617657]\n [0.0919648  0.08776742 0.08079119 ... 0.13449876 0.13312161 0.13390785]]"
+  },
+  "spatial_keywords": [
+    "cardiac silhouette",
+    "heart shadow",
+    "cardiac shadow",
+    "cardiac border",
+    "cardiac contour",
+    "cardiac outline",
+    "heart silhouette",
+    "cardiovascular silhouette",
+    "cardiac margin",
+    "cardiac profile",
+    "focal attention in cardiac silhouette",
+    "left lower lung zone",
+    "left lower lung field",
+    "left lower pulmonary zone",
+    "left basal lung zone",
+    "left inferior lung zone",
+    "left lower lobe region",
+    "left basal lung field",
+    "left lower pulmonary field",
+    "left dependent lung zone",
+    "left caudal lung field",
+    "focal attention in left lower lung zone",
+    "left lung",
+    "left pulmonary field",
+    "left lung field",
+    "left pulmonary zone",
+    "left hemithorax",
+    "left thoracic cavity",
+    "left pulmonary parenchyma",
+    "left lung tissue",
+    "left pulmonary lobe",
+    "left respiratory field",
+    "focal attention in left lung",
+    "multifocal attention pattern"
+  ],
+  "llm_response": {
+    "success": true,
+    "report": "FINDINGS:\nAn endotracheal tube is in place with its tip terminating approximately 3 cm superior to the carina. A gastric tube is also present, coursing below the diaphragm. The cardiac silhouette is enlarged. There is evidence of bibasilar atelectasis/scarring, particularly in the left lower lung zone and right lower lung zone. Small bilateral pleural effusions are suggested by blunting of the costophrenic sulci. The remainder of the lungs are aerated without evidence of focal consolidation or pneumothorax.\n\nIMPRESSION:\n1. Endotracheal tube and a gastric tube in satisfactory position.\n2. Enlarged cardiac silhouette with bibasilar atelectasis/scarring and small bilateral pleural effusions, which may reflect fluid overload.\n3. No evidence of focal pneumonia.",
+    "raw_response": {
+      "candidates": [
+        {
+          "content": {
+            "parts": [
+              {
+                "text": "FINDINGS:\nAn endotracheal tube is in place with its tip terminating approximately 3 cm superior to the carina. A gastric tube is also present, coursing below the diaphragm. The cardiac silhouette is enlarged. There is evidence of bibasilar atelectasis/scarring, particularly in the left lower lung zone and right lower lung zone. Small bilateral pleural effusions are suggested by blunting of the costophrenic sulci. The remainder of the lungs are aerated without evidence of focal consolidation or pneumothorax.\n\nIMPRESSION:\n1. Endotracheal tube and a gastric tube in satisfactory position.\n2. Enlarged cardiac silhouette with bibasilar atelectasis/scarring and small bilateral pleural effusions, which may reflect fluid overload.\n3. No evidence of focal pneumonia."
+              }
+            ],
+            "role": "model"
+          },
+          "finishReason": "STOP",
+          "index": 0,
+          "safetyRatings": [
+            {
+              "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+              "probability": "NEGLIGIBLE"
+            },
+            {
+              "category": "HARM_CATEGORY_HATE_SPEECH",
+              "probability": "NEGLIGIBLE"
+            },
+            {
+              "category": "HARM_CATEGORY_HARASSMENT",
+              "probability": "NEGLIGIBLE"
+            },
+            {
+              "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+              "probability": "NEGLIGIBLE"
+            }
+          ]
+        }
+      ],
+      "usageMetadata": {
+        "promptTokenCount": 1652,
+        "candidatesTokenCount": 167,
+        "totalTokenCount": 3673,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 1652
+          }
+        ],
+        "thoughtsTokenCount": 1854
+      },
+      "modelVersion": "gemini-2.5-pro",
+      "responseId": "XJdnaNy-GJjQz7IPibzNqAc"
+    },
+    "used_fallback": false,
+    "attempt": 1
+  },
+  "medical_report": {
+    "report_text": "FINDINGS:\nAn endotracheal tube is in place with its tip terminating approximately 3 cm superior to the carina. A gastric tube is also present, coursing below the diaphragm. The cardiac silhouette is enlarged. There is evidence of bibasilar atelectasis/scarring, particularly in the left lower lung zone and right lower lung zone. Small bilateral pleural effusions are suggested by blunting of the costophrenic sulci. The remainder of the lungs are aerated without evidence of focal consolidation or pneumothorax.\n\nIMPRESSION:\n1. Endotracheal tube and a gastric tube in satisfactory position.\n2. Enlarged cardiac silhouette with bibasilar atelectasis/scarring and small bilateral pleural effusions, which may reflect fluid overload.\n3. No evidence of focal pneumonia.",
+    "sections": {
+      "findings": "An endotracheal tube is in place with its tip terminating approximately 3 cm superior to the carina. A gastric tube is also present, coursing below the diaphragm. The cardiac silhouette is enlarged. There is evidence of bibasilar atelectasis/scarring, particularly in the left lower lung zone and right lower lung zone. Small bilateral pleural effusions are suggested by blunting of the costophrenic sulci. The remainder of the lungs are aerated without evidence of focal consolidation or pneumothorax.",
+      "impression": "1. Endotracheal tube and a gastric tube in satisfactory position.\n2. Enlarged cardiac silhouette with bibasilar atelectasis/scarring and small bilateral pleural effusions, which may reflect fluid overload.\n3. No evidence of focal pneumonia."
+    },
+    "metadata": {
+      "generated_at": "2025-07-04T08:57:01",
+      "generator": "Medical Report Generator v1.0",
+      "model_used": "gemini-2.5-pro",
+      "word_count": 111,
+      "character_count": 766,
+      "image_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\data_dump\\output\\img_png\\efa5f70a-148764b5-a1137b9b-0e30e4c3-38c465a6.png",
+      "template_used": "standard",
+      "llm_success": true,
+      "used_fallback": false,
+      "total_keywords": 412,
+      "attention_regions": 3,
+      "relevant_anatomical_regions": 15,
+      "patient_info_included": false
+    }
+  },
+  "gaze_attention_validation": {
+    "correlation_metrics": {
+      "pearson_correlation": 0.24904989874399625,
+      "pearson_p_value": 0.0,
+      "jensen_shannon_divergence": 0.4040254796911574,
+      "mean_squared_error": 0.02227783203125,
+      "normalized_scanpath_saliency": 0.1428283303976059
+    },
+    "comparison_plot_path": "real_analysis_results\\gaze_attention\\efa5f70a-148764b5-a1137b9b-0e30e4c3-38c465a6.png"
+  }
+}

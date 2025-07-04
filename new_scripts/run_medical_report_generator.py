@@ -8,14 +8,22 @@ using real MIMIC dataset images with multimodal AI integration.
 
 import sys
 import os
+import cv2
+import numpy as np
+import pandas as pd
+from scipy.stats import pearsonr
+from scipy.spatial.distance import jensenshannon
+from sklearn.metrics import mean_squared_error
+import json
+import time
+import random
+from pathlib import Path
 
 # Add parent directory to path so we can import from new_scripts
 sys.path.append('.')
 sys.path.append('..')
 
 from medical_report_generator import MedicalReportGenerator
-import time
-from pathlib import Path
 
 def progress_tracker(step, progress, message):
     """Progress callback function for visualization"""
@@ -102,6 +110,11 @@ def main():
         progress_callback=progress_tracker
     )
     
+    # === GAZE-ATTENTION VALIDATION (single image) ===
+    gaze_val = perform_gaze_validation(test_image, comprehensive_result.get("attention_analysis", {}), Path("real_analysis_results"))
+    if gaze_val:
+        comprehensive_result["gaze_attention_validation"] = gaze_val
+    
     analysis_time = time.time() - start_time
     
     print(f"\n📈 Analysis completed in {analysis_time:.1f} seconds")
@@ -167,8 +180,11 @@ def main():
     print("DEMO 2: BATCH PROCESSING WITH REAL IMAGES")
     print("=" * 60)
     
-    # Select first 3 real images for batch processing
-    batch_images = available_images[:3]
+    # Select 10 random real images for batch processing
+    if len(available_images) >= 10:
+        batch_images = random.sample(available_images, 10)
+    else:
+        batch_images = available_images
     
     print(f"📁 Processing batch of {len(batch_images)} real chest X-rays")
     print("🔄 Using standard template for balanced processing")
@@ -185,6 +201,26 @@ def main():
         save_results=True,
         output_dir=r".\real_analysis_results"
     )
+    
+    # === UPDATED GAZE-ATTENTION VALIDATION (use in-memory results) ===
+    for img_path in batch_images:
+        dicom_id = Path(img_path).stem
+        analysis = batch_results['results'].get(img_path)
+        if analysis is None:
+            # Fallback to JSON re-load if analysis missing (should not happen)
+            json_path = Path("real_analysis_results") / f"analysis_{dicom_id}.json"
+            if not json_path.exists():
+                continue
+            with open(json_path, "r", encoding="utf-8") as jf:
+                analysis = json.load(jf)
+        # Perform gaze validation using raw attention map (avoids lossy JSON conversion)
+        gaze_val = perform_gaze_validation(img_path, analysis.get("attention_analysis", {}), Path("real_analysis_results"))
+        if gaze_val:
+            analysis["gaze_attention_validation"] = gaze_val
+            # Overwrite JSON result (ensures gaze metrics stored)
+            json_path = Path("real_analysis_results") / f"analysis_{dicom_id}.json"
+            with open(json_path, "w", encoding="utf-8") as jf:
+                json.dump(analysis, jf, indent=2, default=str)
     
     batch_time = time.time() - batch_start
     
@@ -285,6 +321,152 @@ def main():
     print("✅ Single template analysis on real image demonstrated")
     print("✅ Performance optimization and monitoring active")
     print(f"🏥 Medical Report Generator successfully analyzed {len(available_images)} real images!")
+
+# === GAZE-ATTENTION VALIDATION HELPERS (ported from random_xray_analysis) ===
+
+project_root = Path(__file__).parent.parent
+
+
+def _get_patient_fixation_path(dicom_id: str) -> Path | None:
+    """Return fixation CSV path for given dicom_id from final_dataset_fixed.csv"""
+    dataset_csv = project_root / "final_dataset_fixed.csv"
+    if not dataset_csv.exists():
+        return None
+    for chunk in pd.read_csv(dataset_csv, chunksize=1000):
+        row = chunk[chunk["dicom_id"] == dicom_id]
+        if not row.empty:
+            return project_root / row["fixations_path"].iloc[0]
+    return None
+
+
+def _load_fixations(csv_path: Path) -> pd.DataFrame | None:
+    try:
+        df = pd.read_csv(csv_path)
+        required = {"x_norm", "y_norm", "gaze_duration"}
+        if not required.issubset(df.columns):
+            return None
+        return df
+    except Exception:
+        return None
+
+
+def _heatmap_from_fixations(df: pd.DataFrame, size=(224, 224), sigma: int = 15) -> np.ndarray:
+    heat = np.zeros(size, dtype=np.float32)
+    h, w = size
+    for _, r in df.iterrows():
+        x = int(max(0, min(w - 1, r["x_norm"] * w)))
+        y = int(max(0, min(h - 1, r["y_norm"] * h)))
+        heat[y, x] += r["gaze_duration"] / 1000.0
+    if sigma > 0:
+        heat = cv2.GaussianBlur(heat, (0, 0), sigma)
+    if heat.max() > 0:
+        heat /= heat.max()
+    return heat
+
+
+def _calc_corr_metrics(human: np.ndarray, model: np.ndarray) -> dict:
+    if human.shape != model.shape:
+        model = cv2.resize(model, (human.shape[1], human.shape[0]))
+    h_flat, m_flat = human.flatten(), model.flatten()
+    pear, p = pearsonr(h_flat, m_flat)
+    eps = 1e-8
+    h_prob = (h_flat + eps) / (h_flat.sum() + eps * len(h_flat))
+    m_prob = (m_flat + eps) / (m_flat.sum() + eps * len(m_flat))
+    js = jensenshannon(h_prob, m_prob)
+    mse = mean_squared_error(h_flat, m_flat)
+    # simple NSS approximation – mean model attention at random human points
+    idx = (np.random.rand(100) * (human.size - 1)).astype(int)
+    nss = float(model.flatten()[idx].mean())
+    return {
+        "pearson_correlation": float(pear),
+        "pearson_p_value": float(p),
+        "jensen_shannon_divergence": float(js),
+        "mean_squared_error": float(mse),
+        "normalized_scanpath_saliency": nss,
+    }
+
+
+def _save_gaze_plot(human: np.ndarray, model: np.ndarray, metrics: dict, out_path: Path):
+    import matplotlib.pyplot as plt
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    fig, ax = plt.subplots(1, 3, figsize=(12, 4))
+    ax[0].imshow(human, cmap="hot"); ax[0].set_title("Human Gaze"); ax[0].axis("off")
+    ax[1].imshow(model, cmap="hot"); ax[1].set_title("Model Attention"); ax[1].axis("off")
+    diff = np.abs(human - model)
+    ax[2].imshow(diff, cmap="viridis"); ax[2].set_title("Abs Difference"); ax[2].axis("off")
+    fig.suptitle(f"Pearson {metrics['pearson_correlation']:.3f}  JS {metrics['jensen_shannon_divergence']:.3f}")
+    plt.tight_layout()
+    fig.savefig(out_path, dpi=300)
+    plt.close(fig)
+
+
+def _convert_attention_map(att_map, target_shape):
+    """Convert attention map which may be a list, nested lists, or numpy-format string to numpy array with target shape."""
+    import json, re, math
+    if isinstance(att_map, np.ndarray):
+        return cv2.resize(att_map, (target_shape[1], target_shape[0])) if att_map.shape != target_shape else att_map
+    # If already Python list (nested) just convert directly
+    if isinstance(att_map, list):
+        arr = np.array(att_map, dtype=np.float32)
+        if arr.ndim == 2:
+            return cv2.resize(arr, (target_shape[1], target_shape[0])) if arr.shape != target_shape else arr
+        # flatten then reshape later
+        arr = arr.flatten()
+    elif isinstance(att_map, str):
+        s = att_map.strip()
+        # Try JSON first
+        try:
+            parsed = json.loads(s)
+            return _convert_attention_map(parsed, target_shape)
+        except json.JSONDecodeError:
+            # Fallback: string is numpy array repr like "[[0.1 0.2] [0.3 0.4]]"
+            # Remove brackets and newlines, split by whitespace
+            nums = np.fromstring(re.sub(r'[\[\]]', ' ', s), sep=' ', dtype=np.float32)
+            if nums.size == 0:
+                return None
+            # Attempt square reshape via sqrt or target shape
+            side = int(math.sqrt(nums.size))
+            if side * side == nums.size:
+                arr = nums.reshape((side, side))
+            else:
+                # Fallback to target shape resize
+                arr = nums
+    else:
+        return None
+    # If we reach here arr is 1-D or mismatched shape -> reshape/resize
+    if arr.ndim == 1:
+        # Assume target_shape square flatten
+        try:
+            arr = arr.reshape(target_shape)
+        except Exception:
+            # Final fallback to nearest square then resize
+            side = int(math.sqrt(arr.size))
+            arr = arr[:side*side].reshape((side, side))
+    if arr.shape != target_shape:
+        arr = cv2.resize(arr, (target_shape[1], target_shape[0]))
+    return arr
+
+
+def perform_gaze_validation(image_path: str, attention_analysis: dict, output_root: Path) -> dict | None:
+    dicom_id = Path(image_path).stem
+    fix_csv = _get_patient_fixation_path(dicom_id)
+    if fix_csv is None or not fix_csv.exists():
+        return None
+    df = _load_fixations(fix_csv)
+    if df is None or df.empty or "attention_map" not in attention_analysis:
+        return None
+    human_heat = _heatmap_from_fixations(df)
+    model_map = _convert_attention_map(attention_analysis.get("attention_map"), human_heat.shape)
+    if model_map is None:
+        return None
+    metrics = _calc_corr_metrics(human_heat, model_map)
+    out_dir = output_root / "gaze_attention"
+    plot_path = out_dir / f"{dicom_id}.png"
+    _save_gaze_plot(human_heat, model_map, metrics, plot_path)
+    return {
+        "correlation_metrics": metrics,
+        "comparison_plot_path": str(plot_path)
+    }
 
 if __name__ == "__main__":
     main() 

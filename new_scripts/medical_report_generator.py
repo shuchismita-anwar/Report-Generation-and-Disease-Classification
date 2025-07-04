@@ -2500,9 +2500,13 @@ CHEST X-RAY REPORT:
             url = f"{self.llm_config['base_url']}?key={self.gemini_api_key}"
             headers = {"Content-Type": "application/json"}
             
+            # Helper to strip non-ASCII characters (e.g., emojis) for safe console logging
+            def _strip_non_ascii(s: str) -> str:
+                return s.encode('ascii', 'ignore').decode()
+            
             # Debug: Log the prompt being sent
-            self.logger.info(f"DEBUG: Prompt length: {len(prompt)} chars")
-            self.logger.info(f"DEBUG: First 200 chars of prompt: {prompt[:200]}...")
+            self.logger.info(_strip_non_ascii(f"DEBUG: Prompt length: {len(prompt)} chars"))
+            self.logger.info(_strip_non_ascii(f"DEBUG: First 200 chars of prompt: {prompt[:200]}..."))
             
             # Make request with retries
             for attempt in range(self.llm_config['max_retries']):
@@ -3278,11 +3282,11 @@ Please ensure proper clinical review of all automated findings.
                 'memory_mode': 'low' if self.low_memory else 'high'
             }
             
-            # Save batch summary
-            if save_results:
-                summary_file = os.path.join(output_dir, "batch_summary.json")
-                with open(summary_file, 'w') as f:
-                    json.dump(batch_results, f, indent=2, default=str)
+            # Save batch summary - DISABLED (no aggregate file desired)
+            # if save_results:
+            #     summary_file = os.path.join(output_dir, "batch_summary.json")
+            #     with open(summary_file, 'w') as f:
+            #         json.dump(batch_results, f, indent=2, default=str)
             
             self.logger.info(f"Batch analysis completed: {batch_results['successful_analyses']}/{len(image_paths)} successful")
             return batch_results
