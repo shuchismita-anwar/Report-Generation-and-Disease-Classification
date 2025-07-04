@@ -12,38 +12,43 @@
         224
       ],
       "device": "cuda:0",
-      "processing_time": 0.07079410552978516
+      "processing_time": 0.013714075088500977
     },
     "model_inference": {
       "success": true,
       "num_conditions": 8,
-      "processing_time": 0.02956223487854004
+      "processing_time": 0.12911701202392578
     },
     "keyword_extraction": {
       "success": true,
-      "total_keywords": 3,
-      "conditions_with_keywords": 1,
+      "total_keywords": 286,
+      "conditions_with_keywords": 4,
+      "processing_time": 0.0010008811950683594
+    },
+    "anatomical_region_mapping": {
+      "success": true,
+      "relevant_regions_count": 13,
       "processing_time": 0.0
     },
     "attention_analysis": {
       "success": true,
-      "significant_regions": 5,
-      "spatial_keywords": 19,
+      "significant_regions": 0,
+      "spatial_keywords": 0,
       "target_condition": "No Finding",
-      "processing_time": 0.0973961353302002
+      "processing_time": 0.13223981857299805
     },
     "report_generation": {
       "success": true,
       "used_fallback": false,
-      "report_length": 178,
-      "sections_found": 3,
-      "processing_time": 1.0627069473266602
+      "report_length": 361,
+      "sections_found": 2,
+      "processing_time": 21.569883108139038
     }
   },
   "performance_metrics": {
-    "total_processing_time": 1.2672927379608154,
-    "steps_completed": 5,
-    "total_steps": 5,
+    "total_processing_time": 21.84595489501953,
+    "steps_completed": 6,
+    "total_steps": 6,
     "errors_encountered": 0,
     "memory_efficient": false,
     "device_used": "cuda"
@@ -51,275 +56,1362 @@
   "error_log": [],
   "model_predictions": {
     "Atelectasis": {
-      "probability": 0.24448426067829132,
+      "probability": 0.2982519567012787,
       "predicted": false,
-      "logit": -1.1282497644424438
+      "logit": -0.8556357026100159
     },
     "Cardiomegaly": {
-      "probability": 0.25921785831451416,
+      "probability": 0.3425042927265167,
       "predicted": false,
-      "logit": -1.0500377416610718
+      "logit": -0.6521542072296143
     },
     "Edema": {
-      "probability": 0.15995514392852783,
+      "probability": 0.17721618711948395,
       "predicted": false,
-      "logit": -1.6585619449615479
+      "logit": -1.535323143005371
     },
     "Lung Opacity": {
-      "probability": 0.29066556692123413,
+      "probability": 0.2629569172859192,
       "predicted": false,
-      "logit": -0.892153799533844
+      "logit": -1.030656099319458
     },
     "No Finding": {
-      "probability": 0.7462320327758789,
+      "probability": 0.6909406185150146,
       "predicted": true,
-      "logit": 1.0786163806915283
+      "logit": 0.8045204877853394
     },
     "Pleural Effusion": {
-      "probability": 0.13431572914123535,
+      "probability": 0.13659162819385529,
       "predicted": false,
-      "logit": -1.8633270263671875
+      "logit": -1.8438920974731445
     },
     "Pneumonia": {
-      "probability": 0.27997320890426636,
+      "probability": 0.30827587842941284,
       "predicted": false,
-      "logit": -0.9445945024490356
+      "logit": -0.8081921339035034
     },
     "Support Devices": {
-      "probability": 0.25796517729759216,
+      "probability": 0.40525397658348083,
       "predicted": false,
-      "logit": -1.0565714836120605
+      "logit": -0.38362041115760803
     }
   },
   "prediction_keywords": {
+    "Cardiomegaly": [
+      "cardiac contour looks larger due to low lung volume",
+      "cardiomyopathy",
+      "no definite signs of chf",
+      "no edema",
+      "no effusion",
+      "no fluid overload",
+      "no frank edema",
+      "no frank interstitial pulmonary edema",
+      "no frank pulmonary edema",
+      "no gross effusion",
+      "no large effusion",
+      "no large pleural effusion",
+      "no overt chf",
+      "no overt edema",
+      "no overt pulmonary edema",
+      "no overt sign of congestive heart failure",
+      "no pleural effusion",
+      "no significant cardiac enlargement",
+      "no signs of congestion",
+      "normal cardiac silhouette",
+      "normal cardiac size",
+      "normal cardiomediastinal silhouette",
+      "not dilated",
+      "not distended",
+      "not engorged",
+      "not enlarged",
+      "pericardial effusion",
+      "prosthetic cardiac valve"
+    ],
     "No Finding": [
-      "normal chest X-ray",
-      "no acute findings",
-      "unremarkable study"
+      "abdomen is unremarkable",
+      "absence of any new acute infiltrates",
+      "aerated",
+      "aorta, mediastinal contours are unremarkable",
+      "bones and soft tissues are normal",
+      "bones are normal",
+      "bony structures are intact",
+      "bony structures are unremarkable otherwise",
+      "bony thorax grossly intact",
+      "both lungs are clear",
+      "cardiac and hilar contours are within normal limits",
+      "cardiac and mediastinal contours are normal",
+      "cardiac configuration is normal",
+      "cardiac silhouette is normal in size",
+      "cardiac silhouette is upper limits of normal",
+      "cardiac silhouette within normal limits",
+      "cardiac, hilar and mediastinal contours are normal",
+      "cardiomediastinal contours are normal",
+      "cardiomediastinal silhouette is top normal",
+      "cardiomediastinal silhouette is within normal for portable technique",
+      "cardiomediastinal silhouette normal",
+      "cardiomediastinal/hilar contours are unremarkable",
+      "cardiomediastinum is normal",
+      "certainly no edema",
+      "clear lung fields",
+      "clear of large effusion",
+      "clear of masses",
+      "clear of pleural effusion",
+      "clear of pulmonary vascular congestion",
+      "clear without focal consolidation",
+      "cleared",
+      "correct position",
+      "costophrenic angles are sharp",
+      "course of the catheter is now unremarkable",
+      "crowding of normal vessels",
+      "diuresis",
+      "essentially unremarkable",
+      "grossly within normal limits",
+      "has resolved",
+      "heart and mediastinum are within normal limits",
+      "heart size and mediastinal contours are normal",
+      "heart size is at the upper limits of normal",
+      "heart size is upper limits of normal allowing for lung volumes",
+      "heart size is within normal limits",
+      "heart size within normal limits",
+      "heart... not substantially enlarged",
+      "hemidiaphragms are more sharply seen",
+      "hila and pleura are normal",
+      "hila are normal",
+      "hyperexpanded, but clear lungs",
+      "imaged bones also unremarkable",
+      "imaged bony structures appear intact",
+      "imaged bony structures are intact",
+      "imaged upper abdomen is unremarkable",
+      "inspiratory lung volumes are appropriate",
+      "intact leads",
+      "intact median sternotomy wires",
+      "interval resolution",
+      "lateral pleural sinuses are free",
+      "leads in appropriate positioning",
+      "left hemithorax is unremarkable",
+      "left hilus is unremarkable",
+      "lung exam without focal crackles",
+      "lungs are well-expanded",
+      "lungs are well-expanded and clear",
+      "lungs normal",
+      "mediastinal and hilar contours are unremarkable",
+      "mediastinal contours and heart size are within normal limits",
+      "mediastinal contours are normal",
+      "mediastinal contours are not widened",
+      "mediastinal contours are unremarkable",
+      "mediastinal silhouette and hilar contours are normal",
+      "mediastinal silhouette is within normal limits",
+      "mediastinal vasculature is not dilated",
+      "mediastinum is normal",
+      "mediastinum is not widened",
+      "mediastinum is top normal",
+      "merely crowding of normal vessels",
+      "no acute airspace disease",
+      "no acute fractures",
+      "no acute osseous lesions",
+      "no acute rib fractures",
+      "no air under the diaphragm",
+      "no clear upper mediastinal widening",
+      "no congestion",
+      "no consolidative pneumonia",
+      "no dislocation",
+      "no displaced fracture",
+      "no displaced rib fracture",
+      "no displacement",
+      "no edema",
+      "no effusion or edema",
+      "no fluid",
+      "no focal infiltrate",
+      "no fracture",
+      "no infiltrates",
+      "no interstitial edema",
+      "no major atelectasis",
+      "no nodule",
+      "no overt chf",
+      "no pleural fluid",
+      "no pleural thickening",
+      "no pneumoperitoneum",
+      "no pneumothoraces",
+      "no pneumothorax is present",
+      "no pneumothorax, fracture or dislocation",
+      "no pulmonary contusion",
+      "no significant edema",
+      "no significant pleural effusion",
+      "no sternal fracture",
+      "no suspicious osseous lesions",
+      "no tachycardia",
+      "no widening of the mediastinum",
+      "normal in caliber",
+      "normal in size",
+      "normal limits",
+      "normal mediastinal contours",
+      "normal mediastinal silhouette",
+      "normal pleural surfaces",
+      "normal pulmonary vascularity",
+      "normal radiographic appearance of the hila",
+      "normal size of the cardiac silhouette",
+      "normal soft tissues",
+      "normal variant",
+      "not congested",
+      "not enlarged",
+      "not focally dilated",
+      "not shifted",
+      "not visible",
+      "osseous structures are intact",
+      "osseous structures are without acute abnormality",
+      "otherwise no acute process",
+      "otherwise normal",
+      "otherwise normal cardiomediastinal silhouette",
+      "otherwise the lungs are clear",
+      "posterior costophrenic angles are sharp",
+      "pulmonary structures are unremarkable",
+      "pulmonary vasculature is not congested",
+      "pulmonary vasculature is not engorged",
+      "pulmonary vessels are normal",
+      "the lungs are well inflated",
+      "the osseous structures are normal",
+      "the sternal wires are intact",
+      "top normal cardiac size",
+      "trachea is midline",
+      "unfolded thoracic aorta",
+      "unremarkable cardiac contours",
+      "unremarkable cardiomediastinal",
+      "unremarkable hilar",
+      "unremarkable mediastinal contours",
+      "upper abdomen is unremarkable",
+      "upper limits of normal",
+      "vessels are normal",
+      "well aerated",
+      "well inflated",
+      "well-aerated lungs",
+      "well-expanded",
+      "within normal size",
+      "without chf",
+      "without confluent consolidation",
+      "without edema",
+      "without effusion",
+      "without effusion or pneumothorax",
+      "without focal consolidation",
+      "without focal consolidation, effusion, or edema",
+      "without nodules"
+    ],
+    "Pneumonia": [
+      "acute cardiopulmonary disease",
+      "acute consolidation",
+      "acute infiltrates",
+      "bilateral effusions",
+      "calcified granuloma",
+      "central vascular congestion",
+      "chf",
+      "consolidative",
+      "consolidative parenchymal opacities",
+      "diffuse pneumonia",
+      "discrete focal consolidation",
+      "focal pulmonary consolidation",
+      "hazy ground-glass opacities",
+      "increased interstitial markings",
+      "interstitial edema",
+      "interstitial opacities",
+      "linear consolidation",
+      "lymphadenopathy",
+      "no air bronchogram",
+      "non-cardiogenic edema",
+      "partial obscuration of the diaphragm",
+      "peribronchial thickening",
+      "pleural effusions",
+      "pleural scarring",
+      "pulmonary parenchymal infiltrates",
+      "pulmonary vascular redistribution",
+      "respiratory failure",
+      "retained secretions",
+      "reticular opacities",
+      "shortness of breath",
+      "vascular congestion",
+      "volume loss"
+    ],
+    "Support Devices": [
+      "absence of devices",
+      "advancement by 2 cm",
+      "all monitoring and support devices except for the port-a-cath have been removed",
+      "all monitoring and support devices have been removed",
+      "all other lines and tubes",
+      "appropriately positioned",
+      "central line placement",
+      "central venous",
+      "device",
+      "device absent",
+      "endotracheal",
+      "et and ng tubes, as described",
+      "external pacemaker removed",
+      "external wire",
+      "icd implantation",
+      "intact wires",
+      "interval removal of the endotracheal tube",
+      "line",
+      "line placement",
+      "line which was pulled",
+      "monitoring and support devices have been removed",
+      "nasogastric tube has been removed",
+      "ng tubes ... removed",
+      "no additional devices",
+      "no central venous catheter is seen",
+      "no chest tubes",
+      "no device complications",
+      "no evidence of hardware loosening or failure",
+      "no hardware",
+      "no hemodialysis catheter",
+      "no implants",
+      "no intra thoracic devices",
+      "no left subclavian line",
+      "no lines",
+      "no mediastinal drains",
+      "not intubated",
+      "not migrated",
+      "other monitoring and support devices",
+      "pectoral pacemaker",
+      "picc does not flush",
+      "picc line fell out",
+      "pleural catheter has apparently been removed",
+      "poor port flow",
+      "properly positioned",
+      "pulled back",
+      "pulled back 4cm",
+      "r iv",
+      "radiopaque tip",
+      "remain in place",
+      "removal",
+      "removal of 2 pleural drains",
+      "removal of endotracheal tube",
+      "removal of nasogastric tube",
+      "removal of the mediastinal drains",
+      "removed and replaced",
+      "repositioned",
+      "tip of endotracheal tube is in standard position",
+      "tracheostomy or et tube",
+      "untaped",
+      "ventilation"
     ]
   },
   "keyword_summary": {
-    "primary_findings": [
-      "no acute findings",
-      "normal chest X-ray",
-      "unremarkable study"
-    ],
+    "primary_findings": [],
     "anatomical_locations": [],
     "severity_indicators": [],
     "descriptive_terms": [],
-    "total_keywords": 3,
+    "total_keywords": 286,
     "conditions_detected": [
-      "No Finding"
+      "Cardiomegaly",
+      "No Finding",
+      "Pneumonia",
+      "Support Devices"
     ],
-    "high_confidence_findings": [
-      "no acute findings",
-      "normal chest X-ray",
-      "unremarkable study"
+    "high_confidence_findings": [],
+    "medium_confidence_findings": [
+      "absence of any new acute infiltrates",
+      "normal pulmonary vascularity",
+      "pulmonary structures are unremarkable",
+      "otherwise normal",
+      "no widening of the mediastinum",
+      "cardiac and hilar contours are within normal limits",
+      "no infiltrates",
+      "no pleural fluid",
+      "no tachycardia",
+      "intact leads",
+      "no pleural thickening",
+      "diuresis",
+      "without edema",
+      "not congested",
+      "leads in appropriate positioning",
+      "left hilus is unremarkable",
+      "heart size within normal limits",
+      "not enlarged",
+      "aorta, mediastinal contours are unremarkable",
+      "no acute fractures",
+      "unremarkable cardiac contours",
+      "bones are normal",
+      "mediastinal vasculature is not dilated",
+      "bony structures are intact",
+      "lungs normal",
+      "bones and soft tissues are normal",
+      "no overt chf",
+      "unfolded thoracic aorta",
+      "no edema",
+      "clear lung fields",
+      "intact median sternotomy wires",
+      "hemidiaphragms are more sharply seen",
+      "the osseous structures are normal",
+      "not visible",
+      "cardiomediastinal silhouette is top normal",
+      "osseous structures are without acute abnormality",
+      "no effusion or edema",
+      "lung exam without focal crackles",
+      "without focal consolidation",
+      "unremarkable hilar",
+      "bony structures are unremarkable otherwise",
+      "vessels are normal",
+      "cardiomediastinal/hilar contours are unremarkable",
+      "heart size is within normal limits",
+      "mediastinum is not widened",
+      "inspiratory lung volumes are appropriate",
+      "otherwise no acute process",
+      "no pulmonary contusion",
+      "otherwise the lungs are clear",
+      "correct position",
+      "unremarkable cardiomediastinal",
+      "no pneumothoraces",
+      "no major atelectasis",
+      "well-expanded",
+      "hyperexpanded, but clear lungs",
+      "pulmonary vasculature is not congested",
+      "certainly no edema",
+      "upper abdomen is unremarkable",
+      "upper limits of normal",
+      "heart size is at the upper limits of normal",
+      "no pneumothorax is present",
+      "unremarkable mediastinal contours",
+      "cleared",
+      "no significant edema",
+      "no displaced fracture",
+      "posterior costophrenic angles are sharp",
+      "mediastinal contours and heart size are within normal limits",
+      "no dislocation",
+      "cardiomediastinal silhouette normal",
+      "otherwise normal cardiomediastinal silhouette",
+      "normal size of the cardiac silhouette",
+      "interval resolution",
+      "no air under the diaphragm",
+      "heart size is upper limits of normal allowing for lung volumes",
+      "cardiac silhouette is upper limits of normal",
+      "pulmonary vessels are normal",
+      "no significant pleural effusion",
+      "mediastinal silhouette and hilar contours are normal",
+      "within normal size",
+      "well-aerated lungs",
+      "left hemithorax is unremarkable",
+      "no congestion",
+      "lungs are well-expanded",
+      "no acute airspace disease",
+      "well aerated",
+      "lungs are well-expanded and clear",
+      "mediastinum is top normal",
+      "both lungs are clear",
+      "mediastinal contours are normal",
+      "not shifted",
+      "clear of masses",
+      "grossly within normal limits",
+      "lateral pleural sinuses are free",
+      "no displaced rib fracture",
+      "no interstitial edema",
+      "imaged bony structures are intact",
+      "aerated",
+      "no fluid",
+      "normal in size",
+      "no acute osseous lesions",
+      "no pneumoperitoneum",
+      "without effusion",
+      "without nodules",
+      "osseous structures are intact",
+      "heart size and mediastinal contours are normal",
+      "mediastinal silhouette is within normal limits",
+      "normal pleural surfaces",
+      "essentially unremarkable",
+      "cardiac silhouette within normal limits",
+      "no clear upper mediastinal widening",
+      "cardiomediastinal silhouette is within normal for portable technique",
+      "cardiac, hilar and mediastinal contours are normal",
+      "pulmonary vasculature is not engorged",
+      "hila are normal",
+      "no fracture",
+      "no suspicious osseous lesions",
+      "normal radiographic appearance of the hila",
+      "no acute rib fractures",
+      "normal limits",
+      "imaged bones also unremarkable",
+      "normal soft tissues",
+      "imaged bony structures appear intact",
+      "normal variant",
+      "mediastinal and hilar contours are unremarkable",
+      "heart... not substantially enlarged",
+      "top normal cardiac size",
+      "imaged upper abdomen is unremarkable",
+      "heart and mediastinum are within normal limits",
+      "abdomen is unremarkable",
+      "crowding of normal vessels",
+      "clear of pulmonary vascular congestion",
+      "course of the catheter is now unremarkable",
+      "clear of pleural effusion",
+      "not focally dilated",
+      "without confluent consolidation",
+      "cardiac silhouette is normal in size",
+      "cardiomediastinal contours are normal",
+      "without effusion or pneumothorax",
+      "cardiac and mediastinal contours are normal",
+      "clear without focal consolidation",
+      "clear of large effusion",
+      "normal in caliber",
+      "well inflated",
+      "costophrenic angles are sharp",
+      "no nodule",
+      "cardiomediastinum is normal",
+      "no displacement",
+      "no consolidative pneumonia",
+      "normal mediastinal silhouette",
+      "merely crowding of normal vessels",
+      "has resolved",
+      "mediastinal contours are not widened",
+      "mediastinal contours are unremarkable",
+      "hila and pleura are normal",
+      "mediastinum is normal",
+      "trachea is midline",
+      "without focal consolidation, effusion, or edema",
+      "cardiac configuration is normal",
+      "normal mediastinal contours",
+      "without chf",
+      "the lungs are well inflated",
+      "no focal infiltrate",
+      "the sternal wires are intact",
+      "bony thorax grossly intact",
+      "no sternal fracture",
+      "no pneumothorax, fracture or dislocation"
     ],
-    "medium_confidence_findings": [],
-    "low_confidence_findings": []
+    "low_confidence_findings": [
+      "no signs of congestion",
+      "central venous",
+      "reticular opacities",
+      "no frank pulmonary edema",
+      "picc line fell out",
+      "no definite signs of chf",
+      "no lines",
+      "nasogastric tube has been removed",
+      "no frank interstitial pulmonary edema",
+      "respiratory failure",
+      "r iv",
+      "non-cardiogenic edema",
+      "discrete focal consolidation",
+      "shortness of breath",
+      "focal pulmonary consolidation",
+      "not enlarged",
+      "no pleural effusion",
+      "interstitial opacities",
+      "removal of nasogastric tube",
+      "not intubated",
+      "pleural scarring",
+      "no overt chf",
+      "remain in place",
+      "no edema",
+      "no overt sign of congestive heart failure",
+      "pulmonary parenchymal infiltrates",
+      "no overt pulmonary edema",
+      "pericardial effusion",
+      "acute consolidation",
+      "all monitoring and support devices have been removed",
+      "not distended",
+      "removal of 2 pleural drains",
+      "increased interstitial markings",
+      "tracheostomy or et tube",
+      "external pacemaker removed",
+      "external wire",
+      "normal cardiac silhouette",
+      "not dilated",
+      "pulled back 4cm",
+      "pulmonary vascular redistribution",
+      "partial obscuration of the diaphragm",
+      "central line placement",
+      "picc does not flush",
+      "consolidative",
+      "no frank edema",
+      "no device complications",
+      "linear consolidation",
+      "other monitoring and support devices",
+      "bilateral effusions",
+      "pleural catheter has apparently been removed",
+      "untaped",
+      "no large effusion",
+      "all monitoring and support devices except for the port-a-cath have been removed",
+      "removal of the mediastinal drains",
+      "pectoral pacemaker",
+      "no central venous catheter is seen",
+      "no effusion",
+      "no overt edema",
+      "no hardware",
+      "radiopaque tip",
+      "no implants",
+      "line",
+      "no additional devices",
+      "not engorged",
+      "all other lines and tubes",
+      "prosthetic cardiac valve",
+      "properly positioned",
+      "removal",
+      "volume loss",
+      "no fluid overload",
+      "monitoring and support devices have been removed",
+      "ng tubes ... removed",
+      "repositioned",
+      "cardiac contour looks larger due to low lung volume",
+      "lymphadenopathy",
+      "icd implantation",
+      "no hemodialysis catheter",
+      "peribronchial thickening",
+      "not migrated",
+      "no large pleural effusion",
+      "no left subclavian line",
+      "device",
+      "no mediastinal drains",
+      "device absent",
+      "normal cardiomediastinal silhouette",
+      "normal cardiac size",
+      "interstitial edema",
+      "line placement",
+      "retained secretions",
+      "pleural effusions",
+      "acute infiltrates",
+      "line which was pulled",
+      "no significant cardiac enlargement",
+      "et and ng tubes, as described",
+      "vascular congestion",
+      "consolidative parenchymal opacities",
+      "no air bronchogram",
+      "no gross effusion",
+      "ventilation",
+      "cardiomyopathy",
+      "no chest tubes",
+      "central vascular congestion",
+      "hazy ground-glass opacities",
+      "no evidence of hardware loosening or failure",
+      "pulled back",
+      "diffuse pneumonia",
+      "removal of endotracheal tube",
+      "poor port flow",
+      "endotracheal",
+      "tip of endotracheal tube is in standard position",
+      "calcified granuloma",
+      "interval removal of the endotracheal tube",
+      "absence of devices",
+      "no intra thoracic devices",
+      "removed and replaced",
+      "chf",
+      "advancement by 2 cm",
+      "acute cardiopulmonary disease",
+      "appropriately positioned",
+      "intact wires"
+    ]
+  },
+  "relevant_anatomical_regions": {
+    "cardiac_silhouette": {
+      "name": "cardiac silhouette",
+      "keywords": [
+        "cardiac silhouette",
+        "heart shadow",
+        "cardiac shadow"
+      ],
+      "bounds": [
+        0.37321170951463667,
+        0.47769894973347626,
+        0.7700050224868392,
+        0.7546451428797857
+      ],
+      "related_conditions": [
+        {
+          "condition": "Cardiomegaly",
+          "probability": 0.3425042927265167
+        },
+        {
+          "condition": "No Finding",
+          "probability": 0.6909406185150146
+        },
+        {
+          "condition": "Support Devices",
+          "probability": 0.40525397658348083
+        }
+      ]
+    },
+    "left_lung": {
+      "name": "left lung",
+      "keywords": [
+        "left lung",
+        "left pulmonary field",
+        "left lung field"
+      ],
+      "bounds": [
+        0.5259046105190097,
+        0.12478328308312486,
+        0.8980233455747089,
+        0.8024001120456901
+      ],
+      "related_conditions": [
+        {
+          "condition": "No Finding",
+          "probability": 0.6909406185150146
+        },
+        {
+          "condition": "Pneumonia",
+          "probability": 0.30827587842941284
+        }
+      ]
+    },
+    "right_lung": {
+      "name": "right lung",
+      "keywords": [
+        "right lung",
+        "right pulmonary field",
+        "right lung field"
+      ],
+      "bounds": [
+        0.09562001138363245,
+        0.125,
+        0.4706829179696034,
+        0.7906659323645568
+      ],
+      "related_conditions": [
+        {
+          "condition": "No Finding",
+          "probability": 0.6909406185150146
+        },
+        {
+          "condition": "Pneumonia",
+          "probability": 0.30827587842941284
+        }
+      ]
+    },
+    "left_upper_lung_zone": {
+      "name": "left upper lung zone",
+      "keywords": [
+        "left upper lung zone",
+        "left upper lung field",
+        "left apical lung zone"
+      ],
+      "bounds": [
+        0.5312062408550223,
+        0.14465408805031446,
+        0.8372934968385697,
+        0.3868026013644237
+      ],
+      "related_conditions": [
+        {
+          "condition": "No Finding",
+          "probability": 0.6909406185150146
+        },
+        {
+          "condition": "Pneumonia",
+          "probability": 0.30827587842941284
+        }
+      ]
+    },
+    "right_upper_lung_zone": {
+      "name": "right upper lung zone",
+      "keywords": [
+        "right upper lung zone",
+        "right upper lung field",
+        "right apical lung zone"
+      ],
+      "bounds": [
+        0.1608359707201128,
+        0.14606603744330576,
+        0.468688186789311,
+        0.3868989338077552
+      ],
+      "related_conditions": [
+        {
+          "condition": "No Finding",
+          "probability": 0.6909406185150146
+        },
+        {
+          "condition": "Pneumonia",
+          "probability": 0.30827587842941284
+        }
+      ]
+    },
+    "left_mid_lung_zone": {
+      "name": "left mid lung zone",
+      "keywords": [
+        "left mid lung zone",
+        "left middle lung zone",
+        "left middle lung field"
+      ],
+      "bounds": [
+        0.5349430477518289,
+        0.38631738792539266,
+        0.8632075471698113,
+        0.5384190468634817
+      ],
+      "related_conditions": [
+        {
+          "condition": "No Finding",
+          "probability": 0.6909406185150146
+        },
+        {
+          "condition": "Pneumonia",
+          "probability": 0.30827587842941284
+        }
+      ]
+    },
+    "right_mid_lung_zone": {
+      "name": "right mid lung zone",
+      "keywords": [
+        "right mid lung zone",
+        "right middle lung zone",
+        "right middle lung field"
+      ],
+      "bounds": [
+        0.13551193485070873,
+        0.38691391098177536,
+        0.45558176100628933,
+        0.5350437345322385
+      ],
+      "related_conditions": [
+        {
+          "condition": "No Finding",
+          "probability": 0.6909406185150146
+        },
+        {
+          "condition": "Pneumonia",
+          "probability": 0.30827587842941284
+        }
+      ]
+    },
+    "left_lower_lung_zone": {
+      "name": "left lower lung zone",
+      "keywords": [
+        "left lower lung zone",
+        "left lower lung field",
+        "left lower pulmonary zone"
+      ],
+      "bounds": [
+        0.5365964561733096,
+        0.5356675392670157,
+        0.8978004952454568,
+        0.8021890555254403
+      ],
+      "related_conditions": [
+        {
+          "condition": "No Finding",
+          "probability": 0.6909406185150146
+        },
+        {
+          "condition": "Pneumonia",
+          "probability": 0.30827587842941284
+        }
+      ]
+    },
+    "right_lower_lung_zone": {
+      "name": "right lower lung zone",
+      "keywords": [
+        "right lower lung zone",
+        "right lower lung field",
+        "right lower pulmonary zone"
+      ],
+      "bounds": [
+        0.09630503144654089,
+        0.5313971408250037,
+        0.44175392670157065,
+        0.7899214659685864
+      ],
+      "related_conditions": [
+        {
+          "condition": "No Finding",
+          "probability": 0.6909406185150146
+        },
+        {
+          "condition": "Pneumonia",
+          "probability": 0.30827587842941284
+        }
+      ]
+    },
+    "upper_mediastinum": {
+      "name": "upper mediastinum",
+      "keywords": [
+        "upper mediastinum",
+        "superior mediastinum",
+        "mediastinal region"
+      ],
+      "bounds": [
+        0.4086405080948316,
+        0.2153872544852851,
+        0.6273584905660378,
+        0.4739447883883056
+      ],
+      "related_conditions": [
+        {
+          "condition": "Support Devices",
+          "probability": 0.40525397658348083
+        }
+      ]
+    },
+    "trachea": {
+      "name": "trachea",
+      "keywords": [
+        "trachea",
+        "windpipe",
+        "airway"
+      ],
+      "bounds": [
+        0.4021023414508872,
+        0.05791884816753927,
+        0.5579188481675392,
+        0.4904635681013669
+      ],
+      "related_conditions": [
+        {
+          "condition": "Support Devices",
+          "probability": 0.40525397658348083
+        }
+      ]
+    },
+    "left_hilar_structures": {
+      "name": "left hilar structures",
+      "keywords": [
+        "left hilar structures",
+        "left pulmonary hilum",
+        "left lung hilum"
+      ],
+      "bounds": [
+        0.5300927893048408,
+        0.35379003634527917,
+        0.6969339622641509,
+        0.5667539267015707
+      ],
+      "related_conditions": [
+        {
+          "condition": "Support Devices",
+          "probability": 0.40525397658348083
+        }
+      ]
+    },
+    "right_hilar_structures": {
+      "name": "right hilar structures",
+      "keywords": [
+        "right hilar structures",
+        "right pulmonary hilum",
+        "right lung hilum"
+      ],
+      "bounds": [
+        0.29450261780104714,
+        0.3547833202154841,
+        0.46156007958189293,
+        0.5625
+      ],
+      "related_conditions": [
+        {
+          "condition": "Support Devices",
+          "probability": 0.40525397658348083
+        }
+      ]
+    }
   },
   "attention_analysis": {
     "regions": {
-      "upper_left": {
-        "name": "left upper lung field",
-        "max_attention": 0.3713327646255493,
-        "mean_attention": 0.1118444874882698,
-        "attention_coverage": 0.0,
-        "is_significant": false,
-        "keywords": [
-          "left upper lobe",
-          "left apical region",
-          "left clavicular area"
-        ]
-      },
-      "upper_right": {
-        "name": "right upper lung field",
-        "max_attention": 0.7408124208450317,
-        "mean_attention": 0.1487364023923874,
-        "attention_coverage": 0.002407704654895666,
-        "is_significant": true,
-        "keywords": [
-          "right upper lobe",
-          "right apical region",
-          "right clavicular area"
-        ]
-      },
-      "middle_left": {
-        "name": "left middle lung field",
-        "max_attention": 0.5957515239715576,
-        "mean_attention": 0.1716947853565216,
-        "attention_coverage": 0.0,
-        "is_significant": false,
-        "keywords": [
-          "left middle lobe",
-          "left perihilar region",
-          "left cardiac border"
-        ]
-      },
-      "middle_right": {
-        "name": "right middle lung field",
-        "max_attention": 0.9811238646507263,
-        "mean_attention": 0.2773703932762146,
-        "attention_coverage": 0.045442430703624734,
-        "is_significant": true,
-        "keywords": [
-          "right middle lobe",
-          "right perihilar region",
-          "right cardiac border"
-        ]
-      },
-      "lower_left": {
-        "name": "left lower lung field",
-        "max_attention": 1.0,
-        "mean_attention": 0.12359582632780075,
-        "attention_coverage": 0.006959033613445379,
-        "is_significant": true,
-        "keywords": [
-          "left lower lobe",
-          "left costophrenic angle",
-          "left diaphragmatic region"
-        ]
-      },
-      "lower_right": {
-        "name": "right lower lung field",
-        "max_attention": 0.4699589014053345,
-        "mean_attention": 0.10408471524715424,
-        "attention_coverage": 0.0,
-        "is_significant": false,
-        "keywords": [
-          "right lower lobe",
-          "right costophrenic angle",
-          "right diaphragmatic region"
-        ]
-      },
-      "central_cardiac": {
+      "cardiac_silhouette": {
         "name": "cardiac silhouette",
-        "max_attention": 0.7610675096511841,
-        "mean_attention": 0.23265065252780914,
-        "attention_coverage": 0.015248796147672551,
-        "is_significant": true,
-        "keywords": [
-          "heart border",
-          "mediastinum",
-          "cardiac shadow",
-          "central region"
-        ]
-      },
-      "hilum_left": {
-        "name": "left hilum",
-        "max_attention": 0.5957515239715576,
-        "mean_attention": 0.19847428798675537,
+        "max_attention": 0.20655319094657898,
+        "mean_attention": 0.05506337806582451,
         "attention_coverage": 0.0,
         "is_significant": false,
         "keywords": [
-          "left hilar region",
-          "left pulmonary vessels",
-          "left bronchial tree"
+          "cardiac silhouette",
+          "heart shadow",
+          "cardiac shadow",
+          "cardiac border",
+          "cardiac contour",
+          "cardiac outline",
+          "heart silhouette",
+          "cardiovascular silhouette",
+          "cardiac margin",
+          "cardiac profile"
         ]
       },
-      "hilum_right": {
-        "name": "right hilum",
-        "max_attention": 0.9811238646507263,
-        "mean_attention": 0.3604114353656769,
-        "attention_coverage": 0.08130986856760972,
-        "is_significant": true,
+      "left_clavicle": {
+        "name": "left clavicle",
+        "max_attention": 0.19606520235538483,
+        "mean_attention": 0.034893058240413666,
+        "attention_coverage": 0.0,
+        "is_significant": false,
         "keywords": [
+          "left clavicle",
+          "left collarbone",
+          "left collar bone",
+          "left clavicula",
+          "left clavicular bone",
+          "left shoulder girdle",
+          "left clavicular structure",
+          "left keybone",
+          "left scapular attachment",
+          "left thoracic inlet bone"
+        ]
+      },
+      "left_costophrenic_angle": {
+        "name": "left costophrenic angle",
+        "max_attention": 0.08959049731492996,
+        "mean_attention": 0.04411929473280907,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "left costophrenic angle",
+          "left costodiaphragmatic recess",
+          "left phrenicocostal sinus",
+          "left costophrenic recess",
+          "left costodiaphragmatic angle",
+          "left pleural recess",
+          "left diaphragmatic angle",
+          "left costophrenic sulcus",
+          "left lateral costophrenic angle",
+          "left pleural sinus"
+        ]
+      },
+      "left_hilar_structures": {
+        "name": "left hilar structures",
+        "max_attention": 0.151719331741333,
+        "mean_attention": 0.07281729578971863,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "left hilar structures",
+          "left pulmonary hilum",
+          "left lung hilum",
+          "left hilar region",
+          "left pulmonary hila",
+          "left lung root",
+          "left hilar vessels",
+          "left bronchial structures",
+          "left pulmonary vessels",
+          "left hilar anatomy"
+        ]
+      },
+      "left_lower_lung_zone": {
+        "name": "left lower lung zone",
+        "max_attention": 0.20655319094657898,
+        "mean_attention": 0.053222548216581345,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "left lower lung zone",
+          "left lower lung field",
+          "left lower pulmonary zone",
+          "left basal lung zone",
+          "left inferior lung zone",
+          "left lower lobe region",
+          "left basal lung field",
+          "left lower pulmonary field",
+          "left dependent lung zone",
+          "left caudal lung field"
+        ]
+      },
+      "left_lung": {
+        "name": "left lung",
+        "max_attention": 0.20655319094657898,
+        "mean_attention": 0.05181536823511124,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "left lung",
+          "left pulmonary field",
+          "left lung field",
+          "left pulmonary zone",
+          "left hemithorax",
+          "left thoracic cavity",
+          "left pulmonary parenchyma",
+          "left lung tissue",
+          "left pulmonary lobe",
+          "left respiratory field"
+        ]
+      },
+      "left_mid_lung_zone": {
+        "name": "left mid lung zone",
+        "max_attention": 0.151719331741333,
+        "mean_attention": 0.07209053635597229,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "left mid lung zone",
+          "left middle lung zone",
+          "left middle lung field",
+          "left central lung zone",
+          "left midlung field",
+          "left middle pulmonary zone",
+          "left intermediate lung zone",
+          "left central pulmonary field",
+          "left middle lobe region",
+          "left perihilar zone"
+        ]
+      },
+      "left_upper_lung_zone": {
+        "name": "left upper lung zone",
+        "max_attention": 0.14684030413627625,
+        "mean_attention": 0.03891928493976593,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "left upper lung zone",
+          "left upper lung field",
+          "left apical lung zone",
+          "left superior lung zone",
+          "left upper pulmonary zone",
+          "left cranial lung field",
+          "left upper lobe region",
+          "left apical pulmonary field",
+          "left superior pulmonary field",
+          "left upper thoracic zone"
+        ]
+      },
+      "right_clavicle": {
+        "name": "right clavicle",
+        "max_attention": 0.07145672291517258,
+        "mean_attention": 0.02495090290904045,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "right clavicle",
+          "right collarbone",
+          "right collar bone",
+          "right clavicula",
+          "right clavicular bone",
+          "right shoulder girdle",
+          "right clavicular structure",
+          "right keybone",
+          "right scapular attachment",
+          "right thoracic inlet bone"
+        ]
+      },
+      "right_costophrenic_angle": {
+        "name": "right costophrenic angle",
+        "max_attention": 0.0892842635512352,
+        "mean_attention": 0.041730932891368866,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "right costophrenic angle",
+          "right costodiaphragmatic recess",
+          "right phrenicocostal sinus",
+          "right costophrenic recess",
+          "right costodiaphragmatic angle",
+          "right pleural recess",
+          "right diaphragmatic angle",
+          "right costophrenic sulcus",
+          "right lateral costophrenic angle",
+          "right pleural sinus"
+        ]
+      },
+      "right_hilar_structures": {
+        "name": "right hilar structures",
+        "max_attention": 0.1107863262295723,
+        "mean_attention": 0.04468592628836632,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "right hilar structures",
+          "right pulmonary hilum",
+          "right lung hilum",
           "right hilar region",
+          "right pulmonary hila",
+          "right lung root",
+          "right hilar vessels",
+          "right bronchial structures",
           "right pulmonary vessels",
-          "right bronchial tree"
+          "right hilar anatomy"
+        ]
+      },
+      "right_lower_lung_zone": {
+        "name": "right lower lung zone",
+        "max_attention": 0.12871092557907104,
+        "mean_attention": 0.04520193859934807,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "right lower lung zone",
+          "right lower lung field",
+          "right lower pulmonary zone",
+          "right basal lung zone",
+          "right inferior lung zone",
+          "right lower lobe region",
+          "right basal lung field",
+          "right lower pulmonary field",
+          "right dependent lung zone",
+          "right caudal lung field"
+        ]
+      },
+      "right_lung": {
+        "name": "right lung",
+        "max_attention": 0.14360828697681427,
+        "mean_attention": 0.0416000671684742,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "right lung",
+          "right pulmonary field",
+          "right lung field",
+          "right pulmonary zone",
+          "right hemithorax",
+          "right thoracic cavity",
+          "right pulmonary parenchyma",
+          "right lung tissue",
+          "right pulmonary lobe",
+          "right respiratory field"
+        ]
+      },
+      "right_mid_lung_zone": {
+        "name": "right mid lung zone",
+        "max_attention": 0.14360828697681427,
+        "mean_attention": 0.05401865765452385,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "right mid lung zone",
+          "right middle lung zone",
+          "right middle lung field",
+          "right central lung zone",
+          "right midlung field",
+          "right middle pulmonary zone",
+          "right intermediate lung zone",
+          "right central pulmonary field",
+          "right middle lobe region",
+          "right perihilar zone"
+        ]
+      },
+      "right_upper_lung_zone": {
+        "name": "right upper lung zone",
+        "max_attention": 0.12907195091247559,
+        "mean_attention": 0.03337216377258301,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "right upper lung zone",
+          "right upper lung field",
+          "right apical lung zone",
+          "right superior lung zone",
+          "right upper pulmonary zone",
+          "right cranial lung field",
+          "right upper lobe region",
+          "right apical pulmonary field",
+          "right superior pulmonary field",
+          "right upper thoracic zone"
+        ]
+      },
+      "trachea": {
+        "name": "trachea",
+        "max_attention": 0.07891541719436646,
+        "mean_attention": 0.026498902589082718,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "trachea",
+          "windpipe",
+          "airway",
+          "tracheal tube",
+          "main airway",
+          "central airway",
+          "primary airway",
+          "respiratory tract",
+          "bronchial tree",
+          "tracheobronchial tree"
+        ]
+      },
+      "upper_mediastinum": {
+        "name": "upper mediastinum",
+        "max_attention": 0.13939368724822998,
+        "mean_attention": 0.03763775900006294,
+        "attention_coverage": 0.0,
+        "is_significant": false,
+        "keywords": [
+          "upper mediastinum",
+          "superior mediastinum",
+          "mediastinal region",
+          "superior mediastinal compartment",
+          "upper mediastinal space",
+          "cranial mediastinum",
+          "thoracic inlet region",
+          "superior thoracic compartment",
+          "mediastinum superius",
+          "upper central chest"
         ]
       }
     },
     "top_regions": [
-      "lower_left",
-      "middle_right",
-      "hilum_right"
+      "cardiac_silhouette",
+      "left_lower_lung_zone",
+      "left_lung"
     ],
-    "significant_regions": [
-      "upper_right",
-      "middle_right",
-      "lower_left",
-      "central_cardiac",
-      "hilum_right"
-    ],
-    "overall_attention_intensity": 0.15348514914512634,
+    "significant_regions": [],
+    "overall_attention_intensity": 0.04392517730593681,
     "max_attention_location": {
       "y": 199,
-      "x": 72
+      "x": 120
     },
-    "visualization_saved": "test_data\\attention_visualizations\\attention_005aff0f-0c236062-06df954a-25ad1874-bcdffcb0.png"
+    "visualization_saved": "test_data\\attention_visualizations\\attention_005aff0f-0c236062-06df954a-25ad1874-bcdffcb0.png",
+    "attention_map": "[[0.02391522 0.02274209 0.02205019 ... 0.02483948 0.02687236 0.02878516]\n [0.02150478 0.02040029 0.01977278 ... 0.02505765 0.02739001 0.02957479]\n [0.01931673 0.01808003 0.01731394 ... 0.0266713  0.02910347 0.03149737]\n ...\n [0.00663595 0.00675189 0.0071548  ... 0.0055731  0.00462793 0.00394564]\n [0.00660869 0.0067385  0.00727107 ... 0.00600436 0.00493579 0.00417729]\n [0.00675573 0.00684014 0.00732827 ... 0.00619843 0.00502165 0.00419557]]"
   },
-  "spatial_keywords": [
-    "right upper lobe",
-    "right apical region",
-    "increased attention in right upper lung field",
-    "right middle lobe",
-    "right perihilar region",
-    "right cardiac border",
-    "focal attention in right middle lung field",
-    "left lower lobe",
-    "left costophrenic angle",
-    "left diaphragmatic region",
-    "focal attention in left lower lung field",
-    "heart border",
-    "mediastinum",
-    "increased attention in cardiac silhouette",
-    "right hilar region",
-    "right pulmonary vessels",
-    "right bronchial tree",
-    "focal attention in right hilum",
-    "diffuse attention pattern"
-  ],
+  "spatial_keywords": [],
   "llm_response": {
     "success": true,
-    "report": "**FINDINGS:**\n\nNormal chest radiograph. There are no acute cardiopulmonary abnormalities identified. \n\n**IMPRESSION:**\n\nNo evidence of acute disease.\n\n**RECOMMENDATIONS:**\n\nNone.\n\n\n\n",
+    "report": "FINDINGS:\nThe lungs are well aerated. There is an absence of any new acute infiltrates, focal consolidation, or pulmonary edema. The cardiac silhouette and mediastinal contours are within normal limits. No pleural effusion or pneumothorax is identified. No support devices are visualized.\n\nIMPRESSION:\nNo definitive evidence of an acute cardiopulmonary process.",
     "raw_response": {
-      "id": "chatcmpl-vyv0dsa9eeaea1wq01gu9",
-      "object": "chat.completion",
-      "created": 1749821667,
-      "model": "gemma-3-27b-it-qat",
-      "choices": [
+      "candidates": [
         {
+          "content": {
+            "parts": [
+              {
+                "text": "FINDINGS:\nThe lungs are well aerated. There is an absence of any new acute infiltrates, focal consolidation, or pulmonary edema. The cardiac silhouette and mediastinal contours are within normal limits. No pleural effusion or pneumothorax is identified. No support devices are visualized.\n\nIMPRESSION:\nNo definitive evidence of an acute cardiopulmonary process."
+              }
+            ],
+            "role": "model"
+          },
+          "finishReason": "STOP",
           "index": 0,
-          "logprobs": null,
-          "finish_reason": "stop",
-          "message": {
-            "role": "assistant",
-            "content": "**FINDINGS:**\n\nNormal chest radiograph. There are no acute cardiopulmonary abnormalities identified. \n\n**IMPRESSION:**\n\nNo evidence of acute disease.\n\n**RECOMMENDATIONS:**\n\nNone.\n\n\n\n"
-          }
+          "safetyRatings": [
+            {
+              "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+              "probability": "NEGLIGIBLE"
+            },
+            {
+              "category": "HARM_CATEGORY_HATE_SPEECH",
+              "probability": "NEGLIGIBLE"
+            },
+            {
+              "category": "HARM_CATEGORY_HARASSMENT",
+              "probability": "NEGLIGIBLE"
+            },
+            {
+              "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+              "probability": "NEGLIGIBLE"
+            }
+          ]
         }
       ],
-      "usage": {
-        "prompt_tokens": 469,
-        "completion_tokens": 43,
-        "total_tokens": 512
+      "usageMetadata": {
+        "promptTokenCount": 1473,
+        "candidatesTokenCount": 73,
+        "totalTokenCount": 3129,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 1473
+          }
+        ],
+        "thoughtsTokenCount": 1583
       },
-      "stats": {},
-      "system_fingerprint": "gemma-3-27b-it-qat"
+      "modelVersion": "gemini-2.5-pro",
+      "responseId": "jR5naLGLFqrRz7IP9JSfoQc"
     },
     "used_fallback": false,
     "attempt": 1
   },
   "medical_report": {
-    "report_text": "**FINDINGS:**\n\nNormal chest radiograph. There are no acute cardiopulmonary abnormalities identified. \n\n**IMPRESSION:**\n\nNo evidence of acute disease.\n\n**RECOMMENDATIONS:**\n\nNone.",
+    "report_text": "FINDINGS:\nThe lungs are well aerated. There is an absence of any new acute infiltrates, focal consolidation, or pulmonary edema. The cardiac silhouette and mediastinal contours are within normal limits. No pleural effusion or pneumothorax is identified. No support devices are visualized.\n\nIMPRESSION:\nNo definitive evidence of an acute cardiopulmonary process.",
     "sections": {
-      "**findings**": "Normal chest radiograph. There are no acute cardiopulmonary abnormalities identified.",
-      "**impression**": "No evidence of acute disease.",
-      "**recommendations**": "None."
+      "findings": "The lungs are well aerated. There is an absence of any new acute infiltrates, focal consolidation, or pulmonary edema. The cardiac silhouette and mediastinal contours are within normal limits. No pleural effusion or pneumothorax is identified. No support devices are visualized.",
+      "impression": "No definitive evidence of an acute cardiopulmonary process."
     },
     "metadata": {
-      "generated_at": "2025-06-13T13:34:28",
+      "generated_at": "2025-07-04T00:21:31",
       "generator": "Medical Report Generator v1.0",
-      "model_used": "gemma-3-27b-it-qat",
-      "word_count": 19,
-      "character_count": 178,
+      "model_used": "gemini-2.5-pro",
+      "word_count": 51,
+      "character_count": 361,
       "image_path": "E:\\MIMIC Research\\Code\\Report-Generation-and-Disease-Classification\\data_dump\\output\\img_png\\005aff0f-0c236062-06df954a-25ad1874-bcdffcb0.png",
       "template_used": "standard",
       "llm_success": true,
       "used_fallback": false,
-      "total_keywords": 3,
-      "attention_regions": 5,
+      "total_keywords": 286,
+      "attention_regions": 0,
+      "relevant_anatomical_regions": 13,
       "patient_info_included": false
     }
   }

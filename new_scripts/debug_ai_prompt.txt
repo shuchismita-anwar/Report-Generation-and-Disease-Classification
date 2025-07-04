@@ -1,14 +1,14 @@
 ================================================================================
 AI PROMPT DEBUG OUTPUT
-Generated at: 2025-07-03 13:08:19.766003
-Patient ID: 0a7698f4-898f002d-abe934ed-2b21b711-848b7913
+Generated at: 2025-07-04 06:43:18.232544
+Patient ID: 002da0d9-ce49c30d-4dfcc1f8-746d2401-d8044d48
 ================================================================================
 
 PROMPT STATISTICS:
-- Total Characters: 6,584
-- Total Words: 896
-- Estimated Tokens: ~1165
-- Size in KB: 6.54 KB
+- Total Characters: 6,299
+- Total Words: 876
+- Estimated Tokens: ~1139
+- Size in KB: 6.26 KB
 
 ================================================================================
 
@@ -57,40 +57,34 @@ You are an expert radiologist with 20+ years of experience. Generate a concise, 
    • Reference specific lung zones, cardiac contours, and bony structures as appropriate
    • Always mention any visible medical device, line, or tube if present
 
-REPORTING STYLE: CONSERVATIVE ASSESSMENT (Low confidence across all findings - emphasize limitations)
+REPORTING STYLE: SIMPLE & DIRECT (Normal Study - Radiologist-style brevity required)
 
 === CLINICAL ANALYSIS DATA ===
 
 🔬 MODEL PREDICTIONS (Clinical Decision Basis):
-- Atelectasis: 32.4% probability (LOW confidence)
-- Cardiomegaly: 33.9% probability (LOW confidence)
-- Edema: 30.5% probability (LOW confidence)
-- Lung Opacity: 50.7% probability (MODERATE confidence)
-- No Finding: 50.7% probability (MODERATE confidence)
-- Pneumonia: 49.9% probability (LOW confidence)
-- Support Devices: 41.5% probability (LOW confidence)
+- No Finding: 71.7% probability (HIGH confidence)
+- Support Devices: 43.8% probability (LOW confidence)
 
 📋 CLINICAL KEYWORDS (Condition-Based):
-- Atelectasis (LOW): hyperinflated lungs, mucous plugging, normal to decreased in volume
-- Cardiomegaly (LOW): cardiac contour looks larger due to low lung volume, cardiomyopathy, no definite signs of chf
-- Edema (LOW): cardiac silhouette is enlarged, cardiac silhouette is obscured, interval improvement in interstitial edema
-- Lung Opacity (MODERATE): 7 mm nodular opacity, accentuate bronchovascular markings, acute airways inflammation
-- No Finding (MODERATE): abdomen is unremarkable, absence of any new acute infiltrates, aerated
-- Pneumonia (LOW): acute cardiopulmonary disease, acute consolidation, acute infiltrates
+- No Finding (HIGH): absence of pleural effusions, cardiac contours are normal, cardiac silhouette and mediastinal contours are normal [USE VERBATIM]
 - Support Devices (LOW): absence of devices, advancement by 2 cm, all monitoring and support devices except for the port-a-cath have been removed
 
+🎯 HIGH-CONFIDENCE PHRASES TO USE VERBATIM: absence of pleural effusions, cardiac contours are normal
+
 🗺️ RELEVANT ANATOMICAL REGIONS (Condition-Based):
-- No significant findings above 60% confidence for anatomical localization
+- No Finding (71.7%, HIGH): cardiac silhouette, left lung, right lung, left upper lung zone, right upper lung zone, left mid lung zone, right mid lung zone, left lower lung zone, right lower lung zone
 
 === REPORTING TASK ===
 Generate a professional radiological report with sections: FINDINGS, IMPRESSION, RECOMMENDATIONS
 
 🎯 SPECIFIC INSTRUCTIONS FOR THIS CASE:
-- Low confidence findings across all conditions
-- Emphasize limitations of the analysis
-- Suggest clinical correlation
-- Consider additional imaging if warranted
-- Use conservative language throughout
+- This is a NORMAL study with high confidence
+- Use simple, direct language with definitive statements
+- Include any visible medical devices or support equipment
+- Use exact phrases: "No focal consolidation, pleural effusion, or pneumothorax"
+- Keep findings section concise but anatomically specific
+- Impression should be brief and definitive: "No acute cardiopulmonary process"
+- Avoid hedging language like "cannot be excluded" 
 
 ### 📏 FORMATTING INSTRUCTIONS:
 • Structure:

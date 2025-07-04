@@ -53,7 +53,7 @@ def format_medical_report(analysis_result):
     report_data = analysis_result['medical_report']
     
     # Clinical Findings - Just the core medical report
-    formatted_report = "🔍 CLINICAL FINDINGS:\n"
+    formatted_report = "CLINICAL FINDINGS:\n"
     formatted_report += "-" * 50 + "\n"
     
     # Extract the actual report text

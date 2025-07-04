@@ -95,8 +95,8 @@ def main():
     
     comprehensive_result = generator.generate_comprehensive_analysis(
         image_path=test_image,
-        template='detailed',
-        include_image_in_llm=False,  # FIXED: Avoid oversized prompts that degrade LLM performance
+        template='standard',  # Use only standard template like random_xray_analysis.py
+        include_image_in_llm=True,  # FIXED: Enable image sending to LLM for better analysis
         patient_info=patient_info,
         save_visualizations=True,
         progress_callback=progress_tracker
@@ -180,7 +180,7 @@ def main():
     
     batch_results = generator.batch_analyze_images(
         image_paths=batch_images,
-        template='standard',
+        template='standard',  # Use only standard template consistently
         max_concurrent=2,
         save_results=True,
         output_dir=r".\real_analysis_results"
@@ -201,51 +201,51 @@ def main():
     
     # Demo 3: Different Templates with Same Image
     print("\n" + "=" * 60)
-    print("DEMO 3: TEMPLATE COMPARISON ON REAL IMAGE")
+    print("DEMO 3: SINGLE TEMPLATE ANALYSIS ON REAL IMAGE")
     print("=" * 60)
     
-    templates = ['standard', 'detailed', 'concise']
-    template_results = {}
+    # Use only standard template like random_xray_analysis.py
+    template = 'standard'
     
-    # Use the same image for comparison
-    comparison_image = available_images[0]
-    print(f"📸 Comparing templates on: {os.path.basename(comparison_image)}")
+    # Use the same image for analysis
+    analysis_image = available_images[0]
+    print(f"📸 Analyzing with standard template: {os.path.basename(analysis_image)}")
     
-    for template in templates:
-        print(f"📝 Generating {template} report...")
+    print(f"📝 Generating {template} report...")
+    
+    template_start = time.time()
+    result = generator.generate_comprehensive_analysis(
+        image_path=analysis_image,
+        template=template,
+        include_image_in_llm=True,  # Enable image sending to LLM
+        save_visualizations=False
+    )
+    template_time = time.time() - template_start
+    
+    if result['success']:
+        report_text = result['medical_report']['report_text']
+        template_result = {
+            'success': True,
+            'processing_time': template_time,
+            'word_count': len(report_text.split()),
+            'character_count': len(report_text),
+            'sections': len(result['medical_report']['sections'])
+        }
         
-        template_start = time.time()
-        result = generator.generate_comprehensive_analysis(
-            image_path=comparison_image,
-            template=template,
-            save_visualizations=False
-        )
-        template_time = time.time() - template_start
+        print(f"\n📊 Standard Template Analysis Results:")
+        print("-" * 50)
+        print(f"Processing time: {template_result['processing_time']:.1f}s")
+        print(f"Word count: {template_result['word_count']}")
+        print(f"Character count: {template_result['character_count']}")
+        print(f"Sections: {template_result['sections']}")
         
-        if result['success']:
-            report_text = result['medical_report']['report_text']
-            template_results[template] = {
-                'success': True,
-                'processing_time': template_time,
-                'word_count': len(report_text.split()),
-                'character_count': len(report_text),
-                'sections': len(result['medical_report']['sections'])
-            }
-        else:
-            template_results[template] = {'success': False}
-    
-    print("\n📊 Template Comparison Results:")
-    print("-" * 50)
-    print(f"{'Template':<12} {'Time(s)':<8} {'Words':<8} {'Chars':<8} {'Sections':<8}")
-    print("-" * 50)
-    
-    for template, results in template_results.items():
-        if results['success']:
-            print(f"{template:<12} {results['processing_time']:<8.1f} "
-                  f"{results['word_count']:<8} {results['character_count']:<8} "
-                  f"{results['sections']:<8}")
-        else:
-            print(f"{template:<12} {'FAILED':<8} {'N/A':<8} {'N/A':<8} {'N/A':<8}")
+        # Display the generated report
+        print(f"\n📄 Generated Medical Report:")
+        print("=" * 60)
+        print(report_text)
+        print("=" * 60)
+    else:
+        print(f"❌ {template} template analysis failed")
     
     # Final System Summary
     print("\n" + "=" * 60)
@@ -282,7 +282,7 @@ def main():
     print("=" * 60)
     print("✅ Real chest X-ray analysis pipeline demonstrated")
     print("✅ Batch processing capabilities shown") 
-    print("✅ Multiple report templates compared")
+    print("✅ Single template analysis on real image demonstrated")
     print("✅ Performance optimization and monitoring active")
     print(f"🏥 Medical Report Generator successfully analyzed {len(available_images)} real images!")
 
