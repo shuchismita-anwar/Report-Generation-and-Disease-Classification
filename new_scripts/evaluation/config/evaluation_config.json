@@ -20,7 +20,7 @@
       "rouge_2": 0.15,
       "rouge_l": 0.15,
       "meteor": 0.1,
-      "bert_score": 0.15,
+      "radgraph_f1": 0.15,
       "medical_terminology": 0.05,
       "clinical_accuracy": 0.05
     },
@@ -28,9 +28,12 @@
       "bleu": true,
       "rouge": true,
       "meteor": true,
-      "bert_score": true,
+      "chexpert": true,
+      "radgraph_f1": true,
       "medical_terminology": true,
-      "clinical_accuracy": true
+      "clinical_accuracy": true,
+      "bert_score": false,
+      "cider": false
     },
     "parameters": {
       "bleu": {
@@ -47,13 +50,6 @@
         "alpha": 0.9,
         "beta": 3.0,
         "gamma": 0.5
-      },
-      "bert_score": {
-        "model_type": "emilyalsentzer/Bio_ClinicalBERT",
-        "num_layers": 12,
-        "batch_size": 64,
-        "idf": false,
-        "device": "auto"
       }
     }
   },
@@ -68,8 +64,7 @@
     "minimum_scores": {
       "bleu": 0.1,
       "rouge_1": 0.2,
-      "rouge_l": 0.2,
-      "bert_score": 0.7
+      "rouge_l": 0.2
     }
   },
 

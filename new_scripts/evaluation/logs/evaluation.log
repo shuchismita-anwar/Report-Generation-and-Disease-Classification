@@ -522,3 +522,12 @@
 2025-07-04 04:36:05 - MedicalReportEvaluator - INFO - Loading BERT model: bert-base-uncased
 2025-07-04 04:36:07 - MedicalReportEvaluator - INFO - BERTScore model loaded on device: cuda
 2025-07-04 04:36:11 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1297, Quality: very_poor, Time: 13.4696s
+2025-07-04 16:42:12 - MedicalReportEvaluator - INFO - Logging system initialized successfully
+2025-07-04 16:42:12 - MedicalReportEvaluator - INFO - Configuration loaded successfully from config/evaluation_config.json
+2025-07-04 16:42:14 - MedicalReportEvaluator - INFO - Successfully initialized 6 metrics
+2025-07-04 16:42:14 - MedicalReportEvaluator - INFO - Initialized Medical Report Evaluator - Session: eval_20250704_164214
+2025-07-04 16:42:14 - MedicalReportEvaluator - INFO - Loaded 6 metrics: ['bleu', 'rouge', 'meteor', 'bert_score', 'cider', 'medical']
+2025-07-04 16:42:14 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 0a7698f4-898f002d-abe934ed-2b21b711-848b7913
+2025-07-04 16:42:23 - MedicalReportEvaluator - INFO - Loading BERT model: bert-base-uncased
+2025-07-04 16:42:26 - MedicalReportEvaluator - INFO - BERTScore model loaded on device: cuda
+2025-07-04 16:42:31 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.0697, Quality: very_poor, Time: 16.9778s

@@ -23,8 +23,8 @@ from metrics.base_metric import BaseMetric
 from metrics.bleu_scorer import BLEUScorer
 from metrics.rouge_scorer import ROUGEScorer
 from metrics.meteor_scorer import METEORScorer
-from metrics.bertscore_scorer import BERTScoreScorer
-from metrics.cider_scorer import CIDErScorer
+from metrics.chexpert_scorer import ChexpertScorer
+from metrics.radgraph_f1_scorer import RadGraphF1Scorer
 from metrics.medical_scorer import MedicalScorer
 
 # Import utilities
@@ -201,19 +201,19 @@ class MedicalReportEvaluator:
                 self.metrics['meteor'].configure(meteor_config)
                 self.logger.debug("Initialized METEOR scorer")
             
-            # Initialize BERTScore scorer
-            if enabled_metrics.get('bert_score', True):
-                bert_config = metric_params.get('bert_score', {})
-                self.metrics['bert_score'] = BERTScoreScorer(logger=self.logger)
-                self.metrics['bert_score'].configure(bert_config)
-                self.logger.debug("Initialized BERTScore scorer")
+            # Initialize CheXpert scorer (pathology accuracy)
+            if enabled_metrics.get('chexpert', True) or enabled_metrics.get('clinical_accuracy', True):
+                chexpert_config = metric_params.get('chexpert', {})
+                self.metrics['chexpert'] = ChexpertScorer(logger=self.logger)
+                self.metrics['chexpert'].configure(chexpert_config)
+                self.logger.debug("Initialized CheXpert scorer")
             
-            # Initialize CIDEr scorer
-            if enabled_metrics.get('cider', True):
-                cider_config = metric_params.get('cider', {})
-                self.metrics['cider'] = CIDErScorer(logger=self.logger)
-                self.metrics['cider'].configure(cider_config)
-                self.logger.debug("Initialized CIDEr scorer")
+            # Initialize RadGraph F1 scorer (relation correctness)
+            if enabled_metrics.get('radgraph_f1', True):
+                radgraph_config = metric_params.get('radgraph_f1', {})
+                self.metrics['radgraph_f1'] = RadGraphF1Scorer(logger=self.logger)
+                self.metrics['radgraph_f1'].configure(radgraph_config)
+                self.logger.debug("Initialized RadGraph F1 scorer")
             
             # Initialize Medical scorer
             if enabled_metrics.get('medical_terminology', True):
@@ -379,10 +379,11 @@ class MedicalReportEvaluator:
             return scores.get("rouge_l", scores.get("rouge_1", 0.0))
         elif metric_name == "meteor":
             return scores.get("meteor", scores.get("score", 0.0))
-        elif metric_name == "bert_score":
-            return scores.get("f1", scores.get("bert_score", 0.0))
-        elif metric_name == "cider":
-            return scores.get("cider", scores.get("score", 0.0))
+        elif metric_name == "chexpert":
+            # Use CheXpert F1 as primary score for pathology accuracy
+            return scores.get("chexpert_f1", scores.get("f1", 0.0))
+        elif metric_name == "radgraph_f1":
+            return scores.get("radgraph_f1", scores.get("f1", 0.0))
         elif metric_name == "medical":
             return scores.get("overall_score", scores.get("medical_score", 0.0))
         else:
@@ -422,10 +423,12 @@ class MedicalReportEvaluator:
             if metric_name == "rouge":
                 # For ROUGE, we might want to use rouge_l weight or a general rouge weight
                 weight_key = "rouge_l"  # or could be split into rouge_1, rouge_2, rouge_l
-            elif metric_name == "bert_score":
-                weight_key = "bert_score"
             elif metric_name == "medical":
                 weight_key = "medical_terminology"
+            elif metric_name == "chexpert":
+                weight_key = "clinical_accuracy"
+            elif metric_name == "radgraph_f1":
+                weight_key = "radgraph_f1"
             
             weight = metric_weights.get(weight_key, 0.1)  # Default weight if not specified
             weighted_sum += score * weight
