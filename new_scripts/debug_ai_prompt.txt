@@ -1,14 +1,14 @@
 ================================================================================
 AI PROMPT DEBUG OUTPUT
-Generated at: 2025-07-04 08:00:43.895501
+Generated at: 2025-07-08 18:05:54.261200
 Patient ID: efa5f70a-148764b5-a1137b9b-0e30e4c3-38c465a6
 ================================================================================
 
 PROMPT STATISTICS:
-- Total Characters: 7,320
-- Total Words: 987
-- Estimated Tokens: ~1283
-- Size in KB: 7.25 KB
+- Total Characters: 6,963
+- Total Words: 940
+- Estimated Tokens: ~1222
+- Size in KB: 6.91 KB
 
 ================================================================================
 
@@ -62,41 +62,39 @@ REPORTING STYLE: MULTI-PATHOLOGY MIXED CONFIDENCE (Multiple findings with varyin
 === CLINICAL ANALYSIS DATA ===
 
 🔬 MODEL PREDICTIONS (Clinical Decision Basis):
-- Atelectasis: 61.2% probability (MODERATE confidence)
-- Cardiomegaly: 58.2% probability (MODERATE confidence)
-- Edema: 41.3% probability (LOW confidence)
-- Lung Opacity: 44.5% probability (LOW confidence)
-- No Finding: 30.0% probability (LOW confidence)
-- Pleural Effusion: 54.0% probability (MODERATE confidence)
-- Pneumonia: 35.6% probability (LOW confidence)
-- Support Devices: 69.7% probability (MODERATE confidence)
+- Atelectasis: 56.5% probability (MODERATE confidence)
+- Cardiomegaly: 49.6% probability (LOW confidence)
+- Edema: 44.7% probability (LOW confidence)
+- Lung Opacity: 47.9% probability (LOW confidence)
+- No Finding: 44.7% probability (LOW confidence)
+- Pleural Effusion: 42.7% probability (LOW confidence)
+- Pneumonia: 39.5% probability (LOW confidence)
+- Support Devices: 64.6% probability (MODERATE confidence)
 
 📋 CLINICAL KEYWORDS (Condition-Based):
 - Atelectasis (MODERATE): atelectasis/scarring, atelectatic, atelectatic and / or consolidated
-- Cardiomegaly (MODERATE): acute congestive heart failure, acute on chronic chf, afib
+- Cardiomegaly (LOW): cardiac contour looks larger due to low lung volume, cardiomyopathy, no definite signs of chf
 - Edema (LOW): cardiac silhouette is enlarged, cardiac silhouette is obscured, interval improvement in interstitial edema
 - Lung Opacity (LOW): acute cardiopulmonary disease, acute infiltrates, aerated
 - No Finding (LOW): azygos fissure, cardiac silhouette size is normal, cardiac silhouettes are unremarkable
-- Pleural Effusion (MODERATE): air and fluid, air- fluid collection, air-fluid levels
+- Pleural Effusion (LOW): appreciable pleural effusion, definite effusion, effusion absent
 - Pneumonia (LOW): acute cardiopulmonary disease, acute consolidation, acute infiltrates
 - Support Devices (MODERATE): a gastric tube, a laparoscopic gastric band, additional lead
 
 🗺️ RELEVANT ANATOMICAL REGIONS (Condition-Based):
-- Support Devices (69.7%, MODERATE): cardiac silhouette, left hilar structures, right hilar structures, upper mediastinum, trachea
-- Atelectasis (61.2%, MODERATE): left lung, right lung, left lower lung zone, right lower lung zone, left upper lung zone, right upper lung zone
+- Support Devices (64.6%, MODERATE): cardiac silhouette, left hilar structures, right hilar structures, upper mediastinum, trachea
 
 === REPORTING TASK ===
 Generate a professional radiological report with sections: FINDINGS, IMPRESSION, RECOMMENDATIONS
 
 🎯 SPECIFIC INSTRUCTIONS FOR THIS CASE:
-- This case shows MULTIPLE significant findings: Support Devices (69.7%), Atelectasis (61.2%)
-- Report ALL significant findings above 60% confidence using PROVIDED KEYWORDS verbatim
-- Use relevant anatomical regions to specify locations for each finding precisely
+- This shows Support Devices with MODERATE confidence (64.6%)
+- Focus specifically on this pathological finding using PROVIDED KEYWORDS verbatim
+- Use relevant anatomical regions to describe location precisely
 - Include any visible medical devices (tubes, catheters, lines) even if incidental
-- Use exact terminology from CLINICAL KEYWORDS when available for each condition
-- Describe the medical significance of each finding without over-hedging
-- Consider relationships between findings (e.g., atelectasis with pleural effusion)
-- Structure as: FINDINGS (describe each with specific terminology), IMPRESSION (synthesize findings)
+- Use exact terminology from CLINICAL KEYWORDS when available
+- Avoid over-hedging if confidence is high (>70%)
+- Describe the medical significance clearly
 
 ### 📏 FORMATTING INSTRUCTIONS:
 • Structure:

@@ -441,46 +441,70 @@ class MultiModalMIMICModel(nn.Module):
         bbox_feat = self.bbox_encoder(bbox).flatten(1)
         bbox_proj = self.bbox_proj(bbox_feat)
         
-        # Fixation encoding
-        fix_lens = fix_mask.sum(dim=1).cpu()
-        if torch.all(fix_lens == 0):
-            fix_feat_gru = torch.zeros(batch_size, 256 if check_system_memory() else 1536, device=fix_seq.device)
+        # Fixation encoding (skip if model doesn't have fixation)
+        if hasattr(self, 'has_fixation') and not self.has_fixation:
+            # Model was trained without fixation, skip fixation processing
+            fix_proj = None
         else:
-            fix_emb = self.fix_emb(fix_seq)
-            packed_seq = nn.utils.rnn.pack_padded_sequence(
-                fix_emb, fix_lens.clamp(min=1), batch_first=True, enforce_sorted=False
-            )
-            _, h_n = self.fix_gru(packed_seq)
-            fix_feat_gru = h_n.transpose(0, 1).reshape(batch_size, -1)
-        fix_proj = self.fix_proj(fix_feat_gru)
+            # Process fixation data normally
+            fix_lens = fix_mask.sum(dim=1).cpu()
+            if torch.all(fix_lens == 0):
+                fix_feat_gru = torch.zeros(batch_size, 256 if check_system_memory() else 1536, device=fix_seq.device)
+            else:
+                fix_emb = self.fix_emb(fix_seq)
+                packed_seq = nn.utils.rnn.pack_padded_sequence(
+                    fix_emb, fix_lens.clamp(min=1), batch_first=True, enforce_sorted=False
+                )
+                _, h_n = self.fix_gru(packed_seq)
+                fix_feat_gru = h_n.transpose(0, 1).reshape(batch_size, -1)
+            fix_proj = self.fix_proj(fix_feat_gru)
         
-        # Text encoding
-        if isinstance(transcript, list):
-            try:
-                max_length = 256 if check_system_memory() else 512
-                transcript_tokens = self.tokenizer(
-                    transcript, return_tensors="pt", padding=True, 
-                    truncation=True, max_length=max_length
-                ).to(img.device)
-                text_outputs = self.text_encoder(**transcript_tokens)
-                text_feat = text_outputs.last_hidden_state[:, 0, :]
-                text_proj = self.text_proj(text_feat)
-            except Exception:
+        # Text encoding (skip if model doesn't have transcript)
+        if hasattr(self, 'has_transcript') and not self.has_transcript:
+            # Model was trained without transcript, skip text processing
+            text_proj = None
+        else:
+            # Model expects transcript input, always provide a valid tensor
+            if isinstance(transcript, list):
+                try:
+                    max_length = 256 if check_system_memory() else 512
+                    transcript_tokens = self.tokenizer(
+                        transcript, return_tensors="pt", padding=True, 
+                        truncation=True, max_length=max_length
+                    ).to(img.device)
+                    text_outputs = self.text_encoder(**transcript_tokens)
+                    text_feat = text_outputs.last_hidden_state[:, 0, :]
+                    text_proj = self.text_proj(text_feat)
+                except Exception as e:
+                    # Fallback to zero tensor for models that expect transcript input
+                    hidden_dim = 512 if check_system_memory() else 768
+                    text_proj = torch.zeros(batch_size, hidden_dim, device=img.device)
+                    self.logger.warning(f"Text processing failed, using zero tensor: {e}")
+            else:
+                # No transcript provided but model expects it, use zero tensor
                 hidden_dim = 512 if check_system_memory() else 768
                 text_proj = torch.zeros(batch_size, hidden_dim, device=img.device)
-        else:
-            hidden_dim = 512 if check_system_memory() else 768
-            text_proj = torch.zeros(batch_size, hidden_dim, device=img.device)
         
-        # Fusion
-        combined = torch.cat([img_proj, bbox_proj, fix_proj, text_proj], dim=1)
+        # Fusion - combine only the modalities the model was trained with
+        fusion_inputs = [img_proj, bbox_proj]  # Always have image and bbox
+        if hasattr(self, 'has_fixation') and self.has_fixation:
+            fusion_inputs.append(fix_proj)
+        if hasattr(self, 'has_transcript') and self.has_transcript:
+            fusion_inputs.append(text_proj)
+        
+        combined = torch.cat(fusion_inputs, dim=1)
         fused = self.fusion(combined)
         
         if not check_system_memory() and self.fusion_attention is not None:
-            stacked_features = torch.stack([img_proj, bbox_proj, fix_proj, text_proj], dim=1)
-            attended_features, _ = self.fusion_attention(stacked_features, stacked_features, stacked_features)
-            attended_combined = attended_features.mean(dim=1)
-            final_fused = self.fusion_norm(fused + attended_combined)
+            # Only use attention mechanism for full models (has both fixation and transcript)
+            if hasattr(self, 'has_fixation') and hasattr(self, 'has_transcript') and self.has_fixation and self.has_transcript:
+                stacked_features = torch.stack([img_proj, bbox_proj, fix_proj, text_proj], dim=1)
+                attended_features, _ = self.fusion_attention(stacked_features, stacked_features, stacked_features)
+                attended_combined = attended_features.mean(dim=1)
+                final_fused = self.fusion_norm(fused + attended_combined)
+            else:
+                # Skip attention mechanism for reduced-modality models
+                final_fused = fused
         else:
             final_fused = fused
         
@@ -664,10 +688,11 @@ class MedicalReportGenerator:
 
     def get_available_chest_xrays(self) -> List[str]:
         """
-        Get list of available chest X-ray images from the real dataset.
+        Get list of available chest X-ray images that have corresponding gaze data.
+        Only returns images that exist in both img_png directory and final_dataset_fixed.csv.
         
         Returns:
-            List of available image file paths
+            List of available image file paths with gaze data
         """
         try:
             self.logger.debug(f"Current working directory: {os.getcwd()}")
@@ -696,18 +721,54 @@ class MedicalReportGenerator:
                 
                 return []
             
-            # Get all PNG files
-            image_files = []
+            # Get all PNG files first
+            all_image_files = []
             for filename in os.listdir(self.chest_xray_dir):
                 if filename.lower().endswith('.png'):
                     image_path = os.path.join(self.chest_xray_dir, filename)
-                    image_files.append(image_path)
+                    all_image_files.append(image_path)
             
-            self.logger.info(f"Found {len(image_files)} chest X-ray images in {self.chest_xray_dir}")
-            if len(image_files) > 0:
-                self.logger.debug(f"Sample images: {[os.path.basename(f) for f in image_files[:3]]}")
+            self.logger.debug(f"Found {len(all_image_files)} total PNG files in directory")
             
-            return sorted(image_files)
+            # Load valid dicom_ids from final_dataset_fixed.csv
+            dataset_csv_path = os.path.join(os.path.dirname(self.chest_xray_dir), "..", "..", "final_dataset_fixed.csv")
+            if not os.path.exists(dataset_csv_path):
+                # Try alternative path relative to current working directory
+                dataset_csv_path = "final_dataset_fixed.csv"
+                if not os.path.exists(dataset_csv_path):
+                    self.logger.error(f"Could not find final_dataset_fixed.csv")
+                    return sorted(all_image_files)  # Fallback to all images
+            
+            self.logger.debug(f"Loading gaze data IDs from: {dataset_csv_path}")
+            
+            # Read valid dicom_ids with gaze data
+            import pandas as pd
+            valid_dicom_ids = set()
+            try:
+                # Read in chunks to handle large files efficiently
+                for chunk in pd.read_csv(dataset_csv_path, chunksize=1000):
+                    if 'dicom_id' in chunk.columns:
+                        valid_dicom_ids.update(chunk['dicom_id'].dropna().astype(str))
+                
+                self.logger.debug(f"Found {len(valid_dicom_ids)} valid dicom_ids with gaze data")
+            except Exception as e:
+                self.logger.error(f"Error reading final_dataset_fixed.csv: {e}")
+                return sorted(all_image_files)  # Fallback to all images
+            
+            # Filter images to only those with gaze data
+            filtered_image_files = []
+            for image_path in all_image_files:
+                filename = os.path.basename(image_path)
+                dicom_id = os.path.splitext(filename)[0]  # Remove .png extension
+                
+                if dicom_id in valid_dicom_ids:
+                    filtered_image_files.append(image_path)
+            
+            self.logger.info(f"Found {len(filtered_image_files)} chest X-ray images with gaze data (filtered from {len(all_image_files)} total)")
+            if len(filtered_image_files) > 0:
+                self.logger.debug(f"Sample filtered images: {[os.path.basename(f) for f in filtered_image_files[:3]]}")
+            
+            return sorted(filtered_image_files)
             
         except Exception as e:
             self.logger.error(f"Error getting available chest X-rays: {e}")
@@ -871,11 +932,100 @@ class MedicalReportGenerator:
                 
                 raise FileNotFoundError(f"Model file not found: {self.model_path}")
             
-            # Initialize model
+            # Load weights first to detect model architecture
+            state_dict = safetensors.torch.load_file(self.model_path, device="cpu")
+            
+            # Detect model configuration from fusion layer size
+            fusion_weight_key = "fusion.0.weight"
+            if fusion_weight_key in state_dict:
+                fusion_shape = state_dict[fusion_weight_key].shape
+                fusion_input_size = fusion_shape[1]  # Input dimension
+                
+                # Determine missing modalities based on fusion input size
+                # Full model (4 modalities): 768*4 = 3072 (image + bbox + fixation + transcript)
+                # 3 modalities: 768*3 = 2304 (typically fixation removed)
+                # 2 modalities: 768*2 = 1536 (fixation + transcript removed)
+                
+                if fusion_input_size == 3072:
+                    # Full model with all modalities
+                    has_fixation = True
+                    has_transcript = True
+                    self.logger.info("Detected: Full model with all modalities (image + bbox + fixation + transcript)")
+                elif fusion_input_size == 2304:
+                    # Model with fixation removed
+                    has_fixation = False
+                    has_transcript = True
+                    self.logger.info("Detected: Model with fixation removed (image + bbox + transcript)")
+                elif fusion_input_size == 1536:
+                    # Model with fixation + transcript removed
+                    has_fixation = False
+                    has_transcript = False
+                    self.logger.info("Detected: Model with fixation + transcript removed (image + bbox only)")
+                else:
+                    # Unknown configuration, default to full model
+                    has_fixation = True
+                    has_transcript = True
+                    self.logger.warning(f"Unknown fusion input size {fusion_input_size}, defaulting to full model")
+            else:
+                # No fusion layer found, default to full model
+                has_fixation = True
+                has_transcript = True
+                self.logger.warning("No fusion layer found in checkpoint, defaulting to full model")
+            
+            # Initialize model with appropriate configuration
             self.model = MultiModalMIMICModel(len(CONDITIONS))
             
-            # Load weights
-            state_dict = safetensors.torch.load_file(self.model_path, device="cpu")
+            # Store the modality configuration for inference
+            self.model.has_fixation = has_fixation
+            self.model.has_transcript = has_transcript
+            
+            # Modify fusion layer if needed
+            if not has_fixation or not has_transcript:
+                hidden_dim = 512 if self.low_memory else 768
+                num_modalities = 2  # Always have image + bbox
+                if has_fixation:
+                    num_modalities += 1
+                if has_transcript:
+                    num_modalities += 1
+                
+                if self.low_memory:
+                    self.model.fusion = nn.Sequential(
+                        nn.Linear(hidden_dim * num_modalities, hidden_dim * 2),
+                        nn.LayerNorm(hidden_dim * 2),
+                        nn.GELU(),
+                        nn.Dropout(0.15),
+                        nn.Linear(hidden_dim * 2, hidden_dim)
+                    )
+                else:
+                    # Match the exact architecture used during training
+                    if num_modalities == 2:
+                        # For 2 modalities (image + bbox only): input=1536, hidden=1024, output=768
+                        self.model.fusion = nn.Sequential(
+                            nn.Linear(1536, 1024),  # 768*2 -> 1024
+                            nn.LayerNorm(1024),
+                            nn.GELU(),
+                            nn.Dropout(0.2),
+                            nn.Linear(1024, 768),   # 1024 -> 768
+                            nn.LayerNorm(768),
+                            nn.GELU(),
+                            nn.Dropout(0.15)
+                        )
+                    elif num_modalities == 3:
+                        # For 3 modalities (fixation removed): input=2304, output=768
+                        self.model.fusion = nn.Sequential(
+                            nn.Linear(768 * 3, 1536),
+                            nn.LayerNorm(1536),
+                            nn.GELU(),
+                            nn.Dropout(0.2),
+                            nn.Linear(1536, 768),
+                            nn.LayerNorm(768),
+                            nn.GELU(),
+                            nn.Dropout(0.15)
+                        )
+                
+                self.logger.info(f"Adapted fusion layer for {num_modalities} modalities")
+            
+            # Load weights with adapted architecture
             missing_keys, unexpected_keys = self.model.load_state_dict(state_dict, strict=False)
             
             if missing_keys:
@@ -890,6 +1040,7 @@ class MedicalReportGenerator:
             # Get model size info
             total_params = sum(p.numel() for p in self.model.parameters())
             self.logger.info(f"Model loaded successfully: {total_params:,} parameters")
+            self.logger.info(f"Model configuration - Fixation: {has_fixation}, Transcript: {has_transcript}")
             return True
             
         except Exception as e:
@@ -1846,13 +1997,18 @@ class MedicalReportGenerator:
             # Save if path provided
             if save_path:
                 os.makedirs(os.path.dirname(save_path), exist_ok=True)
-                plt.figure(figsize=(10, 10))
-                plt.imshow(vis_with_regions)
-                plt.title("Attention Map Visualization")
-                plt.axis('off')
-                plt.colorbar(plt.cm.ScalarMappable(cmap='jet'), shrink=0.8)
+                fig, ax = plt.subplots(figsize=(10, 10))
+                im = ax.imshow(vis_with_regions)
+                ax.set_title("Attention Map Visualization")
+                ax.axis('off')
+                
+                # Create colorbar with proper mappable
+                mappable = plt.cm.ScalarMappable(cmap='jet')
+                mappable.set_array(attention_np)  # Set the data for the colorbar
+                plt.colorbar(mappable, ax=ax, shrink=0.8)
+                
                 plt.savefig(save_path, dpi=150, bbox_inches='tight')
-                plt.close()
+                plt.close(fig)
                 self.logger.debug(f"Attention visualization saved to {save_path}")
             
             return (vis_with_regions * 255).astype(np.uint8)

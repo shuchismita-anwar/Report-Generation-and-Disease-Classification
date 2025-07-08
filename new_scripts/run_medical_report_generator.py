@@ -76,6 +76,7 @@ def main():
         print(f"  {status_icon} {component.replace('_', ' ').title()}")
     
     # Demo 1: Single Image Analysis
+    """
     print("\n" + "=" * 60)
     print("DEMO 1: SINGLE CHEST X-RAY ANALYSIS")
     print("=" * 60)
@@ -174,13 +175,15 @@ def main():
         print(f"   Sections: {len(medical_report['sections'])}")
         print(f"   LLM success: {report_metadata.get('llm_success', 'Unknown')}")
         print(f"   Used fallback: {report_metadata.get('used_fallback', 'Unknown')}")
+    # End of Demo 1
+    """
     
     # Demo 2: Batch Processing with Real Images
     print("\n" + "=" * 60)
     print("DEMO 2: BATCH PROCESSING WITH REAL IMAGES")
     print("=" * 60)
     
-    # Select 10 random real images for batch processing
+    # Select up to 10 random real images for batch processing
     if len(available_images) >= 10:
         batch_images = random.sample(available_images, 10)
     else:
@@ -236,6 +239,7 @@ def main():
         print(f"📁 Results saved to: real_analysis_results/")
     
     # Demo 3: Different Templates with Same Image
+    """
     print("\n" + "=" * 60)
     print("DEMO 3: SINGLE TEMPLATE ANALYSIS ON REAL IMAGE")
     print("=" * 60)
@@ -282,6 +286,8 @@ def main():
         print("=" * 60)
     else:
         print(f"❌ {template} template analysis failed")
+    # End of Demo 3
+    """
     
     # Final System Summary
     print("\n" + "=" * 60)
@@ -377,27 +383,86 @@ def _calc_corr_metrics(human: np.ndarray, model: np.ndarray) -> dict:
     # simple NSS approximation – mean model attention at random human points
     idx = (np.random.rand(100) * (human.size - 1)).astype(int)
     nss = float(model.flatten()[idx].mean())
+    
+    # Calculate entropies like random_xray_analysis.py
+    human_entropy = -np.sum(h_prob * np.log(h_prob + eps))
+    model_entropy = -np.sum(m_prob * np.log(m_prob + eps))
+    
     return {
         "pearson_correlation": float(pear),
         "pearson_p_value": float(p),
         "jensen_shannon_divergence": float(js),
         "mean_squared_error": float(mse),
         "normalized_scanpath_saliency": nss,
+        "human_attention_entropy": float(human_entropy),
+        "model_attention_entropy": float(model_entropy)
     }
 
 
 def _save_gaze_plot(human: np.ndarray, model: np.ndarray, metrics: dict, out_path: Path):
     import matplotlib.pyplot as plt
+    from datetime import datetime
+    
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig, ax = plt.subplots(1, 3, figsize=(12, 4))
-    ax[0].imshow(human, cmap="hot"); ax[0].set_title("Human Gaze"); ax[0].axis("off")
-    ax[1].imshow(model, cmap="hot"); ax[1].set_title("Model Attention"); ax[1].axis("off")
-    diff = np.abs(human - model)
-    ax[2].imshow(diff, cmap="viridis"); ax[2].set_title("Abs Difference"); ax[2].axis("off")
-    fig.suptitle(f"Pearson {metrics['pearson_correlation']:.3f}  JS {metrics['jensen_shannon_divergence']:.3f}")
+    
+    # Create 2x2 grid layout like random_xray_analysis.py
+    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+    patient_id = out_path.stem
+    fig.suptitle(f'Gaze-Attention Comparison: {patient_id}', fontsize=16, fontweight='bold')
+    
+    # Human gaze heatmap (top-left)
+    im1 = axes[0, 0].imshow(human, cmap='hot', interpolation='bilinear')
+    axes[0, 0].set_title('Human Radiologist Gaze Heatmap', fontweight='bold')
+    axes[0, 0].axis('off')
+    plt.colorbar(im1, ax=axes[0, 0], fraction=0.046, pad=0.04)
+    
+    # Model attention heatmap (top-right)
+    im2 = axes[0, 1].imshow(model, cmap='hot', interpolation='bilinear')
+    axes[0, 1].set_title('Model Attention Heatmap (Grad-CAM)', fontweight='bold')
+    axes[0, 1].axis('off')
+    plt.colorbar(im2, ax=axes[0, 1], fraction=0.046, pad=0.04)
+    
+    # Difference map (bottom-left)
+    diff_map = np.abs(human - model)
+    im3 = axes[1, 0].imshow(diff_map, cmap='viridis', interpolation='bilinear')
+    axes[1, 0].set_title('Absolute Difference Map', fontweight='bold')
+    axes[1, 0].axis('off')
+    plt.colorbar(im3, ax=axes[1, 0], fraction=0.046, pad=0.04)
+    
+    # Metrics text (bottom-right)
+    axes[1, 1].axis('off')
+    metrics_text = f"""CORRELATION METRICS:
+
+Pearson Correlation: {metrics['pearson_correlation']:.4f}
+P-value: {metrics['pearson_p_value']:.4f}
+
+Jensen-Shannon Divergence: {metrics['jensen_shannon_divergence']:.4f}
+Mean Squared Error: {metrics['mean_squared_error']:.4f}
+
+Normalized Scanpath Saliency: {metrics['normalized_scanpath_saliency']:.4f}
+
+INTERPRETATION:
+• Pearson > 0.3: Good spatial correlation
+• JS Divergence < 0.5: Similar distributions  
+• Lower MSE: Better pixel-wise match
+• Higher NSS: Better fixation prediction
+"""
+    
+    axes[1, 1].text(0.05, 0.95, metrics_text, transform=axes[1, 1].transAxes, 
+                   fontsize=10, verticalalignment='top', fontfamily='monospace',
+                   bbox=dict(boxstyle='round', facecolor='lightgray', alpha=0.8))
+    
     plt.tight_layout()
-    fig.savefig(out_path, dpi=300)
+    
+    # Update filename to include timestamp like random_xray_analysis.py
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    new_filename = f"gaze_attention_comparison_{patient_id}_{timestamp}.png"
+    final_path = out_path.parent / new_filename
+    
+    fig.savefig(final_path, dpi=300, bbox_inches='tight')
     plt.close(fig)
+    
+    return final_path
 
 
 def _convert_attention_map(att_map, target_shape):
@@ -462,10 +527,10 @@ def perform_gaze_validation(image_path: str, attention_analysis: dict, output_ro
     metrics = _calc_corr_metrics(human_heat, model_map)
     out_dir = output_root / "gaze_attention"
     plot_path = out_dir / f"{dicom_id}.png"
-    _save_gaze_plot(human_heat, model_map, metrics, plot_path)
+    final_plot_path = _save_gaze_plot(human_heat, model_map, metrics, plot_path)
     return {
         "correlation_metrics": metrics,
-        "comparison_plot_path": str(plot_path)
+        "comparison_plot_path": str(final_plot_path)
     }
 
 if __name__ == "__main__":
