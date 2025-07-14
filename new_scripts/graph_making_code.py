@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 from pathlib import Path
+from sklearn.metrics import f1_score
 
 # Set style for better-looking plots
 plt.style.use('seaborn-v0_8')
@@ -91,63 +92,81 @@ def load_training_history(trainer_files):
     
     return train_logs, eval_logs
 
-def create_f1_training_history_plot(experiment_key, experiment_config, eval_logs):
-    """Create F1 score training history plot"""
+def load_test_predictions(experiment_path):
+    """Load test metrics from metrics JSON file"""
+    metrics_file = os.path.join(experiment_path, "metrics_training_mimic_on_chexpert.json")
+    
+    if not os.path.exists(metrics_file):
+        print(f"⚠️  Metrics file not found: {metrics_file}")
+        return None
+    
+    try:
+        with open(metrics_file, 'r') as f:
+            metrics = json.load(f)
+        
+        test_f1 = metrics.get('eval_f1', None)
+        test_auc = metrics.get('eval_auc', None)
+        
+        print(f"📊 Test Metrics from JSON:")
+        print(f"  Test F1: {test_f1:.4f}")
+        print(f"  Test AUC: {test_auc:.4f}")
+        
+        return test_f1
+    except Exception as e:
+        print(f"❌ Error loading test metrics: {e}")
+        return None
+
+def create_f1_training_testing_history_plot(experiment_key, experiment_config, eval_logs):
+    """Create F1 score training and testing history plot"""
     if eval_logs is None or eval_logs.empty:
         print(f"❌ No evaluation data for {experiment_key}")
         return
     
+    # Load test F1 score
+    test_f1 = load_test_predictions(experiment_config['path'])
+    
     # Create figure
     plt.figure(figsize=(12, 8))
     
-    # Plot F1 score progression
+    # Plot training F1 score progression (eval_f1 represents training performance)
     plt.plot(eval_logs['step'], eval_logs['eval_f1'], 
              color=experiment_config['color'], 
              linewidth=2.5, 
              marker='o', 
              markersize=4, 
              alpha=0.8,
-             label='F1 Score')
+             label='Training F1 Score')
     
-    # Add baseline reference line (if applicable)
-    baseline_f1 = 0.6242  # ViT-only baseline mentioned in the code
-    plt.axhline(y=baseline_f1, color='gray', linestyle='--', alpha=0.7, 
-                label=f'Baseline F1 ({baseline_f1})')
+    # Add test F1 as horizontal line if available
+    if test_f1 is not None:
+        plt.axhline(y=test_f1, color='orange', linestyle='--', linewidth=2.5, 
+                    alpha=0.8, label=f'Test F1 Score ({test_f1:.4f})')
     
-    # Formatting
-    plt.title(f'{experiment_config["name"]} - Training History', 
-              fontsize=16, fontweight='bold', pad=20)
+    # Formatting (no title)
     plt.xlabel('Training Steps', fontsize=12)
     plt.ylabel('F1 Score', fontsize=12)
     plt.grid(True, alpha=0.3)
     plt.legend(fontsize=11)
     
-    # Add statistics text box
-    if not eval_logs['eval_f1'].empty:
-        final_f1 = eval_logs['eval_f1'].iloc[-1]
-        best_f1 = eval_logs['eval_f1'].max()
-        best_step = eval_logs.loc[eval_logs['eval_f1'].idxmax(), 'step']
-        
-        stats_text = f'Final F1: {final_f1:.4f}\nBest F1: {best_f1:.4f} (Step {best_step})'
-        plt.text(0.02, 0.98, stats_text, transform=plt.gca().transAxes, 
-                fontsize=10, verticalalignment='top',
-                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
-    
     # Set y-axis limits for better visualization
     f1_min = eval_logs['eval_f1'].min()
     f1_max = eval_logs['eval_f1'].max()
+    if test_f1 is not None:
+        f1_min = min(f1_min, test_f1)
+        f1_max = max(f1_max, test_f1)
+    
     margin = (f1_max - f1_min) * 0.1
     plt.ylim(max(0, f1_min - margin), min(1, f1_max + margin))
     
     plt.tight_layout()
     
     # Save plot
-    filename = f"{experiment_config['filename_prefix']}_training_history.png"
+    filename = f"{experiment_config['filename_prefix']}_training_testing_history.png"
     filepath = os.path.join(OUTPUT_DIR, filename)
     plt.savefig(filepath, dpi=300, bbox_inches='tight')
     plt.close()
     
-    print(f"✅ Saved F1 training history: {filepath}")
+    print(f"✅ Saved F1 training/testing history: {filepath}")
 
 def create_loss_plot(experiment_key, experiment_config, train_logs, eval_logs):
     """Create training and validation loss plot"""
@@ -176,31 +195,11 @@ def create_loss_plot(experiment_key, experiment_config, train_logs, eval_logs):
                 markersize=3,
                 label='Validation Loss')
     
-    # Formatting
-    plt.title(f'{experiment_config["name"]} - Loss Plot', 
-              fontsize=16, fontweight='bold', pad=20)
+    # Formatting (no title)
     plt.xlabel('Training Steps', fontsize=12)
     plt.ylabel('Loss', fontsize=12)
     plt.grid(True, alpha=0.3)
     plt.legend(fontsize=11)
-    
-    # Add statistics text box
-    stats_text = ""
-    if not train_logs.empty:
-        final_train_loss = train_logs['loss'].iloc[-1]
-        stats_text += f'Final Train Loss: {final_train_loss:.4f}\n'
-    
-    if not eval_logs.empty:
-        final_val_loss = eval_logs['eval_loss'].iloc[-1]
-        best_val_loss = eval_logs['eval_loss'].min()
-        best_step = eval_logs.loc[eval_logs['eval_loss'].idxmin(), 'step']
-        stats_text += f'Final Val Loss: {final_val_loss:.4f}\n'
-        stats_text += f'Best Val Loss: {best_val_loss:.4f} (Step {best_step})'
-    
-    if stats_text:
-        plt.text(0.02, 0.98, stats_text.strip(), transform=plt.gca().transAxes, 
-                fontsize=10, verticalalignment='top',
-                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
     
     plt.tight_layout()
     
@@ -230,7 +229,7 @@ def process_experiment(experiment_key, experiment_config):
         return
     
     # Create plots
-    create_f1_training_history_plot(experiment_key, experiment_config, eval_logs)
+    create_f1_training_testing_history_plot(experiment_key, experiment_config, eval_logs)
     create_loss_plot(experiment_key, experiment_config, train_logs, eval_logs)
 
 def main():
