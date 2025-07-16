@@ -131,3 +131,5 @@ new_scripts/2308.01317v2.pdf
 cleaned_reports/
 new_scripts/.env
 /GAZE-RESULTS
+new_scripts/test_data/attention_visualizations/
+new_scripts/real_analysis_results/

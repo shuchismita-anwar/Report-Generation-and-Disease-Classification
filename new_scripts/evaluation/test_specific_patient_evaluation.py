@@ -3,13 +3,13 @@
 Specific Patient Report Evaluation
 ==================================
 
-This script evaluates the LLM-generated report for patient 0a7698f4-898f002d-abe934ed-2b21b711-848b7913
+This script evaluates the LLM-generated report for patient efa5f70a-148764b5-a1137b9b-0e30e4c3-38c465a6
 against the ground truth radiology report using all available metrics (BLEU, ROUGE, METEOR, CIDEr, BERTScore, Medical).
 
 Patient Details:
-- Patient ID: patient_14211662
-- Study ID: 53438276
-- DICOM ID: 0a7698f4-898f002d-abe934ed-2b21b711-848b7913
+- Patient ID: patient_12020330
+- Study ID: 56979066
+- DICOM ID: efa5f70a-148764b5-a1137b9b-0e30e4c3-38c465a6
 
 Author: Medical Report Evaluation System
 Date: 2025-01-19
@@ -66,13 +66,13 @@ def load_llm_generated_report() -> str:
 
 def load_ground_truth_report() -> str:
     """
-    Load the ground truth radiology report from the cleaned_reports folder
+    Load the ground truth radiology report from the MIMIC dataset
     
     Returns:
         str: The cleaned ground truth report text
     """
     # Path to the ground truth report
-    gt_report_path = current_dir.parent.parent / "cleaned_reports" / "patient_14211662" / "CXR-DICOM" / "s53438276.txt"
+    gt_report_path = current_dir.parent.parent / "cleaned_reports" / "patient_12020330" / "CXR-DICOM" / "s56979066.txt"
     
     if not gt_report_path.exists():
         raise FileNotFoundError(f"Ground truth report not found: {gt_report_path}")
@@ -112,8 +112,8 @@ def format_detailed_results(evaluation_result: dict) -> str:
     # Build detailed report
     report = f"""
 # 🏥 DETAILED PATIENT EVALUATION REPORT
-**Patient ID**: patient_14211662 (0a7698f4-898f002d-abe934ed-2b21b711-848b7913)
-**Study ID**: 53438276
+**Patient ID**: patient_12020330 (efa5f70a-148764b5-a1137b9b-0e30e4c3-38c465a6)
+**Study ID**: 56979066
 **Evaluation Date**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
 ## 🎯 OVERALL PERFORMANCE
@@ -266,8 +266,8 @@ def main():
     
     print("🚀 Starting Specific Patient Evaluation...")
     print("=" * 80)
-    print(f"📋 Patient: 0a7698f4-898f002d-abe934ed-2b21b711-848b7913")
-    print(f"🏥 Study: 53438276 (patient_14211662)")
+    print(f"📋 Patient: efa5f70a-148764b5-a1137b9b-0e30e4c3-38c465a6")
+    print(f"🏥 Study: 56979066 (patient_12020330)")
     print("=" * 80)
     
     try:
@@ -304,10 +304,10 @@ def main():
         results = evaluator.evaluate_single(
             generated_report=llm_report,
             ground_truth_report=gt_report,
-            image_id="0a7698f4-898f002d-abe934ed-2b21b711-848b7913",
+            image_id="efa5f70a-148764b5-a1137b9b-0e30e4c3-38c465a6",
             metadata={
-                "patient_id": "patient_14211662",
-                "study_id": "53438276",
+                "patient_id": "patient_12020330",
+                "study_id": "56979066",
                 "evaluation_type": "specific_patient_test"
             }
         )

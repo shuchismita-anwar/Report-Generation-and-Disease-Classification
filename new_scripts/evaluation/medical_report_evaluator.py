@@ -23,6 +23,7 @@ from metrics.base_metric import BaseMetric
 from metrics.bleu_scorer import BLEUScorer
 from metrics.rouge_scorer import ROUGEScorer
 from metrics.meteor_scorer import METEORScorer
+from metrics.bertscore_scorer import BERTScoreScorer
 from metrics.chexpert_scorer import ChexpertScorer
 from metrics.radgraph_f1_scorer import RadGraphF1Scorer
 from metrics.medical_scorer import MedicalScorer
@@ -201,6 +202,13 @@ class MedicalReportEvaluator:
                 self.metrics['meteor'].configure(meteor_config)
                 self.logger.debug("Initialized METEOR scorer")
             
+            # Initialize BERTScore scorer
+            if enabled_metrics.get('bert_score', True):
+                bertscore_config = metric_params.get('bert_score', {})
+                self.metrics['bert_score'] = BERTScoreScorer(logger=self.logger)
+                self.metrics['bert_score'].configure(bertscore_config)
+                self.logger.debug("Initialized BERTScore scorer")
+            
             # Initialize CheXpert scorer (pathology accuracy)
             if enabled_metrics.get('chexpert', True) or enabled_metrics.get('clinical_accuracy', True):
                 chexpert_config = metric_params.get('chexpert', {})
@@ -235,22 +243,69 @@ class MedicalReportEvaluator:
     def load_ground_truth(self, source_dirs: Optional[List[str]] = None, 
                          force_reload: bool = False) -> Dict:
         """
-        Load ground truth radiologist reports from MIMIC dataset.
+        Load ground truth radiologist reports from cleaned_reports directory using dicom_id mapping.
         
         Args:
-            source_dirs (Optional[List[str]]): List of directories to search for ground truth.
-                                             If None, uses config defaults.
+            source_dirs (Optional[List[str]]): Not used - kept for compatibility
             force_reload (bool): Force reload even if already loaded
             
         Returns:
-            Dict: Dictionary mapping image IDs to ground truth reports
+            Dict: Dictionary mapping dicom IDs to ground truth reports
             
         Raises:
-            FileNotFoundError: If ground truth directories don't exist
+            FileNotFoundError: If dataset CSV or ground truth directories don't exist
             ValueError: If no valid ground truth reports found
         """
-        # Implementation will be added in Phase 2
-        pass
+        if not force_reload and self.ground_truth_data:
+            return self.ground_truth_data
+        
+        self.logger.info("Loading ground truth reports from cleaned_reports directory...")
+        
+        try:
+            # Import the data discovery functions
+            from automation.data_discovery import load_ground_truth_report
+            
+            # Get ground truth base path from config
+            gt_base_path = self.config.get('paths', {}).get('ground_truth_base', '../../cleaned_reports/')
+            dataset_csv_path = self.config.get('paths', {}).get('dataset_csv', '../../final_dataset_fixed.csv')
+            
+            self.logger.info(f"Ground truth base path: {gt_base_path}")
+            self.logger.info(f"Dataset CSV path: {dataset_csv_path}")
+            
+            # Check if paths exist
+            if not os.path.exists(dataset_csv_path):
+                raise FileNotFoundError(f"Dataset CSV not found: {dataset_csv_path}")
+            
+            if not os.path.exists(gt_base_path):
+                raise FileNotFoundError(f"Ground truth directory not found: {gt_base_path}")
+            
+            # Load dataset CSV to get all available dicom_ids
+            import pandas as pd
+            df = pd.read_csv(dataset_csv_path)
+            
+            loaded_count = 0
+            self.ground_truth_data = {}
+            
+            # Load ground truth for each dicom_id
+            for _, row in df.iterrows():
+                dicom_id = row['dicom_id']
+                
+                # Load ground truth report
+                gt_data = load_ground_truth_report(dicom_id)
+                
+                if gt_data and 'report_text' in gt_data:
+                    self.ground_truth_data[dicom_id] = gt_data['report_text']
+                    loaded_count += 1
+            
+            if loaded_count == 0:
+                raise ValueError("No valid ground truth reports could be loaded")
+            
+            self.logger.info(f"Successfully loaded {loaded_count} ground truth reports")
+            return self.ground_truth_data
+            
+        except Exception as e:
+            self.logger.error(f"Error loading ground truth reports: {e}")
+            raise
     
     def evaluate_single(self, generated_report: str, ground_truth_report: str,
                        image_id: str = None, metadata: Dict = None) -> Dict:
@@ -379,6 +434,8 @@ class MedicalReportEvaluator:
             return scores.get("rouge_l", scores.get("rouge_1", 0.0))
         elif metric_name == "meteor":
             return scores.get("meteor", scores.get("score", 0.0))
+        elif metric_name == "bert_score":
+            return scores.get("bertscore_f1", scores.get("bertscore", 0.0))
         elif metric_name == "chexpert":
             # Use CheXpert F1 as primary score for pathology accuracy
             return scores.get("chexpert_f1", scores.get("f1", 0.0))
@@ -426,7 +483,7 @@ class MedicalReportEvaluator:
             elif metric_name == "medical":
                 weight_key = "medical_terminology"
             elif metric_name == "chexpert":
-                weight_key = "clinical_accuracy"
+                weight_key = "chexpert"
             elif metric_name == "radgraph_f1":
                 weight_key = "radgraph_f1"
             
@@ -883,7 +940,9 @@ def run_discovery_only(args):
         from automation.data_discovery import discover_and_match_reports
         
         print("🔍 Starting data discovery and matching...")
-        matched_pairs, unmatched_llm, unmatched_gt = discover_and_match_reports()
+        matched_pairs, unmatched_llm, unmatched_gt = discover_and_match_reports(
+            llm_path="../real_analysis_results/"
+        )
         
         print(f"\n🔍 Discovery completed:")
         print(f"✅ Found {len(matched_pairs)} matched pairs")

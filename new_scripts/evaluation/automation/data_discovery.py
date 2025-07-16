@@ -18,7 +18,7 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 def discover_and_match_reports(
-    llm_path: str = "../../real_analysis_results/",
+    llm_path: str = "../real_analysis_results/",
     dataset_csv_path: str = "../../dataset_splits/val.csv",
     use_all_splits: bool = True
 ) -> Tuple[List[Dict], List[str], List[str]]:
@@ -68,43 +68,32 @@ def _load_llm_reports(llm_path: str) -> Dict[str, str]:
     return llm_reports
 
 def _load_dataset_files(use_all_splits: bool = True) -> pd.DataFrame:
-    """Load dataset CSV files with all the metadata."""
-    dataset_files = []
+    """Load the main dataset CSV file with all metadata for dicom_id mapping."""
+    # Use the main dataset CSV file for mapping instead of split files
+    dataset_csv_path = "../../final_dataset_fixed.csv"
     
-    if use_all_splits:
-        # Load all splits for comprehensive coverage
-        split_files = [
-            "../../dataset_splits/train.csv",
-            "../../dataset_splits/val.csv", 
-            "../../dataset_splits/test.csv"
-        ]
-    else:
-        # Just validation set
-        split_files = ["../../dataset_splits/val.csv"]
-    
-    combined_df = pd.DataFrame()
-    
-    for csv_file in split_files:
-        if os.path.exists(csv_file):
-            try:
-                df = pd.read_csv(csv_file)
-                combined_df = pd.concat([combined_df, df], ignore_index=True)
-                logger.info(f"Loaded {len(df)} entries from {csv_file}")
-            except Exception as e:
-                logger.error(f"Error loading {csv_file}: {e}")
-        else:
-            logger.warning(f"CSV file not found: {csv_file}")
-    
-    if combined_df.empty:
-        logger.error("No dataset files could be loaded!")
+    if not os.path.exists(dataset_csv_path):
+        logger.error(f"Main dataset CSV not found: {dataset_csv_path}")
         return pd.DataFrame()
     
-    # Clean and standardize column names
-    if 'dicom_id' in combined_df.columns:
-        combined_df['study_id'] = combined_df['dicom_id']
-    
-    logger.info(f"Combined dataset: {len(combined_df)} total entries")
-    return combined_df
+    try:
+        df = pd.read_csv(dataset_csv_path)
+        logger.info(f"Loaded {len(df)} entries from {dataset_csv_path}")
+        
+        # Ensure required columns exist
+        required_columns = ['dicom_id', 'patient_folder', 'study_id']
+        missing_columns = [col for col in required_columns if col not in df.columns]
+        
+        if missing_columns:
+            logger.error(f"Missing required columns in dataset: {missing_columns}")
+            return pd.DataFrame()
+        
+        logger.info(f"Dataset loaded successfully with columns: {list(df.columns)}")
+        return df
+        
+    except Exception as e:
+        logger.error(f"Error loading {dataset_csv_path}: {e}")
+        return pd.DataFrame()
 
 def _match_reports_csv_based(
     llm_reports: Dict[str, str], 
@@ -181,38 +170,68 @@ def _validate_report_path(report_path: str) -> bool:
     
     return False
 
-def load_ground_truth_report(report_path: str) -> Dict:
-    """Load and parse a ground truth radiology report file (.txt)."""
+def load_ground_truth_report(dicom_id: str) -> Dict:
+    """
+    Load ground truth radiology report using dicom_id mapping.
+    
+    Args:
+        dicom_id (str): DICOM ID to look up in final_dataset_fixed.csv
+        
+    Returns:
+        Dict: Ground truth report data or None if not found
+    """
     try:
-        # Try multiple path variations
-        paths_to_try = [
-            report_path,
-            os.path.join("..", "..", report_path),
-            report_path.replace("\\", "/"),
-            os.path.join("..", "..", report_path.replace("\\", "/"))
-        ]
+        # Load the main dataset CSV file to get patient mapping
+        dataset_csv_path = "../../final_dataset_fixed.csv"
         
-        for path in paths_to_try:
-            if os.path.exists(path):
-                with open(path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                
-                # Clean the report text to extract final report
-                cleaned_text = _clean_radiology_report(content)
-                
-                # Return the full report text (these are .txt files, not JSON)
-                return {
-                    'report_text': cleaned_text.strip(),
-                    'source_path': path,
-                    'file_type': 'radiology_report',
-                    'raw_text': content.strip()
-                }
+        if not os.path.exists(dataset_csv_path):
+            logger.error(f"Main dataset CSV not found: {dataset_csv_path}")
+            return None
         
-        logger.error(f"Report file not found: {report_path}")
-        return None
+        # Read CSV and find the matching dicom_id
+        import pandas as pd
+        df = pd.read_csv(dataset_csv_path)
+        
+        # Find the row with matching dicom_id
+        matching_rows = df[df['dicom_id'] == dicom_id]
+        
+        if matching_rows.empty:
+            logger.warning(f"No matching entry found for dicom_id: {dicom_id}")
+            return None
+        
+        # Get the first match (should be unique)
+        row = matching_rows.iloc[0]
+        patient_folder = row['patient_folder']
+        study_id = row['study_id']
+        
+        # Construct the ground truth report path
+        ground_truth_path = f"../../cleaned_reports/{patient_folder}/CXR-DICOM/s{study_id}.txt"
+        
+        if not os.path.exists(ground_truth_path):
+            logger.warning(f"Ground truth report not found: {ground_truth_path}")
+            return None
+        
+        # Load the ground truth report
+        with open(ground_truth_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Clean the report text to extract final report
+        cleaned_text = _clean_radiology_report(content)
+        
+        logger.info(f"Successfully loaded ground truth for {dicom_id} from {ground_truth_path}")
+        
+        return {
+            'report_text': cleaned_text.strip(),
+            'source_path': ground_truth_path,
+            'file_type': 'radiology_report',
+            'raw_text': content.strip(),
+            'patient_folder': patient_folder,
+            'study_id': study_id,
+            'dicom_id': dicom_id
+        }
         
     except Exception as e:
-        logger.error(f"Error loading report {report_path}: {e}")
+        logger.error(f"Error loading ground truth report for {dicom_id}: {e}")
         return None
 
 def _clean_radiology_report(raw_text: str) -> str:

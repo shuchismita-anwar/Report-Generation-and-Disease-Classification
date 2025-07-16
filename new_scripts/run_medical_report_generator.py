@@ -179,6 +179,7 @@ def main():
     """
     
     # Demo 2: Batch Processing with Real Images
+    """
     print("\n" + "=" * 60)
     print("DEMO 2: BATCH PROCESSING WITH REAL IMAGES")
     print("=" * 60)
@@ -237,6 +238,123 @@ def main():
     if batch_results['successful_analyses'] > 0:
         print("✅ Batch processing completed successfully")
         print(f"📁 Results saved to: real_analysis_results/")
+    """
+    
+    # Demo 4: Test Set Analysis - Process All Test Images
+    print("\n" + "=" * 60)
+    print("DEMO 4: TEST SET ANALYSIS - COMPLETE TEST DATASET")
+    print("=" * 60)
+    
+    # Load test.csv to get the dicom_ids
+    test_csv_path = "../dataset_splits/test.csv"
+    
+    try:
+        print(f"📊 Loading test dataset from: {test_csv_path}")
+        test_df = pd.read_csv(test_csv_path)
+        
+        # Get dicom_ids from test.csv
+        test_dicom_ids = test_df['dicom_id'].tolist()
+        print(f"📋 Found {len(test_dicom_ids)} dicom_ids in test.csv")
+        
+        # Map dicom_ids to actual image files in data_dump/output/img_png
+        # Use the same logic as medical_report_generator.py to get available images
+        available_images = generator.get_available_chest_xrays()
+        
+        # Create mapping from dicom_id to image path
+        dicom_to_image_map = {}
+        for img_path in available_images:
+            img_filename = os.path.basename(img_path)
+            dicom_id = os.path.splitext(img_filename)[0]  # Remove .png extension
+            dicom_to_image_map[dicom_id] = img_path
+        
+        # Get test images that exist in data_dump
+        test_image_paths = []
+        missing_images = []
+        
+        for dicom_id in test_dicom_ids:
+            if dicom_id in dicom_to_image_map:
+                test_image_paths.append(dicom_to_image_map[dicom_id])
+            else:
+                missing_images.append(dicom_id)
+        
+        print(f"✅ Found {len(test_image_paths)} valid test images out of {len(test_dicom_ids)} in test.csv")
+        if missing_images:
+            print(f"⚠️ {len(missing_images)} images not found in data_dump/output/img_png")
+            print(f"   First few missing: {missing_images[:3]}")
+        
+        if not test_image_paths:
+            print("❌ No valid test images found! Check that images exist in data_dump/output/img_png")
+            return
+        
+        print(f"🔄 Processing complete test set with {len(test_image_paths)} images")
+        print("📝 Using standard template for consistent evaluation")
+        
+        # Show sample of images to be processed
+        print(f"\n📁 Sample test images:")
+        for i, img_path in enumerate(test_image_paths[:5]):
+            dicom_id = os.path.basename(img_path).replace('.jpg', '').replace('.png', '')
+            print(f"   {i+1}. {dicom_id}")
+        if len(test_image_paths) > 5:
+            print(f"   ... and {len(test_image_paths) - 5} more")
+        
+        test_batch_start = time.time()
+        
+        # Process all test images in batches (copied exactly from Demo 2)
+        test_batch_results = generator.batch_analyze_images(
+            image_paths=test_image_paths,
+            template='standard',  # Use standard template consistently
+            max_concurrent=2,  # Same as Demo 2
+            save_results=True,
+            output_dir=r".\real_analysis_results"
+        )
+        
+        # === UPDATED GAZE-ATTENTION VALIDATION (copied exactly from Demo 2) ===
+        for img_path in test_image_paths:
+            dicom_id = Path(img_path).stem
+            analysis = test_batch_results['results'].get(img_path)
+            if analysis is None:
+                # Fallback to JSON re-load if analysis missing (should not happen)
+                json_path = Path("real_analysis_results") / f"analysis_{dicom_id}.json"
+                if not json_path.exists():
+                    continue
+                with open(json_path, "r", encoding="utf-8") as jf:
+                    analysis = json.load(jf)
+            # Perform gaze validation using raw attention map (avoids lossy JSON conversion)
+            gaze_val = perform_gaze_validation(img_path, analysis.get("attention_analysis", {}), Path("real_analysis_results"))
+            if gaze_val:
+                analysis["gaze_attention_validation"] = gaze_val
+                # Overwrite JSON result (ensures gaze metrics stored)
+                json_path = Path("real_analysis_results") / f"analysis_{dicom_id}.json"
+                with open(json_path, "w", encoding="utf-8") as jf:
+                    json.dump(analysis, jf, indent=2, default=str)
+        
+        test_batch_time = time.time() - test_batch_start
+        
+        print(f"\n📊 Test Set Processing Results:")
+        print(f"   Total dicom_ids in test.csv: {len(test_dicom_ids)}")
+        print(f"   Valid images found in data_dump: {len(test_image_paths)}")
+        print(f"   Successfully processed: {test_batch_results['successful_analyses']}")
+        print(f"   Failed processing: {test_batch_results['failed_analyses']}")
+        print(f"   Success rate: {test_batch_results['performance_summary']['success_rate']:.1f}%")
+        print(f"   Total processing time: {test_batch_time:.1f}s")
+        print(f"   Average per image: {test_batch_time/len(test_image_paths):.1f}s")
+        
+        if test_batch_results['successful_analyses'] > 0:
+            print("✅ Test set processing completed successfully")
+            print(f"📁 All results saved to: real_analysis_results/")
+            print(f"🎯 Ready for evaluation against ground truth reports")
+        else:
+            print("❌ Test set processing failed")
+    
+    except Exception as e:
+        print(f"❌ Error processing test set: {str(e)}")
+        print("Please ensure:")
+        print("1. dataset_splits/test.csv exists and is readable")
+        print("2. data_dump/output/img_png directory exists with image files")
+        print("3. dicom_id column exists in test.csv")
+        import traceback
+        traceback.print_exc()
+        return
     
     # Demo 3: Different Templates with Same Image
     """

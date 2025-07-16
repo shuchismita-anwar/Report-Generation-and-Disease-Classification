@@ -6,23 +6,25 @@
   },
 
   "paths": {
-    "ground_truth_base": "ground_truth/",
+    "ground_truth_base": "../../cleaned_reports/",
     "evaluation_results": "evaluation_results/",
     "llm_outputs": "../real_analysis_results/",
+    "dataset_csv": "../../final_dataset_fixed.csv",
     "mimic_dataset_base": "../../mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0/mimic-eye/",
     "logs": "logs/"
   },
 
   "metrics": {
     "weights": {
-      "bleu": 0.2,
-      "rouge_1": 0.15,
-      "rouge_2": 0.15,
-      "rouge_l": 0.15,
+      "bleu": 0.15,
+      "rouge_1": 0.1,
+      "rouge_2": 0.1,
+      "rouge_l": 0.1,
       "meteor": 0.1,
       "radgraph_f1": 0.15,
       "medical_terminology": 0.05,
-      "clinical_accuracy": 0.05
+      "chexpert": 0.1,
+      "bert_score": 0.15
     },
     "enabled": {
       "bleu": true,
@@ -31,8 +33,7 @@
       "chexpert": true,
       "radgraph_f1": true,
       "medical_terminology": true,
-      "clinical_accuracy": true,
-      "bert_score": false,
+      "bert_score": true,
       "cider": false
     },
     "parameters": {
@@ -50,6 +51,12 @@
         "alpha": 0.9,
         "beta": 3.0,
         "gamma": 0.5
+      },
+      "bert_score": {
+        "model_type": "bert-base-uncased",
+        "num_layers": 9,
+        "idf": false,
+        "rescale_with_baseline": false
       }
     }
   },

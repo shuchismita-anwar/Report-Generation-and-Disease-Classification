@@ -68,6 +68,12 @@ class AutomatedReportGenerator:
                         metric_details[metric_name].append(metric_data.get("rouge_avg_f1", 0))
                     elif metric_name == "meteor":
                         metric_details[metric_name].append(metric_data.get("meteor", 0))
+                    elif metric_name == "bert_score":
+                        metric_details[metric_name].append(metric_data.get("bertscore_f1", 0))
+                    elif metric_name == "chexpert":
+                        metric_details[metric_name].append(metric_data.get("chexpert_f1", 0))
+                    elif metric_name == "radgraph_f1":
+                        metric_details[metric_name].append(metric_data.get("radgraph_f1", 0))
                     elif metric_name == "cider":
                         metric_details[metric_name].append(metric_data.get("cider", 0))
                     elif metric_name == "medical":
@@ -76,7 +82,7 @@ class AutomatedReportGenerator:
         # Calculate metric averages
         metric_averages = {}
         for metric, scores in metric_details.items():
-            if scores and metric != "bert_score":  # Skip BERT if it has errors
+            if scores:  # Include all metrics including BERTScore
                 metric_averages[metric] = sum(scores) / len(scores)
         
         # Best and worst performing reports
@@ -193,12 +199,45 @@ Generated: {datetime.now().isoformat()}
 """
         
         for i, result in enumerate(results.get('individual_results', []), 1):
+            metrics = result.get('metrics', {})
             report += f"""
 ### Report {i}: {result.get('image_id', 'Unknown')}
 - Overall Score: {result.get('overall_score', 0):.4f}
 - Quality Level: {result.get('quality_level', 'unknown')}
 - Processing Time: {result.get('evaluation_time', 0):.3f}s
-"""
+
+**Individual Metrics:**"""
+            
+            # Add all available metrics
+            if 'bleu' in metrics:
+                bleu_score = metrics['bleu'].get('bleu', 0) if isinstance(metrics['bleu'], dict) else metrics['bleu']
+                report += f"\n- BLEU: {bleu_score:.4f}"
+            
+            if 'rouge' in metrics:
+                rouge_score = metrics['rouge'].get('rouge_avg_f1', 0) if isinstance(metrics['rouge'], dict) else metrics['rouge']
+                report += f"\n- ROUGE: {rouge_score:.4f}"
+            
+            if 'meteor' in metrics:
+                meteor_score = metrics['meteor'].get('meteor', 0) if isinstance(metrics['meteor'], dict) else metrics['meteor']
+                report += f"\n- METEOR: {meteor_score:.4f}"
+            
+            if 'bert_score' in metrics:
+                bert_score = metrics['bert_score'].get('bertscore_f1', 0) if isinstance(metrics['bert_score'], dict) else metrics['bert_score']
+                report += f"\n- BERTScore: {bert_score:.4f}"
+            
+            if 'chexpert' in metrics:
+                chexpert_score = metrics['chexpert'].get('chexpert_f1', 0) if isinstance(metrics['chexpert'], dict) else metrics['chexpert']
+                report += f"\n- CheXpert: {chexpert_score:.4f}"
+            
+            if 'radgraph_f1' in metrics:
+                radgraph_score = metrics['radgraph_f1'].get('radgraph_f1', 0) if isinstance(metrics['radgraph_f1'], dict) else metrics['radgraph_f1']
+                report += f"\n- RadGraph: {radgraph_score:.4f}"
+            
+            if 'medical' in metrics:
+                medical_score = metrics['medical'].get('medical_score', 0) if isinstance(metrics['medical'], dict) else metrics['medical']
+                report += f"\n- Medical: {medical_score:.4f}"
+            
+            report += "\n"
         
         return report
     

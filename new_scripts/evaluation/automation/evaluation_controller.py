@@ -68,19 +68,21 @@ class AutomatedEvaluationController:
         self.logger.info("Automated Evaluation Controller initialized")
     
     def run_full_automation(self, 
-                          llm_path: str = "../../real_analysis_results/",
-                          gt_path: str = "../../mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0/mimic-eye/",
+                          llm_path: str = "../real_analysis_results/",
                           output_dir: str = "../output/automation/") -> Dict:
         """
         Run the complete automated evaluation pipeline.
         
         Args:
             llm_path (str): Path to LLM analysis results
-            gt_path (str): Path to ground truth reports
             output_dir (str): Output directory for results
             
         Returns:
             Dict: Complete automation results
+            
+        Note:
+            Ground truth reports are loaded from cleaned_reports/ directory
+            using the mapping configured in evaluation_config.json
         """
         self.start_time = datetime.now()
         self.logger.info("🚀 Starting full automation pipeline")
@@ -88,7 +90,7 @@ class AutomatedEvaluationController:
         try:
             # Phase 1: Discovery and Matching
             self.logger.info("📡 Phase 1: Discovery and Matching")
-            self._run_discovery(llm_path, gt_path)
+            self._run_discovery(llm_path)
             
             # Phase 2: Validation
             self.logger.info("✅ Phase 2: Data Validation")
@@ -116,10 +118,10 @@ class AutomatedEvaluationController:
             self.end_time = datetime.now()
             raise
     
-    def _run_discovery(self, llm_path: str, gt_path: str):
+    def _run_discovery(self, llm_path: str):
         """Run data discovery and matching."""
         self.logger.info(f"Discovering reports in LLM path: {llm_path}")
-        self.logger.info(f"Discovering reports in GT path: {gt_path}")
+        self.logger.info(f"Ground truth reports will be loaded from cleaned_reports/ directory")
         
         # Discover and match reports
         self.matched_pairs, self.unmatched_llm, self.unmatched_gt = discover_and_match_reports(
@@ -169,12 +171,41 @@ class AutomatedEvaluationController:
         """Run batch evaluation on all matched pairs."""
         self.logger.info(f"Starting batch evaluation of {self.total_pairs} pairs")
         
+        # Import the data loading functions
+        from .data_discovery import load_ground_truth_report
+        
         # Prepare batch data as list of tuples (generated, ground_truth)
         batch_data = []
         image_ids = []
+        
         for pair in self.matched_pairs:
-            batch_data.append((pair["llm_report"], pair["ground_truth"]))
-            image_ids.append(pair["study_id"])
+            try:
+                # Load LLM report content from JSON file
+                llm_report_path = pair["llm_report"]
+                with open(llm_report_path, 'r', encoding='utf-8') as f:
+                    llm_data = json.load(f)
+                    llm_report_text = llm_data.get('medical_report', {}).get('report_text', '')
+                
+                # Load ground truth report using the dicom_id
+                study_id = pair["study_id"]
+                gt_data = load_ground_truth_report(study_id)
+                gt_report_text = gt_data.get('report_text', '') if gt_data else ''
+                
+                # Only add to batch if both reports are available
+                if llm_report_text and gt_report_text:
+                    batch_data.append((llm_report_text, gt_report_text))
+                    image_ids.append(study_id)
+                else:
+                    self.logger.warning(f"Missing report content for {study_id}")
+                    
+            except Exception as e:
+                self.logger.error(f"Error loading reports for {pair['study_id']}: {e}")
+                continue
+        
+        if not batch_data:
+            raise ValueError("No valid report pairs could be loaded for evaluation")
+        
+        self.logger.info(f"Loaded {len(batch_data)} valid report pairs for evaluation")
         
         # Run batch evaluation
         start_time = time.time()
@@ -291,8 +322,7 @@ class AutomatedEvaluationController:
         return summary
 
 
-def run_automation_pipeline(llm_path: str = "../../real_analysis_results/",
-                           gt_path: str = "../../mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0/mimic-eye/",
+def run_automation_pipeline(llm_path: str = "../real_analysis_results/",
                            output_dir: str = "output/automation/",
                            config_path: str = "config/evaluation_config.json") -> Dict:
     """
@@ -300,15 +330,18 @@ def run_automation_pipeline(llm_path: str = "../../real_analysis_results/",
     
     Args:
         llm_path (str): Path to LLM analysis results
-        gt_path (str): Path to ground truth reports  
         output_dir (str): Output directory for results
         config_path (str): Path to evaluation configuration
         
     Returns:
         Dict: Automation summary results
+        
+    Note:
+        Ground truth reports are loaded from cleaned_reports/ directory
+        using the mapping configured in evaluation_config.json
     """
     controller = AutomatedEvaluationController(config_path)
-    return controller.run_full_automation(llm_path, gt_path, output_dir)
+    return controller.run_full_automation(llm_path, output_dir)
 
 
 if __name__ == "__main__":
