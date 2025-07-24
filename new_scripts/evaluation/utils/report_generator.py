@@ -180,13 +180,14 @@ class ReportGenerator:
             # Key findings
             key_findings = []
             
-            # Best and worst performing metrics
+            # Best and worst performing metrics with std dev
             metric_means = {metric: float(df[metric].mean()) for metric in df.columns}
+            metric_stds = {metric: float(df[metric].std()) for metric in df.columns}
             best_metric = max(metric_means, key=metric_means.get)
             worst_metric = min(metric_means, key=metric_means.get)
             
-            key_findings.append(f"Best performing metric: {best_metric} ({metric_means[best_metric]:.3f})")
-            key_findings.append(f"Lowest performing metric: {worst_metric} ({metric_means[worst_metric]:.3f})")
+            key_findings.append(f"Best performing metric: {best_metric} (Mean: {metric_means[best_metric]:.3f} ± {metric_stds[best_metric]:.3f})")
+            key_findings.append(f"Lowest performing metric: {worst_metric} (Mean: {metric_means[worst_metric]:.3f} ± {metric_stds[worst_metric]:.3f})")
             
             # Consistency analysis
             consistency = 1 - (summary_stats['overall_performance']['std_score'] / summary_stats['overall_performance']['mean_score'])
@@ -282,16 +283,16 @@ class ReportGenerator:
                 std_score = stats_analysis['descriptive_statistics']['std']
                 
                 if mean_score >= 0.8:
-                    insights.append(f"{metric} shows excellent performance (mean: {mean_score:.3f})")
+                    insights.append(f"{metric} shows excellent performance (Mean: {mean_score:.3f} ± {std_score:.3f})")
                 elif mean_score >= 0.7:
-                    insights.append(f"{metric} shows good performance (mean: {mean_score:.3f})")
+                    insights.append(f"{metric} shows good performance (Mean: {mean_score:.3f} ± {std_score:.3f})")
                 else:
-                    insights.append(f"{metric} needs improvement (mean: {mean_score:.3f})")
+                    insights.append(f"{metric} needs improvement (Mean: {mean_score:.3f} ± {std_score:.3f})")
                 
                 if std_score < 0.1:
-                    insights.append(f"{metric} shows high consistency (std: {std_score:.3f})")
+                    insights.append(f"{metric} shows high consistency (Std Dev: {std_score:.3f})")
                 elif std_score > 0.2:
-                    insights.append(f"{metric} shows high variability (std: {std_score:.3f})")
+                    insights.append(f"{metric} shows high variability (Std Dev: {std_score:.3f})")
                 
                 detailed_analysis[metric] = {
                     'statistical_analysis': stats_analysis,

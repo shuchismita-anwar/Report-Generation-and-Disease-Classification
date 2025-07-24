@@ -2264,3 +2264,918 @@
 2025-07-16 13:53:03 - MedicalReportEvaluator - INFO - Batch evaluation completed - ID: batch_20250716_134524_400
 2025-07-16 13:53:03 - MedicalReportEvaluator - INFO - Success: 400/400, Time: 459.39s, Avg: 1.148s/report
 2025-07-16 13:53:03 - MedicalReportEvaluator - INFO - Batch Overall Score: 0.2968
+2025-07-17 16:06:44 - MedicalReportEvaluator - INFO - Logging system initialized successfully
+2025-07-17 16:06:44 - MedicalReportEvaluator - INFO - Configuration loaded successfully from config/evaluation_config.json
+2025-07-17 16:06:46 - MedicalReportEvaluator - INFO - Successfully initialized 7 metrics
+2025-07-17 16:06:46 - MedicalReportEvaluator - INFO - Initialized Medical Report Evaluator - Session: eval_20250717_160646
+2025-07-17 16:06:46 - MedicalReportEvaluator - INFO - Loaded 7 metrics: ['bleu', 'rouge', 'meteor', 'bert_score', 'chexpert', 'radgraph_f1', 'medical']
+2025-07-17 16:06:46 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 6c2b39fa-2c251fcf-addd31da-83faee60-044fa8f9
+2025-07-17 16:06:48 - MedicalReportEvaluator - INFO - Loading BERT model: bert-base-uncased
+2025-07-17 16:06:51 - MedicalReportEvaluator - INFO - BERTScore model loaded on device: cuda
+2025-07-17 16:06:57 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1903, Quality: very_poor, Time: 11.5941s
+2025-07-17 16:08:51 - MedicalReportEvaluator - INFO - Logging system initialized successfully
+2025-07-17 16:08:51 - MedicalReportEvaluator - INFO - Configuration loaded successfully from config/evaluation_config.json
+2025-07-17 16:08:52 - MedicalReportEvaluator - INFO - Successfully initialized 7 metrics
+2025-07-17 16:08:52 - MedicalReportEvaluator - INFO - Initialized Medical Report Evaluator - Session: eval_20250717_160852
+2025-07-17 16:08:52 - MedicalReportEvaluator - INFO - Loaded 7 metrics: ['bleu', 'rouge', 'meteor', 'bert_score', 'chexpert', 'radgraph_f1', 'medical']
+2025-07-17 16:08:52 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 6c2b39fa-2c251fcf-addd31da-83faee60-044fa8f9
+2025-07-17 16:08:52 - MedicalReportEvaluator - ERROR - Transformers library not available. Install with: pip install transformers torch
+2025-07-17 16:08:52 - MedicalReportEvaluator - ERROR - Error calculating bert_score: BERTScore requires transformers library
+2025-07-17 16:08:52 - MedicalReportEvaluator - ERROR - Error calculating radgraph_f1: No module named 'radgraph'
+2025-07-17 16:08:52 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3012, Quality: very_poor, Time: 0.0150s
+2025-07-17 16:09:29 - MedicalReportEvaluator - INFO - Logging system initialized successfully
+2025-07-17 16:09:29 - MedicalReportEvaluator - INFO - Configuration loaded successfully from config/evaluation_config.json
+2025-07-17 16:09:29 - MedicalReportEvaluator - INFO - Successfully initialized 7 metrics
+2025-07-17 16:09:29 - MedicalReportEvaluator - INFO - Initialized Medical Report Evaluator - Session: eval_20250717_160929
+2025-07-17 16:09:29 - MedicalReportEvaluator - INFO - Loaded 7 metrics: ['bleu', 'rouge', 'meteor', 'bert_score', 'chexpert', 'radgraph_f1', 'medical']
+2025-07-17 16:09:29 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 6c2b39fa-2c251fcf-addd31da-83faee60-044fa8f9
+2025-07-17 16:09:31 - MedicalReportEvaluator - INFO - Loading BERT model: bert-base-uncased
+2025-07-17 16:09:33 - MedicalReportEvaluator - INFO - BERTScore model loaded on device: cuda
+2025-07-17 16:09:36 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3153, Quality: very_poor, Time: 6.7899s
+2025-07-17 16:26:35 - MedicalReportEvaluator - INFO - Logging system initialized successfully
+2025-07-17 16:26:35 - MedicalReportEvaluator - INFO - Configuration loaded successfully from config/evaluation_config.json
+2025-07-17 16:26:36 - MedicalReportEvaluator - INFO - Successfully initialized 7 metrics
+2025-07-17 16:26:36 - MedicalReportEvaluator - INFO - Initialized Medical Report Evaluator - Session: eval_20250717_162636
+2025-07-17 16:26:36 - MedicalReportEvaluator - INFO - Loaded 7 metrics: ['bleu', 'rouge', 'meteor', 'bert_score', 'chexpert', 'radgraph_f1', 'medical']
+2025-07-17 16:26:36 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 6c2b39fa-2c251fcf-addd31da-83faee60-044fa8f9
+2025-07-17 16:26:36 - MedicalReportEvaluator - ERROR - Transformers library not available. Install with: pip install transformers torch
+2025-07-17 16:26:36 - MedicalReportEvaluator - ERROR - Error calculating bert_score: BERTScore requires transformers library
+2025-07-17 16:26:36 - MedicalReportEvaluator - ERROR - Error calculating radgraph_f1: No module named 'radgraph'
+2025-07-17 16:26:36 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3012, Quality: very_poor, Time: 0.0129s
+2025-07-17 16:27:11 - MedicalReportEvaluator - INFO - Logging system initialized successfully
+2025-07-17 16:27:11 - MedicalReportEvaluator - INFO - Configuration loaded successfully from config/evaluation_config.json
+2025-07-17 16:27:12 - MedicalReportEvaluator - INFO - Successfully initialized 7 metrics
+2025-07-17 16:27:12 - MedicalReportEvaluator - INFO - Initialized Medical Report Evaluator - Session: eval_20250717_162712
+2025-07-17 16:27:12 - MedicalReportEvaluator - INFO - Loaded 7 metrics: ['bleu', 'rouge', 'meteor', 'bert_score', 'chexpert', 'radgraph_f1', 'medical']
+2025-07-17 16:27:12 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 6c2b39fa-2c251fcf-addd31da-83faee60-044fa8f9
+2025-07-17 16:27:14 - MedicalReportEvaluator - INFO - Loading BERT model: bert-base-uncased
+2025-07-17 16:27:16 - MedicalReportEvaluator - INFO - BERTScore model loaded on device: cuda
+2025-07-17 16:27:19 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3153, Quality: very_poor, Time: 7.3427s
+2025-07-17 16:29:30 - MedicalReportEvaluator - INFO - Logging system initialized successfully
+2025-07-17 16:29:30 - MedicalReportEvaluator - INFO - Configuration loaded successfully from config/evaluation_config.json
+2025-07-17 16:29:31 - MedicalReportEvaluator - INFO - Successfully initialized 7 metrics
+2025-07-17 16:29:31 - MedicalReportEvaluator - INFO - Initialized Medical Report Evaluator - Session: eval_20250717_162931
+2025-07-17 16:29:31 - MedicalReportEvaluator - INFO - Loaded 7 metrics: ['bleu', 'rouge', 'meteor', 'bert_score', 'chexpert', 'radgraph_f1', 'medical']
+2025-07-17 16:29:31 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 6c2b39fa-2c251fcf-addd31da-83faee60-044fa8f9
+2025-07-17 16:29:33 - MedicalReportEvaluator - INFO - Loading BERT model: bert-base-uncased
+2025-07-17 16:29:35 - MedicalReportEvaluator - INFO - BERTScore model loaded on device: cuda
+2025-07-17 16:29:38 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3153, Quality: very_poor, Time: 7.2641s
+2025-07-18 20:54:12 - MedicalReportEvaluator - INFO - Logging system initialized successfully
+2025-07-18 20:54:12 - MedicalReportEvaluator - INFO - Configuration loaded successfully from config/evaluation_config.json
+2025-07-18 20:54:18 - MedicalReportEvaluator - INFO - Successfully initialized 7 metrics
+2025-07-18 20:54:18 - MedicalReportEvaluator - INFO - Initialized Medical Report Evaluator - Session: eval_20250718_205418
+2025-07-18 20:54:18 - MedicalReportEvaluator - INFO - Loaded 7 metrics: ['bleu', 'rouge', 'meteor', 'bert_score', 'chexpert', 'radgraph_f1', 'medical']
+2025-07-18 20:54:34 - MedicalReportEvaluator - INFO - Logging system initialized successfully
+2025-07-18 20:54:34 - MedicalReportEvaluator - INFO - Configuration loaded successfully from config/evaluation_config.json
+2025-07-18 20:54:34 - MedicalReportEvaluator - INFO - Successfully initialized 7 metrics
+2025-07-18 20:54:34 - MedicalReportEvaluator - INFO - Initialized Medical Report Evaluator - Session: eval_20250718_205434
+2025-07-18 20:54:34 - MedicalReportEvaluator - INFO - Loaded 7 metrics: ['bleu', 'rouge', 'meteor', 'bert_score', 'chexpert', 'radgraph_f1', 'medical']
+2025-07-18 20:54:57 - MedicalReportEvaluator - INFO - Starting batch evaluation - ID: batch_20250718_205457_400, Size: 400
+2025-07-18 20:54:57 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 010fa20c-6ac04c8a-f6d4bc0b-eb1e735c-cd940793
+2025-07-18 20:55:12 - MedicalReportEvaluator - INFO - Loading BERT model: bert-base-uncased
+2025-07-18 20:55:19 - MedicalReportEvaluator - INFO - BERTScore model loaded on device: cuda
+2025-07-18 20:55:20 - MedicalReportEvaluator - INFO - Loading RadGraph model (radgraph)...
+2025-07-18 20:55:24 - MedicalReportEvaluator - INFO - RadGraph model loaded.
+2025-07-18 20:55:24 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3553, Quality: poor, Time: 27.0990s
+2025-07-18 20:55:24 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 02366474-affa930c-2d42a996-4149bce6-0fa01bee
+2025-07-18 20:55:24 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1103, Quality: very_poor, Time: 0.1823s
+2025-07-18 20:55:24 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 0256325b-599d7e3f-315c0911-45a20707-4921326c
+2025-07-18 20:55:26 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3091, Quality: very_poor, Time: 1.6771s
+2025-07-18 20:55:26 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 02cab5e2-32c693a1-f28fc960-a42cc4a2-4d8d7c44
+2025-07-18 20:55:28 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2388, Quality: very_poor, Time: 2.7182s
+2025-07-18 20:55:28 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 02f90b85-4f9f059b-c345c702-311813d6-7e3a580f
+2025-07-18 20:55:29 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3089, Quality: very_poor, Time: 0.9816s
+2025-07-18 20:55:29 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 04d8b146-8f27fd48-e07afc43-464529fc-57350e1b
+2025-07-18 20:55:33 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3005, Quality: very_poor, Time: 3.3340s
+2025-07-18 20:55:33 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 05ba3e85-875eda0d-e635ab65-721ad62a-2ab3e9d5
+2025-07-18 20:55:36 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2456, Quality: very_poor, Time: 3.4048s
+2025-07-18 20:55:36 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 069534ba-cbd0f880-3564af8a-662a8a6b-fe4b5033
+2025-07-18 20:55:38 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2350, Quality: very_poor, Time: 1.7924s
+2025-07-18 20:55:38 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 072cf1f3-f0fe4324-4f870983-549f8fcc-d4eb7016
+2025-07-18 20:55:38 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3575, Quality: poor, Time: 0.2675s
+2025-07-18 20:55:38 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 076a5349-88bb9bda-2374918c-c4cf992b-2b6248f7
+2025-07-18 20:55:39 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3335, Quality: very_poor, Time: 0.3455s
+2025-07-18 20:55:39 - MedicalReportEvaluator - INFO - Processed 10/400 reports
+2025-07-18 20:55:39 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 07886c95-b1f91525-6cc45c85-f0f9d171-2c319917
+2025-07-18 20:55:40 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2768, Quality: very_poor, Time: 1.4203s
+2025-07-18 20:55:40 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 07dbc552-31479fc4-1096a7ea-82eff2ac-6e86a8b6
+2025-07-18 20:55:41 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3638, Quality: poor, Time: 0.8714s
+2025-07-18 20:55:41 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 0956a636-ed256903-3688336d-93261b75-d0e2b1cf
+2025-07-18 20:55:42 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2191, Quality: very_poor, Time: 1.1526s
+2025-07-18 20:55:42 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 098b3037-8fbf61e1-6b459e53-8b2d231e-05518b69
+2025-07-18 20:55:43 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2623, Quality: very_poor, Time: 1.0810s
+2025-07-18 20:55:43 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 0a90c3bb-3cf21ec9-835a1537-faf370a1-21053fd6
+2025-07-18 20:55:43 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4095, Quality: poor, Time: 0.1817s
+2025-07-18 20:55:43 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 0b918585-b57b79f6-8c53d0b6-a2fe91ac-a9b9077c
+2025-07-18 20:55:45 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2363, Quality: very_poor, Time: 1.2720s
+2025-07-18 20:55:45 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 0dda5129-7c030387-3c83d925-fae90635-d2f2c42f
+2025-07-18 20:55:45 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3565, Quality: poor, Time: 0.5444s
+2025-07-18 20:55:45 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 107fb23d-4d6f914d-fd7d0307-5198c481-588d7dd5
+2025-07-18 20:55:46 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1824, Quality: very_poor, Time: 1.1105s
+2025-07-18 20:55:46 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 108277e6-06cfd568-24780aaa-c7ae8016-9ee8e98d
+2025-07-18 20:55:46 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2251, Quality: very_poor, Time: 0.1866s
+2025-07-18 20:55:46 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 10904f22-5598cef1-754fba77-81fce124-662f915f
+2025-07-18 20:55:47 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3201, Quality: very_poor, Time: 0.9604s
+2025-07-18 20:55:47 - MedicalReportEvaluator - INFO - Processed 20/400 reports
+2025-07-18 20:55:47 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 124760a1-6185f791-8672a86d-cfd9973e-38019b15
+2025-07-18 20:55:50 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2854, Quality: very_poor, Time: 2.6880s
+2025-07-18 20:55:50 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 138d5e51-bfc2bf4d-92df004e-7093540a-8d44cf8c
+2025-07-18 20:55:50 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4568, Quality: poor, Time: 0.3749s
+2025-07-18 20:55:50 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 140f0530-a611e673-1b4864fe-f65b84ec-9a261bfb
+2025-07-18 20:55:52 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2567, Quality: very_poor, Time: 1.2111s
+2025-07-18 20:55:52 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 147f3af7-ee42fffa-d075d4e0-206ae65f-645dacfc
+2025-07-18 20:55:53 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2556, Quality: very_poor, Time: 1.3806s
+2025-07-18 20:55:53 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 14bdebe6-2f596743-169c418e-299bfbe4-360105f1
+2025-07-18 20:55:53 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.5057, Quality: fair, Time: 0.0910s
+2025-07-18 20:55:53 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 14f2c788-c78965c4-074a94ce-5c2bbc37-26aab27d
+2025-07-18 20:55:55 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2700, Quality: very_poor, Time: 1.6085s
+2025-07-18 20:55:55 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 15e60dc7-6493889f-d2cb9dba-2c860709-f171bc98
+2025-07-18 20:55:56 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2649, Quality: very_poor, Time: 0.9721s
+2025-07-18 20:55:56 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 164e2ff0-c6468822-16bc7399-fcad73a2-e2420936
+2025-07-18 20:55:57 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3024, Quality: very_poor, Time: 1.2754s
+2025-07-18 20:55:57 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 16eb6b4e-2b74c937-6cbf749f-5d2646e5-4892cb6d
+2025-07-18 20:55:58 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3046, Quality: very_poor, Time: 1.5172s
+2025-07-18 20:55:58 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 17599eb3-173fc22b-84db3c0b-9639c478-d0db6bc2
+2025-07-18 20:55:59 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4253, Quality: poor, Time: 0.2554s
+2025-07-18 20:55:59 - MedicalReportEvaluator - INFO - Processed 30/400 reports
+2025-07-18 20:55:59 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 17f253d4-69e365d3-e59e6671-fbae71e8-cafe91be
+2025-07-18 20:56:01 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3052, Quality: very_poor, Time: 2.0738s
+2025-07-18 20:56:01 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 18f65381-b889a00b-6d1eba00-7aafe028-3e4f4e43
+2025-07-18 20:56:02 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2880, Quality: very_poor, Time: 1.5487s
+2025-07-18 20:56:02 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 1949e952-c0b0d55e-ab51c699-2dc72d5f-b81c5f75
+2025-07-18 20:56:04 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2323, Quality: very_poor, Time: 1.3178s
+2025-07-18 20:56:04 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 1a3f39ce-ebe90275-9a66145a-af03360e-ee3b163b
+2025-07-18 20:56:04 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2719, Quality: very_poor, Time: 0.8306s
+2025-07-18 20:56:04 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 1ada5255-fa241d69-17b66455-f8b26fa7-7c02d268
+2025-07-18 20:56:06 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2546, Quality: very_poor, Time: 1.4829s
+2025-07-18 20:56:06 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 1bebccd9-0116530e-c58324a1-e8dce7b1-d71c1a62
+2025-07-18 20:56:06 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4913, Quality: poor, Time: 0.2175s
+2025-07-18 20:56:06 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 1c0a513c-65ec59c7-16231ea9-17b60fe6-a183780e
+2025-07-18 20:56:07 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2137, Quality: very_poor, Time: 1.0384s
+2025-07-18 20:56:07 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 1d43a894-5ef3cf1c-ebf3bc9d-5291db2e-40307726
+2025-07-18 20:56:09 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1852, Quality: very_poor, Time: 1.7308s
+2025-07-18 20:56:09 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 1d74e138-f06043a0-d1e00c7d-29989acd-abf1a364
+2025-07-18 20:56:09 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3701, Quality: poor, Time: 0.4856s
+2025-07-18 20:56:09 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 1e083950-46d960b1-fa89f1e2-6b8272f8-1aa5cdc7
+2025-07-18 20:56:11 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2813, Quality: very_poor, Time: 1.2454s
+2025-07-18 20:56:11 - MedicalReportEvaluator - INFO - Processed 40/400 reports
+2025-07-18 20:56:11 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 1f0fa741-0c5e5a37-92744e13-2920cf39-ec6d6a86
+2025-07-18 20:56:12 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2822, Quality: very_poor, Time: 1.2209s
+2025-07-18 20:56:12 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 210f9c01-9e0728bf-4b8ec9bf-34d1564e-16cf509c
+2025-07-18 20:56:15 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2235, Quality: very_poor, Time: 2.8439s
+2025-07-18 20:56:15 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 221f0bec-30c95074-574590e9-cbde4ca1-5427112e
+2025-07-18 20:56:16 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1552, Quality: very_poor, Time: 1.5173s
+2025-07-18 20:56:16 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 22466b09-2cee1d9e-b98fb545-bd303e86-24eacae3
+2025-07-18 20:56:17 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3151, Quality: very_poor, Time: 0.4899s
+2025-07-18 20:56:17 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 2434d6b8-4828302e-7923908c-d6ea3b85-b4cfc271
+2025-07-18 20:56:19 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2562, Quality: very_poor, Time: 1.7779s
+2025-07-18 20:56:19 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 248562ef-16070046-4132f366-8903e0ca-100923cf
+2025-07-18 20:56:20 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2518, Quality: very_poor, Time: 1.4078s
+2025-07-18 20:56:20 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 24c20c2c-b1e49685-e1dacb49-c2e7a7eb-35094390
+2025-07-18 20:56:20 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4353, Quality: poor, Time: 0.1395s
+2025-07-18 20:56:20 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 2689618d-d2d66d76-59bc106d-e3cc0c85-91cc995f
+2025-07-18 20:56:21 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1701, Quality: very_poor, Time: 1.1204s
+2025-07-18 20:56:21 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 2756fb1d-45bdeff0-4f3cab91-67c49af9-04c378d9
+2025-07-18 20:56:21 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1132, Quality: very_poor, Time: 0.1538s
+2025-07-18 20:56:21 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 27840b57-a464ffbc-d6e7d071-9b5643e7-44a9afe0
+2025-07-18 20:56:22 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4370, Quality: poor, Time: 0.1852s
+2025-07-18 20:56:22 - MedicalReportEvaluator - INFO - Processed 50/400 reports
+2025-07-18 20:56:22 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 28674cfd-a09cd562-c2ee2007-8a9a2145-bc7be12c
+2025-07-18 20:56:23 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2354, Quality: very_poor, Time: 1.7808s
+2025-07-18 20:56:23 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 2a2992bc-ce749b7a-090a94a3-80d7d59c-039fc25f
+2025-07-18 20:56:25 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2816, Quality: very_poor, Time: 1.8268s
+2025-07-18 20:56:25 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 2b08cde7-b8b4ea5b-f3f60bf2-f22b5a70-ca880866
+2025-07-18 20:56:26 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2343, Quality: very_poor, Time: 1.0166s
+2025-07-18 20:56:26 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 2cc042d3-6807a0c0-29bc79c6-295027bc-568256cd
+2025-07-18 20:56:26 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.5144, Quality: fair, Time: 0.0883s
+2025-07-18 20:56:26 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 2d97c2cf-fa064bc4-926d7a8f-36a81b07-f59fb37e
+2025-07-18 20:56:26 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1415, Quality: very_poor, Time: 0.1341s
+2025-07-18 20:56:26 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 2df0f649-feea37d2-5fc8a411-ea7f5ca1-caeebd9e
+2025-07-18 20:56:27 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4818, Quality: poor, Time: 0.1672s
+2025-07-18 20:56:27 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 2f1093d1-c43e5d18-c628a586-4f6d2ec5-99f1b19b
+2025-07-18 20:56:29 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2802, Quality: very_poor, Time: 2.7753s
+2025-07-18 20:56:29 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 2f62d2ab-c32be343-071da369-b163287d-095259d8
+2025-07-18 20:56:30 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1450, Quality: very_poor, Time: 0.2307s
+2025-07-18 20:56:30 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 2f9f452c-bd8170e0-d4cfe79e-fbf20077-0df42d35
+2025-07-18 20:56:30 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.5012, Quality: fair, Time: 0.1934s
+2025-07-18 20:56:30 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 3107500c-37097cfb-7828232d-61df9093-9be2b013
+2025-07-18 20:56:32 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2291, Quality: very_poor, Time: 2.1149s
+2025-07-18 20:56:32 - MedicalReportEvaluator - INFO - Processed 60/400 reports
+2025-07-18 20:56:32 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 3134db8f-a170f7d3-54c0220a-08a2e07c-50ae890d
+2025-07-18 20:56:33 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2500, Quality: very_poor, Time: 1.0684s
+2025-07-18 20:56:33 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 31c7145a-bc952ff0-ad9037a8-6b884fbe-bc918022
+2025-07-18 20:56:35 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2044, Quality: very_poor, Time: 2.0169s
+2025-07-18 20:56:35 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 3314ae8d-d964c435-7ef3e7d5-1d84da84-2ce78d18
+2025-07-18 20:56:37 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2275, Quality: very_poor, Time: 2.0452s
+2025-07-18 20:56:37 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 33b507ee-4feb7505-3bd788c3-236f34b2-ae15dc9c
+2025-07-18 20:56:39 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2515, Quality: very_poor, Time: 2.3853s
+2025-07-18 20:56:39 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 343a4e56-21ee8c67-e6cd39bd-20f8949a-0467998e
+2025-07-18 20:56:40 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3288, Quality: very_poor, Time: 0.7331s
+2025-07-18 20:56:40 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 34c5e2b4-b4a8eccb-0ab6d905-3d0070ea-d019ae9e
+2025-07-18 20:56:41 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2969, Quality: very_poor, Time: 0.8341s
+2025-07-18 20:56:41 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 34cedb74-d0996b40-6d218312-a9174bea-d48dc033
+2025-07-18 20:56:42 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2702, Quality: very_poor, Time: 0.9491s
+2025-07-18 20:56:42 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 356de3a5-d9db831b-467ca3e1-2d399001-0b7e117a
+2025-07-18 20:56:42 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3004, Quality: very_poor, Time: 0.2993s
+2025-07-18 20:56:42 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 357d8e2a-a735de56-fd410c6a-4c0514bd-c90f9813
+2025-07-18 20:56:43 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2605, Quality: very_poor, Time: 0.8363s
+2025-07-18 20:56:43 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 361a23e0-2ec8e67f-88d38872-8c5eb83b-0bcfc507
+2025-07-18 20:56:44 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2689, Quality: very_poor, Time: 0.5349s
+2025-07-18 20:56:44 - MedicalReportEvaluator - INFO - Processed 70/400 reports
+2025-07-18 20:56:44 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 367fa9fe-8f3600d2-d12f420f-6645d477-942c36f9
+2025-07-18 20:56:44 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3825, Quality: poor, Time: 0.1527s
+2025-07-18 20:56:44 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 37281a6b-d40f025d-51681f11-e078aa8f-3c6452d2
+2025-07-18 20:56:46 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2862, Quality: very_poor, Time: 1.8896s
+2025-07-18 20:56:46 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 3848baf0-1386855b-f5dd996e-a2981d9a-2e9dc6e9
+2025-07-18 20:56:47 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3302, Quality: very_poor, Time: 0.9936s
+2025-07-18 20:56:47 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 385a3c11-fd7b228a-f2752b22-4a5f6bcc-f0a74999
+2025-07-18 20:56:47 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2868, Quality: very_poor, Time: 0.3914s
+2025-07-18 20:56:47 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 3a00ab90-4563967d-ad46d969-ae884a78-c7f2dd2b
+2025-07-18 20:56:48 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3423, Quality: very_poor, Time: 0.7232s
+2025-07-18 20:56:48 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 3bb2525c-8f158bac-9df3b6f4-20746eee-e6d8dab1
+2025-07-18 20:56:49 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2208, Quality: very_poor, Time: 0.9644s
+2025-07-18 20:56:49 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 3c666113-2af7eb71-3157e196-8ffa0076-e818cb34
+2025-07-18 20:56:49 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3068, Quality: very_poor, Time: 0.3577s
+2025-07-18 20:56:49 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 3d38598e-6b5c6625-3d8099ff-21178a58-ea7859a1
+2025-07-18 20:56:49 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3651, Quality: poor, Time: 0.1916s
+2025-07-18 20:56:49 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 3db10b12-1c0c2273-0eb4d5ba-ea1331d9-aa0d7d3d
+2025-07-18 20:56:51 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2859, Quality: very_poor, Time: 2.1067s
+2025-07-18 20:56:51 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 3fc04668-755de08f-1705dda4-534e1f4d-b22d4296
+2025-07-18 20:56:53 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2447, Quality: very_poor, Time: 1.3234s
+2025-07-18 20:56:53 - MedicalReportEvaluator - INFO - Processed 80/400 reports
+2025-07-18 20:56:53 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 40040bb7-4675aba5-aba1265d-6efef4e6-c8dd3978
+2025-07-18 20:56:54 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2562, Quality: very_poor, Time: 1.0696s
+2025-07-18 20:56:54 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 412226a0-fe97f725-576b21f8-3d8d4fd3-ea7cfa4a
+2025-07-18 20:56:56 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2533, Quality: very_poor, Time: 2.3519s
+2025-07-18 20:56:56 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 413d8c6e-270d0af8-96ae3812-cb4659fc-47c055ec
+2025-07-18 20:56:57 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2954, Quality: very_poor, Time: 0.8637s
+2025-07-18 20:56:57 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 420a8ee7-d70c53a8-cc5cccd8-09826c87-4500c4d2
+2025-07-18 20:56:57 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3941, Quality: poor, Time: 0.3063s
+2025-07-18 20:56:57 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 42ca3426-3c2dc573-7e2d42fe-aa2b9627-d888b47b
+2025-07-18 20:57:00 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2532, Quality: very_poor, Time: 3.0491s
+2025-07-18 20:57:00 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 42e4bff5-0068470c-844699c2-1b48b19c-2edc684d
+2025-07-18 20:57:02 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3068, Quality: very_poor, Time: 1.3529s
+2025-07-18 20:57:02 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 4312034e-c0ade4c7-3e1008de-aff6c79d-45229db6
+2025-07-18 20:57:02 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4775, Quality: poor, Time: 0.2246s
+2025-07-18 20:57:02 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 44b4f0d3-707daaa7-d4bf3715-2fc7d150-d097d68b
+2025-07-18 20:57:02 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3517, Quality: poor, Time: 0.1550s
+2025-07-18 20:57:02 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 44d21fe9-7d185d5f-00927b0f-11bf3dce-45b85640
+2025-07-18 20:57:03 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2424, Quality: very_poor, Time: 0.5602s
+2025-07-18 20:57:03 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 45028478-17502c6d-4b2e0828-1a754b68-aaea43c7
+2025-07-18 20:57:04 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2654, Quality: very_poor, Time: 1.5869s
+2025-07-18 20:57:04 - MedicalReportEvaluator - INFO - Processed 90/400 reports
+2025-07-18 20:57:04 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 4628ff9f-baf277e0-8cb44981-e8f3a8de-180e479a
+2025-07-18 20:57:06 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2635, Quality: very_poor, Time: 1.3630s
+2025-07-18 20:57:06 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 46320a3a-fb2b1476-8c675d96-42dbec8d-f20ce68a
+2025-07-18 20:57:06 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2224, Quality: very_poor, Time: 0.8425s
+2025-07-18 20:57:06 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 46b6d27f-05fc0509-a106934d-8b60e412-be2d97bb
+2025-07-18 20:57:07 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3762, Quality: poor, Time: 0.8584s
+2025-07-18 20:57:07 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 46bdab14-1fa0233c-c0b0841d-4c0869de-6564ff0d
+2025-07-18 20:57:10 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2612, Quality: very_poor, Time: 2.3484s
+2025-07-18 20:57:10 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 46de736c-2227ff03-8a086619-9938ee1f-34328e47
+2025-07-18 20:57:10 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2172, Quality: very_poor, Time: 0.1937s
+2025-07-18 20:57:10 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 46ea4229-aa78b2e5-acf0a9e4-bfa98ebc-3cb645ca
+2025-07-18 20:57:11 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3209, Quality: very_poor, Time: 0.8618s
+2025-07-18 20:57:11 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 48075acc-3667be78-42fc2f5f-fbd8850d-20995eaa
+2025-07-18 20:57:12 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1628, Quality: very_poor, Time: 1.7011s
+2025-07-18 20:57:12 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 483e688f-2c933528-78551593-cd8fc42a-72115dd6
+2025-07-18 20:57:13 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2977, Quality: very_poor, Time: 0.8461s
+2025-07-18 20:57:13 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 49b56871-ceac7f94-3bb75028-ee21bc9d-f2a3b7cf
+2025-07-18 20:57:14 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2313, Quality: very_poor, Time: 0.4070s
+2025-07-18 20:57:14 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 49fbbb95-26d86ddd-40b1c80e-a1a476c9-79d7f56b
+2025-07-18 20:57:14 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2397, Quality: very_poor, Time: 0.1398s
+2025-07-18 20:57:14 - MedicalReportEvaluator - INFO - Processed 100/400 reports
+2025-07-18 20:57:14 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 4a195764-6d1de672-cbb362d8-7b5d4596-ce447c0b
+2025-07-18 20:57:14 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3487, Quality: very_poor, Time: 0.2434s
+2025-07-18 20:57:14 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 4a9cc3b6-6d09aa34-e3843566-9d2caa59-9973e261
+2025-07-18 20:57:15 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2380, Quality: very_poor, Time: 0.7745s
+2025-07-18 20:57:15 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 4a9fcdf1-1879c158-bc1958bb-4046c379-100f0be3
+2025-07-18 20:57:15 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3862, Quality: poor, Time: 0.1724s
+2025-07-18 20:57:15 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 4add059b-a077b794-729a96c7-c383d830-7bfe6506
+2025-07-18 20:57:16 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2917, Quality: very_poor, Time: 0.9237s
+2025-07-18 20:57:16 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 4b0d22b7-3e3be18c-9a0d08cc-986b3a1d-c9652063
+2025-07-18 20:57:17 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2371, Quality: very_poor, Time: 0.8941s
+2025-07-18 20:57:17 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 4ce9e5bc-91147696-d0c4b6cd-fc5ffa18-c485b700
+2025-07-18 20:57:18 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2531, Quality: very_poor, Time: 1.6416s
+2025-07-18 20:57:18 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 4d9fc35b-ef8fd357-7e1431a5-c63bc6d6-0bd538b9
+2025-07-18 20:57:19 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3080, Quality: very_poor, Time: 0.9558s
+2025-07-18 20:57:19 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 4df0c412-e01a6486-acd5ab0b-e6e4aa31-d6773e42
+2025-07-18 20:57:20 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2805, Quality: very_poor, Time: 0.4618s
+2025-07-18 20:57:20 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 4f0faead-95e73b77-559dcd5d-39720124-36d6bfa9
+2025-07-18 20:57:20 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2286, Quality: very_poor, Time: 0.3473s
+2025-07-18 20:57:20 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 4f2511df-20bb1886-1fe1fe5c-55a6e85d-bb387be9
+2025-07-18 20:57:22 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3370, Quality: very_poor, Time: 1.3287s
+2025-07-18 20:57:22 - MedicalReportEvaluator - INFO - Processed 110/400 reports
+2025-07-18 20:57:22 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 5024f775-51ab5259-a943877e-ebaa6afd-2ed9fe6d
+2025-07-18 20:57:22 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2933, Quality: very_poor, Time: 0.7190s
+2025-07-18 20:57:22 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 50e435b3-ae9bd66f-5e03b322-63aafaf0-88f98267
+2025-07-18 20:57:23 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3034, Quality: very_poor, Time: 1.1153s
+2025-07-18 20:57:23 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 519f7994-0845b287-f1a597c4-221215e3-9ac9397b
+2025-07-18 20:57:24 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2297, Quality: very_poor, Time: 0.6655s
+2025-07-18 20:57:24 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 521d6f68-bba64c3b-86a27bc3-0f2eb3c0-908d6127
+2025-07-18 20:57:26 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2782, Quality: very_poor, Time: 2.1222s
+2025-07-18 20:57:26 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 5284cba1-73ab3bad-b668dd9c-9cd7284c-5a0905db
+2025-07-18 20:57:27 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3438, Quality: very_poor, Time: 0.3611s
+2025-07-18 20:57:27 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 52f7cf0a-e13e2328-993ae39b-37ed0efb-14d64e8a
+2025-07-18 20:57:27 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3099, Quality: very_poor, Time: 0.4279s
+2025-07-18 20:57:27 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 53e94126-63add2ce-d6795d3f-463be10e-15c14645
+2025-07-18 20:57:28 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3925, Quality: poor, Time: 0.7038s
+2025-07-18 20:57:28 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 53f02941-f6c9c679-179a8c69-5826f312-ae896b2f
+2025-07-18 20:57:29 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2503, Quality: very_poor, Time: 1.2261s
+2025-07-18 20:57:29 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 543ddf75-b40274a0-27806ef2-e0231e20-9a290d39
+2025-07-18 20:57:31 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2268, Quality: very_poor, Time: 1.7270s
+2025-07-18 20:57:31 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 548359a8-26a276bb-59ef0a1b-e55f614f-76ad2967
+2025-07-18 20:57:33 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3108, Quality: very_poor, Time: 1.9493s
+2025-07-18 20:57:33 - MedicalReportEvaluator - INFO - Processed 120/400 reports
+2025-07-18 20:57:33 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 550025f0-fb28013b-e174e563-a9c2dc35-c3f0b4d0
+2025-07-18 20:57:33 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3224, Quality: very_poor, Time: 0.3768s
+2025-07-18 20:57:33 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 55d7d74f-9ed6afea-e6ffa5b9-57811022-308ea785
+2025-07-18 20:57:34 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3336, Quality: very_poor, Time: 0.8531s
+2025-07-18 20:57:34 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 57239032-3ffcd3d9-902dd83c-69ec4012-4dd35fae
+2025-07-18 20:57:34 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2989, Quality: very_poor, Time: 0.5076s
+2025-07-18 20:57:34 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 57e5385e-8ba6064e-e004ef84-a402abd6-856480f1
+2025-07-18 20:57:35 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3235, Quality: very_poor, Time: 0.9269s
+2025-07-18 20:57:35 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 58049623-2c1a5d2e-12545df5-4e555744-c0582488
+2025-07-18 20:57:35 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.5095, Quality: fair, Time: 0.1796s
+2025-07-18 20:57:35 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 583773a3-6b41ad4f-7bfe965e-5bf0b259-b6f7dc0c
+2025-07-18 20:57:36 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3269, Quality: very_poor, Time: 0.2535s
+2025-07-18 20:57:36 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 5840dcb5-d927aa9a-7c1e3474-ce2b18a7-8dbb0075
+2025-07-18 20:57:37 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2665, Quality: very_poor, Time: 1.4765s
+2025-07-18 20:57:37 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 58ac7347-d09cbde9-a4dc2b0d-9344c0ad-fd4de555
+2025-07-18 20:57:38 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2146, Quality: very_poor, Time: 1.0395s
+2025-07-18 20:57:38 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 58dc0734-a5023d8c-153a5fef-98f577eb-936fbcc4
+2025-07-18 20:57:38 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3981, Quality: poor, Time: 0.3035s
+2025-07-18 20:57:38 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 5904bf84-697f24ac-9d9f2ca5-bf18ddfd-0445a6f7
+2025-07-18 20:57:39 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4044, Quality: poor, Time: 0.3213s
+2025-07-18 20:57:39 - MedicalReportEvaluator - INFO - Processed 130/400 reports
+2025-07-18 20:57:39 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 5991d4a4-669759aa-554fcffb-86314b57-70c9edf4
+2025-07-18 20:57:40 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2152, Quality: very_poor, Time: 1.1667s
+2025-07-18 20:57:40 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 5b07d9a6-0d3955a8-5134f6fa-5357ca78-485cd5af
+2025-07-18 20:57:43 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2961, Quality: very_poor, Time: 2.8278s
+2025-07-18 20:57:43 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 5c1c3e8e-b15eee69-6d6ede1e-5006da98-fd31eb07
+2025-07-18 20:57:44 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1693, Quality: very_poor, Time: 0.7661s
+2025-07-18 20:57:44 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 5db1ff54-6a22902f-51402f15-27dc7310-21a1183c
+2025-07-18 20:57:45 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1931, Quality: very_poor, Time: 1.4077s
+2025-07-18 20:57:45 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 5f1ac54d-47dfae00-930fa704-514131fa-ee0c138e
+2025-07-18 20:57:45 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4514, Quality: poor, Time: 0.3095s
+2025-07-18 20:57:45 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 5f9c55a2-38684622-78b175af-5a14d72f-86b56cc9
+2025-07-18 20:57:46 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3956, Quality: poor, Time: 0.2978s
+2025-07-18 20:57:46 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 6073ad46-d6fc60fe-602b2a65-97f8532b-6239a162
+2025-07-18 20:57:46 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3692, Quality: poor, Time: 0.2216s
+2025-07-18 20:57:46 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 617d55bf-85884881-e9148c47-b91abc33-318904ad
+2025-07-18 20:57:46 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3577, Quality: poor, Time: 0.3394s
+2025-07-18 20:57:46 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 6211cdcb-6f1ce9f6-4a00cb48-b337b9e0-27766c69
+2025-07-18 20:57:47 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2254, Quality: very_poor, Time: 0.7975s
+2025-07-18 20:57:47 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 621226d3-8bd2caf6-946500a6-6fb80ebe-7bf7dc3e
+2025-07-18 20:57:47 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2725, Quality: very_poor, Time: 0.4509s
+2025-07-18 20:57:47 - MedicalReportEvaluator - INFO - Processed 140/400 reports
+2025-07-18 20:57:47 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 62399164-765f36f3-77c2ac9d-bda37fce-93f6a82c
+2025-07-18 20:57:48 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2771, Quality: very_poor, Time: 1.0565s
+2025-07-18 20:57:48 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 648fb31c-69818899-565ec447-3f1e4d46-91e430e7
+2025-07-18 20:57:49 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2911, Quality: very_poor, Time: 0.6434s
+2025-07-18 20:57:49 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 655ca63b-91739e04-2121ab41-bb8734f9-d8fcd64b
+2025-07-18 20:57:49 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4905, Quality: poor, Time: 0.1981s
+2025-07-18 20:57:49 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 6620c86d-6be6ba2b-c1c0beb1-2b89f89b-a0a59da4
+2025-07-18 20:57:56 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2382, Quality: very_poor, Time: 6.2735s
+2025-07-18 20:57:56 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 6723c585-cf0ade16-559f8ed4-1ff44bc2-2290c515
+2025-07-18 20:57:56 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3334, Quality: very_poor, Time: 0.2144s
+2025-07-18 20:57:56 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 6778a9a4-00e2dca7-3fa9b403-0d8aa7f0-a97878a0
+2025-07-18 20:57:56 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3221, Quality: very_poor, Time: 0.5076s
+2025-07-18 20:57:56 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 67f72169-420093d8-9666887b-01b4828c-26a380c7
+2025-07-18 20:57:57 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2495, Quality: very_poor, Time: 0.4333s
+2025-07-18 20:57:57 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 68f7e0e6-c40c074a-42023f0e-3846e342-fbb379f9
+2025-07-18 20:57:57 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2897, Quality: very_poor, Time: 0.4086s
+2025-07-18 20:57:57 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 69049330-0ad59e63-d94192ce-6fc6ddf7-5f1ca598
+2025-07-18 20:57:59 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3090, Quality: very_poor, Time: 2.1138s
+2025-07-18 20:57:59 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 6acc427b-57dfcb76-42bfe32a-060177db-044a5c6f
+2025-07-18 20:58:00 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3385, Quality: very_poor, Time: 0.9393s
+2025-07-18 20:58:00 - MedicalReportEvaluator - INFO - Processed 150/400 reports
+2025-07-18 20:58:00 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 6bea2b29-75ec6478-b72070e6-8a4c2613-4e498d43
+2025-07-18 20:58:00 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3759, Quality: poor, Time: 0.2288s
+2025-07-18 20:58:00 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 6c2b39fa-2c251fcf-addd31da-83faee60-044fa8f9
+2025-07-18 20:58:01 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3091, Quality: very_poor, Time: 0.5768s
+2025-07-18 20:58:01 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 6c4ca7bc-fc576c41-8eb7e8ec-24873e87-25c2f8cb
+2025-07-18 20:58:03 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2103, Quality: very_poor, Time: 1.7195s
+2025-07-18 20:58:03 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 6d5154c5-ccef3822-3193eccd-486a1a19-5a63a0ea
+2025-07-18 20:58:03 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3276, Quality: very_poor, Time: 0.3520s
+2025-07-18 20:58:03 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 6e9ff2e6-bd7424b4-23f1bd55-1d4d3707-72211444
+2025-07-18 20:58:03 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3993, Quality: poor, Time: 0.3525s
+2025-07-18 20:58:03 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 70ff78b4-b7fd50a0-3be98615-4ba9b9d3-e5b89c48
+2025-07-18 20:58:04 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3623, Quality: poor, Time: 0.3012s
+2025-07-18 20:58:04 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 724b43fd-ce7cedc5-9d67b476-23e03e3d-650cbb41
+2025-07-18 20:58:04 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2726, Quality: very_poor, Time: 0.6800s
+2025-07-18 20:58:04 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 72501585-75d272d6-3bbe6b11-c541076e-73ec2378
+2025-07-18 20:58:05 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2374, Quality: very_poor, Time: 0.4793s
+2025-07-18 20:58:05 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 72c5ec38-9b2b2964-63723752-f320ed2d-d2e18a1f
+2025-07-18 20:58:07 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2924, Quality: very_poor, Time: 2.2344s
+2025-07-18 20:58:07 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 72c748d6-2ed43348-13afa6d4-f46f250e-2188d07e
+2025-07-18 20:58:08 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2366, Quality: very_poor, Time: 0.9881s
+2025-07-18 20:58:08 - MedicalReportEvaluator - INFO - Processed 160/400 reports
+2025-07-18 20:58:08 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 72dabaea-ee1a036f-6136b4f1-4836b2be-8808ddc9
+2025-07-18 20:58:09 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3109, Quality: very_poor, Time: 1.1382s
+2025-07-18 20:58:09 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 748991dc-fb330cd1-fc203d00-b89b5ccb-7995b475
+2025-07-18 20:58:10 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2912, Quality: very_poor, Time: 0.8408s
+2025-07-18 20:58:10 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 74b9ce21-6548d336-68ce658a-6b63c802-4511a10c
+2025-07-18 20:58:11 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2095, Quality: very_poor, Time: 1.0290s
+2025-07-18 20:58:11 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 75101307-4ba84eae-dbe09286-86f4eec2-cc609226
+2025-07-18 20:58:12 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2427, Quality: very_poor, Time: 0.8580s
+2025-07-18 20:58:12 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 75584692-e6c699a3-dbbed0f6-233766d6-c6cf6201
+2025-07-18 20:58:13 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2816, Quality: very_poor, Time: 1.3510s
+2025-07-18 20:58:13 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 76fd585c-242d423a-47acafcc-7ce402c7-645f6920
+2025-07-18 20:58:15 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2853, Quality: very_poor, Time: 1.4030s
+2025-07-18 20:58:15 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 7744e910-ffab52cd-090a9e79-e48e757c-c35585fa
+2025-07-18 20:58:17 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2270, Quality: very_poor, Time: 2.4636s
+2025-07-18 20:58:17 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 7754be12-2e01cd87-a1f64872-9e38dd0b-9ca070a8
+2025-07-18 20:58:19 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2540, Quality: very_poor, Time: 1.7948s
+2025-07-18 20:58:19 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 77986392-2dac3752-b145c42b-2ba010de-d49de562
+2025-07-18 20:58:21 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2180, Quality: very_poor, Time: 2.3689s
+2025-07-18 20:58:21 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 77aae002-e6cdc173-628d759a-49a4a143-3fe1b9da
+2025-07-18 20:58:23 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2302, Quality: very_poor, Time: 1.8404s
+2025-07-18 20:58:23 - MedicalReportEvaluator - INFO - Processed 170/400 reports
+2025-07-18 20:58:23 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 78830bfd-5c6cded1-9c844764-6b3b5c2b-979da97b
+2025-07-18 20:58:23 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3891, Quality: poor, Time: 0.2411s
+2025-07-18 20:58:23 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 78c04a6a-e5b8c8f3-43d03217-13036342-bf328551
+2025-07-18 20:58:24 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3157, Quality: very_poor, Time: 0.6758s
+2025-07-18 20:58:24 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 7a28df15-9a9dfa2e-e829e842-81f1f7b3-201b4b4a
+2025-07-18 20:58:25 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2149, Quality: very_poor, Time: 1.1759s
+2025-07-18 20:58:25 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 7a55cc24-af056803-8afcb8bc-a571dd98-09be561f
+2025-07-18 20:58:26 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3562, Quality: poor, Time: 0.2993s
+2025-07-18 20:58:26 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 7a7dd377-4f6a1f03-27aca801-0636d65d-94882626
+2025-07-18 20:58:26 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.5588, Quality: fair, Time: 0.0895s
+2025-07-18 20:58:26 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 7b263371-acef702b-ef1aea02-1cd82bcb-36f6d952
+2025-07-18 20:58:28 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2876, Quality: very_poor, Time: 1.8363s
+2025-07-18 20:58:28 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 7bf2c194-41b9ece8-903860ce-ab77f0cb-9900d3d9
+2025-07-18 20:58:28 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4526, Quality: poor, Time: 0.2169s
+2025-07-18 20:58:28 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 7c14c513-4c38def0-4de59a7a-e9f5959c-07207003
+2025-07-18 20:58:28 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3139, Quality: very_poor, Time: 0.5513s
+2025-07-18 20:58:28 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 7c40a626-d0754b9f-c8091cad-b7c93783-4cd25ef5
+2025-07-18 20:58:29 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2394, Quality: very_poor, Time: 1.2052s
+2025-07-18 20:58:29 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 7d0bb69a-f58f876c-68ddd5d5-5642b0c9-cbc9a0d7
+2025-07-18 20:58:30 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3337, Quality: very_poor, Time: 0.9415s
+2025-07-18 20:58:30 - MedicalReportEvaluator - INFO - Processed 180/400 reports
+2025-07-18 20:58:30 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 7ddc973c-5b2d7918-06fde940-d6e2662e-639dcef4
+2025-07-18 20:58:31 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2197, Quality: very_poor, Time: 0.9530s
+2025-07-18 20:58:31 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 7e28768c-2778bdbb-ccf809fa-856ba986-61e4b0cf
+2025-07-18 20:58:33 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3234, Quality: very_poor, Time: 1.3558s
+2025-07-18 20:58:33 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 7e950526-ccc5960e-735b0f76-a80365d9-139f5bff
+2025-07-18 20:58:34 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2641, Quality: very_poor, Time: 1.4797s
+2025-07-18 20:58:34 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 7e9e4d35-62e51509-84ecd770-92aa9cbe-fe2886a5
+2025-07-18 20:58:36 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2503, Quality: very_poor, Time: 1.4025s
+2025-07-18 20:58:36 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 7ec1ab88-b619e63d-fa79ea72-c2f97a28-b775a27f
+2025-07-18 20:58:37 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1883, Quality: very_poor, Time: 1.1912s
+2025-07-18 20:58:37 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 8011d9cb-8f3ea017-86ad36bd-5e7380ff-32005f00
+2025-07-18 20:58:38 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2893, Quality: very_poor, Time: 1.4640s
+2025-07-18 20:58:38 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 804fd3f5-bf769e56-79b96d6c-61d59859-75611bea
+2025-07-18 20:58:39 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3991, Quality: poor, Time: 0.2251s
+2025-07-18 20:58:39 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 805a8950-23cbb6d4-e782fa05-4f383d52-095f442d
+2025-07-18 20:58:40 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3089, Quality: very_poor, Time: 1.3324s
+2025-07-18 20:58:40 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 8106f7b3-233a8f3b-dcf27b65-ee05560c-f79f8d26
+2025-07-18 20:58:41 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2113, Quality: very_poor, Time: 1.1224s
+2025-07-18 20:58:41 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 81789f75-81d8bc70-780b9acd-d023c3f4-640a0229
+2025-07-18 20:58:41 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.5048, Quality: fair, Time: 0.1670s
+2025-07-18 20:58:41 - MedicalReportEvaluator - INFO - Processed 190/400 reports
+2025-07-18 20:58:41 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 819e8838-813f6f6e-a6c5d098-e747a8aa-68e03a8b
+2025-07-18 20:58:42 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2288, Quality: very_poor, Time: 1.3622s
+2025-07-18 20:58:42 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 81f2eac1-e5c7ddff-a96eb85f-85612dc2-0d95264c
+2025-07-18 20:58:44 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3297, Quality: very_poor, Time: 1.3604s
+2025-07-18 20:58:44 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 82452f13-034d049f-5aa676e8-d7b29bcb-d397abdd
+2025-07-18 20:58:45 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2870, Quality: very_poor, Time: 1.5447s
+2025-07-18 20:58:45 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 82f95280-1613e7c7-ff927b41-adf5aa1d-8963f41e
+2025-07-18 20:58:46 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3240, Quality: very_poor, Time: 0.8492s
+2025-07-18 20:58:46 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 8306e05f-c270ff1d-d938797a-54fbe25b-6c3a3d52
+2025-07-18 20:58:48 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2984, Quality: very_poor, Time: 1.2717s
+2025-07-18 20:58:48 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 8342b21d-d50a5dfe-a3ff0ce9-4bf57f58-a5802c4a
+2025-07-18 20:58:48 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3882, Quality: poor, Time: 0.2772s
+2025-07-18 20:58:48 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 845cab57-7175f1f2-caf520b2-83bdf74a-434a7206
+2025-07-18 20:58:49 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3250, Quality: very_poor, Time: 1.6675s
+2025-07-18 20:58:49 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 855b9f4c-e7f477e2-5a4d2a8d-f804ba4b-fbbaad28
+2025-07-18 20:58:50 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3262, Quality: very_poor, Time: 0.5005s
+2025-07-18 20:58:50 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 86824ae8-47aca95a-11895fbb-657cbb87-6876fbee
+2025-07-18 20:58:53 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2930, Quality: very_poor, Time: 3.1755s
+2025-07-18 20:58:53 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 86c83b75-1debb4e8-ca7a9ff2-d82e5244-79a14fef
+2025-07-18 20:58:55 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2892, Quality: very_poor, Time: 1.6149s
+2025-07-18 20:58:55 - MedicalReportEvaluator - INFO - Processed 200/400 reports
+2025-07-18 20:58:55 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 86f76c99-40085083-41251cbb-c9372fba-840f8c28
+2025-07-18 20:58:56 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2790, Quality: very_poor, Time: 1.0834s
+2025-07-18 20:58:56 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 87694c3c-e07ea01b-0ee35fd8-55a7defd-8e318d65
+2025-07-18 20:58:58 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2640, Quality: very_poor, Time: 2.4193s
+2025-07-18 20:58:58 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 87ed8900-3ef9d043-86420cb1-c294d965-baabb37c
+2025-07-18 20:58:59 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3124, Quality: very_poor, Time: 0.5806s
+2025-07-18 20:58:59 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 887c1469-cd1650cc-d1dd9c81-a6c133d8-b9f4a6d2
+2025-07-18 20:58:59 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2896, Quality: very_poor, Time: 0.3134s
+2025-07-18 20:58:59 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 88c12dcf-8cac7e69-097d86c4-2f199ad2-778b9cd7
+2025-07-18 20:59:00 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2583, Quality: very_poor, Time: 1.0410s
+2025-07-18 20:59:00 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 88c6c717-a8632896-fd029484-3dee5f36-331a78dc
+2025-07-18 20:59:07 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2196, Quality: very_poor, Time: 6.5162s
+2025-07-18 20:59:07 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 8941d4e4-0bdfb1b7-9193cded-17511ee6-e48bb193
+2025-07-18 20:59:08 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3006, Quality: very_poor, Time: 1.6687s
+2025-07-18 20:59:08 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 89a5076e-089c1cb8-f81dba59-c7c1b8df-45bef33b
+2025-07-18 20:59:09 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.5875, Quality: fair, Time: 0.1970s
+2025-07-18 20:59:09 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 8afe8a73-004dc473-b4775f04-0952fd66-39b22b99
+2025-07-18 20:59:09 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1707, Quality: very_poor, Time: 0.7151s
+2025-07-18 20:59:09 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 8b965bb3-8d23f74b-35d26473-e87b2c61-c72240c8
+2025-07-18 20:59:10 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3530, Quality: poor, Time: 0.2713s
+2025-07-18 20:59:10 - MedicalReportEvaluator - INFO - Processed 210/400 reports
+2025-07-18 20:59:10 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 8bd39af7-6f4fd7ed-abeffdb1-0e618c7f-b5c53b38
+2025-07-18 20:59:10 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2526, Quality: very_poor, Time: 0.5081s
+2025-07-18 20:59:10 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 8bed071d-530b59d0-17c0e137-b8e71e88-19562017
+2025-07-18 20:59:11 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1869, Quality: very_poor, Time: 0.7028s
+2025-07-18 20:59:11 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 8bfe0461-6d1010d0-01f5cc7b-9a74c4a7-a2bd6efb
+2025-07-18 20:59:13 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2247, Quality: very_poor, Time: 2.6717s
+2025-07-18 20:59:13 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 8dc876ae-427764ff-b4f508bf-26892673-6aa5e20a
+2025-07-18 20:59:14 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3460, Quality: very_poor, Time: 0.3336s
+2025-07-18 20:59:14 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 8e023604-ece0e893-3ec1c2cd-7cd320cf-a3866e53
+2025-07-18 20:59:15 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2884, Quality: very_poor, Time: 0.9784s
+2025-07-18 20:59:15 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 8e32d4aa-51c4b394-87602123-827fdd5b-512e282f
+2025-07-18 20:59:16 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2811, Quality: very_poor, Time: 1.4662s
+2025-07-18 20:59:16 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 8e996700-e43f0100-4c697d66-6380fa96-b076f339
+2025-07-18 20:59:20 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2207, Quality: very_poor, Time: 3.6795s
+2025-07-18 20:59:20 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 90497097-0b7b98d2-72a60f69-7b28a886-aa2a5ae1
+2025-07-18 20:59:20 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3419, Quality: very_poor, Time: 0.2781s
+2025-07-18 20:59:20 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 91f25e79-bf588cac-a8e149c6-9a63b28e-aa2f43d5
+2025-07-18 20:59:21 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2288, Quality: very_poor, Time: 0.7756s
+2025-07-18 20:59:21 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 93a4d17a-76a3254b-e318f913-9ff1de80-1e0c10e6
+2025-07-18 20:59:21 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2803, Quality: very_poor, Time: 0.3528s
+2025-07-18 20:59:21 - MedicalReportEvaluator - INFO - Processed 220/400 reports
+2025-07-18 20:59:21 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 942bf41a-e4258201-b9f6fe05-329c670c-2f673739
+2025-07-18 20:59:23 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3078, Quality: very_poor, Time: 1.4311s
+2025-07-18 20:59:23 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 949fb11c-506def51-4806af01-24d8693f-2f90ea60
+2025-07-18 20:59:25 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2505, Quality: very_poor, Time: 1.7412s
+2025-07-18 20:59:25 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 9528bf70-0da47cb5-e9dba3c0-608485c6-9923e87e
+2025-07-18 20:59:26 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2287, Quality: very_poor, Time: 1.7440s
+2025-07-18 20:59:26 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 96796252-ec631616-7f78ed59-cb707f62-dcc94e4e
+2025-07-18 20:59:27 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2444, Quality: very_poor, Time: 0.4660s
+2025-07-18 20:59:27 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 96eaa39d-4bc0be4a-e67e7d41-30d19f3a-ad1c3ea0
+2025-07-18 20:59:28 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2510, Quality: very_poor, Time: 1.2867s
+2025-07-18 20:59:28 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 981f5956-9dbb9f69-8b7bbf12-b872f7a3-16f09cf4
+2025-07-18 20:59:30 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2915, Quality: very_poor, Time: 1.7904s
+2025-07-18 20:59:30 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 9a177679-9e809e56-552b0650-230b9dc0-ee2f5a9c
+2025-07-18 20:59:30 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4280, Quality: poor, Time: 0.3396s
+2025-07-18 20:59:30 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 9aa30167-061e6c33-dcdfeb93-06185f00-11d80b01
+2025-07-18 20:59:31 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3245, Quality: very_poor, Time: 0.7788s
+2025-07-18 20:59:31 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 9ad62288-7dcfad9c-e82a3a29-4bd658f9-bf9e5953
+2025-07-18 20:59:31 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.5425, Quality: fair, Time: 0.2037s
+2025-07-18 20:59:31 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 9adb1f67-819ea041-693ecf10-5ae2d47f-a9e8e6b2
+2025-07-18 20:59:32 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3774, Quality: poor, Time: 0.4461s
+2025-07-18 20:59:32 - MedicalReportEvaluator - INFO - Processed 230/400 reports
+2025-07-18 20:59:32 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 9b3079b6-47991e2b-b8e11df8-9277c061-5c17d096
+2025-07-18 20:59:33 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2663, Quality: very_poor, Time: 1.1502s
+2025-07-18 20:59:33 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 9c119cc4-8b633d5b-b1c3b4c6-82ee52b6-ff4477dd
+2025-07-18 20:59:33 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1475, Quality: very_poor, Time: 0.5054s
+2025-07-18 20:59:33 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 9c2efd7b-99676c6a-f4156fb6-e659b8b7-bc4ba8ee
+2025-07-18 20:59:35 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2652, Quality: very_poor, Time: 1.2765s
+2025-07-18 20:59:35 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 9cac6863-50460050-b4ddf241-cacc9df9-c2a1272a
+2025-07-18 20:59:37 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3052, Quality: very_poor, Time: 2.2515s
+2025-07-18 20:59:37 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 9d32e96f-dcc52f72-a7262f7a-298b9e97-39fc55bb
+2025-07-18 20:59:39 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2484, Quality: very_poor, Time: 2.3832s
+2025-07-18 20:59:39 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 9d355cc0-083fe476-3b7f9508-be55eb42-1768a914
+2025-07-18 20:59:39 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4740, Quality: poor, Time: 0.2438s
+2025-07-18 20:59:39 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 9e519c1d-c1326b0e-62602844-b77f28f6-cb752182
+2025-07-18 20:59:40 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2106, Quality: very_poor, Time: 1.1074s
+2025-07-18 20:59:40 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 9e54009b-cc034275-2232ddeb-3e0ca168-a3064f7e
+2025-07-18 20:59:41 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3014, Quality: very_poor, Time: 0.2391s
+2025-07-18 20:59:41 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 9ea3778c-d75fec9c-996b2a8f-739a5b91-84b87d03
+2025-07-18 20:59:41 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2207, Quality: very_poor, Time: 0.5495s
+2025-07-18 20:59:41 - MedicalReportEvaluator - INFO - Evaluating single report - ID: 9f3d5fc1-d379c8b2-1cca6682-38855283-4dbfe5d5
+2025-07-18 20:59:41 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.5848, Quality: fair, Time: 0.1254s
+2025-07-18 20:59:41 - MedicalReportEvaluator - INFO - Processed 240/400 reports
+2025-07-18 20:59:41 - MedicalReportEvaluator - INFO - Evaluating single report - ID: a06609d8-57f41c76-af85d92f-93c2b1de-217c4189
+2025-07-18 20:59:42 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.5898, Quality: fair, Time: 0.1002s
+2025-07-18 20:59:42 - MedicalReportEvaluator - INFO - Evaluating single report - ID: a10dea57-90f876f4-c66af250-6fb45322-6ef88ddc
+2025-07-18 20:59:42 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2309, Quality: very_poor, Time: 0.9452s
+2025-07-18 20:59:42 - MedicalReportEvaluator - INFO - Evaluating single report - ID: a1742a0e-e2c0874f-263c7296-a8d478fa-eb73b79e
+2025-07-18 20:59:43 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3097, Quality: very_poor, Time: 0.9815s
+2025-07-18 20:59:43 - MedicalReportEvaluator - INFO - Evaluating single report - ID: a20d165b-867ac709-38b494b4-d398cdf0-71045d6e
+2025-07-18 20:59:44 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2738, Quality: very_poor, Time: 0.6219s
+2025-07-18 20:59:44 - MedicalReportEvaluator - INFO - Evaluating single report - ID: a2a98c0f-4e042d9f-630ab121-c6f0c6d7-3fc7e1bf
+2025-07-18 20:59:44 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2061, Quality: very_poor, Time: 0.2148s
+2025-07-18 20:59:44 - MedicalReportEvaluator - INFO - Evaluating single report - ID: a2e815a4-5845e017-615321a2-685cc1a6-7c5ab264
+2025-07-18 20:59:45 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2652, Quality: very_poor, Time: 0.9329s
+2025-07-18 20:59:45 - MedicalReportEvaluator - INFO - Evaluating single report - ID: a360539b-7d20b920-a57b334d-6fe782c2-7bbf2aef
+2025-07-18 20:59:46 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2959, Quality: very_poor, Time: 0.8776s
+2025-07-18 20:59:46 - MedicalReportEvaluator - INFO - Evaluating single report - ID: a502d333-653fc256-d147e2f7-080a78fd-83815270
+2025-07-18 20:59:48 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2659, Quality: very_poor, Time: 1.8995s
+2025-07-18 20:59:48 - MedicalReportEvaluator - INFO - Evaluating single report - ID: a5034057-fd95b092-7db53845-1f1b7c58-53657b12
+2025-07-18 20:59:48 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.5472, Quality: fair, Time: 0.1767s
+2025-07-18 20:59:48 - MedicalReportEvaluator - INFO - Evaluating single report - ID: a5264d2c-5d74521a-9fc6b28a-4991fbd0-ad4c15d1
+2025-07-18 20:59:50 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2176, Quality: very_poor, Time: 1.5086s
+2025-07-18 20:59:50 - MedicalReportEvaluator - INFO - Processed 250/400 reports
+2025-07-18 20:59:50 - MedicalReportEvaluator - INFO - Evaluating single report - ID: a63f5408-77a1d873-4fdda1aa-db9d4497-69a747a7
+2025-07-18 20:59:51 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3295, Quality: very_poor, Time: 1.0414s
+2025-07-18 20:59:51 - MedicalReportEvaluator - INFO - Evaluating single report - ID: a6d18cb6-12f2afc5-01623453-d3b4abaf-9fc7c542
+2025-07-18 20:59:52 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3067, Quality: very_poor, Time: 0.8852s
+2025-07-18 20:59:52 - MedicalReportEvaluator - INFO - Evaluating single report - ID: a6f62f68-51689aa3-2c49f059-d1f61a23-b84def59
+2025-07-18 20:59:54 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3040, Quality: very_poor, Time: 2.8047s
+2025-07-18 20:59:54 - MedicalReportEvaluator - INFO - Evaluating single report - ID: a764b3b7-03b81bb3-e3278b28-1892a9ec-8c4c75df
+2025-07-18 20:59:55 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2754, Quality: very_poor, Time: 0.5910s
+2025-07-18 20:59:55 - MedicalReportEvaluator - INFO - Evaluating single report - ID: a770d8d6-7b6a62ff-815ab876-c81709a8-9a654a54
+2025-07-18 20:59:56 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3027, Quality: very_poor, Time: 0.7661s
+2025-07-18 20:59:56 - MedicalReportEvaluator - INFO - Evaluating single report - ID: a827a253-911b39ce-0565ff15-c5f2f643-f09db283
+2025-07-18 20:59:56 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4006, Quality: poor, Time: 0.2615s
+2025-07-18 20:59:56 - MedicalReportEvaluator - INFO - Evaluating single report - ID: a833f67f-0aec71bc-23cee40a-3b88ba18-f3193578
+2025-07-18 20:59:56 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4626, Quality: poor, Time: 0.1720s
+2025-07-18 20:59:56 - MedicalReportEvaluator - INFO - Evaluating single report - ID: a903df4c-35df6cac-1ab1b32a-10c83d71-12a2e2db
+2025-07-18 20:59:57 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3346, Quality: very_poor, Time: 0.6256s
+2025-07-18 20:59:57 - MedicalReportEvaluator - INFO - Evaluating single report - ID: a94ca59d-195010a2-bf2a26a9-611bdabf-29d86726
+2025-07-18 20:59:59 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2985, Quality: very_poor, Time: 1.8816s
+2025-07-18 20:59:59 - MedicalReportEvaluator - INFO - Evaluating single report - ID: aaee667a-6268e39b-0d8f03d5-93dc7b9b-46ebeae9
+2025-07-18 21:00:02 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2510, Quality: very_poor, Time: 2.8274s
+2025-07-18 21:00:02 - MedicalReportEvaluator - INFO - Processed 260/400 reports
+2025-07-18 21:00:02 - MedicalReportEvaluator - INFO - Evaluating single report - ID: ab526db5-35fe2dcf-f4076d54-7bd2c43f-ebb6964c
+2025-07-18 21:00:02 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2910, Quality: very_poor, Time: 0.7080s
+2025-07-18 21:00:02 - MedicalReportEvaluator - INFO - Evaluating single report - ID: ab708c9d-bcd745c2-76bf2f1b-985fae1b-6add2c44
+2025-07-18 21:00:03 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2312, Quality: very_poor, Time: 1.0325s
+2025-07-18 21:00:03 - MedicalReportEvaluator - INFO - Evaluating single report - ID: ab79192c-62b95431-10ed50cf-b34ee361-cc410717
+2025-07-18 21:00:04 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3273, Quality: very_poor, Time: 0.7409s
+2025-07-18 21:00:04 - MedicalReportEvaluator - INFO - Evaluating single report - ID: ade879ed-62ef9c94-efdc1325-6546fc98-0e61df8e
+2025-07-18 21:00:07 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2345, Quality: very_poor, Time: 3.3381s
+2025-07-18 21:00:07 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b05b60aa-151446ea-8a014991-b0304b9e-a779f284
+2025-07-18 21:00:08 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3158, Quality: very_poor, Time: 0.2216s
+2025-07-18 21:00:08 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b07f9be6-d5c345a5-952fad3e-5e9af9d2-1023fabb
+2025-07-18 21:00:08 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3807, Quality: poor, Time: 0.3601s
+2025-07-18 21:00:08 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b0c1aa3e-833eddf0-d8ebe51a-e85bb808-50796526
+2025-07-18 21:00:10 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2351, Quality: very_poor, Time: 2.2573s
+2025-07-18 21:00:10 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b1879ede-77f4dea4-bcb8916c-ec72ff1b-efc87cf3
+2025-07-18 21:00:12 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2634, Quality: very_poor, Time: 1.3697s
+2025-07-18 21:00:12 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b18aab09-30ea3fe9-b2bd3683-cb1ec1c0-67e930fa
+2025-07-18 21:00:13 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1940, Quality: very_poor, Time: 1.1976s
+2025-07-18 21:00:13 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b1dc00c1-529b01aa-15739ab5-54f2d242-71c227db
+2025-07-18 21:00:14 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2776, Quality: very_poor, Time: 1.4216s
+2025-07-18 21:00:14 - MedicalReportEvaluator - INFO - Processed 270/400 reports
+2025-07-18 21:00:14 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b27075b3-b7e1fe25-5fbdb16e-c50801a9-e689a01a
+2025-07-18 21:00:15 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3223, Quality: very_poor, Time: 0.7339s
+2025-07-18 21:00:15 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b2861128-44f16a19-3b643243-d9c4e8b8-10aa2bc7
+2025-07-18 21:00:17 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2918, Quality: very_poor, Time: 2.3824s
+2025-07-18 21:00:17 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b29338da-397c28f9-bc3a9e63-eac557ee-b22e8513
+2025-07-18 21:00:18 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3012, Quality: very_poor, Time: 0.5679s
+2025-07-18 21:00:18 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b2b5cf46-13002f39-c98a3f0f-444b85d3-66785e50
+2025-07-18 21:00:20 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2161, Quality: very_poor, Time: 2.2959s
+2025-07-18 21:00:20 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b31c7bf0-97f9192e-213f55ff-12c60e9f-147a62cd
+2025-07-18 21:00:21 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2992, Quality: very_poor, Time: 1.2243s
+2025-07-18 21:00:21 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b4e49a08-11ac1789-0da7b9a7-8fd64f76-3dd4da5f
+2025-07-18 21:00:22 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2867, Quality: very_poor, Time: 0.6713s
+2025-07-18 21:00:22 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b4ebd154-e11af34e-d4762186-1ba87f4b-505e3d78
+2025-07-18 21:00:22 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3999, Quality: poor, Time: 0.3778s
+2025-07-18 21:00:22 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b4f219eb-0bdbf37a-c33e70a8-385ac112-2f486ffc
+2025-07-18 21:00:24 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2683, Quality: very_poor, Time: 1.5530s
+2025-07-18 21:00:24 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b5d3da06-fd20e016-8b1924e1-3ff9ceed-fb365036
+2025-07-18 21:00:26 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2591, Quality: very_poor, Time: 1.5891s
+2025-07-18 21:00:26 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b5e950aa-173733f4-b60e95c5-b7539589-8798da20
+2025-07-18 21:00:26 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.5110, Quality: fair, Time: 0.1666s
+2025-07-18 21:00:26 - MedicalReportEvaluator - INFO - Processed 280/400 reports
+2025-07-18 21:00:26 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b6bc6236-0c103df4-ca37f3d3-f8984bb4-344360a1
+2025-07-18 21:00:30 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2303, Quality: very_poor, Time: 4.3497s
+2025-07-18 21:00:30 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b6d03d61-6e39a21b-e6516989-dc0a5afa-7c8f2fc4
+2025-07-18 21:00:32 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2841, Quality: very_poor, Time: 2.2895s
+2025-07-18 21:00:32 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b7005445-104c013d-0d5f61e1-9bd5c075-949ceecf
+2025-07-18 21:00:33 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2321, Quality: very_poor, Time: 0.2057s
+2025-07-18 21:00:33 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b7212e79-5c135736-a0ee4672-1ab2ebe2-c0cf13fd
+2025-07-18 21:00:33 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4420, Quality: poor, Time: 0.1131s
+2025-07-18 21:00:33 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b7af9d3f-55d277ba-022de5c3-f2af02db-f835144c
+2025-07-18 21:00:34 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3396, Quality: very_poor, Time: 1.5097s
+2025-07-18 21:00:34 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b7c6fdce-f0908c0a-7d9af9cc-c41325ae-72b92805
+2025-07-18 21:00:36 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2728, Quality: very_poor, Time: 1.9660s
+2025-07-18 21:00:36 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b7f7645f-afa4f5e7-4c67d87d-2cee15d7-fed5d9dc
+2025-07-18 21:00:38 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3384, Quality: very_poor, Time: 1.9562s
+2025-07-18 21:00:38 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b877a619-83f9280d-2b5bbdda-73af9b44-9e1aea88
+2025-07-18 21:00:40 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2640, Quality: very_poor, Time: 1.4100s
+2025-07-18 21:00:40 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b8ba3688-c33f4901-68666539-5ac881b0-5bc5394c
+2025-07-18 21:00:40 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4024, Quality: poor, Time: 0.2323s
+2025-07-18 21:00:40 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b9dd5699-cf09487d-cb0eee39-9a403a17-70a186f0
+2025-07-18 21:00:40 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3673, Quality: poor, Time: 0.2446s
+2025-07-18 21:00:40 - MedicalReportEvaluator - INFO - Processed 290/400 reports
+2025-07-18 21:00:40 - MedicalReportEvaluator - INFO - Evaluating single report - ID: b9e01b73-f0e7b2f9-d4a6f661-4f9bd412-9c4fe1c2
+2025-07-18 21:00:40 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4382, Quality: poor, Time: 0.2802s
+2025-07-18 21:00:40 - MedicalReportEvaluator - INFO - Evaluating single report - ID: ba86733f-022dc291-793e635a-29727e1e-9dad7179
+2025-07-18 21:00:41 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3602, Quality: poor, Time: 0.3329s
+2025-07-18 21:00:41 - MedicalReportEvaluator - INFO - Evaluating single report - ID: ba908331-a82e925f-04f20105-cac05c54-eaa3c3fa
+2025-07-18 21:00:42 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2028, Quality: very_poor, Time: 1.2585s
+2025-07-18 21:00:42 - MedicalReportEvaluator - INFO - Evaluating single report - ID: baf740a5-9e461b39-2335f685-a9a3725a-5afcaa6d
+2025-07-18 21:00:42 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3162, Quality: very_poor, Time: 0.4745s
+2025-07-18 21:00:42 - MedicalReportEvaluator - INFO - Evaluating single report - ID: bb67e399-2d48e563-acaeee48-c2d7e421-f4cc621c
+2025-07-18 21:00:45 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2740, Quality: very_poor, Time: 2.1763s
+2025-07-18 21:00:45 - MedicalReportEvaluator - INFO - Evaluating single report - ID: bc33fd1f-ada69d81-6d03750d-675e1bb0-536f6b8e
+2025-07-18 21:00:45 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4800, Quality: poor, Time: 0.1994s
+2025-07-18 21:00:45 - MedicalReportEvaluator - INFO - Evaluating single report - ID: bcb2f258-df6440d0-2e2f85e0-5575b137-d1fc288a
+2025-07-18 21:00:45 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4446, Quality: poor, Time: 0.2679s
+2025-07-18 21:00:45 - MedicalReportEvaluator - INFO - Evaluating single report - ID: be899a19-89cf10c2-7295ce31-56058872-cbae3abb
+2025-07-18 21:00:46 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3087, Quality: very_poor, Time: 1.3183s
+2025-07-18 21:00:46 - MedicalReportEvaluator - INFO - Evaluating single report - ID: c025727e-2d11897a-78dc5b05-b1728bf1-ecc7f975
+2025-07-18 21:00:47 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1366, Quality: very_poor, Time: 0.9038s
+2025-07-18 21:00:47 - MedicalReportEvaluator - INFO - Evaluating single report - ID: c1316162-1ca1832f-ca0ac6d3-9e45467e-f56c3f32
+2025-07-18 21:00:48 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1369, Quality: very_poor, Time: 0.6741s
+2025-07-18 21:00:48 - MedicalReportEvaluator - INFO - Processed 300/400 reports
+2025-07-18 21:00:48 - MedicalReportEvaluator - INFO - Evaluating single report - ID: c16e7d5d-3bc8325f-20b37195-05637979-a5992ffc
+2025-07-18 21:00:50 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2828, Quality: very_poor, Time: 1.5989s
+2025-07-18 21:00:50 - MedicalReportEvaluator - INFO - Evaluating single report - ID: c1d5b4f7-c4ed16c1-202cd868-0f06cd8a-25de3389
+2025-07-18 21:00:51 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2756, Quality: very_poor, Time: 1.1561s
+2025-07-18 21:00:51 - MedicalReportEvaluator - INFO - Evaluating single report - ID: c3875548-40cc758f-444c5dcb-a3479873-f2ce4226
+2025-07-18 21:00:51 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3016, Quality: very_poor, Time: 0.5361s
+2025-07-18 21:00:51 - MedicalReportEvaluator - INFO - Evaluating single report - ID: c5a94847-3725f257-a7b3345f-eccf2615-514ae08c
+2025-07-18 21:00:52 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3323, Quality: very_poor, Time: 0.5513s
+2025-07-18 21:00:52 - MedicalReportEvaluator - INFO - Evaluating single report - ID: c6d26c85-ec936a45-7be81953-5aa9d57a-6abd108e
+2025-07-18 21:00:53 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3096, Quality: very_poor, Time: 0.8461s
+2025-07-18 21:00:53 - MedicalReportEvaluator - INFO - Evaluating single report - ID: c78db0ff-828351a3-b87d8bcf-0cf9ec1b-f8d45906
+2025-07-18 21:00:54 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2421, Quality: very_poor, Time: 1.1918s
+2025-07-18 21:00:54 - MedicalReportEvaluator - INFO - Evaluating single report - ID: c7e8e2bc-4eec351f-7537ee20-ad4758af-5540e9f7
+2025-07-18 21:00:54 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4287, Quality: poor, Time: 0.1222s
+2025-07-18 21:00:54 - MedicalReportEvaluator - INFO - Evaluating single report - ID: c935de02-fd28d8b2-78dabe51-6ffd9987-ec56407f
+2025-07-18 21:00:56 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2633, Quality: very_poor, Time: 2.1102s
+2025-07-18 21:00:56 - MedicalReportEvaluator - INFO - Evaluating single report - ID: c973408c-0332e90c-b2d6ad6a-da4fa47b-088aeee4
+2025-07-18 21:00:58 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2724, Quality: very_poor, Time: 2.4023s
+2025-07-18 21:00:58 - MedicalReportEvaluator - INFO - Evaluating single report - ID: ca1d0c7b-1d46774a-6e2296d0-dc1d69b7-afc2474c
+2025-07-18 21:01:00 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2001, Quality: very_poor, Time: 1.9183s
+2025-07-18 21:01:00 - MedicalReportEvaluator - INFO - Processed 310/400 reports
+2025-07-18 21:01:00 - MedicalReportEvaluator - INFO - Evaluating single report - ID: cae34b8f-cef454bf-250bd88e-8bef265d-9a3f0172
+2025-07-18 21:01:02 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3735, Quality: poor, Time: 1.8499s
+2025-07-18 21:01:02 - MedicalReportEvaluator - INFO - Evaluating single report - ID: cb6c25df-0142c110-8fcd3735-dd952723-de6e5a91
+2025-07-18 21:01:03 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3312, Quality: very_poor, Time: 0.6391s
+2025-07-18 21:01:03 - MedicalReportEvaluator - INFO - Evaluating single report - ID: cc793e81-c56c08ce-c4d4998f-c53118c4-2c4042d3
+2025-07-18 21:01:03 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2848, Quality: very_poor, Time: 0.2841s
+2025-07-18 21:01:03 - MedicalReportEvaluator - INFO - Evaluating single report - ID: cce8ccd6-8d1a1418-705d1d9e-f19a858c-df92d6d4
+2025-07-18 21:01:05 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3344, Quality: very_poor, Time: 1.4400s
+2025-07-18 21:01:05 - MedicalReportEvaluator - INFO - Evaluating single report - ID: cd992638-f253b969-9363fdce-2a91bf07-9277ef3d
+2025-07-18 21:01:06 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2530, Quality: very_poor, Time: 1.4845s
+2025-07-18 21:01:06 - MedicalReportEvaluator - INFO - Evaluating single report - ID: ce3150ee-79e00aa2-0158d3ec-4df97717-cfa25047
+2025-07-18 21:01:07 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2517, Quality: very_poor, Time: 1.2115s
+2025-07-18 21:01:07 - MedicalReportEvaluator - INFO - Evaluating single report - ID: ce93df74-33dc6fb0-073af359-b5d4d566-9fdbf8e6
+2025-07-18 21:01:10 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1977, Quality: very_poor, Time: 2.3109s
+2025-07-18 21:01:10 - MedicalReportEvaluator - INFO - Evaluating single report - ID: d0873561-ad6a84ed-54f41798-79892a90-065358e3
+2025-07-18 21:01:10 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1503, Quality: very_poor, Time: 0.4838s
+2025-07-18 21:01:10 - MedicalReportEvaluator - INFO - Evaluating single report - ID: d0ad933b-0ff0fa4f-bd6b669d-a0931003-7ea00aab
+2025-07-18 21:01:11 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2982, Quality: very_poor, Time: 1.2564s
+2025-07-18 21:01:11 - MedicalReportEvaluator - INFO - Evaluating single report - ID: d0f49570-efbaa32e-041618b8-73171370-d1837a07
+2025-07-18 21:01:12 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3148, Quality: very_poor, Time: 0.8422s
+2025-07-18 21:01:12 - MedicalReportEvaluator - INFO - Processed 320/400 reports
+2025-07-18 21:01:12 - MedicalReportEvaluator - INFO - Evaluating single report - ID: d13abe86-35877813-1c28f39b-69ec5dbd-c9eca288
+2025-07-18 21:01:13 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4308, Quality: poor, Time: 0.5063s
+2025-07-18 21:01:13 - MedicalReportEvaluator - INFO - Evaluating single report - ID: d1d24df3-e48915e5-d488f006-a897d15a-1db1508d
+2025-07-18 21:01:14 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2936, Quality: very_poor, Time: 1.1131s
+2025-07-18 21:01:14 - MedicalReportEvaluator - INFO - Evaluating single report - ID: d1e67125-fc737ba3-1ac0b22f-c08a9f54-0ce85c95
+2025-07-18 21:01:14 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3268, Quality: very_poor, Time: 0.3200s
+2025-07-18 21:01:14 - MedicalReportEvaluator - INFO - Evaluating single report - ID: d23ca573-85c7b305-706a03ae-19d85aa6-dd6ef016
+2025-07-18 21:01:15 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2262, Quality: very_poor, Time: 0.4484s
+2025-07-18 21:01:15 - MedicalReportEvaluator - INFO - Evaluating single report - ID: d25f054a-e8199cdc-c669cb2e-ebcfb082-54c205b7
+2025-07-18 21:01:16 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2780, Quality: very_poor, Time: 1.1050s
+2025-07-18 21:01:16 - MedicalReportEvaluator - INFO - Evaluating single report - ID: d395c594-96025cff-7e6af4ad-ca08ac10-032bd500
+2025-07-18 21:01:17 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2062, Quality: very_poor, Time: 1.0051s
+2025-07-18 21:01:17 - MedicalReportEvaluator - INFO - Evaluating single report - ID: d43fd05a-ef456fe1-a327d066-651e7da7-49aac58b
+2025-07-18 21:01:18 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3344, Quality: very_poor, Time: 0.8602s
+2025-07-18 21:01:18 - MedicalReportEvaluator - INFO - Evaluating single report - ID: d4faec83-51dc7577-1952d8f5-952d86f5-f6facf8d
+2025-07-18 21:01:19 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2172, Quality: very_poor, Time: 1.9006s
+2025-07-18 21:01:19 - MedicalReportEvaluator - INFO - Evaluating single report - ID: d696dc20-e7e4cf9f-79bbc30b-4ab4a4bf-1429be71
+2025-07-18 21:01:22 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2851, Quality: very_poor, Time: 2.1512s
+2025-07-18 21:01:22 - MedicalReportEvaluator - INFO - Evaluating single report - ID: d6a6d523-9a51040b-07bb47eb-44feb4bc-ca64ca95
+2025-07-18 21:01:22 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2578, Quality: very_poor, Time: 0.7919s
+2025-07-18 21:01:22 - MedicalReportEvaluator - INFO - Processed 330/400 reports
+2025-07-18 21:01:22 - MedicalReportEvaluator - INFO - Evaluating single report - ID: d6c2c297-71ce258b-9b743223-c4df7ea7-de91722c
+2025-07-18 21:01:23 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2290, Quality: very_poor, Time: 0.7222s
+2025-07-18 21:01:23 - MedicalReportEvaluator - INFO - Evaluating single report - ID: d6c4c0d6-f12c2415-a5b3d2df-bcc4a202-442d3523
+2025-07-18 21:01:24 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3440, Quality: very_poor, Time: 0.6818s
+2025-07-18 21:01:24 - MedicalReportEvaluator - INFO - Evaluating single report - ID: d82df30f-7feff809-2d5bf188-57a88841-9808d811
+2025-07-18 21:01:24 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3209, Quality: very_poor, Time: 0.6211s
+2025-07-18 21:01:24 - MedicalReportEvaluator - INFO - Evaluating single report - ID: d890ca8e-d3cde70d-56388038-89f025a4-aa032f9b
+2025-07-18 21:01:25 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2942, Quality: very_poor, Time: 0.9078s
+2025-07-18 21:01:25 - MedicalReportEvaluator - INFO - Evaluating single report - ID: d8d27634-c797ba3f-79f7384e-6dd55810-93915d51
+2025-07-18 21:01:26 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3127, Quality: very_poor, Time: 0.8277s
+2025-07-18 21:01:26 - MedicalReportEvaluator - INFO - Evaluating single report - ID: d940e7a9-559c248c-f6e05216-82a4fae8-7e84c087
+2025-07-18 21:01:27 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3708, Quality: poor, Time: 0.3906s
+2025-07-18 21:01:27 - MedicalReportEvaluator - INFO - Evaluating single report - ID: d9c9a1f7-002efedd-9e4b68ad-a57b0802-3a8a0543
+2025-07-18 21:01:28 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2958, Quality: very_poor, Time: 1.3179s
+2025-07-18 21:01:28 - MedicalReportEvaluator - INFO - Evaluating single report - ID: da0ed441-96da9ff1-8a3b72ba-61640a66-0e1c287a
+2025-07-18 21:01:28 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3628, Quality: poor, Time: 0.3882s
+2025-07-18 21:01:28 - MedicalReportEvaluator - INFO - Evaluating single report - ID: da279565-e5f3f907-e3f48862-75ae1211-c84e923a
+2025-07-18 21:01:29 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2952, Quality: very_poor, Time: 0.8903s
+2025-07-18 21:01:29 - MedicalReportEvaluator - INFO - Evaluating single report - ID: da2ae2cd-4a35bbc9-b6049c66-681c935f-8b4d1aab
+2025-07-18 21:01:30 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2863, Quality: very_poor, Time: 1.0111s
+2025-07-18 21:01:30 - MedicalReportEvaluator - INFO - Processed 340/400 reports
+2025-07-18 21:01:30 - MedicalReportEvaluator - INFO - Evaluating single report - ID: da2fd5fb-aa175b1c-e7741cb5-fe3bfaa9-fb7961ad
+2025-07-18 21:01:31 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2723, Quality: very_poor, Time: 0.5206s
+2025-07-18 21:01:31 - MedicalReportEvaluator - INFO - Evaluating single report - ID: da79869d-f8840992-cfc33a71-57e34f53-f9674f28
+2025-07-18 21:01:31 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.5181, Quality: fair, Time: 0.2075s
+2025-07-18 21:01:31 - MedicalReportEvaluator - INFO - Evaluating single report - ID: dc63738e-e751f65e-82a68318-2d812b04-d30cf7f3
+2025-07-18 21:01:32 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2613, Quality: very_poor, Time: 1.1270s
+2025-07-18 21:01:32 - MedicalReportEvaluator - INFO - Evaluating single report - ID: dc9c939a-061a10e6-99e6e97a-71879b67-fac529fa
+2025-07-18 21:01:32 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2563, Quality: very_poor, Time: 0.3808s
+2025-07-18 21:01:32 - MedicalReportEvaluator - INFO - Evaluating single report - ID: dcdc908d-8f4a46cf-0dff1d17-7bf04375-a24a33a8
+2025-07-18 21:01:33 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2549, Quality: very_poor, Time: 0.2651s
+2025-07-18 21:01:33 - MedicalReportEvaluator - INFO - Evaluating single report - ID: dd28d7b2-1303acd7-f23b52ab-4c24a9ab-f7296720
+2025-07-18 21:01:35 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2967, Quality: very_poor, Time: 2.3594s
+2025-07-18 21:01:35 - MedicalReportEvaluator - INFO - Evaluating single report - ID: dd614e11-cbaae90d-0d7aba90-dcbc64f3-dceed02f
+2025-07-18 21:01:35 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3847, Quality: poor, Time: 0.2897s
+2025-07-18 21:01:35 - MedicalReportEvaluator - INFO - Evaluating single report - ID: ddad2d58-34709cbe-c4b4462e-0fefc53a-c03292dc
+2025-07-18 21:01:36 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4579, Quality: poor, Time: 0.1640s
+2025-07-18 21:01:36 - MedicalReportEvaluator - INFO - Evaluating single report - ID: dddb39f7-b24db7e0-879ef5d6-b57ce357-17a8d2c7
+2025-07-18 21:01:36 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4182, Quality: poor, Time: 0.1446s
+2025-07-18 21:01:36 - MedicalReportEvaluator - INFO - Evaluating single report - ID: de692171-a620e239-de282eaf-e448d994-0d961f61
+2025-07-18 21:01:37 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1957, Quality: very_poor, Time: 1.4347s
+2025-07-18 21:01:37 - MedicalReportEvaluator - INFO - Processed 350/400 reports
+2025-07-18 21:01:37 - MedicalReportEvaluator - INFO - Evaluating single report - ID: de7d96e9-b5b6595c-987c4b7c-0e007d4c-9f30ebb0
+2025-07-18 21:01:38 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1995, Quality: very_poor, Time: 1.0196s
+2025-07-18 21:01:38 - MedicalReportEvaluator - INFO - Evaluating single report - ID: de862699-c552320b-11e6f6c8-5087a74f-98f0b80d
+2025-07-18 21:01:39 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3054, Quality: very_poor, Time: 1.0129s
+2025-07-18 21:01:39 - MedicalReportEvaluator - INFO - Evaluating single report - ID: debed8d3-97a91dd5-82f33245-583fa2f3-57a91967
+2025-07-18 21:01:41 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2875, Quality: very_poor, Time: 2.2926s
+2025-07-18 21:01:41 - MedicalReportEvaluator - INFO - Evaluating single report - ID: dede6edc-e94146ea-4aebdfba-4b06ab35-078b48f7
+2025-07-18 21:01:43 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2471, Quality: very_poor, Time: 1.1298s
+2025-07-18 21:01:43 - MedicalReportEvaluator - INFO - Evaluating single report - ID: e0104303-430cdfae-5848a171-34c9bb07-b006fd0a
+2025-07-18 21:01:43 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2216, Quality: very_poor, Time: 0.2205s
+2025-07-18 21:01:43 - MedicalReportEvaluator - INFO - Evaluating single report - ID: e02c74b5-7e6db77b-ca664972-b7202c10-53116e66
+2025-07-18 21:01:45 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3015, Quality: very_poor, Time: 1.7501s
+2025-07-18 21:01:45 - MedicalReportEvaluator - INFO - Evaluating single report - ID: e09c7d22-4fa6216f-6237ef58-ab2f5406-f4a602a6
+2025-07-18 21:01:45 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4567, Quality: poor, Time: 0.1594s
+2025-07-18 21:01:45 - MedicalReportEvaluator - INFO - Evaluating single report - ID: e0fb4b29-8ecbe21f-f7dbf4f8-de44646d-76e97eae
+2025-07-18 21:01:45 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4781, Quality: poor, Time: 0.1775s
+2025-07-18 21:01:45 - MedicalReportEvaluator - INFO - Evaluating single report - ID: e13035e9-35e026e1-d7d54018-e342a349-93752c81
+2025-07-18 21:01:46 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1977, Quality: very_poor, Time: 0.9175s
+2025-07-18 21:01:46 - MedicalReportEvaluator - INFO - Evaluating single report - ID: e199d51c-58d0356d-8ed19c9f-64ddb8ec-cd3fdc7a
+2025-07-18 21:01:46 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.0993, Quality: very_poor, Time: 0.1363s
+2025-07-18 21:01:46 - MedicalReportEvaluator - INFO - Processed 360/400 reports
+2025-07-18 21:01:46 - MedicalReportEvaluator - INFO - Evaluating single report - ID: e276b74c-ead369d4-94ec0d06-8b5db80d-f57cfca8
+2025-07-18 21:01:47 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2853, Quality: very_poor, Time: 1.4375s
+2025-07-18 21:01:47 - MedicalReportEvaluator - INFO - Evaluating single report - ID: e2da8f3f-ff915aaa-3ef413f2-a93a4dcb-1000dee2
+2025-07-18 21:01:49 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2624, Quality: very_poor, Time: 1.3995s
+2025-07-18 21:01:49 - MedicalReportEvaluator - INFO - Evaluating single report - ID: e3129294-b3406567-c9b72e77-ac5c4b50-38d50e13
+2025-07-18 21:01:50 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2263, Quality: very_poor, Time: 1.3170s
+2025-07-18 21:01:50 - MedicalReportEvaluator - INFO - Evaluating single report - ID: e35b1970-3dfc9412-ec657374-09990870-561ca892
+2025-07-18 21:01:52 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3303, Quality: very_poor, Time: 1.5815s
+2025-07-18 21:01:52 - MedicalReportEvaluator - INFO - Evaluating single report - ID: e435656e-c2bcf67d-ac123c19-834cccab-4abceb1a
+2025-07-18 21:01:52 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3240, Quality: very_poor, Time: 0.4323s
+2025-07-18 21:01:52 - MedicalReportEvaluator - INFO - Evaluating single report - ID: e4e81875-e7df926a-ea64293e-5e2e7e7a-0a6862ee
+2025-07-18 21:01:52 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3668, Quality: poor, Time: 0.2210s
+2025-07-18 21:01:52 - MedicalReportEvaluator - INFO - Evaluating single report - ID: e59da37b-74cfaeaa-6c7392df-80e7dc41-d45ef005
+2025-07-18 21:01:53 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2952, Quality: very_poor, Time: 0.7695s
+2025-07-18 21:01:53 - MedicalReportEvaluator - INFO - Evaluating single report - ID: e68bb7df-05039df8-44346b6b-c34ca52e-a92432c7
+2025-07-18 21:01:54 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2350, Quality: very_poor, Time: 0.6264s
+2025-07-18 21:01:54 - MedicalReportEvaluator - INFO - Evaluating single report - ID: e7ec80d5-5aa729da-6c3e4569-4c94f01f-0ad2215f
+2025-07-18 21:01:55 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2999, Quality: very_poor, Time: 0.7937s
+2025-07-18 21:01:55 - MedicalReportEvaluator - INFO - Evaluating single report - ID: e9358a67-7aa99ec1-44e98efc-a9f02c43-f6aea5cf
+2025-07-18 21:01:56 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2619, Quality: very_poor, Time: 1.1357s
+2025-07-18 21:01:56 - MedicalReportEvaluator - INFO - Processed 370/400 reports
+2025-07-18 21:01:56 - MedicalReportEvaluator - INFO - Evaluating single report - ID: e952efca-b170e9cb-0faf06cf-286b4ea1-05a61065
+2025-07-18 21:01:56 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3479, Quality: very_poor, Time: 0.3548s
+2025-07-18 21:01:56 - MedicalReportEvaluator - INFO - Evaluating single report - ID: eaea1e29-a27efeaa-4a2068e3-0ef61fec-50bc854a
+2025-07-18 21:01:57 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3255, Quality: very_poor, Time: 0.8240s
+2025-07-18 21:01:57 - MedicalReportEvaluator - INFO - Evaluating single report - ID: ecaab183-6c08f6b8-21edcbae-0f9547f2-c28f62d0
+2025-07-18 21:01:57 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2488, Quality: very_poor, Time: 0.4337s
+2025-07-18 21:01:57 - MedicalReportEvaluator - INFO - Evaluating single report - ID: ecd3d7dd-5561deec-5ff7cf85-0ca734e3-cfbe0b9d
+2025-07-18 21:01:57 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3680, Quality: poor, Time: 0.1838s
+2025-07-18 21:01:57 - MedicalReportEvaluator - INFO - Evaluating single report - ID: ed0a0025-df879bcc-0127b76f-536794c9-93b43cd3
+2025-07-18 21:01:58 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3758, Quality: poor, Time: 0.1812s
+2025-07-18 21:01:58 - MedicalReportEvaluator - INFO - Evaluating single report - ID: efd15b9c-a2da098d-3a0e0297-4e57f2fe-6821c6b9
+2025-07-18 21:02:00 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3360, Quality: very_poor, Time: 2.3786s
+2025-07-18 21:02:00 - MedicalReportEvaluator - INFO - Evaluating single report - ID: f01c5c2c-02e5fe0a-bdf284cc-15f15421-aa93f19d
+2025-07-18 21:02:01 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2135, Quality: very_poor, Time: 1.4643s
+2025-07-18 21:02:01 - MedicalReportEvaluator - INFO - Evaluating single report - ID: f0b10c31-81a85a6a-6e7ff850-3204af93-1b38f177
+2025-07-18 21:02:03 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3086, Quality: very_poor, Time: 1.2953s
+2025-07-18 21:02:03 - MedicalReportEvaluator - INFO - Evaluating single report - ID: f2ea048e-52ada468-199a5a64-06f14cb3-76e57312
+2025-07-18 21:02:05 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2764, Quality: very_poor, Time: 2.1074s
+2025-07-18 21:02:05 - MedicalReportEvaluator - INFO - Evaluating single report - ID: f43ed85f-f693419c-ca41ad14-854149c7-81bf7afe
+2025-07-18 21:02:06 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2350, Quality: very_poor, Time: 0.7054s
+2025-07-18 21:02:06 - MedicalReportEvaluator - INFO - Processed 380/400 reports
+2025-07-18 21:02:06 - MedicalReportEvaluator - INFO - Evaluating single report - ID: f49302b9-036ae061-5d20582e-5f68f886-cba4f6fd
+2025-07-18 21:02:06 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4120, Quality: poor, Time: 0.1767s
+2025-07-18 21:02:06 - MedicalReportEvaluator - INFO - Evaluating single report - ID: f5f335c8-148fbc15-8bb36e82-d7f364d8-066a5b50
+2025-07-18 21:02:08 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3412, Quality: very_poor, Time: 2.0073s
+2025-07-18 21:02:08 - MedicalReportEvaluator - INFO - Evaluating single report - ID: f717a475-b500ef37-d179a27e-ad501557-08129dc5
+2025-07-18 21:02:10 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2854, Quality: very_poor, Time: 2.3263s
+2025-07-18 21:02:10 - MedicalReportEvaluator - INFO - Evaluating single report - ID: f7254b7d-1a32be23-2b58d468-1d80dc7e-736286d4
+2025-07-18 21:02:13 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2742, Quality: very_poor, Time: 2.9211s
+2025-07-18 21:02:13 - MedicalReportEvaluator - INFO - Evaluating single report - ID: f79f46d3-74a520f1-3039fa3d-eef50e3d-a5ad3e59
+2025-07-18 21:02:13 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3623, Quality: poor, Time: 0.2177s
+2025-07-18 21:02:13 - MedicalReportEvaluator - INFO - Evaluating single report - ID: f822bf04-bb6d44c7-d992163b-54e7d6ac-9355a7aa
+2025-07-18 21:02:14 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1441, Quality: very_poor, Time: 0.3617s
+2025-07-18 21:02:14 - MedicalReportEvaluator - INFO - Evaluating single report - ID: f854499f-d285509a-3d6f3bb9-95f42e2e-de20bc5f
+2025-07-18 21:02:14 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.4851, Quality: poor, Time: 0.2495s
+2025-07-18 21:02:14 - MedicalReportEvaluator - INFO - Evaluating single report - ID: f9474194-83c01c55-41295dbc-708f66b1-a289b0e3
+2025-07-18 21:02:15 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1760, Quality: very_poor, Time: 0.9273s
+2025-07-18 21:02:15 - MedicalReportEvaluator - INFO - Evaluating single report - ID: f95f730a-28f10e3a-f482484b-6efe8e38-1a69556d
+2025-07-18 21:02:16 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2964, Quality: very_poor, Time: 0.9520s
+2025-07-18 21:02:16 - MedicalReportEvaluator - INFO - Evaluating single report - ID: fb53795f-72ab0dde-40f18b2a-67082c18-2df67b9e
+2025-07-18 21:02:16 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3113, Quality: very_poor, Time: 0.3398s
+2025-07-18 21:02:16 - MedicalReportEvaluator - INFO - Processed 390/400 reports
+2025-07-18 21:02:16 - MedicalReportEvaluator - INFO - Evaluating single report - ID: fb97dc99-52ef2345-cca09851-57c3d33d-c0fcf34c
+2025-07-18 21:02:18 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2425, Quality: very_poor, Time: 1.4797s
+2025-07-18 21:02:18 - MedicalReportEvaluator - INFO - Evaluating single report - ID: fbae5604-a1013966-9879d4a3-7298599f-956824e1
+2025-07-18 21:02:19 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2163, Quality: very_poor, Time: 1.2412s
+2025-07-18 21:02:19 - MedicalReportEvaluator - INFO - Evaluating single report - ID: fbbc3c9e-e25f5fc2-ae478cb9-2c907a52-bfdf4f54
+2025-07-18 21:02:20 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2408, Quality: very_poor, Time: 1.2355s
+2025-07-18 21:02:20 - MedicalReportEvaluator - INFO - Evaluating single report - ID: fbd0a719-f05c1b45-24ac721f-07b8da32-996da570
+2025-07-18 21:02:22 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2770, Quality: very_poor, Time: 2.3043s
+2025-07-18 21:02:22 - MedicalReportEvaluator - INFO - Evaluating single report - ID: fbd2309d-6992330e-8a9306ef-abf38f69-1a411894
+2025-07-18 21:02:24 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.1954, Quality: very_poor, Time: 1.3623s
+2025-07-18 21:02:24 - MedicalReportEvaluator - INFO - Evaluating single report - ID: fd8917c5-e97a5dc3-fb6f764d-99d49d97-009a6d0b
+2025-07-18 21:02:24 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2458, Quality: very_poor, Time: 0.2242s
+2025-07-18 21:02:24 - MedicalReportEvaluator - INFO - Evaluating single report - ID: fd9e7099-abc02c00-3751d6ed-6fad31f0-afd07b89
+2025-07-18 21:02:26 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2850, Quality: very_poor, Time: 1.6472s
+2025-07-18 21:02:26 - MedicalReportEvaluator - INFO - Evaluating single report - ID: fe4451a9-627ed12a-8ed7bff0-462c69ab-51a36855
+2025-07-18 21:02:26 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.3944, Quality: poor, Time: 0.1606s
+2025-07-18 21:02:26 - MedicalReportEvaluator - INFO - Evaluating single report - ID: feefc68a-0a26d0a0-65e4a2a0-b1efc19d-0abcd7d1
+2025-07-18 21:02:27 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2405, Quality: very_poor, Time: 1.1263s
+2025-07-18 21:02:27 - MedicalReportEvaluator - INFO - Evaluating single report - ID: ff31f1c2-4f33d28f-62c1ef2d-e426f946-abb758fa
+2025-07-18 21:02:29 - MedicalReportEvaluator - INFO - Evaluation completed - Overall Score: 0.2123, Quality: very_poor, Time: 2.0612s
+2025-07-18 21:02:29 - MedicalReportEvaluator - INFO - Processed 400/400 reports
+2025-07-18 21:02:29 - MedicalReportEvaluator - INFO - Saved batch results to evaluation_results/batch_20250718_205457_400_final.json
+2025-07-18 21:02:29 - MedicalReportEvaluator - INFO - Batch evaluation completed - ID: batch_20250718_205457_400
+2025-07-18 21:02:29 - MedicalReportEvaluator - INFO - Success: 400/400, Time: 452.25s, Avg: 1.131s/report
+2025-07-18 21:02:29 - MedicalReportEvaluator - INFO - Batch Overall Score: 0.2983

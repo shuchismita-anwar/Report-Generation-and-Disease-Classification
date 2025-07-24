@@ -2288,20 +2288,16 @@ REPORTING STYLE: {reporting_style}
             # Task instruction with optimized guidance
             task_instruction = f"""
 === REPORTING TASK ===
-Generate a {template_config['style']} with sections: {', '.join(template_config['sections']).upper()}
+Generate ONLY the IMPRESSION section for this chest X-ray analysis.
 
 🎯 SPECIFIC INSTRUCTIONS FOR THIS CASE:
 {self._get_case_specific_instructions(condition_predictions, template)}
 
 ### 📏 FORMATTING INSTRUCTIONS:
-• Structure:
-  ```
-  FINDINGS: 
-  [continuous paragraph]  
-
-  IMPRESSION:  
-  [continuous paragraph]
-  ```
+• Write ONLY the impression text as a continuous paragraph
+• Do NOT include section headers like "IMPRESSION:" 
+• Do NOT include findings section
+• Focus on concise clinical conclusions
 
 ### ✳️ INPUT STRUCTURE:
 • `CHEST X-RAY IMAGE`: Primary source - examine visually for all findings
@@ -2315,35 +2311,26 @@ Generate a {template_config['style']} with sections: {', '.join(template_config[
 • **Include device findings** (tubes, catheters, lines) even if incidental
 • **Be anatomically specific** when high-confidence predictions support it
 
-📋 EXAMPLE REPORT FORMATS:
+📋 EXAMPLE IMPRESSION FORMATS:
 
 Example 1 (Device Present):
-FINDINGS: 
-Feeding tube extends into the upper abdomen, the tip is not imaged. Lung volumes are normal. Mediastinal contours and heart size within normal limits. No consolidation or pleural effusion. No pneumothorax. No acute osseous abnormality.
-
-IMPRESSION: 
 No acute cardiopulmonary process.
 
 Example 2 (Multiple Findings):
-FINDINGS: 
-PA and lateral views of the chest demonstrate well-expanded lungs. In comparison to the prior study, there is interval obscuration of the right heart border and the medial right hemidiaphragm. Correlation with the lateral view suggests that this is likely due to interval development of small bilateral pleural effusions. Underlying consolidation is not excluded. No pneumothorax. Cardiomediastinal silhouette is otherwise stable.
-
-IMPRESSION: 
 Interval development of small bilateral pleural effusions. Underlying consolidation not excluded.
 
 Example 3 (Normal Study):
-FINDINGS: 
-The lungs are hyperinflated reflective of COPD. Apparent increased opacity projecting over the right lung apex correlates with posterior right fifth rib fracture with callus. Streaky bibasilar opacities likely reflect atelectasis. No focal consolidation to suggest pneumonia. No pleural effusion or pneumothorax. The heart is normal in size, and the mediastinal contours are normal.
-
-IMPRESSION: 
 No acute cardiopulmonary process. Focal opacity in the retrocardiac region.
 
-⚠️ **REMEMBER**: Do NOT mention attention maps, saliency, heatmaps, or explainability data. Use model predictions and provided keywords only.
+⚠️ **REMEMBER**: 
+• Do NOT mention attention maps, saliency, heatmaps, or explainability data
+• Use model predictions and provided keywords only
+• Write ONLY the impression paragraph - no section headers or findings
 
 ### ✳️ GOAL:
-Maximize lexical and semantic similarity to the expert reference report. Prioritize clinical specificity and exact terminology alignment.
+Maximize lexical and semantic similarity to the expert reference report impression. Prioritize clinical specificity and exact terminology alignment.
 
-CHEST X-RAY REPORT:
+IMPRESSION:
 """
             
             # Combine sections

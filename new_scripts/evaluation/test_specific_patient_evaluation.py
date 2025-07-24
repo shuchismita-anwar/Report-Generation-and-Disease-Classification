@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 """
-Specific Patient Report Evaluation
-==================================
+Specific Patient Impression Evaluation
+======================================
 
-This script evaluates the LLM-generated report for patient efa5f70a-148764b5-a1137b9b-0e30e4c3-38c465a6
-against the ground truth radiology report using all available metrics (BLEU, ROUGE, METEOR, CIDEr, BERTScore, Medical).
+This script evaluates ONLY the IMPRESSION section of the LLM-generated report for patient 6c2b39fa-2c251fcf-addd31da-83faee60-044fa8f9
+against the IMPRESSION section of the ground truth radiology report using all available metrics (BLEU, ROUGE, METEOR, CIDEr, BERTScore, Medical).
 
 Patient Details:
-- Patient ID: patient_12020330
-- Study ID: 56979066
-- DICOM ID: efa5f70a-148764b5-a1137b9b-0e30e4c3-38c465a6
+- Patient ID: patient_12683473
+- Study ID: 59581651
+- DICOM ID: 6c2b39fa-2c251fcf-addd31da-83faee60-044fa8f9
+
+Note: This evaluation focuses solely on impression-to-impression comparison, excluding findings sections.
 
 Author: Medical Report Evaluation System
 Date: 2025-01-19
@@ -33,10 +35,10 @@ from metrics.radgraph_f1_scorer import RadGraphF1Scorer
 
 def load_llm_generated_report() -> str:
     """
-    Load the LLM-generated report from latest_fixed_analysis.txt
+    Load ONLY the impression content from latest_fixed_analysis.txt
     
     Returns:
-        str: The cleaned LLM-generated report text
+        str: The impression text only (without headers or formatting)
     """
     llm_report_path = current_dir.parent / "latest_fixed_analysis.txt"
     
@@ -46,33 +48,35 @@ def load_llm_generated_report() -> str:
     with open(llm_report_path, 'r', encoding='utf-8') as f:
         content = f.read()
     
-    # The file appears to contain a complete medical report already
-    # Clean it up by removing any extra headers and formatting
+    # Extract only the actual impression content, removing headers and formatting
     lines = content.split('\n')
-    report_lines = []
+    impression_lines = []
     
     for line in lines:
         line = line.strip()
-        if line and not line.startswith('🔍') and not line.startswith('--'):
-            report_lines.append(line)
+        # Skip headers, separators, and empty lines
+        if line and not line.startswith('CLINICAL FINDINGS:') and not line.startswith('--') and not line.startswith('🔍'):
+            impression_lines.append(line)
     
-    # If no content found, return the entire content stripped
-    result = '\n'.join(report_lines).strip()
-    if not result:
-        result = content.strip()
+    # Join all content lines (should be just the impression)
+    impression_text = ' '.join(impression_lines).strip()
     
-    return result
+    # If no content found, raise an error
+    if not impression_text:
+        raise ValueError("No impression content found in LLM report")
+    
+    return impression_text
 
 
 def load_ground_truth_report() -> str:
     """
-    Load the ground truth radiology report from the MIMIC dataset
+    Load ONLY the IMPRESSION section from the ground truth radiology report
     
     Returns:
-        str: The cleaned ground truth report text
+        str: The impression section text only
     """
     # Path to the ground truth report
-    gt_report_path = current_dir.parent.parent / "cleaned_reports" / "patient_12020330" / "CXR-DICOM" / "s56979066.txt"
+    gt_report_path = current_dir.parent.parent / "cleaned_reports" / "patient_12683473" / "CXR-DICOM" / "s59581651.txt"
     
     if not gt_report_path.exists():
         raise FileNotFoundError(f"Ground truth report not found: {gt_report_path}")
@@ -80,16 +84,42 @@ def load_ground_truth_report() -> str:
     with open(gt_report_path, 'r', encoding='utf-8') as f:
         content = f.read()
     
-    # Clean the ground truth report by removing headers and extra whitespace
+    # Extract only the IMPRESSION section
     lines = content.split('\n')
-    report_lines = []
+    impression_lines = []
+    in_impression_section = False
     
     for line in lines:
         line = line.strip()
-        if line and not line.startswith('FINAL REPORT'):
-            report_lines.append(line)
+        
+        # Start capturing when we hit the IMPRESSION header
+        if line.startswith('IMPRESSION:'):
+            in_impression_section = True
+            # Add the content after "IMPRESSION:" if it's on the same line
+            impression_content = line.replace('IMPRESSION:', '').strip()
+            if impression_content:
+                impression_lines.append(impression_content)
+            continue
+        
+        # If we're in the impression section, add the line
+        if in_impression_section:
+            # Stop if we hit another section header or empty lines that indicate end
+            if line.startswith(('FINDINGS:', 'TECHNIQUE:', 'COMPARISON:', 'HISTORY:', 'FINAL REPORT')) or \
+               (not line and len(impression_lines) > 0):
+                break
+            
+            # Add non-empty lines to impression
+            if line:
+                impression_lines.append(line)
     
-    return '\n'.join(report_lines).strip()
+    # Join the impression lines and clean up
+    impression_text = ' '.join(impression_lines).strip()
+    
+    # If no impression found, raise an error
+    if not impression_text:
+        raise ValueError("No IMPRESSION section found in ground truth report")
+    
+    return impression_text
 
 
 def format_detailed_results(evaluation_result: dict) -> str:
@@ -111,10 +141,11 @@ def format_detailed_results(evaluation_result: dict) -> str:
     
     # Build detailed report
     report = f"""
-# 🏥 DETAILED PATIENT EVALUATION REPORT
-**Patient ID**: patient_12020330 (efa5f70a-148764b5-a1137b9b-0e30e4c3-38c465a6)
-**Study ID**: 56979066
+# 🏥 DETAILED PATIENT IMPRESSION EVALUATION REPORT
+**Patient ID**: patient_12683473 (6c2b39fa-2c251fcf-addd31da-83faee60-044fa8f9)
+**Study ID**: 59581651
 **Evaluation Date**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+**Evaluation Type**: IMPRESSION section comparison only
 
 ## 🎯 OVERALL PERFORMANCE
 - **Overall Score**: {overall_score:.4f}
@@ -161,12 +192,12 @@ def format_detailed_results(evaluation_result: dict) -> str:
                 report += f"- **CIDEr Score**: {cider_score:.4f}\n"
                 
             elif metric_name == "bert_score":
-                if 'f1' in metric_data:
-                    report += f"- **F1 Score**: {metric_data['f1']:.4f}\n"
-                if 'precision' in metric_data:
-                    report += f"- **Precision**: {metric_data['precision']:.4f}\n"
-                if 'recall' in metric_data:
-                    report += f"- **Recall**: {metric_data['recall']:.4f}\n"
+                if 'bertscore_f1' in metric_data:
+                    report += f"- **F1 Score**: {metric_data['bertscore_f1']:.4f}\n"
+                if 'bertscore_precision' in metric_data:
+                    report += f"- **Precision**: {metric_data['bertscore_precision']:.4f}\n"
+                if 'bertscore_recall' in metric_data:
+                    report += f"- **Recall**: {metric_data['bertscore_recall']:.4f}\n"
                     
             elif metric_name == "medical":
                 medical_score = metric_data.get('medical_score', 0)
@@ -264,23 +295,24 @@ def format_detailed_results(evaluation_result: dict) -> str:
 def main():
     """Main execution function."""
     
-    print("🚀 Starting Specific Patient Evaluation...")
+    print("🚀 Starting Specific Patient Impression Evaluation...")
     print("=" * 80)
-    print(f"📋 Patient: efa5f70a-148764b5-a1137b9b-0e30e4c3-38c465a6")
-    print(f"🏥 Study: 56979066 (patient_12020330)")
+    print(f"📋 Patient: 6c2b39fa-2c251fcf-addd31da-83faee60-044fa8f9")
+    print(f"🏥 Study: 59581651 (patient_12683473)")
+    print(f"🎯 Focus: IMPRESSION section comparison only")
     print("=" * 80)
     
     try:
-        # Step 1: Load both reports
-        print("\n📖 Step 1: Loading reports...")
+        # Step 1: Load both impression sections
+        print("\n📖 Step 1: Loading impression sections...")
         
-        print("   Loading LLM-generated report...")
+        print("   Loading LLM-generated impression...")
         llm_report = load_llm_generated_report()
-        print(f"   ✅ LLM report loaded ({len(llm_report)} characters)")
+        print(f"   ✅ LLM impression loaded ({len(llm_report)} characters)")
         
-        print("   Loading ground truth report...")
+        print("   Loading ground truth impression...")
         gt_report = load_ground_truth_report()
-        print(f"   ✅ Ground truth loaded ({len(gt_report)} characters)")
+        print(f"   ✅ Ground truth impression loaded ({len(gt_report)} characters)")
         
         # Step 2: Initialize evaluator
         print("\n🔧 Step 2: Initializing evaluation system...")
@@ -304,10 +336,10 @@ def main():
         results = evaluator.evaluate_single(
             generated_report=llm_report,
             ground_truth_report=gt_report,
-            image_id="efa5f70a-148764b5-a1137b9b-0e30e4c3-38c465a6",
+            image_id="6c2b39fa-2c251fcf-addd31da-83faee60-044fa8f9",
             metadata={
-                "patient_id": "patient_12020330",
-                "study_id": "56979066",
+                "patient_id": "patient_12683473",
+                "study_id": "59581651",
                 "evaluation_type": "specific_patient_test"
             }
         )
@@ -338,6 +370,10 @@ def main():
         if 'meteor' in metrics:
             meteor_score = metrics['meteor'].get('meteor', 0) if isinstance(metrics['meteor'], dict) else metrics['meteor']
             print(f"   METEOR Score: {meteor_score:.4f}")
+        
+        if 'bert_score' in metrics:
+            bert_score = metrics['bert_score'].get('bertscore_f1', 0) if isinstance(metrics['bert_score'], dict) else metrics['bert_score']
+            print(f"   BERTScore F1: {bert_score:.4f}")
         
         if 'medical' in metrics:
             medical_score = metrics['medical'].get('medical_score', 0) if isinstance(metrics['medical'], dict) else metrics['medical']

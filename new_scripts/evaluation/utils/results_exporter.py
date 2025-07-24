@@ -277,7 +277,12 @@ class ResultsExporter:
         
         if 'average_scores' in batch_summary:
             avg_scores = batch_summary['average_scores']
-            writer.writerow(['Average Overall Score', round(avg_scores.get('overall_score', 0.0), precision)])
+            writer.writerow(['Average Overall Score (Mean)', round(avg_scores.get('overall_score', 0.0), precision)])
+            
+            # Add standard deviation if available
+            stats = avg_scores.get('statistics', {})
+            if 'std_dev' in stats:
+                writer.writerow(['Overall Score Std Dev', round(stats.get('std_dev', 0.0), precision)])
     
     def _write_single_csv(self, writer, results: Dict[str, Any], 
                          include_metadata: bool, precision: int) -> None:
@@ -400,7 +405,12 @@ class ResultsExporter:
         
         if 'average_scores' in batch_summary:
             avg_scores = batch_summary['average_scores']
-            f.write(f"<tr><td>Average Overall Score</td><td>{avg_scores.get('overall_score', 0.0):.{precision}f}</td></tr>\n")
+            f.write(f"<tr><td>Average Overall Score (Mean)</td><td>{avg_scores.get('overall_score', 0.0):.{precision}f}</td></tr>\n")
+            
+            # Add standard deviation if available
+            stats = avg_scores.get('statistics', {})
+            if 'std_dev' in stats:
+                f.write(f"<tr><td>Overall Score Std Dev</td><td>±{stats.get('std_dev', 0.0):.{precision}f}</td></tr>\n")
         
         f.write("</table>\n")
         

@@ -79,16 +79,25 @@ class AutomatedReportGenerator:
                     elif metric_name == "medical":
                         metric_details[metric_name].append(metric_data.get("medical_score", 0))
         
-        # Calculate metric averages
-        metric_averages = {}
+        # Calculate metric averages and standard deviations
+        import statistics
+        metric_statistics = {}
         for metric, scores in metric_details.items():
             if scores:  # Include all metrics including BERTScore
-                metric_averages[metric] = sum(scores) / len(scores)
+                metric_statistics[metric] = {
+                    'mean': sum(scores) / len(scores),
+                    'std': statistics.stdev(scores) if len(scores) > 1 else 0.0,
+                    'count': len(scores)
+                }
         
         # Best and worst performing reports
         sorted_results = sorted(individual_results, key=lambda x: x.get("overall_score", 0), reverse=True)
         best_report = sorted_results[0] if sorted_results else None
         worst_report = sorted_results[-1] if sorted_results else None
+        
+        # Calculate overall score standard deviation
+        overall_scores = [result.get("overall_score", 0) for result in individual_results]
+        overall_std = statistics.stdev(overall_scores) if len(overall_scores) > 1 else 0.0
         
         summary = f"""
 # 📊 MIMIC-Eye Medical Report Evaluation Summary
@@ -96,7 +105,8 @@ class AutomatedReportGenerator:
 
 ## 🎯 Overall Performance
 - **Reports Evaluated**: {total_evaluated}
-- **Overall Quality Score**: {overall_score:.4f} ({quality_level})
+- **Overall Quality Score (Mean)**: {overall_score:.4f} ({quality_level})
+- **Overall Quality Score (Std Dev)**: ±{overall_std:.4f}
 - **Success Rate**: {success_rate:.1f}%
 - **Processing Time**: {processing_time:.3f} seconds
 
@@ -107,17 +117,21 @@ class AutomatedReportGenerator:
 - **Poor (<40%)**: {quality_breakdown['poor']} reports
 
 ## 📋 Individual Metric Performance
+*Note: Values shown as Mean ± Standard Deviation across all {total_evaluated} patients*
+
 """
         
-        # Add metric details
-        for metric, avg_score in metric_averages.items():
+        # Add metric details with mean and std
+        for metric, stats in metric_statistics.items():
             metric_name = metric.upper()
-            performance = "Excellent" if avg_score > 0.8 else \
-                         "Good" if avg_score > 0.6 else \
-                         "Fair" if avg_score > 0.4 else \
-                         "Needs Work" if avg_score > 0.2 else \
+            mean_score = stats['mean']
+            std_score = stats['std']
+            performance = "Excellent" if mean_score > 0.8 else \
+                         "Good" if mean_score > 0.6 else \
+                         "Fair" if mean_score > 0.4 else \
+                         "Needs Work" if mean_score > 0.2 else \
                          "Poor"
-            summary += f"- **{metric_name}**: {avg_score:.4f} ({performance})\n"
+            summary += f"- **{metric_name}**: {mean_score:.4f} ± {std_score:.4f} ({performance})\n"
         
         # Add best/worst analysis
         if best_report and worst_report and len(individual_results) > 1:
@@ -161,14 +175,14 @@ class AutomatedReportGenerator:
 """
         
         # Add metric-specific recommendations
-        if metric_averages:
-            weakest_metric = min(metric_averages.keys(), key=lambda k: metric_averages[k])
-            strongest_metric = max(metric_averages.keys(), key=lambda k: metric_averages[k])
+        if metric_statistics:
+            weakest_metric = min(metric_statistics.keys(), key=lambda k: metric_statistics[k]['mean'])
+            strongest_metric = max(metric_statistics.keys(), key=lambda k: metric_statistics[k]['mean'])
             
             summary += f"""
 **Metric-Specific Insights:**
-- **Strongest**: {strongest_metric.upper()} ({metric_averages[strongest_metric]:.4f}) - maintain this strength
-- **Weakest**: {weakest_metric.upper()} ({metric_averages[weakest_metric]:.4f}) - focus improvement here
+- **Strongest**: {strongest_metric.upper()} (Mean: {metric_statistics[strongest_metric]['mean']:.4f} ± {metric_statistics[strongest_metric]['std']:.4f}) - maintain this strength
+- **Weakest**: {weakest_metric.upper()} (Mean: {metric_statistics[weakest_metric]['mean']:.4f} ± {metric_statistics[weakest_metric]['std']:.4f}) - focus improvement here
 
 """
         

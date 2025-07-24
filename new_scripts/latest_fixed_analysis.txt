@@ -1,6 +1,3 @@
 CLINICAL FINDINGS:
 --------------------------------------------------
-   FINDINGS:
-   Portable AP view of the chest demonstrates multiple support devices, including EKG leads and a subcutaneous port catheter projected over the right upper chest. The cardiac silhouette is enlarged, which may be exaggerated by the portable AP technique. There are bibasilar opacities, greater on the right than the left, consistent with atelectasis/scarring. The costophrenic angles appear blunted, suspicious for small bilateral pleural effusions. No definite focal consolidation or pneumothorax is identified.
-   IMPRESSION:
-   Bibasilar opacities likely representing atelectasis. Enlarged cardiac silhouette, potentially magnified by patient positioning. Multiple support devices are in place, including a right chest wall port.
+   No acute cardiopulmonary process. A laparoscopic gastric band is present.

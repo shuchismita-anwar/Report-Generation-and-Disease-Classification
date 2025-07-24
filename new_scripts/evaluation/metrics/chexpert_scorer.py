@@ -48,20 +48,20 @@ class ChexpertScorer(BaseMetric):
     def _initialize_chexpert_labels(self):
         """Defines the 14 CheXpert labels and their associated keywords."""
         self.chexpert_labels = {
-            "No Finding": {"keywords": ["no finding", "normal", "clear"], "type": "global"},
+            "No Finding": {"keywords": ["no finding", "normal", "clear", "no acute", "no abnormalities", "unremarkable", "within normal limits", "no process"], "type": "global"},
             "Enlarged Cardiomediastinum": {"keywords": ["enlarged cardiomediastinum", "wide mediastinum"]},
             "Cardiomegaly": {"keywords": ["cardiomegaly", "enlarged heart", "cardiac enlargement"]},
             "Lung Opacity": {"keywords": ["opacity", "opacification"]},
             "Lung Lesion": {"keywords": ["lesion", "nodule", "mass"]},
             "Edema": {"keywords": ["edema", "pulmonary edema", "congestion"]},
-            "Consolidation": {"keywords": ["consolidation", "infiltrate"]},
+            "Consolidation": {"keywords": ["consolidation", "infiltrate", "focal consolidation"]},
             "Pneumonia": {"keywords": ["pneumonia", "infection"]},
             "Atelectasis": {"keywords": ["atelectasis", "collapse"]},
             "Pneumothorax": {"keywords": ["pneumothorax"]},
             "Pleural Effusion": {"keywords": ["effusion", "pleural effusion", "fluid"]},
             "Pleural Other": {"keywords": ["pleural thickening", "pleural disease"]},
             "Fracture": {"keywords": ["fracture", "rib fracture"]},
-            "Support Devices": {"keywords": ["device", "tube", "line", "catheter", "pacemaker"]},
+            "Support Devices": {"keywords": ["device", "tube", "line", "catheter", "pacemaker", "band", "wire", "lead", "clip", "stent", "implant"]},
         }
         
         self.negation_patterns = re.compile(

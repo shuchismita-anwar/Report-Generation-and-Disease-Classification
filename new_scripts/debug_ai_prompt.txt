@@ -1,14 +1,14 @@
 ================================================================================
 AI PROMPT DEBUG OUTPUT
-Generated at: 2025-07-08 18:05:54.261200
-Patient ID: efa5f70a-148764b5-a1137b9b-0e30e4c3-38c465a6
+Generated at: 2025-07-17 15:59:51.637421
+Patient ID: 6c2b39fa-2c251fcf-addd31da-83faee60-044fa8f9
 ================================================================================
 
 PROMPT STATISTICS:
-- Total Characters: 6,963
-- Total Words: 940
-- Estimated Tokens: ~1222
-- Size in KB: 6.91 KB
+- Total Characters: 5,438
+- Total Words: 763
+- Estimated Tokens: ~992
+- Size in KB: 5.43 KB
 
 ================================================================================
 
@@ -57,38 +57,30 @@ You are an expert radiologist with 20+ years of experience. Generate a concise, 
    • Reference specific lung zones, cardiac contours, and bony structures as appropriate
    • Always mention any visible medical device, line, or tube if present
 
-REPORTING STYLE: MULTI-PATHOLOGY MIXED CONFIDENCE (Multiple findings with varying confidence levels)
+REPORTING STYLE: MODERATE PATHOLOGY (Single moderate-confidence finding - appropriate uncertainty)
 
 === CLINICAL ANALYSIS DATA ===
 
 🔬 MODEL PREDICTIONS (Clinical Decision Basis):
-- Atelectasis: 56.5% probability (MODERATE confidence)
-- Cardiomegaly: 49.6% probability (LOW confidence)
-- Edema: 44.7% probability (LOW confidence)
-- Lung Opacity: 47.9% probability (LOW confidence)
-- No Finding: 44.7% probability (LOW confidence)
-- Pleural Effusion: 42.7% probability (LOW confidence)
-- Pneumonia: 39.5% probability (LOW confidence)
-- Support Devices: 64.6% probability (MODERATE confidence)
+- Atelectasis: 41.0% probability (LOW confidence)
+- Cardiomegaly: 35.9% probability (LOW confidence)
+- No Finding: 60.1% probability (MODERATE confidence)
+- Support Devices: 54.3% probability (MODERATE confidence)
 
 📋 CLINICAL KEYWORDS (Condition-Based):
-- Atelectasis (MODERATE): atelectasis/scarring, atelectatic, atelectatic and / or consolidated
+- Atelectasis (LOW): hyperinflated lungs, mucous plugging, normal to decreased in volume
 - Cardiomegaly (LOW): cardiac contour looks larger due to low lung volume, cardiomyopathy, no definite signs of chf
-- Edema (LOW): cardiac silhouette is enlarged, cardiac silhouette is obscured, interval improvement in interstitial edema
-- Lung Opacity (LOW): acute cardiopulmonary disease, acute infiltrates, aerated
-- No Finding (LOW): azygos fissure, cardiac silhouette size is normal, cardiac silhouettes are unremarkable
-- Pleural Effusion (LOW): appreciable pleural effusion, definite effusion, effusion absent
-- Pneumonia (LOW): acute cardiopulmonary disease, acute consolidation, acute infiltrates
+- No Finding (MODERATE): abdomen is unremarkable, absence of any new acute infiltrates, aerated
 - Support Devices (MODERATE): a gastric tube, a laparoscopic gastric band, additional lead
 
 🗺️ RELEVANT ANATOMICAL REGIONS (Condition-Based):
-- Support Devices (64.6%, MODERATE): cardiac silhouette, left hilar structures, right hilar structures, upper mediastinum, trachea
+- No Finding (60.1%, MODERATE): left lung, right lung, left lower lung zone, right lower lung zone, left upper lung zone, right upper lung zone, cardiac silhouette, left mid lung zone, right mid lung zone
 
 === REPORTING TASK ===
-Generate a professional radiological report with sections: FINDINGS, IMPRESSION, RECOMMENDATIONS
+Generate ONLY the IMPRESSION section for this chest X-ray analysis.
 
 🎯 SPECIFIC INSTRUCTIONS FOR THIS CASE:
-- This shows Support Devices with MODERATE confidence (64.6%)
+- This shows No Finding with MODERATE confidence (60.1%)
 - Focus specifically on this pathological finding using PROVIDED KEYWORDS verbatim
 - Use relevant anatomical regions to describe location precisely
 - Include any visible medical devices (tubes, catheters, lines) even if incidental
@@ -97,14 +89,10 @@ Generate a professional radiological report with sections: FINDINGS, IMPRESSION,
 - Describe the medical significance clearly
 
 ### 📏 FORMATTING INSTRUCTIONS:
-• Structure:
-  ```
-  FINDINGS: 
-  [continuous paragraph]  
-
-  IMPRESSION:  
-  [continuous paragraph]
-  ```
+• Write ONLY the impression text as a continuous paragraph
+• Do NOT include section headers like "IMPRESSION:" 
+• Do NOT include findings section
+• Focus on concise clinical conclusions
 
 ### ✳️ INPUT STRUCTURE:
 • `CHEST X-RAY IMAGE`: Primary source - examine visually for all findings
@@ -118,32 +106,23 @@ Generate a professional radiological report with sections: FINDINGS, IMPRESSION,
 • **Include device findings** (tubes, catheters, lines) even if incidental
 • **Be anatomically specific** when high-confidence predictions support it
 
-📋 EXAMPLE REPORT FORMATS:
+📋 EXAMPLE IMPRESSION FORMATS:
 
 Example 1 (Device Present):
-FINDINGS: 
-Feeding tube extends into the upper abdomen, the tip is not imaged. Lung volumes are normal. Mediastinal contours and heart size within normal limits. No consolidation or pleural effusion. No pneumothorax. No acute osseous abnormality.
-
-IMPRESSION: 
 No acute cardiopulmonary process.
 
 Example 2 (Multiple Findings):
-FINDINGS: 
-PA and lateral views of the chest demonstrate well-expanded lungs. In comparison to the prior study, there is interval obscuration of the right heart border and the medial right hemidiaphragm. Correlation with the lateral view suggests that this is likely due to interval development of small bilateral pleural effusions. Underlying consolidation is not excluded. No pneumothorax. Cardiomediastinal silhouette is otherwise stable.
-
-IMPRESSION: 
 Interval development of small bilateral pleural effusions. Underlying consolidation not excluded.
 
 Example 3 (Normal Study):
-FINDINGS: 
-The lungs are hyperinflated reflective of COPD. Apparent increased opacity projecting over the right lung apex correlates with posterior right fifth rib fracture with callus. Streaky bibasilar opacities likely reflect atelectasis. No focal consolidation to suggest pneumonia. No pleural effusion or pneumothorax. The heart is normal in size, and the mediastinal contours are normal.
-
-IMPRESSION: 
 No acute cardiopulmonary process. Focal opacity in the retrocardiac region.
 
-⚠️ **REMEMBER**: Do NOT mention attention maps, saliency, heatmaps, or explainability data. Use model predictions and provided keywords only.
+⚠️ **REMEMBER**: 
+• Do NOT mention attention maps, saliency, heatmaps, or explainability data
+• Use model predictions and provided keywords only
+• Write ONLY the impression paragraph - no section headers or findings
 
 ### ✳️ GOAL:
-Maximize lexical and semantic similarity to the expert reference report. Prioritize clinical specificity and exact terminology alignment.
+Maximize lexical and semantic similarity to the expert reference report impression. Prioritize clinical specificity and exact terminology alignment.
 
-CHEST X-RAY REPORT:
+IMPRESSION:

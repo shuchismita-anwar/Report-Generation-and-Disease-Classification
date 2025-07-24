@@ -56,16 +56,19 @@ class AutomatedInsightsGenerator:
         if not per_metric:
             return {"status": "no_metric_data"}
         
-        # Find strongest and weakest metrics
+        # Find strongest and weakest metrics with std dev
         metric_scores = {name: data.get('mean', 0) for name, data in per_metric.items()}
+        metric_stds = {name: data.get('std', 0) for name, data in per_metric.items()}
         strongest = max(metric_scores, key=metric_scores.get) if metric_scores else None
         weakest = min(metric_scores, key=metric_scores.get) if metric_scores else None
         
         return {
             "strongest_metric": strongest,
             "strongest_score": metric_scores.get(strongest, 0) if strongest else 0,
+            "strongest_std": metric_stds.get(strongest, 0) if strongest else 0,
             "weakest_metric": weakest,
             "weakest_score": metric_scores.get(weakest, 0) if weakest else 0,
+            "weakest_std": metric_stds.get(weakest, 0) if weakest else 0,
             "metric_count": len(metric_scores),
             "average_score": sum(metric_scores.values()) / len(metric_scores) if metric_scores else 0
         }
