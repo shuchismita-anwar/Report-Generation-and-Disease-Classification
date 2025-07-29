@@ -192,12 +192,12 @@ CONDITION_TO_REGIONS = {
     ]
 }
 
-# LLM Integration Configuration - Gemini 2.5 Pro
+# LLM Integration Configuration - LM Studio
 LLM_CONFIG = {
-    'api_type': 'gemini',
-    'base_url': 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent',
-    'model_name': 'gemini-2.5-pro',
-    'max_tokens': 65535,
+    'api_type': 'lm_studio',
+    'base_url': '{LM_STUDIO_HOST}:{LM_STUDIO_PORT}/v1/chat/completions',
+    'model_name': '{LM_STUDIO_MODEL}',
+    'max_tokens': 4096,
     'temperature': 0.3,  # Conservative for medical reports
     'timeout': 120,  # 120 seconds timeout
     'max_retries': 3,
@@ -532,9 +532,11 @@ class MultiModalMIMICModel(nn.Module):
 
 class MedicalReportGenerator:
     def __init__(self, model_path: str = None, log_level: int = logging.INFO):
-        # Load environment variables for Gemini API
+        # Load environment variables for LM Studio
         load_dotenv('.env')
-        self.gemini_api_key = os.getenv("GEMINI_API_KEY")
+        self.lm_studio_host = os.getenv("LM_STUDIO_HOST")
+        self.lm_studio_port = os.getenv("LM_STUDIO_PORT")
+        self.lm_studio_model = os.getenv("LM_STUDIO_MODEL")
         
         self.device = detect_device()
         self.low_memory = check_system_memory()
@@ -543,7 +545,7 @@ class MedicalReportGenerator:
         # Fix model path - try multiple possible locations
         if model_path is None:
             possible_paths = [
-                os.path.join("output", "0.(full+enhanced_gaze)_training_mimic_on_chexpert_optimized", "model_0.(full+enhanced_gaze)_training_mimic_on_chexpert_optimized", "model.safetensors"),
+                os.path.join("output", "0.((train+val)full+enhanced_gaze)_training_mimic_on_chexpert_optimized", "model_0.((train+val)full+enhanced_gaze)_training_mimic_on_chexpert_optimized", "model.safetensors"),
                 os.path.join("output", "training_mimic_on_chexpert_optimized", "model_training_mimic_on_chexpert_optimized", "model.safetensors"),
                 os.path.join("results", "final_model", "model.safetensors"),
                 "model.safetensors"  # Current directory fallback
@@ -592,7 +594,13 @@ class MedicalReportGenerator:
         self.attention_cache = {}  # Cache attention maps for efficiency
         
         # Initialize LLM integration system (Phase 4)
-        self.llm_config = LLM_CONFIG
+        self.llm_config = LLM_CONFIG.copy()
+        # Replace placeholders with actual environment values
+        self.llm_config['base_url'] = self.llm_config['base_url'].format(
+            LM_STUDIO_HOST=self.lm_studio_host,
+            LM_STUDIO_PORT=self.lm_studio_port
+        )
+        self.llm_config['model_name'] = self.lm_studio_model
         self.report_templates = REPORT_TEMPLATES
         self.llm_available = False
         self.llm_connection_tested = False
@@ -608,7 +616,7 @@ class MedicalReportGenerator:
         self.logger.info(f"Test data directory: {self.test_data_dir}")
         self.logger.info(f"Keyword extraction system loaded with {len(self.condition_keywords)} conditions")
         self.logger.info(f"Attention visualization system loaded with {len(self.anatomical_regions)} anatomical regions")
-        self.logger.info(f"LLM integration configured for {self.llm_config['model_name']} via Gemini API")
+        self.logger.info(f"LLM integration configured for {self.llm_config['model_name']} via LM Studio")
 
     def _setup_logging(self, log_level: int):
         """Enhanced logging configuration"""
@@ -2095,34 +2103,30 @@ class MedicalReportGenerator:
     
     def test_llm_connection(self) -> bool:
         """
-        Test connection to Gemini 2.5 Pro API.
+        Test connection to LM Studio API.
         
         Returns:
             True if connection successful, False otherwise
         """
         try:
-            self.logger.info("Testing Gemini 2.5 Pro connection...")
+            self.logger.info("Testing LM Studio connection...")
             
-            if not self.gemini_api_key:
-                self.logger.error("Gemini API key not found. Set GEMINI_API_KEY environment variable.")
+            if not self.lm_studio_host or not self.lm_studio_port:
+                self.logger.error("LM Studio host/port not found. Set LM_STUDIO_HOST and LM_STUDIO_PORT environment variables.")
                 return False
             
-            # Simple test request for Gemini
+            # Simple test request for LM Studio
             test_payload = {
-                "contents": [{
-                    "parts": [{
-                        "text": "Hello! Please respond with just 'Working' to confirm connection."
-                    }]
+                "model": self.llm_config['model_name'],
+                "messages": [{
+                    "role": "user",
+                    "content": "Hello! Please respond with just 'Working' to confirm connection."
                 }],
-                "generationConfig": {
-                    "temperature": 0.1,
-                    "topK": 1,
-                    "topP": 0.8,
-                    "maxOutputTokens": 50
-                }
+                "temperature": 0.1,
+                "max_tokens": 50
             }
             
-            url = f"{self.llm_config['base_url']}?key={self.gemini_api_key}"
+            url = self.llm_config['base_url']
             headers = {"Content-Type": "application/json"}
             
             response = requests.post(
@@ -2134,25 +2138,24 @@ class MedicalReportGenerator:
             
             if response.status_code == 200:
                 result = response.json()
-                if 'candidates' in result and len(result['candidates']) > 0:
-                    candidate = result['candidates'][0]
-                    # Check if we have content (even if parts is missing due to MAX_TOKENS)
-                    if 'content' in candidate:
-                        # If we got a response (even truncated), connection is working
+                if 'choices' in result and len(result['choices']) > 0:
+                    choice = result['choices'][0]
+                    if 'message' in choice and 'content' in choice['message']:
+                        # If we got a response, connection is working
                         self.llm_available = True
                         self.llm_connection_tested = True
-                        self.logger.info("Gemini 2.5 Pro connection test successful")
+                        self.logger.info("LM Studio connection test successful")
                         return True
             
-            self.logger.error(f"Gemini connection test failed: {response.status_code} - {response.text}")
+            self.logger.error(f"LM Studio connection test failed: {response.status_code} - {response.text}")
             return False
             
         except requests.exceptions.RequestException as e:
-            self.logger.error(f"Gemini connection error: {e}")
+            self.logger.error(f"LM Studio connection error: {e}")
             self.llm_available = False
             return False
         except Exception as e:
-            self.logger.error(f"Unexpected error testing Gemini connection: {e}")
+            self.logger.error(f"Unexpected error testing LM Studio connection: {e}")
             return False
     
     def encode_image_for_llm(self, image_tensor: torch.Tensor) -> str:
@@ -2288,16 +2291,20 @@ REPORTING STYLE: {reporting_style}
             # Task instruction with optimized guidance
             task_instruction = f"""
 === REPORTING TASK ===
-Generate ONLY the IMPRESSION section for this chest X-ray analysis.
+Generate a {template_config['style']} with sections: {', '.join(template_config['sections']).upper()}
 
 🎯 SPECIFIC INSTRUCTIONS FOR THIS CASE:
 {self._get_case_specific_instructions(condition_predictions, template)}
 
 ### 📏 FORMATTING INSTRUCTIONS:
-• Write ONLY the impression text as a continuous paragraph
-• Do NOT include section headers like "IMPRESSION:" 
-• Do NOT include findings section
-• Focus on concise clinical conclusions
+• Structure:
+  ```
+  FINDINGS: 
+  [continuous paragraph]  
+
+  IMPRESSION:  
+  [continuous paragraph]
+  ```
 
 ### ✳️ INPUT STRUCTURE:
 • `CHEST X-RAY IMAGE`: Primary source - examine visually for all findings
@@ -2311,26 +2318,37 @@ Generate ONLY the IMPRESSION section for this chest X-ray analysis.
 • **Include device findings** (tubes, catheters, lines) even if incidental
 • **Be anatomically specific** when high-confidence predictions support it
 
-📋 EXAMPLE IMPRESSION FORMATS:
+📋 EXAMPLE REPORT FORMATS:
 
 Example 1 (Device Present):
+FINDINGS: 
+Feeding tube extends into the upper abdomen, the tip is not imaged. Lung volumes are normal. Mediastinal contours and heart size within normal limits. No consolidation or pleural effusion. No pneumothorax. No acute osseous abnormality.
+
+IMPRESSION: 
 No acute cardiopulmonary process.
 
 Example 2 (Multiple Findings):
+FINDINGS: 
+PA and lateral views of the chest demonstrate well-expanded lungs. In comparison to the prior study, there is interval obscuration of the right heart border and the medial right hemidiaphragm. Correlation with the lateral view suggests that this is likely due to interval development of small bilateral pleural effusions. Underlying consolidation is not excluded. No pneumothorax. Cardiomediastinal silhouette is otherwise stable.
+
+IMPRESSION: 
 Interval development of small bilateral pleural effusions. Underlying consolidation not excluded.
 
 Example 3 (Normal Study):
+FINDINGS: 
+The lungs are hyperinflated reflective of COPD. Apparent increased opacity projecting over the right lung apex correlates with posterior right fifth rib fracture with callus. Streaky bibasilar opacities likely reflect atelectasis. No focal consolidation to suggest pneumonia. No pleural effusion or pneumothorax. The heart is normal in size, and the mediastinal contours are normal.
+
+IMPRESSION: 
 No acute cardiopulmonary process. Focal opacity in the retrocardiac region.
 
-⚠️ **REMEMBER**: 
-• Do NOT mention attention maps, saliency, heatmaps, or explainability data
-• Use model predictions and provided keywords only
-• Write ONLY the impression paragraph - no section headers or findings
+⚠️ **REMEMBER**: Do NOT mention attention maps, saliency, heatmaps, or explainability data. Use model predictions and provided keywords only.
 
 ### ✳️ GOAL:
-Maximize lexical and semantic similarity to the expert reference report impression. Prioritize clinical specificity and exact terminology alignment.
+Maximize lexical and semantic similarity to the expert reference report. Prioritize clinical specificity and exact terminology alignment.
 
-IMPRESSION:
+CHEST X-RAY REPORT:
+
+/no_think
 """
             
             # Combine sections
@@ -2522,11 +2540,11 @@ IMPRESSION:
     def call_llm_for_report(self, prompt: str, include_image: bool = False, 
                            image_tensor: torch.Tensor = None) -> Dict:
         """
-        Call Gemini 2.5 Pro to generate a medical report.
+        Call LM Studio to generate a medical report.
         
         Args:
             prompt: Formatted prompt for report generation
-            include_image: Whether to include the image in the request
+            include_image: Whether to include the image in the request (Note: LM Studio may not support images)
             image_tensor: Image tensor if including image
             
         Returns:
@@ -2537,110 +2555,36 @@ IMPRESSION:
                 if not self.test_llm_connection():
                     return {
                         'success': False,
-                        'error': 'Gemini connection not available',
+                        'error': 'LM Studio connection not available',
                         'report': self._generate_fallback_report(),
                         'used_fallback': True
                     }
             
-            if not self.gemini_api_key:
+            if not self.lm_studio_host or not self.lm_studio_port:
                 return {
                     'success': False,
-                    'error': 'Gemini API key not available',
+                    'error': 'LM Studio host/port not available',
                     'report': self._generate_fallback_report(),
                     'used_fallback': True
                 }
             
-            # Prepare message content with image support
+            # Note: LM Studio typically doesn't support image input, so we'll skip image processing
             if include_image and image_tensor is not None:
-                # Encode image as base64
-                image_base64 = self.encode_image_for_llm(image_tensor)
-                if image_base64:
-                    self.logger.info("Including image in Gemini request")
-                else:
-                    self.logger.warning("Failed to encode image, proceeding with text-only")
-                    include_image = False
-            else:
-                include_image = False
+                self.logger.warning("Image input requested but LM Studio may not support image processing. Proceeding with text-only.")
+            include_image = False
             
-            # Prepare request payload for Gemini
-            if include_image and 'image_base64' in locals():
-                # Include both text and image
-                payload = {
-                    "contents": [{
-                        "parts": [
-                            {
-                                "text": prompt
-                            },
-                            {
-                                "inline_data": {
-                                    "mime_type": "image/png",
-                                    "data": image_base64
-                                }
-                            }
-                        ]
-                    }],
-                    "generationConfig": {
-                        "temperature": self.llm_config['temperature'],
-                        "topK": 40,
-                        "topP": 0.95,
-                        "maxOutputTokens": self.llm_config['max_tokens'],
-                        "candidateCount": 1
-                    },
-                    "safetySettings": [
-                        {
-                            "category": "HARM_CATEGORY_HARASSMENT",
-                            "threshold": "BLOCK_NONE"
-                        },
-                        {
-                            "category": "HARM_CATEGORY_HATE_SPEECH", 
-                            "threshold": "BLOCK_NONE"
-                        },
-                        {
-                            "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                            "threshold": "BLOCK_NONE"
-                        },
-                        {
-                            "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-                            "threshold": "BLOCK_NONE"
-                        }
-                    ]
-                }
-            else:
-                # Text only
-                payload = {
-                    "contents": [{
-                        "parts": [{
-                            "text": prompt
-                        }]
-                    }],
-                    "generationConfig": {
-                        "temperature": self.llm_config['temperature'],
-                        "topK": 40,
-                        "topP": 0.95,
-                        "maxOutputTokens": self.llm_config['max_tokens'],
-                        "candidateCount": 1
-                    },
-                    "safetySettings": [
-                        {
-                            "category": "HARM_CATEGORY_HARASSMENT",
-                            "threshold": "BLOCK_NONE"
-                        },
-                        {
-                            "category": "HARM_CATEGORY_HATE_SPEECH", 
-                            "threshold": "BLOCK_NONE"
-                        },
-                        {
-                            "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                            "threshold": "BLOCK_NONE"
-                        },
-                        {
-                            "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-                            "threshold": "BLOCK_NONE"
-                        }
-                    ]
-                }
+            # Prepare request payload for LM Studio
+            payload = {
+                "model": self.llm_config['model_name'],
+                "messages": [{
+                    "role": "user",
+                    "content": prompt
+                }],
+                "temperature": self.llm_config['temperature'],
+                "max_tokens": self.llm_config['max_tokens']
+            }
             
-            url = f"{self.llm_config['base_url']}?key={self.gemini_api_key}"
+            url = self.llm_config['base_url']
             headers = {"Content-Type": "application/json"}
             
             # Helper to strip non-ASCII characters (e.g., emojis) for safe console logging
@@ -2654,7 +2598,7 @@ IMPRESSION:
             # Make request with retries
             for attempt in range(self.llm_config['max_retries']):
                 try:
-                    self.logger.debug(f"Gemini request attempt {attempt + 1}/{self.llm_config['max_retries']}")
+                    self.logger.debug(f"LM Studio request attempt {attempt + 1}/{self.llm_config['max_retries']}")
                     
                     response = requests.post(
                         url,
@@ -2666,35 +2610,24 @@ IMPRESSION:
                     if response.status_code == 200:
                         result = response.json()
                         
-                        if 'candidates' in result and len(result['candidates']) > 0:
-                            candidate = result['candidates'][0]
+                        if 'choices' in result and len(result['choices']) > 0:
+                            choice = result['choices'][0]
                             
-                            if 'content' in candidate:
-                                # Check if we have parts with content
-                                if 'parts' in candidate['content'] and len(candidate['content']['parts']) > 0:
-                                    report_text = candidate['content']['parts'][0]['text']
-                                    
-                                    return {
-                                        'success': True,
-                                        'report': report_text,
-                                        'raw_response': result,
-                                        'used_fallback': False,
-                                        'attempt': attempt + 1
-                                    }
-                                else:
-                                    # Content exists but no parts - likely MAX_TOKENS hit
-                                    self.logger.error(f"Gemini response has no content parts. Finish reason: {candidate.get('finishReason', 'unknown')}")
-                                    return {
-                                        'success': False,
-                                        'error': f"Response has no content parts. Finish reason: {candidate.get('finishReason', 'unknown')}",
-                                        'report': self._generate_fallback_report(),
-                                        'used_fallback': True
-                                    }
-                            elif 'finishReason' in candidate and candidate['finishReason'] == 'MAX_TOKENS':
-                                self.logger.error("MAX_TOKENS hit - response was too long")
+                            if 'message' in choice and 'content' in choice['message']:
+                                report_text = choice['message']['content']
+                                
+                                return {
+                                    'success': True,
+                                    'report': report_text,
+                                    'raw_response': result,
+                                    'used_fallback': False,
+                                    'attempt': attempt + 1
+                                }
+                            else:
+                                self.logger.error(f"LM Studio response has no message content. Finish reason: {choice.get('finish_reason', 'unknown')}")
                                 return {
                                     'success': False,
-                                    'error': 'Response exceeded maximum tokens',
+                                    'error': f"Response has no message content. Finish reason: {choice.get('finish_reason', 'unknown')}",
                                     'report': self._generate_fallback_report(),
                                     'used_fallback': True
                                 }
@@ -2705,26 +2638,26 @@ IMPRESSION:
                         time.sleep(wait_time)
                         continue
                     
-                    self.logger.warning(f"Gemini request failed (attempt {attempt + 1}): {response.status_code} - {response.text}")
+                    self.logger.warning(f"LM Studio request failed (attempt {attempt + 1}): {response.status_code} - {response.text}")
                     
                 except requests.exceptions.RequestException as e:
-                    self.logger.warning(f"Gemini request error (attempt {attempt + 1}): {e}")
+                    self.logger.warning(f"LM Studio request error (attempt {attempt + 1}): {e}")
                 
                 # Wait before retry
                 if attempt < self.llm_config['max_retries'] - 1:
                     time.sleep(self.llm_config['retry_delay'])
             
             # All attempts failed
-            self.logger.error("All Gemini request attempts failed")
+            self.logger.error("All LM Studio request attempts failed")
             return {
                 'success': False,
-                'error': 'All Gemini request attempts failed',
+                'error': 'All LM Studio request attempts failed',
                 'report': self._generate_fallback_report(),
                 'used_fallback': True
             }
             
         except Exception as e:
-            self.logger.error(f"Error calling Gemini for report: {e}")
+            self.logger.error(f"Error calling LM Studio for report: {e}")
             return {
                 'success': False,
                 'error': str(e),

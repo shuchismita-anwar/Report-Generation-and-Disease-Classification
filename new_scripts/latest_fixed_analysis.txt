@@ -1,3 +1,8 @@
 CLINICAL FINDINGS:
 --------------------------------------------------
-   No acute cardiopulmonary process. A laparoscopic gastric band is present.
+   <think>
+   </think>
+   FINDINGS:
+   The chest radiograph demonstrates aerated lung fields with no acute infiltrates or focal consolidation noted in any of the defined zones, including the left upper, mid, and lower lung zones as well as the right upper, mid, and lower lung zones. The cardiac silhouette is within normal limits with no definite signs of cardiomyopathy or congestive heart failure. No pleural effusion or pneumothorax is present. In the upper mediastinum and trachea, a gastric tube is visualized extending into the upper abdomen; however, the tip is not fully imaged. Additionally, an additional lead is noted in proximity to cardiac structures, likely representing a pacemaker or defibrillator lead. The abdominal region appears unremarkable with no new acute findings.
+   IMPRESSION:
+   No acute cardiopulmonary process identified on this chest radiograph. A gastric tube and an additional lead are present; the tip of the gastric tube is not visualized in its entirety.

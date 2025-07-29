@@ -133,3 +133,4 @@ new_scripts/.env
 /GAZE-RESULTS
 new_scripts/test_data/attention_visualizations/
 new_scripts/real_analysis_results/
+new_scripts/.cursorignore
