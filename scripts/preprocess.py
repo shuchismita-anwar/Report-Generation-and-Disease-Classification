@@ -92,7 +92,7 @@ def process_fixations(fix_path, mu, sigma, out_dir):
 def main():
     # Hard-coded paths (no argparse)
     CSV_PATH = Path(r'E:\MIMIC Research\Code\Report-Generation-and-Disease-Classification\final_dataset_fixed.csv')
-    OUT_DIR  = Path(r'E:\MIMIC Research\Code\Report-Generation-and-Disease-Classification\output')
+    OUT_DIR  = Path(r'E:\MIMIC Research\Code\Report-Generation-and-Disease-Classification\data_dump\output')
 
     df = pd.read_csv(CSV_PATH)
     img_out  = OUT_DIR / "img_png"

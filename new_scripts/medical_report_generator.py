@@ -2220,20 +2220,17 @@ class MedicalReportGenerator:
             reporting_style = self._determine_reporting_style_multi_condition(condition_predictions)
             
             # System instruction with optimized clinical guidelines
-            image_note = "\n\n🖼️ IMPORTANT: You have been provided with the actual chest X-ray image. Use visual analysis of the image to correlate with and validate the AI predictions below." if include_image else ""
-            
-            system_instruction = f"""You are an expert radiologist with 20+ years of experience. Generate a concise, accurate chest X-ray report that combines visual analysis with AI predictions.{image_note}
+            system_instruction = f"""You are an expert radiologist with 20+ years of experience. Generate a concise, accurate chest X-ray report based on AI predictions.
 
-✅ Your report combines direct visual analysis of the chest X-ray with AI model predictions.
-✅ Use clear radiological terminology and anatomical specificity based on **visual findings and model predictions**.
+✅ Your report uses AI model predictions to generate accurate radiological reports.
+✅ Use clear radiological terminology and anatomical specificity based on **model predictions**.
 
 ### 🚨 REPORTING GUIDELINES:
 
-1. **VISUAL-AI CORRELATION**
-   • Examine the provided chest X-ray image directly
-   • Correlate visual findings with AI predictions 
-   • Prioritize what you see in the image over AI predictions when they conflict
-   • Use AI predictions to guide attention to specific areas
+1. **AI PREDICTION ANALYSIS**
+   • Use AI predictions as the primary source for findings
+   • Correlate predictions with clinical knowledge
+   • Prioritize high-confidence predictions in reporting
 
 2. **CONFIDENCE-BASED REPORTING**
    • >70% = Report directly and confidently
@@ -2245,22 +2242,22 @@ class MedicalReportGenerator:
    • Mention if the **tip** is not visible or fully imaged
    • Report device positioning and termination when visible
 
-3. **USE PROVIDED TERMINOLOGY**
+4. **USE PROVIDED TERMINOLOGY**
    • Prefer using **exact phrases** from `CLINICAL KEYWORDS` to improve alignment with ground truth
    • When high-confidence keywords are provided, incorporate them verbatim when clinically appropriate
 
-4. **AVOID OVER-HEDGING**
+5. **AVOID OVER-HEDGING**
    • Do not say "subtle findings cannot be excluded" unless prediction confidence is mixed (50–70%)
    • If the study is normal and high confidence, use definitive phrases: "No focal consolidation, pleural effusion, or pneumothorax."
    • Be decisive when model confidence is high (>70%)
 
-5. **STYLE & STRUCTURE**
+6. **STYLE & STRUCTURE**
    • Match expert radiologist tone
    • Avoid unnecessary hedging or speculation
    • Each section (FINDINGS, IMPRESSION) should be continuous text (no bullet points)
    • Include non-pathological findings such as tubes, lines, or structural anomalies
 
-6. **ANATOMICAL SPECIFICITY**
+7. **ANATOMICAL SPECIFICITY**
    • Use precise anatomical terms when supported by high-confidence predictions
    • Reference specific lung zones, cardiac contours, and bony structures as appropriate
    • Always mention any visible medical device, line, or tube if present
