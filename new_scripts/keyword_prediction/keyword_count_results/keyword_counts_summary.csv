@@ -1,0 +1,9 @@
+condition,high_confidence,medium_confidence,low_confidence,total
+No Finding,540,524,607,1671
+Lung Opacity,712,624,167,1503
+Support Devices,749,340,108,1197
+Pneumonia,159,554,147,860
+Edema,269,474,116,859
+Cardiomegaly,211,155,89,455
+Atelectasis,170,198,49,417
+Pleural Effusion,100,174,86,360

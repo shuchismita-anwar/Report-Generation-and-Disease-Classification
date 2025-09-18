@@ -1,0 +1,678 @@
+MEDICAL REPORTS MATCHING CRITERIA - SUMMARY
+============================================================
+Total matching reports: 168
+Analysis date: 2025-06-29 03:02:13
+============================================================
+
+   1. patient_10058974/CXR-DICOM/s54456726.txt
+      Words: 63, Sentences: 7
+      Patient ID: 10058974, Study ID: 54456726
+
+   2. patient_10064049/CXR-DICOM/s54392870.txt
+      Words: 65, Sentences: 8
+      Patient ID: 10064049, Study ID: 54392870
+
+   3. patient_10216097/CXR-DICOM/s54394310.txt
+      Words: 65, Sentences: 8
+      Patient ID: 10216097, Study ID: 54394310
+
+   4. patient_10224335/CXR-DICOM/s52091068.txt
+      Words: 62, Sentences: 7
+      Patient ID: 10224335, Study ID: 52091068
+
+   5. patient_10297948/CXR-DICOM/s54437316.txt
+      Words: 68, Sentences: 8
+      Patient ID: 10297948, Study ID: 54437316
+
+   6. patient_10314359/CXR-DICOM/s59926025.txt
+      Words: 68, Sentences: 7
+      Patient ID: 10314359, Study ID: 59926025
+
+   7. patient_10504635/CXR-DICOM/s57854196.txt
+      Words: 65, Sentences: 8
+      Patient ID: 10504635, Study ID: 57854196
+
+   8. patient_10536742/CXR-DICOM/s58365579.txt
+      Words: 61, Sentences: 7
+      Patient ID: 10536742, Study ID: 58365579
+
+   9. patient_10538657/CXR-DICOM/s52299932.txt
+      Words: 62, Sentences: 8
+      Patient ID: 10538657, Study ID: 52299932
+
+  10. patient_10540652/CXR-DICOM/s57651859.txt
+      Words: 64, Sentences: 7
+      Patient ID: 10540652, Study ID: 57651859
+
+  11. patient_10576074/CXR-DICOM/s52239065.txt
+      Words: 66, Sentences: 8
+      Patient ID: 10576074, Study ID: 52239065
+
+  12. patient_10598395/CXR-DICOM/s53598444.txt
+      Words: 61, Sentences: 8
+      Patient ID: 10598395, Study ID: 53598444
+
+  13. patient_10676001/CXR-DICOM/s51921167.txt
+      Words: 69, Sentences: 8
+      Patient ID: 10676001, Study ID: 51921167
+
+  14. patient_10699336/CXR-DICOM/s53811413.txt
+      Words: 68, Sentences: 8
+      Patient ID: 10699336, Study ID: 53811413
+
+  15. patient_10778867/CXR-DICOM/s54701104.txt
+      Words: 69, Sentences: 8
+      Patient ID: 10778867, Study ID: 54701104
+
+  16. patient_10843678/CXR-DICOM/s57146887.txt
+      Words: 65, Sentences: 7
+      Patient ID: 10843678, Study ID: 57146887
+
+  17. patient_10865278/CXR-DICOM/s56139927.txt
+      Words: 62, Sentences: 8
+      Patient ID: 10865278, Study ID: 56139927
+
+  18. patient_10884708/CXR-DICOM/s56636538.txt
+      Words: 66, Sentences: 7
+      Patient ID: 10884708, Study ID: 56636538
+
+  19. patient_10885680/CXR-DICOM/s53945637.txt
+      Words: 67, Sentences: 7
+      Patient ID: 10885680, Study ID: 53945637
+
+  20. patient_10891332/CXR-DICOM/s53691817.txt
+      Words: 67, Sentences: 8
+      Patient ID: 10891332, Study ID: 53691817
+
+  21. patient_10933609/CXR-DICOM/s51002383.txt
+      Words: 67, Sentences: 8
+      Patient ID: 10933609, Study ID: 51002383
+
+  22. patient_10933609/CXR-DICOM/s55438657.txt
+      Words: 64, Sentences: 7
+      Patient ID: 10933609, Study ID: 55438657
+
+  23. patient_10990952/CXR-DICOM/s56684926.txt
+      Words: 69, Sentences: 8
+      Patient ID: 10990952, Study ID: 56684926
+
+  24. patient_11018892/CXR-DICOM/s50635288.txt
+      Words: 60, Sentences: 7
+      Patient ID: 11018892, Study ID: 50635288
+
+  25. patient_11056953/CXR-DICOM/s53524008.txt
+      Words: 63, Sentences: 8
+      Patient ID: 11056953, Study ID: 53524008
+
+  26. patient_11117085/CXR-DICOM/s57087907.txt
+      Words: 60, Sentences: 8
+      Patient ID: 11117085, Study ID: 57087907
+
+  27. patient_11208426/CXR-DICOM/s54684056.txt
+      Words: 70, Sentences: 8
+      Patient ID: 11208426, Study ID: 54684056
+
+  28. patient_11214611/CXR-DICOM/s50455422.txt
+      Words: 65, Sentences: 7
+      Patient ID: 11214611, Study ID: 50455422
+
+  29. patient_11443554/CXR-DICOM/s57808761.txt
+      Words: 64, Sentences: 8
+      Patient ID: 11443554, Study ID: 57808761
+
+  30. patient_11474065/CXR-DICOM/s50955371.txt
+      Words: 61, Sentences: 7
+      Patient ID: 11474065, Study ID: 50955371
+
+  31. patient_11495809/CXR-DICOM/s52705409.txt
+      Words: 70, Sentences: 8
+      Patient ID: 11495809, Study ID: 52705409
+
+  32. patient_11501481/CXR-DICOM/s50286546.txt
+      Words: 62, Sentences: 7
+      Patient ID: 11501481, Study ID: 50286546
+
+  33. patient_11607177/CXR-DICOM/s56566779.txt
+      Words: 68, Sentences: 7
+      Patient ID: 11607177, Study ID: 56566779
+
+  34. patient_11614040/CXR-DICOM/s52884720.txt
+      Words: 69, Sentences: 7
+      Patient ID: 11614040, Study ID: 52884720
+
+  35. patient_11615169/CXR-DICOM/s55227980.txt
+      Words: 69, Sentences: 7
+      Patient ID: 11615169, Study ID: 55227980
+
+  36. patient_11635649/CXR-DICOM/s57179687.txt
+      Words: 61, Sentences: 8
+      Patient ID: 11635649, Study ID: 57179687
+
+  37. patient_11756467/CXR-DICOM/s58081889.txt
+      Words: 61, Sentences: 7
+      Patient ID: 11756467, Study ID: 58081889
+
+  38. patient_11798500/CXR-DICOM/s56391457.txt
+      Words: 64, Sentences: 7
+      Patient ID: 11798500, Study ID: 56391457
+
+  39. patient_11849484/CXR-DICOM/s51091271.txt
+      Words: 65, Sentences: 7
+      Patient ID: 11849484, Study ID: 51091271
+
+  40. patient_11893091/CXR-DICOM/s57134673.txt
+      Words: 60, Sentences: 7
+      Patient ID: 11893091, Study ID: 57134673
+
+  41. patient_12097647/CXR-DICOM/s51310335.txt
+      Words: 63, Sentences: 8
+      Patient ID: 12097647, Study ID: 51310335
+
+  42. patient_12185775/CXR-DICOM/s54211038.txt
+      Words: 65, Sentences: 7
+      Patient ID: 12185775, Study ID: 54211038
+
+  43. patient_12185775/CXR-DICOM/s55391561.txt
+      Words: 67, Sentences: 7
+      Patient ID: 12185775, Study ID: 55391561
+
+  44. patient_12208824/CXR-DICOM/s55766505.txt
+      Words: 67, Sentences: 8
+      Patient ID: 12208824, Study ID: 55766505
+
+  45. patient_12221629/CXR-DICOM/s56707998.txt
+      Words: 70, Sentences: 8
+      Patient ID: 12221629, Study ID: 56707998
+
+  46. patient_12221879/CXR-DICOM/s58943794.txt
+      Words: 70, Sentences: 8
+      Patient ID: 12221879, Study ID: 58943794
+
+  47. patient_12324075/CXR-DICOM/s51462941.txt
+      Words: 63, Sentences: 7
+      Patient ID: 12324075, Study ID: 51462941
+
+  48. patient_12412492/CXR-DICOM/s56070645.txt
+      Words: 68, Sentences: 8
+      Patient ID: 12412492, Study ID: 56070645
+
+  49. patient_12600024/CXR-DICOM/s58898778.txt
+      Words: 64, Sentences: 8
+      Patient ID: 12600024, Study ID: 58898778
+
+  50. patient_12821949/CXR-DICOM/s55643271.txt
+      Words: 64, Sentences: 8
+      Patient ID: 12821949, Study ID: 55643271
+
+  51. patient_12843938/CXR-DICOM/s50253911.txt
+      Words: 66, Sentences: 8
+      Patient ID: 12843938, Study ID: 50253911
+
+  52. patient_12876914/CXR-DICOM/s54805494.txt
+      Words: 70, Sentences: 7
+      Patient ID: 12876914, Study ID: 54805494
+
+  53. patient_12963531/CXR-DICOM/s53443143.txt
+      Words: 63, Sentences: 8
+      Patient ID: 12963531, Study ID: 53443143
+
+  54. patient_13011941/CXR-DICOM/s59136181.txt
+      Words: 69, Sentences: 7
+      Patient ID: 13011941, Study ID: 59136181
+
+  55. patient_13031876/CXR-DICOM/s53831546.txt
+      Words: 62, Sentences: 8
+      Patient ID: 13031876, Study ID: 53831546
+
+  56. patient_13071954/CXR-DICOM/s53491735.txt
+      Words: 63, Sentences: 8
+      Patient ID: 13071954, Study ID: 53491735
+
+  57. patient_13080673/CXR-DICOM/s56155503.txt
+      Words: 64, Sentences: 7
+      Patient ID: 13080673, Study ID: 56155503
+
+  58. patient_13114891/CXR-DICOM/s56289050.txt
+      Words: 63, Sentences: 8
+      Patient ID: 13114891, Study ID: 56289050
+
+  59. patient_13120246/CXR-DICOM/s53601144.txt
+      Words: 63, Sentences: 8
+      Patient ID: 13120246, Study ID: 53601144
+
+  60. patient_13213685/CXR-DICOM/s56142649.txt
+      Words: 61, Sentences: 7
+      Patient ID: 13213685, Study ID: 56142649
+
+  61. patient_13272956/CXR-DICOM/s54416529.txt
+      Words: 65, Sentences: 7
+      Patient ID: 13272956, Study ID: 54416529
+
+  62. patient_13299285/CXR-DICOM/s57868966.txt
+      Words: 66, Sentences: 8
+      Patient ID: 13299285, Study ID: 57868966
+
+  63. patient_13367998/CXR-DICOM/s52108606.txt
+      Words: 65, Sentences: 7
+      Patient ID: 13367998, Study ID: 52108606
+
+  64. patient_13398212/CXR-DICOM/s52787790.txt
+      Words: 62, Sentences: 7
+      Patient ID: 13398212, Study ID: 52787790
+
+  65. patient_13475033/CXR-DICOM/s59862902.txt
+      Words: 65, Sentences: 7
+      Patient ID: 13475033, Study ID: 59862902
+
+  66. patient_13511876/CXR-DICOM/s58550681.txt
+      Words: 63, Sentences: 7
+      Patient ID: 13511876, Study ID: 58550681
+
+  67. patient_13590165/CXR-DICOM/s58797003.txt
+      Words: 69, Sentences: 8
+      Patient ID: 13590165, Study ID: 58797003
+
+  68. patient_13606683/CXR-DICOM/s58039737.txt
+      Words: 62, Sentences: 7
+      Patient ID: 13606683, Study ID: 58039737
+
+  69. patient_13621755/CXR-DICOM/s55572085.txt
+      Words: 65, Sentences: 7
+      Patient ID: 13621755, Study ID: 55572085
+
+  70. patient_13871299/CXR-DICOM/s53230429.txt
+      Words: 60, Sentences: 7
+      Patient ID: 13871299, Study ID: 53230429
+
+  71. patient_13871390/CXR-DICOM/s54956630.txt
+      Words: 60, Sentences: 7
+      Patient ID: 13871390, Study ID: 54956630
+
+  72. patient_13872997/CXR-DICOM/s55257263.txt
+      Words: 65, Sentences: 7
+      Patient ID: 13872997, Study ID: 55257263
+
+  73. patient_13881772/CXR-DICOM/s56217980.txt
+      Words: 66, Sentences: 7
+      Patient ID: 13881772, Study ID: 56217980
+
+  74. patient_13945090/CXR-DICOM/s51590645.txt
+      Words: 68, Sentences: 8
+      Patient ID: 13945090, Study ID: 51590645
+
+  75. patient_13964474/CXR-DICOM/s50909414.txt
+      Words: 67, Sentences: 7
+      Patient ID: 13964474, Study ID: 50909414
+
+  76. patient_13985594/CXR-DICOM/s51851322.txt
+      Words: 62, Sentences: 7
+      Patient ID: 13985594, Study ID: 51851322
+
+  77. patient_14001478/CXR-DICOM/s50052026.txt
+      Words: 68, Sentences: 8
+      Patient ID: 14001478, Study ID: 50052026
+
+  78. patient_14108608/CXR-DICOM/s55378455.txt
+      Words: 60, Sentences: 7
+      Patient ID: 14108608, Study ID: 55378455
+
+  79. patient_14150037/CXR-DICOM/s50922041.txt
+      Words: 66, Sentences: 7
+      Patient ID: 14150037, Study ID: 50922041
+
+  80. patient_14150037/CXR-DICOM/s53453723.txt
+      Words: 65, Sentences: 7
+      Patient ID: 14150037, Study ID: 53453723
+
+  81. patient_14199690/CXR-DICOM/s50468997.txt
+      Words: 69, Sentences: 7
+      Patient ID: 14199690, Study ID: 50468997
+
+  82. patient_14250712/CXR-DICOM/s53406939.txt
+      Words: 62, Sentences: 7
+      Patient ID: 14250712, Study ID: 53406939
+
+  83. patient_14335490/CXR-DICOM/s55920416.txt
+      Words: 64, Sentences: 7
+      Patient ID: 14335490, Study ID: 55920416
+
+  84. patient_14361828/CXR-DICOM/s55612557.txt
+      Words: 60, Sentences: 8
+      Patient ID: 14361828, Study ID: 55612557
+
+  85. patient_14558067/CXR-DICOM/s58538027.txt
+      Words: 69, Sentences: 7
+      Patient ID: 14558067, Study ID: 58538027
+
+  86. patient_14591152/CXR-DICOM/s53504951.txt
+      Words: 60, Sentences: 8
+      Patient ID: 14591152, Study ID: 53504951
+
+  87. patient_14677614/CXR-DICOM/s55703813.txt
+      Words: 65, Sentences: 7
+      Patient ID: 14677614, Study ID: 55703813
+
+  88. patient_14732131/CXR-DICOM/s57515735.txt
+      Words: 69, Sentences: 8
+      Patient ID: 14732131, Study ID: 57515735
+
+  89. patient_14744884/CXR-DICOM/s52630162.txt
+      Words: 68, Sentences: 7
+      Patient ID: 14744884, Study ID: 52630162
+
+  90. patient_14841168/CXR-DICOM/s59481059.txt
+      Words: 62, Sentences: 7
+      Patient ID: 14841168, Study ID: 59481059
+
+  91. patient_14875942/CXR-DICOM/s59396136.txt
+      Words: 69, Sentences: 7
+      Patient ID: 14875942, Study ID: 59396136
+
+  92. patient_14939850/CXR-DICOM/s51892605.txt
+      Words: 67, Sentences: 7
+      Patient ID: 14939850, Study ID: 51892605
+
+  93. patient_15131736/CXR-DICOM/s56028927.txt
+      Words: 67, Sentences: 7
+      Patient ID: 15131736, Study ID: 56028927
+
+  94. patient_15185305/CXR-DICOM/s58478940.txt
+      Words: 67, Sentences: 8
+      Patient ID: 15185305, Study ID: 58478940
+
+  95. patient_15195362/CXR-DICOM/s59446236.txt
+      Words: 66, Sentences: 7
+      Patient ID: 15195362, Study ID: 59446236
+
+  96. patient_15225006/CXR-DICOM/s52705280.txt
+      Words: 64, Sentences: 8
+      Patient ID: 15225006, Study ID: 52705280
+
+  97. patient_15245907/CXR-DICOM/s54604346.txt
+      Words: 69, Sentences: 7
+      Patient ID: 15245907, Study ID: 54604346
+
+  98. patient_15467022/CXR-DICOM/s55971724.txt
+      Words: 69, Sentences: 7
+      Patient ID: 15467022, Study ID: 55971724
+
+  99. patient_15508006/CXR-DICOM/s56802578.txt
+      Words: 63, Sentences: 7
+      Patient ID: 15508006, Study ID: 56802578
+
+ 100. patient_15558165/CXR-DICOM/s54589824.txt
+      Words: 60, Sentences: 7
+      Patient ID: 15558165, Study ID: 54589824
+
+ 101. patient_15633489/CXR-DICOM/s51081532.txt
+      Words: 70, Sentences: 7
+      Patient ID: 15633489, Study ID: 51081532
+
+ 102. patient_15713148/CXR-DICOM/s53253561.txt
+      Words: 69, Sentences: 8
+      Patient ID: 15713148, Study ID: 53253561
+
+ 103. patient_15773840/CXR-DICOM/s54963146.txt
+      Words: 64, Sentences: 7
+      Patient ID: 15773840, Study ID: 54963146
+
+ 104. patient_15870527/CXR-DICOM/s53218038.txt
+      Words: 61, Sentences: 8
+      Patient ID: 15870527, Study ID: 53218038
+
+ 105. patient_15974908/CXR-DICOM/s57921801.txt
+      Words: 64, Sentences: 7
+      Patient ID: 15974908, Study ID: 57921801
+
+ 106. patient_16167420/CXR-DICOM/s53385099.txt
+      Words: 60, Sentences: 7
+      Patient ID: 16167420, Study ID: 53385099
+
+ 107. patient_16245512/CXR-DICOM/s50731169.txt
+      Words: 64, Sentences: 7
+      Patient ID: 16245512, Study ID: 50731169
+
+ 108. patient_16334516/CXR-DICOM/s52628998.txt
+      Words: 67, Sentences: 7
+      Patient ID: 16334516, Study ID: 52628998
+
+ 109. patient_16360107/CXR-DICOM/s52598379.txt
+      Words: 62, Sentences: 7
+      Patient ID: 16360107, Study ID: 52598379
+
+ 110. patient_16486158/CXR-DICOM/s50537653.txt
+      Words: 66, Sentences: 7
+      Patient ID: 16486158, Study ID: 50537653
+
+ 111. patient_16508811/CXR-DICOM/s52933806.txt
+      Words: 61, Sentences: 8
+      Patient ID: 16508811, Study ID: 52933806
+
+ 112. patient_16518959/CXR-DICOM/s54844727.txt
+      Words: 68, Sentences: 8
+      Patient ID: 16518959, Study ID: 54844727
+
+ 113. patient_16607751/CXR-DICOM/s50117678.txt
+      Words: 68, Sentences: 7
+      Patient ID: 16607751, Study ID: 50117678
+
+ 114. patient_16672854/CXR-DICOM/s54046805.txt
+      Words: 61, Sentences: 8
+      Patient ID: 16672854, Study ID: 54046805
+
+ 115. patient_16690146/CXR-DICOM/s56314674.txt
+      Words: 68, Sentences: 8
+      Patient ID: 16690146, Study ID: 56314674
+
+ 116. patient_16735911/CXR-DICOM/s50138272.txt
+      Words: 62, Sentences: 7
+      Patient ID: 16735911, Study ID: 50138272
+
+ 117. patient_16737973/CXR-DICOM/s51469193.txt
+      Words: 70, Sentences: 7
+      Patient ID: 16737973, Study ID: 51469193
+
+ 118. patient_16855430/CXR-DICOM/s55801123.txt
+      Words: 65, Sentences: 7
+      Patient ID: 16855430, Study ID: 55801123
+
+ 119. patient_16957952/CXR-DICOM/s59610928.txt
+      Words: 63, Sentences: 7
+      Patient ID: 16957952, Study ID: 59610928
+
+ 120. patient_16976729/CXR-DICOM/s52300992.txt
+      Words: 61, Sentences: 8
+      Patient ID: 16976729, Study ID: 52300992
+
+ 121. patient_16994918/CXR-DICOM/s53702715.txt
+      Words: 67, Sentences: 8
+      Patient ID: 16994918, Study ID: 53702715
+
+ 122. patient_17030962/CXR-DICOM/s58129414.txt
+      Words: 67, Sentences: 7
+      Patient ID: 17030962, Study ID: 58129414
+
+ 123. patient_17087909/CXR-DICOM/s55007351.txt
+      Words: 68, Sentences: 7
+      Patient ID: 17087909, Study ID: 55007351
+
+ 124. patient_17112109/CXR-DICOM/s55858471.txt
+      Words: 63, Sentences: 7
+      Patient ID: 17112109, Study ID: 55858471
+
+ 125. patient_17112205/CXR-DICOM/s58790361.txt
+      Words: 68, Sentences: 8
+      Patient ID: 17112205, Study ID: 58790361
+
+ 126. patient_17114146/CXR-DICOM/s55670691.txt
+      Words: 69, Sentences: 8
+      Patient ID: 17114146, Study ID: 55670691
+
+ 127. patient_17137767/CXR-DICOM/s52035533.txt
+      Words: 64, Sentences: 8
+      Patient ID: 17137767, Study ID: 52035533
+
+ 128. patient_17139582/CXR-DICOM/s53630228.txt
+      Words: 60, Sentences: 7
+      Patient ID: 17139582, Study ID: 53630228
+
+ 129. patient_17189198/CXR-DICOM/s55198163.txt
+      Words: 62, Sentences: 7
+      Patient ID: 17189198, Study ID: 55198163
+
+ 130. patient_17216263/CXR-DICOM/s53839210.txt
+      Words: 61, Sentences: 7
+      Patient ID: 17216263, Study ID: 53839210
+
+ 131. patient_17340686/CXR-DICOM/s54477721.txt
+      Words: 68, Sentences: 7
+      Patient ID: 17340686, Study ID: 54477721
+
+ 132. patient_17448106/CXR-DICOM/s50445442.txt
+      Words: 64, Sentences: 8
+      Patient ID: 17448106, Study ID: 50445442
+
+ 133. patient_17467341/CXR-DICOM/s52718685.txt
+      Words: 63, Sentences: 7
+      Patient ID: 17467341, Study ID: 52718685
+
+ 134. patient_17473722/CXR-DICOM/s58792606.txt
+      Words: 69, Sentences: 8
+      Patient ID: 17473722, Study ID: 58792606
+
+ 135. patient_17581899/CXR-DICOM/s59781062.txt
+      Words: 70, Sentences: 8
+      Patient ID: 17581899, Study ID: 59781062
+
+ 136. patient_17643026/CXR-DICOM/s51790826.txt
+      Words: 60, Sentences: 7
+      Patient ID: 17643026, Study ID: 51790826
+
+ 137. patient_17648869/CXR-DICOM/s56602441.txt
+      Words: 66, Sentences: 7
+      Patient ID: 17648869, Study ID: 56602441
+
+ 138. patient_17651172/CXR-DICOM/s55579027.txt
+      Words: 67, Sentences: 8
+      Patient ID: 17651172, Study ID: 55579027
+
+ 139. patient_17781570/CXR-DICOM/s51131817.txt
+      Words: 65, Sentences: 7
+      Patient ID: 17781570, Study ID: 51131817
+
+ 140. patient_17898039/CXR-DICOM/s58958670.txt
+      Words: 65, Sentences: 7
+      Patient ID: 17898039, Study ID: 58958670
+
+ 141. patient_17943298/CXR-DICOM/s59552146.txt
+      Words: 64, Sentences: 7
+      Patient ID: 17943298, Study ID: 59552146
+
+ 142. patient_17948002/CXR-DICOM/s54022929.txt
+      Words: 64, Sentences: 8
+      Patient ID: 17948002, Study ID: 54022929
+
+ 143. patient_18009858/CXR-DICOM/s52128684.txt
+      Words: 67, Sentences: 7
+      Patient ID: 18009858, Study ID: 52128684
+
+ 144. patient_18043576/CXR-DICOM/s59470333.txt
+      Words: 60, Sentences: 7
+      Patient ID: 18043576, Study ID: 59470333
+
+ 145. patient_18096934/CXR-DICOM/s57896500.txt
+      Words: 70, Sentences: 7
+      Patient ID: 18096934, Study ID: 57896500
+
+ 146. patient_18309149/CXR-DICOM/s50035498.txt
+      Words: 69, Sentences: 7
+      Patient ID: 18309149, Study ID: 50035498
+
+ 147. patient_18520455/CXR-DICOM/s57965087.txt
+      Words: 61, Sentences: 7
+      Patient ID: 18520455, Study ID: 57965087
+
+ 148. patient_18654891/CXR-DICOM/s50678086.txt
+      Words: 66, Sentences: 7
+      Patient ID: 18654891, Study ID: 50678086
+
+ 149. patient_18855495/CXR-DICOM/s59335033.txt
+      Words: 63, Sentences: 8
+      Patient ID: 18855495, Study ID: 59335033
+
+ 150. patient_18896755/CXR-DICOM/s55884151.txt
+      Words: 66, Sentences: 8
+      Patient ID: 18896755, Study ID: 55884151
+
+ 151. patient_18978682/CXR-DICOM/s54392033.txt
+      Words: 61, Sentences: 7
+      Patient ID: 18978682, Study ID: 54392033
+
+ 152. patient_19005970/CXR-DICOM/s50435149.txt
+      Words: 70, Sentences: 7
+      Patient ID: 19005970, Study ID: 50435149
+
+ 153. patient_19061282/CXR-DICOM/s59509358.txt
+      Words: 60, Sentences: 7
+      Patient ID: 19061282, Study ID: 59509358
+
+ 154. patient_19064289/CXR-DICOM/s58122805.txt
+      Words: 62, Sentences: 8
+      Patient ID: 19064289, Study ID: 58122805
+
+ 155. patient_19073526/CXR-DICOM/s57782651.txt
+      Words: 69, Sentences: 7
+      Patient ID: 19073526, Study ID: 57782651
+
+ 156. patient_19100978/CXR-DICOM/s52344768.txt
+      Words: 60, Sentences: 7
+      Patient ID: 19100978, Study ID: 52344768
+
+ 157. patient_19346228/CXR-DICOM/s54100364.txt
+      Words: 67, Sentences: 8
+      Patient ID: 19346228, Study ID: 54100364
+
+ 158. patient_19362609/CXR-DICOM/s56750552.txt
+      Words: 68, Sentences: 7
+      Patient ID: 19362609, Study ID: 56750552
+
+ 159. patient_19365016/CXR-DICOM/s58124714.txt
+      Words: 60, Sentences: 8
+      Patient ID: 19365016, Study ID: 58124714
+
+ 160. patient_19454512/CXR-DICOM/s56957077.txt
+      Words: 63, Sentences: 8
+      Patient ID: 19454512, Study ID: 56957077
+
+ 161. patient_19552401/CXR-DICOM/s50264712.txt
+      Words: 62, Sentences: 8
+      Patient ID: 19552401, Study ID: 50264712
+
+ 162. patient_19584206/CXR-DICOM/s50066801.txt
+      Words: 68, Sentences: 7
+      Patient ID: 19584206, Study ID: 50066801
+
+ 163. patient_19623993/CXR-DICOM/s54350292.txt
+      Words: 63, Sentences: 8
+      Patient ID: 19623993, Study ID: 54350292
+
+ 164. patient_19623993/CXR-DICOM/s57448721.txt
+      Words: 60, Sentences: 8
+      Patient ID: 19623993, Study ID: 57448721
+
+ 165. patient_19837618/CXR-DICOM/s58815353.txt
+      Words: 67, Sentences: 7
+      Patient ID: 19837618, Study ID: 58815353
+
+ 166. patient_19884194/CXR-DICOM/s57912042.txt
+      Words: 62, Sentences: 7
+      Patient ID: 19884194, Study ID: 57912042
+
+ 167. patient_19907884/CXR-DICOM/s59325966.txt
+      Words: 69, Sentences: 8
+      Patient ID: 19907884, Study ID: 59325966
+
+ 168. patient_19957626/CXR-DICOM/s57835828.txt
+      Words: 60, Sentences: 8
+      Patient ID: 19957626, Study ID: 57835828
+

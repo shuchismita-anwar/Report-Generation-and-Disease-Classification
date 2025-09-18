@@ -1,0 +1,191 @@
+{
+  "evaluation_settings": {
+    "version": "1.0",
+    "description": "Medical Report Evaluation System Configuration",
+    "created": "2025-06-13"
+  },
+
+  "paths": {
+    "ground_truth_base": "../../cleaned_reports/",
+    "evaluation_results": "evaluation_results/",
+    "llm_outputs": "../real_analysis_results/",
+    "dataset_csv": "../../final_dataset_fixed.csv",
+    "mimic_dataset_base": "../../mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0/mimic-eye/",
+    "logs": "logs/"
+  },
+
+  "metrics": {
+    "weights": {
+      "bleu": 0.15,
+      "rouge_1": 0.1,
+      "rouge_2": 0.1,
+      "rouge_l": 0.1,
+      "meteor": 0.1,
+      "radgraph_f1": 0.15,
+      "medical_terminology": 0.05,
+      "chexpert": 0.1,
+      "bert_score": 0.15
+    },
+    "enabled": {
+      "bleu": true,
+      "rouge": true,
+      "meteor": true,
+      "chexpert": true,
+      "radgraph_f1": true,
+      "medical_terminology": true,
+      "bert_score": true,
+      "cider": false
+    },
+    "parameters": {
+      "bleu": {
+        "max_n": 4,
+        "smoothing": true,
+        "sentence_level": false
+      },
+      "rouge": {
+        "rouge_types": ["rouge1", "rouge2", "rougeL"],
+        "use_stemmer": true,
+        "split_summaries": true
+      },
+      "meteor": {
+        "alpha": 0.9,
+        "beta": 3.0,
+        "gamma": 0.5
+      },
+      "bert_score": {
+        "model_type": "bert-base-uncased",
+        "num_layers": 9,
+        "idf": false,
+        "rescale_with_baseline": false
+      }
+    }
+  },
+
+  "thresholds": {
+    "quality_levels": {
+      "excellent": 0.8,
+      "good": 0.65,
+      "fair": 0.5,
+      "poor": 0.35
+    },
+    "minimum_scores": {
+      "bleu": 0.1,
+      "rouge_1": 0.2,
+      "rouge_l": 0.2
+    }
+  },
+
+  "output_formats": {
+    "supported": ["json", "csv", "txt", "html"],
+    "default": "json",
+    "precision": 4,
+    "include_metadata": true,
+    "save_individual_scores": true,
+    "generate_summary": true
+  },
+
+  "processing": {
+    "batch_size": 10,
+    "max_workers": 4,
+    "timeout_seconds": 300,
+    "retry_attempts": 3,
+    "cache_results": true,
+    "cleanup_temp_files": true
+  },
+
+  "ground_truth": {
+    "sources": {
+      "radiology_reports": {
+        "enabled": true,
+        "path_pattern": "patient_*/CXR-DICOM/*.txt",
+        "text_field": "raw_text",
+        "priority": 1,
+        "description": "Official radiology reports as ground truth"
+      }
+    },
+    "text_preprocessing": {
+      "lowercase": true,
+      "remove_timestamps": true,
+      "normalize_whitespace": true,
+      "remove_special_chars": false,
+      "min_length": 5,
+      "max_length": 10000
+    }
+  },
+
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "file": "logs/evaluation.log",
+    "max_file_size": "10MB",
+    "backup_count": 5,
+    "console_output": true
+  },
+
+  "medical_specific": {
+    "condition_mapping": {
+      "Atelectasis": ["atelectasis", "collapse", "volume loss"],
+      "Cardiomegaly": [
+        "cardiomegaly",
+        "heart enlargement",
+        "cardiac enlargement"
+      ],
+      "Edema": ["edema", "fluid", "pulmonary edema"],
+      "Lung Opacity": ["opacity", "infiltrate", "consolidation"],
+      "No Finding": ["normal", "unremarkable", "no acute findings"],
+      "Pleural Effusion": ["effusion", "pleural fluid"],
+      "Pneumonia": ["pneumonia", "infection"],
+      "Support Devices": ["devices", "tubes", "lines"]
+    },
+    "clinical_keywords": {
+      "anatomy": ["lung", "heart", "chest", "cardiac", "pulmonary", "pleural"],
+      "pathology": ["abnormal", "findings", "lesion", "disease", "pathology"],
+      "severity": ["mild", "moderate", "severe", "acute", "chronic"],
+      "location": ["bilateral", "unilateral", "left", "right", "upper", "lower"]
+    }
+  },
+
+  "validation": {
+    "check_file_existence": true,
+    "validate_json_format": true,
+    "check_text_encoding": "utf-8",
+    "min_report_pairs": 1,
+    "max_missing_percentage": 0.2
+  },
+
+  "automation": {
+    "batch_processing": {
+      "batch_size": 50,
+      "max_workers": 4,
+      "use_multiprocessing": false,
+      "save_interval": 10,
+      "checkpoint_interval": 100,
+      "output_dir": "output/automation",
+      "temp_dir": "temp/automation"
+    },
+    "monitoring": {
+      "update_interval": 1.0,
+      "log_file": "logs/automation_monitor.log",
+      "memory_threshold_mb": 8192
+    },
+    "error_recovery": {
+      "max_retries": 3,
+      "retry_delay": 1.0,
+      "exponential_backoff": true,
+      "max_consecutive_errors": 10,
+      "checkpoint_dir": "checkpoints"
+    },
+    "data_discovery": {
+      "llm_output_dir": "../real_analysis_results/",
+      "mimic_dataset_dir": "../../mimic-eye-integrating-mimic-datasets-with-reflacx-and-eye-gaze-for-multimodal-deep-learning-applications-1.0.0/mimic-eye/",
+      "supported_file_types": [".txt", ".json"],
+      "max_discovery_depth": 5
+    },
+    "reporting": {
+      "generate_executive_summary": true,
+      "generate_visualizations": true,
+      "generate_insights": true,
+      "output_formats": ["json", "html", "markdown"]
+    }
+  }
+}
